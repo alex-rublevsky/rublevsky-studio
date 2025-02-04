@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { Button } from "@/components/ui/button";
 
 // Constants for R2 image handling
 const R2_DOMAIN = process.env.NEXT_PUBLIC_R2_URL;
@@ -84,7 +85,7 @@ export default function StorePage() {
               {/* Thumbnails */}
               <div className="order-2 lg:order-1 flex-shrink-0 w-full lg:w-24 overflow-x-auto lg:overflow-x-hidden">
                 {/* Scrollable container */}
-                <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-y-auto lg:max-h-[calc(100vh-6rem)] px-4 lg:px-0">
+                <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-y-auto  px-4 lg:px-0">
                   {mockProduct.images.map((image, index) => (
                     <div
                       key={index}
@@ -207,14 +208,16 @@ export default function StorePage() {
                     onClick={incrementQuantity}
                     className={`w-10 h-10 rounded-full hover:bg-gray-100 transition flex items-center justify-center ${
                       !canAddToCart ||
-                      (selectedVariant &&
+                      (selectedVariant !== null &&
+                        selectedVariant !== undefined &&
                         quantity >= selectedVariant.stockCount)
                         ? "opacity-50 cursor-not-allowed"
                         : ""
                     }`}
                     disabled={
                       !canAddToCart ||
-                      (selectedVariant &&
+                      (selectedVariant !== null &&
+                        selectedVariant !== undefined &&
                         quantity >= selectedVariant.stockCount)
                     }
                   >
@@ -222,29 +225,25 @@ export default function StorePage() {
                   </button>
                 </div>
 
-                <button
-                  className={`px-6 py-3 rounded-md transition ${
-                    canAddToCart
-                      ? "bg-black text-white hover:bg-gray-800"
-                      : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                  }`}
-                  onClick={() => canAddToCart && alert("Added to cart")}
+                <Button
+                  size="lg"
                   disabled={!canAddToCart}
+                  onClick={() => canAddToCart && alert("Added to cart")}
                 >
                   {selectedSize ? (
                     <>
-                      Add to Cart - <span className="opacity-75">CAD</span>{" "}
+                      Add to Cart <span className="opacity-75">CAD</span>{" "}
                       {(currentPrice * quantity).toFixed(2)}
                     </>
                   ) : (
                     "Select a size"
                   )}
-                </button>
+                </Button>
               </div>
 
               {/* Description */}
-              <div className="prose mt-8">
-                <div className="text-gray-700">{mockProduct.description}</div>
+              <div className="mt-8">
+                <div className="">{mockProduct.description}</div>
               </div>
             </div>
           </div>
