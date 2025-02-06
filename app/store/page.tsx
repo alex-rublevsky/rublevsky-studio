@@ -127,19 +127,18 @@ export default function StorePage() {
 
               {/* Main image */}
               <div className="order-1 lg:order-2 flex-grow w-full">
-                <div className="relative w-full h-full">
-                  <div className="relative w-full lg:h-[calc(100vh-6rem)] flex items-center justify-center lg:block">
-                    <div className="w-full h-full">
-                      <Image
-                        src={getR2ImageUrl(selectedImage)}
-                        alt={`${mockProduct.name} main image`}
-                        width={1000}
-                        height={1000}
-                        className="w-full h-auto lg:max-h-full lg:w-auto rounded-none lg:rounded-lg object-contain object-center lg:object-left-top"
-                        priority
-                        sizes="(max-width: 1024px) 100vw, 66vw"
-                      />
-                    </div>
+                <div className="flex items-center justify-center lg:items-start lg:justify-start">
+                  <div className="relative w-full">
+                    <Image
+                      src={getR2ImageUrl(selectedImage)}
+                      alt={`${mockProduct.name} main image`}
+                      // TODO: remove width and height, substitute for fill?
+                      width={1200}
+                      height={1200}
+                      className="max-w-full w-full lg:w-auto max-h-[75vh] lg:max-h-[calc(100vh-6rem)] object-contain rounded-none lg:rounded-lg"
+                      priority
+                      sizes="(max-width: 1024px) 100vw"
+                    />
                   </div>
                 </div>
               </div>
@@ -147,13 +146,13 @@ export default function StorePage() {
           </div>
 
           {/* Product information */}
-          <div className="w-full lg:w-2/5 xl:w-1/3 px-4 lg:px-0 lg:min-h-[calc(100vh-2rem)] lg:flex lg:items-center mt-4 lg:mt-0">
+          <div className="w-full lg:w-2/5 xl:w-1/3 px-4 lg:px-0 lg:min-h-[calc(100vh-2rem)] lg:flex lg:items-center mt-4 lg:mt-0 mb-40 lg:mb-0">
             <div className="space-y-6 w-full">
-              <h1 className="text-3xl font-bold">{mockProduct.name}</h1>
+              <h3 className="">{mockProduct.name}</h3>
 
               {/* Size selection */}
               <div className="space-y-2">
-                <h3 className="text-lg font-medium">Size</h3>
+                <h6 className="">Size</h6>
                 <div className="flex flex-wrap gap-2">
                   {mockProduct.variants.map((variant) => (
                     <button
