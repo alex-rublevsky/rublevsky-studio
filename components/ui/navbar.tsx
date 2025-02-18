@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -23,53 +23,94 @@ const defaultNavItems: NavItem[] = [
   { name: "Store", url: "/store" },
 ];
 
+interface TabProps {
+  children: React.ReactNode;
+  setPosition: (position: {
+    left: number;
+    width: number;
+    opacity: number;
+  }) => void;
+  href: string;
+  isActive: boolean;
+}
+
+const Tab = ({ children, setPosition, href, isActive }: TabProps) => {
+  const ref = useRef<HTMLLIElement>(null);
+
+  return (
+    <Link href={href}>
+      <li
+        ref={ref}
+        onMouseEnter={() => {
+          if (!ref.current) return;
+          const { width } = ref.current.getBoundingClientRect();
+          setPosition({
+            width,
+            opacity: 1,
+            left: ref.current.offsetLeft,
+          });
+        }}
+        className={cn(
+          "relative z-10 block cursor-pointer px-3 py-1.5 text-xs uppercase text-white mix-blend-difference md:px-4 md:py-2 md:text-base",
+          isActive && "underline underline-offset-4"
+        )}
+      >
+        {children}
+        {isActive && (
+          <motion.div
+            layoutId="active-pill"
+            className="absolute inset-0 z-0 rounded-full bg-black/10"
+          />
+        )}
+      </li>
+    </Link>
+  );
+};
+
+const Cursor = ({
+  position,
+}: {
+  position: { left: number; width: number; opacity: number };
+}) => {
+  return (
+    <motion.li
+      animate={position}
+      className="absolute z-0 h-7 rounded-full bg-black md:h-10"
+    />
+  );
+};
+
 export function NavBar({ items = defaultNavItems, className }: NavBarProps) {
   const pathname = usePathname();
+  const [position, setPosition] = useState({
+    left: 0,
+    width: 0,
+    opacity: 0,
+  });
 
   return (
     <nav
       className={cn(
-        "fixed bottom-0 left-1/2 -translate-x-1/2 z-50 mb-6 pointer-events-none",
+        "fixed bottom-0 left-0 right-0 z-50 mb-6 flex justify-center",
         className
       )}
     >
-      <div className="flex items-center gap-3 bg-background/5 border border-border backdrop-blur-lg py-1 px-1 rounded-full shadow-lg pointer-events-auto">
-        {items.map((item) => {
-          const isActive = pathname === item.url;
-
-          return (
-            <Link
-              key={item.name}
-              href={item.url}
-              className={cn(
-                "relative cursor-pointer text-sm font-semibold px-6 py-2 rounded-full transition-colors",
-                "text-foreground/80 hover:text-primary",
-                isActive && "bg-muted text-primary"
-              )}
-            >
-              <span>{item.name}</span>
-              {isActive && (
-                <motion.div
-                  layoutId="lamp"
-                  className="absolute inset-0 w-full bg-primary/5 rounded-full -z-10"
-                  initial={false}
-                  transition={{
-                    type: "spring",
-                    stiffness: 300,
-                    damping: 30,
-                  }}
-                >
-                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-8 h-1 bg-primary rounded-t-full">
-                    <div className="absolute w-12 h-6 bg-primary/20 rounded-full blur-md -top-2 -left-2" />
-                    <div className="absolute w-8 h-6 bg-primary/20 rounded-full blur-md -top-1" />
-                    <div className="absolute w-4 h-4 bg-primary/20 rounded-full blur-sm top-0 left-2" />
-                  </div>
-                </motion.div>
-              )}
-            </Link>
-          );
-        })}
-      </div>
+      <ul
+        className="relative mx-auto flex w-fit rounded-full border border-black bg-white p-1"
+        onMouseLeave={() => setPosition((prev) => ({ ...prev, opacity: 0 }))}
+      >
+        {items.map((item) => (
+          <Tab
+            key={item.url}
+            setPosition={setPosition}
+            href={item.url}
+            isActive={pathname === item.url}
+          >
+            {item.name}
+          </Tab>
+        ))}
+        <Cursor position={position} />
+      </ul>
     </nav>
   );
 }

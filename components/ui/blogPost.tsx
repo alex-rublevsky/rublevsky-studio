@@ -33,7 +33,7 @@ function BlogPost({ id, title, body, images, publishedAt }: BlogPostProps) {
   return (
     <article className="max-w-2xl mx-auto">
       <div
-        className="relative left-[50%] right-[50%] w-screen -translate-x-1/2 mb-4"
+        className="relative left-[50%] right-[50%] w-screen -translate-x-1/2 mb-4 overflow-x-hidden"
         style={{
           opacity: isReady ? 1 : 0,
           transition: "opacity 0.5s ease-in-out",
