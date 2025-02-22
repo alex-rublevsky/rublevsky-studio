@@ -66,15 +66,6 @@ export function ExpertiseSection() {
                     className="hover:opacity-70 transition-opacity"
                   />
                 </div>
-                <div className="w-3/4 h-full flex justify-center items-center p-4">
-                  <Image
-                    src="/logos/php.svg"
-                    alt="PHP Logo"
-                    width={80}
-                    height={80}
-                    className="hover:opacity-70 transition-opacity"
-                  />
-                </div>
               </div>
 
               <div className="flex justify-center items-center">
@@ -100,6 +91,15 @@ export function ExpertiseSection() {
                   <Image
                     src="/logos/webflow.svg"
                     alt="Webflow Logo"
+                    width={80}
+                    height={80}
+                    className="hover:opacity-70 transition-opacity"
+                  />
+                </div>
+                <div className="w-3/4 h-full flex justify-center items-center p-4">
+                  <Image
+                    src="/logos/php.svg"
+                    alt="PHP Logo"
                     width={80}
                     height={80}
                     className="hover:opacity-70 transition-opacity"

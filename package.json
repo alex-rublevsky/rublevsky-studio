@@ -6,10 +6,11 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:worker": "pnpm build && opennextjs-cloudflare",
+    "build:worker": "opennextjs-cloudflare",
     "dev:worker": "wrangler dev --port 8771",
     "preview:worker": "pnpm build:worker && pnpm dev:worker",
-    "deploy:worker": "pnpm build:worker && wrangler deploy",
+    "deploy:worker": "pnpm build && pnpm build:worker && wrangler deploy",
+    "deploy": "pnpm build && pnpm build:worker && wrangler deploy",
     "start": "next start",
     "lint": "next lint"
   },
