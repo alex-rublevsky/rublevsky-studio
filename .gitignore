@@ -21,6 +21,7 @@
 /build
 /.open-next/
 /.cursor/
+/.wrangler/
 
 # misc
 .DS_Store
