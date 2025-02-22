@@ -1,5 +1,5 @@
-import gsap from 'gsap';
-import ScrollTrigger from 'gsap/dist/ScrollTrigger';
+import gsap from "gsap";
+import ScrollTrigger from "gsap/dist/ScrollTrigger";
 
 if (typeof window !== "undefined") {
     gsap.registerPlugin(ScrollTrigger);
@@ -13,7 +13,7 @@ export const initExperienceTimeline = (styles: { [key: string]: string }) => {
         opacity: 0.20
     });
     gsap.set(`.${styles.experienceTimelineCircle}`, {
-        backgroundColor: '#e5e5e5'
+        backgroundColor: "#e5e5e5"
     });
     gsap.set(`.${styles.experienceTimelineProgress}, .${styles.experienceTimelineProgressBar}`, {
         opacity: 0
@@ -25,8 +25,8 @@ export const initExperienceTimeline = (styles: { [key: string]: string }) => {
         gsap.timeline({
             scrollTrigger: {
                 trigger: item,
-                start: 'start 45%',
-                end: 'start 35%',
+                start: "start 45%",
+                end: "start 35%",
                 scrub: true,
             }
         })
@@ -34,8 +34,8 @@ export const initExperienceTimeline = (styles: { [key: string]: string }) => {
             opacity: 1,
         })
         .to(item.querySelector(`.${styles.experienceTimelineCircle}`), {
-            backgroundColor: '#000000',
-        }, '<');
+            backgroundColor: "#000000",
+        }, "<");
     });
 
     // Control visibility of progress elements
@@ -43,8 +43,8 @@ export const initExperienceTimeline = (styles: { [key: string]: string }) => {
     if (timelineComponent) {
         ScrollTrigger.create({
             trigger: timelineComponent,
-            start: 'top 120%',
-            end: 'bottom -20%',
+            start: "top 120%",
+            end: "bottom -20%",
             onEnter: () => gsap.to(`.${styles.experienceTimelineProgress}, .${styles.experienceTimelineProgressBar}`, { opacity: 1, duration: 0.1 }),
             onLeave: () => gsap.to(`.${styles.experienceTimelineProgress}, .${styles.experienceTimelineProgressBar}`, { opacity: 0, duration: 0.1 }),
             onEnterBack: () => gsap.to(`.${styles.experienceTimelineProgress}, .${styles.experienceTimelineProgressBar}`, { opacity: 1, duration: 0.1 }),

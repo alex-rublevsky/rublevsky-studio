@@ -3,7 +3,7 @@ import BlogPost from "@/components/ui/blogPost";
 const blogPosts = [
   {
     id: "guardian-2",
-    title: 'Ripe Pu\'er Ku Zhu Shan "Guardian 2.0"',
+    title: "Ripe Pu\u2019er Ku Zhu Shan \u201CGuardian 2.0\u201D",
     body: `📍Ancient trees from Ku Zhu Shan Mountain, Jinggu County. 🌿Fermentation was carried out in small-volume baskets. 
     
     Aroma Creamy and nutty, with confectionery notes: burnt brownie crust, condensed milk, chocolate sponge cake, and a hint of vanilla pod. 
@@ -47,7 +47,7 @@ export default function Page() {
   return (
     <section className="pt-24 sm:pt-32">
       <div>
-        <h1 className="text-center mb-8">What's in the gaiwan?</h1>
+        <h1 className="text-center mb-8">What&apos;s in the gaiwan?</h1>
         <h5 className="text-center mb-16 sm:mb-24">
           <a className="blurLink" href="https://t.me/gaiwan_contents">
             🇷🇺 RU blog version
@@ -59,11 +59,9 @@ export default function Page() {
         {blogPosts.map((post) => (
           <BlogPost
             key={post.id}
-            id={post.id}
             title={post.title}
             body={post.body}
             images={post.images}
-            publishedAt={post.publishedAt}
           />
         ))}
       </div>

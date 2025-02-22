@@ -9,7 +9,7 @@ import {
   Keyboard,
   Mousewheel,
 } from "swiper/modules";
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 
 // Import Swiper styles
 import "swiper/css";
@@ -20,14 +20,12 @@ import "swiper/css/keyboard";
 import "swiper/css/mousewheel";
 
 interface BlogPostProps {
-  id: string;
   title: string;
   body: string;
   images: string[];
-  publishedAt: string;
 }
 
-function BlogPost({ id, title, body, images, publishedAt }: BlogPostProps) {
+function BlogPost({ title, body, images }: BlogPostProps) {
   const [isReady, setIsReady] = useState(false);
 
   return (

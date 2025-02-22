@@ -11,7 +11,7 @@ export function ExpertiseSection() {
       </h2>
 
       <div className="grid grid-cols-1 gap-16">
-        {/* First row */}
+        {/* Web Development */}
         <div className="grid grid-cols-1 lg:grid-cols-10 gap-16 items-center">
           <div className="lg:col-span-6 order-2 lg:order-1">
             <h3
@@ -23,9 +23,8 @@ export function ExpertiseSection() {
               <strong className="font-semibold">Next.js</strong>,{" "}
               <strong className="font-semibold">React</strong>,{" "}
               <strong className="font-semibold">Tailwind CSS</strong>, and{" "}
-              <strong className="font-semibold">Figma</strong>, enabling me to
-              design and build modern, performant web applications with
-              beautiful user interfaces and seamless user experiences.
+              <strong className="font-semibold">HTML5</strong>, enabling me to
+              design and build modern, performant web applications.
             </h3>
           </div>
           <div className="lg:col-span-4 flex justify-center items-center order-1 lg:order-2">
@@ -33,7 +32,7 @@ export function ExpertiseSection() {
               <div className="flex justify-center items-center">
                 <div className="h-full w-full flex justify-center items-center p-4">
                   <Image
-                    src="/logos/nextjs.svg"
+                    src="/logos/next-js.svg"
                     alt="Next.js Logo"
                     width={80}
                     height={80}
@@ -51,8 +50,8 @@ export function ExpertiseSection() {
                 </div>
                 <div className="w-3/4 h-full flex justify-center items-center p-4">
                   <Image
-                    src="/logos/git.svg"
-                    alt="Git Logo"
+                    src="/logos/html5.svg"
+                    alt="HTML5 Logo"
                     width={80}
                     height={80}
                     className="hover:opacity-70 transition-opacity"
@@ -72,8 +71,8 @@ export function ExpertiseSection() {
                 </div>
                 <div className="h-full w-full flex justify-center items-center p-4">
                   <Image
-                    src="/logos/typescript.svg"
-                    alt="TypeScript Logo"
+                    src="/logos/alpine-js.svg"
+                    alt="Alpine.js Logo"
                     width={80}
                     height={80}
                     className="hover:opacity-70 transition-opacity"
@@ -81,8 +80,8 @@ export function ExpertiseSection() {
                 </div>
                 <div className="h-full w-3/4 flex justify-center items-center p-4">
                   <Image
-                    src="/logos/figma.svg"
-                    alt="Figma Logo"
+                    src="/logos/webflow.svg"
+                    alt="Webflow Logo"
                     width={80}
                     height={80}
                     className="hover:opacity-70 transition-opacity"
@@ -93,14 +92,14 @@ export function ExpertiseSection() {
           </div>
         </div>
 
-        {/* Second row */}
+        {/* Development Tools */}
         <div className="grid grid-cols-1 lg:grid-cols-10 gap-16 items-center">
           <div className="lg:col-span-4 flex justify-center items-center order-1">
             <div className="flex justify-center items-center w-full">
               <div className="w-3/4 h-full flex justify-center items-center p-4">
                 <Image
-                  src="/logos/framer.svg"
-                  alt="Framer Logo"
+                  src="/logos/git.svg"
+                  alt="Git Logo"
                   width={80}
                   height={80}
                   className="hover:opacity-70 transition-opacity"
@@ -108,8 +107,8 @@ export function ExpertiseSection() {
               </div>
               <div className="w-full h-full flex justify-center items-center p-4">
                 <Image
-                  src="/logos/vercel.svg"
-                  alt="Vercel Logo"
+                  src="/logos/spline.png"
+                  alt="Spline Logo"
                   width={80}
                   height={80}
                   className="hover:opacity-70 transition-opacity"
@@ -117,8 +116,8 @@ export function ExpertiseSection() {
               </div>
               <div className="w-3/4 h-full flex justify-center items-center p-4">
                 <Image
-                  src="/logos/prisma.svg"
-                  alt="Prisma Logo"
+                  src="/logos/wized.svg"
+                  alt="Wized Logo"
                   width={80}
                   height={80}
                   className="hover:opacity-70 transition-opacity"
@@ -131,58 +130,97 @@ export function ExpertiseSection() {
               className="text-lg md:text-xl lg:text-2xl text-left lg:text-right"
               reveal-type="true"
             >
-              The modern web stack I use allows for rapid development and
-              deployment, never compromising on quality or performance,
-              delivering results that match those of a full development team.
+              I leverage modern development tools like{" "}
+              <strong className="font-semibold">Git</strong>,{" "}
+              <strong className="font-semibold">Spline</strong>, and{" "}
+              <strong className="font-semibold">Wized</strong> to streamline
+              development workflow and create engaging interactive experiences.
             </h3>
           </div>
         </div>
 
-        {/* Third row */}
+        {/* Adobe Creative Suite */}
         <div className="grid grid-cols-1 lg:grid-cols-10 gap-16 items-center">
           <div className="lg:col-span-6 order-2 lg:order-1">
             <h3
               className="text-lg md:text-xl lg:text-2xl text-left"
               reveal-type="true"
             >
-              Using <strong className="font-semibold">component-driven</strong>{" "}
-              development makes projects maintainable and scalable, while{" "}
-              <strong className="font-semibold">modern APIs</strong> enable
-              seamless integration with any third-party service or database.
+              Proficient in the{" "}
+              <strong className="font-semibold">Adobe Creative Suite</strong>,
+              including <strong className="font-semibold">Photoshop</strong>,{" "}
+              <strong className="font-semibold">Illustrator</strong>,{" "}
+              <strong className="font-semibold">InDesign</strong>, and{" "}
+              <strong className="font-semibold">After Effects</strong> for
+              comprehensive digital content creation.
             </h3>
           </div>
           <div className="lg:col-span-4 flex justify-center items-center order-1 lg:order-2">
-            <div className="h-18 w-full">
-              {/* Replace Spline with a suitable 3D viewer for Next.js or an image */}
-              <div className="w-full aspect-square rounded-lg bg-gray-100" />
+            <div className="flex flex-wrap justify-center gap-4">
+              <div className="w-1/3 flex justify-center items-center p-4">
+                <Image
+                  src="/logos/photoshop.svg"
+                  alt="Photoshop Logo"
+                  width={80}
+                  height={80}
+                  className="hover:opacity-70 transition-opacity"
+                />
+              </div>
+              <div className="w-1/3 flex justify-center items-center p-4">
+                <Image
+                  src="/logos/illustrator.svg"
+                  alt="Illustrator Logo"
+                  width={80}
+                  height={80}
+                  className="hover:opacity-70 transition-opacity"
+                />
+              </div>
+              <div className="w-1/3 flex justify-center items-center p-4">
+                <Image
+                  src="/logos/indesisgn.svg"
+                  alt="InDesign Logo"
+                  width={80}
+                  height={80}
+                  className="hover:opacity-70 transition-opacity"
+                />
+              </div>
+              <div className="w-1/3 flex justify-center items-center p-4">
+                <Image
+                  src="/logos/after-effects.svg"
+                  alt="After Effects Logo"
+                  width={80}
+                  height={80}
+                  className="hover:opacity-70 transition-opacity"
+                />
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Print/Photo row */}
+        {/* Analytics and Print */}
         <div className="grid grid-cols-1 lg:grid-cols-10 gap-16 items-center">
           <div className="lg:col-span-4 flex justify-center items-center order-1">
-            <video
-              className="w-full h-auto aspect-square object-cover rounded-lg"
-              autoPlay
-              loop
-              muted
-              playsInline
-            >
-              <source src="/videos/screen-printing.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
+            <div className="flex justify-center items-center w-full">
+              <div className="w-full h-full flex justify-center items-center p-4">
+                <Image
+                  src="/logos/google-analytics.svg"
+                  alt="Google Analytics Logo"
+                  width={80}
+                  height={80}
+                  className="hover:opacity-70 transition-opacity"
+                />
+              </div>
+            </div>
           </div>
           <div className="lg:col-span-6 order-2 flex lg:justify-end">
             <h3
               className="text-lg md:text-xl lg:text-2xl text-left lg:text-right"
               reveal-type="true"
             >
-              Beyond digital, I bring expertise in{" "}
-              <strong className="font-semibold">screen printing</strong> for
-              apparel and posters, as well as professional{" "}
-              <strong className="font-semibold">photography</strong> services
-              capturing anything from portraits to products.
+              I utilize{" "}
+              <strong className="font-semibold">Google Analytics</strong> for
+              data-driven decision making, while also offering expertise in
+              screen printing for physical media production.
             </h3>
           </div>
         </div>

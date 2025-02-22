@@ -2,6 +2,7 @@ import { ServicesOffered } from "@/components/ui/services-offered";
 import { ExpertiseSection } from "@/components/ui/expertise-section";
 import { ExperienceTimeline } from "@/components/ui/experience-timeline";
 import { ProcessSection } from "@/components/ui/process-section";
+import Image from "next/image";
 
 export default function ContactPage() {
   return (
@@ -90,10 +91,11 @@ export default function ContactPage() {
 
           <div className="w-full mb-4 md:mb-0 md:col-span-1 -order-1 md:order-none">
             <div className="relative aspect-square rounded-lg overflow-hidden">
-              <img
+              <Image
                 src="/me.jpg"
                 alt="Profile picture"
                 className="w-full h-full object-cover"
+                fill
               />
             </div>
           </div>

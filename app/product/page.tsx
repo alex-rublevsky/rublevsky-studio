@@ -97,7 +97,7 @@ export default function StorePage() {
                         last:mb-2
                       "
                       onClick={() => setSelectedImage(image)}
-                      onMouseEnter={(e) => {
+                      onMouseEnter={() => {
                         // Only change image on hover for desktop
                         if (window.matchMedia("(min-width: 1024px)").matches) {
                           setSelectedImage(image);

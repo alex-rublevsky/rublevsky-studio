@@ -18,14 +18,18 @@ export default function ProjectCard({ project }: ProjectCardProps) {
             <>
               <div className="col-span-12 lg:col-span-4 mb-6 lg:mb-0">
                 <div className="space-y-4">
-                  <img
+                  <Image
                     src={project.devices[0].content.url}
                     alt="BeautyFloor Screenshot 1"
+                    width={1200}
+                    height={800}
                     className="w-[90%] mr-0 h-auto ml-auto rounded-lg"
                   />
-                  <img
+                  <Image
                     src={project.devices[1].content.url}
                     alt="BeautyFloor Screenshot 2"
+                    width={1200}
+                    height={800}
                     className="w-[90%] translate-y-[-10%] h-auto ml-0 rounded-lg"
                   />
                   <div className="w-[66%] mr-0 relative translate-y-[-20%]">
@@ -108,8 +112,8 @@ export default function ProjectCard({ project }: ProjectCardProps) {
                     index === 0
                       ? "w-[90%] mr-0 ml-auto"
                       : index === 1
-                      ? "w-[90%] translate-y-[-10%] ml-0"
-                      : "w-[66%] mr-0 relative translate-y-[-20%]"
+                        ? "w-[90%] translate-y-[-10%] ml-0"
+                        : "w-[66%] mr-0 relative translate-y-[-20%]"
                   }`}
                 >
                   {device.type === "phone" ? (

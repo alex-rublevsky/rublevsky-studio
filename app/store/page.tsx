@@ -195,47 +195,92 @@ export default function StorePage() {
 
   const currentPrice =
     selectedVariant?.price ?? mockProducts[0].variants[0].price;
-  const currentStock = selectedVariant?.stockCount ?? 0;
-  const canAddToCart: boolean = selectedSize !== null && currentStock > 0;
+  const canAddToCart = selectedSize !== null && quantity > 0;
+
+  const handleImageSelect = (image: string) => {
+    setSelectedImage(image);
+  };
+
+  const handleQuantityChange = (newQuantity: number) => {
+    setQuantity(Math.max(1, newQuantity));
+  };
+
+  const handleSizeSelect = (size: string) => {
+    setSelectedSize(size);
+  };
 
   return (
-    <main>
-      <section>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-[95rem] mx-auto items-start">
-          {mockProducts.map((product) => (
-            <div
-              key={product.id}
-              className="w-full overflow-hidden rounded-lg group transition-all duration-300 ease-in-out hover:scale-[102%] hover:shadow-lg"
-            >
-              <div className="relative aspect-square overflow-hidden">
+    <div className="container mx-auto px-4 py-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="relative">
+          <Image
+            src={getR2ImageUrl(selectedImage)}
+            alt={mockProducts[0].name}
+            width={500}
+            height={500}
+            className="rounded-lg"
+          />
+          <div className="flex mt-4 gap-2">
+            {mockProducts[0].images.map((image, index) => (
+              <Button
+                key={index}
+                onClick={() => handleImageSelect(image)}
+                variant={selectedImage === image ? "default" : "outline"}
+              >
                 <Image
-                  src={getR2ImageUrl(product.images[0])}
-                  alt={product.name}
-                  fill
-                  className="object-cover transition-all duration-500 ease-in-out group-hover:scale-[105%]"
+                  src={getR2ImageUrl(image)}
+                  alt={`${mockProducts[0].name} thumbnail ${index + 1}`}
+                  width={50}
+                  height={50}
+                  className="rounded"
                 />
-              </div>
-
-              <div className="p-4">
-                <div className="mb-2 flex items-baseline justify-between w-full gap-x-2 ">
-                  <span className="text-xl font-light text-black whitespace-nowrap">
-                    CAD {product.variants[0].price.toFixed(2)}
-                  </span>
-                  <span className="text-sm whitespace-nowrap">
-                    In stock:{" "}
-                    {product.variants.reduce(
-                      (sum, variant) => sum + variant.stockCount,
-                      0
-                    )}
-                  </span>
-                </div>
-
-                <h3 className="text-base">{product.name}</h3>
-              </div>
-            </div>
-          ))}
+              </Button>
+            ))}
+          </div>
         </div>
-      </section>
-    </main>
+
+        <div className="space-y-4">
+          <h1 className="text-2xl font-bold">{mockProducts[0].name}</h1>
+          <p>{mockProducts[0].description}</p>
+
+          <div className="flex gap-2">
+            {mockProducts[0].variants.map((variant) => (
+              <Button
+                key={variant.size}
+                onClick={() => handleSizeSelect(variant.size)}
+                variant={selectedSize === variant.size ? "default" : "outline"}
+              >
+                {variant.size}
+              </Button>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-4">
+            <Button
+              onClick={() => handleQuantityChange(quantity - 1)}
+              disabled={quantity <= 1}
+            >
+              -
+            </Button>
+            <span>{quantity}</span>
+            <Button onClick={() => handleQuantityChange(quantity + 1)}>
+              +
+            </Button>
+          </div>
+
+          <div className="text-xl font-bold">
+            ${(currentPrice * quantity).toFixed(2)}
+          </div>
+
+          <Button
+            className="w-full"
+            disabled={!canAddToCart}
+            onClick={() => alert("Added to cart!")}
+          >
+            Add to Cart
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }
