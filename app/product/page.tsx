@@ -4,9 +4,6 @@ import { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
-// Constants for R2 image handling
-const R2_DOMAIN = process.env.NEXT_PUBLIC_R2_URL;
-
 // Mock product data structure
 interface ProductVariant {
   size: string;
@@ -44,9 +41,6 @@ const mockProduct: Product = {
   description: "Screen Printing a Custom Design",
   variants: MOCK_SIZES,
 };
-
-// Helper function to generate R2 image URL
-const getR2ImageUrl = (imagePath: string) => `${R2_DOMAIN}/${imagePath}`;
 
 export default function StorePage() {
   const [selectedImage, setSelectedImage] = useState(mockProduct.images[0]);
@@ -114,7 +108,7 @@ export default function StorePage() {
                       />
                       <div className="absolute inset-[2px] rounded-[6px] overflow-hidden">
                         <Image
-                          src={getR2ImageUrl(image)}
+                          src={`/${image}`}
                           alt={`${mockProduct.name} thumbnail ${index + 1}`}
                           fill
                           className="object-cover"
@@ -130,7 +124,7 @@ export default function StorePage() {
                 <div className="flex items-center justify-center lg:items-start lg:justify-start">
                   <div className="relative w-full">
                     <Image
-                      src={getR2ImageUrl(selectedImage)}
+                      src={`/${selectedImage}`}
                       alt={`${mockProduct.name} main image`}
                       // TODO: remove width and height, substitute for fill?
                       width={1200}

@@ -1,11 +1,5 @@
 import { BrandingProject } from '@/types/branding-project';
 
-const R2_URL = process.env.NEXT_PUBLIC_R2_URL;
-
-if (!R2_URL) {
-  throw new Error('NEXT_PUBLIC_R2_URL environment variable is not set');
-}
-
 export const brandingProjects: BrandingProject[] = [
   {
     name: 'Yin Yan Graffiti',

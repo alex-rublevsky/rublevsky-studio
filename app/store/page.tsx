@@ -4,9 +4,6 @@ import { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
-// Constants for R2 image handling
-const R2_DOMAIN = process.env.NEXT_PUBLIC_R2_URL;
-
 // Product interfaces
 interface ProductVariant {
   size: string;
@@ -179,9 +176,6 @@ const mockProducts: Product[] = [
   },
 ];
 
-// Helper function to generate R2 image URL
-const getR2ImageUrl = (imagePath: string) => `${R2_DOMAIN}/${imagePath}`;
-
 export default function StorePage() {
   const [selectedImage, setSelectedImage] = useState(mockProducts[0].images[0]);
   const [quantity, setQuantity] = useState(1);
@@ -214,7 +208,7 @@ export default function StorePage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="relative">
           <Image
-            src={getR2ImageUrl(selectedImage)}
+            src={`/${selectedImage}`}
             alt={mockProducts[0].name}
             width={500}
             height={500}
@@ -228,7 +222,7 @@ export default function StorePage() {
                 variant={selectedImage === image ? "default" : "outline"}
               >
                 <Image
-                  src={getR2ImageUrl(image)}
+                  src={`/${image}`}
                   alt={`${mockProducts[0].name} thumbnail ${index + 1}`}
                   width={50}
                   height={50}
@@ -256,27 +250,28 @@ export default function StorePage() {
           </div>
 
           <div className="flex items-center gap-4">
-            <Button
-              onClick={() => handleQuantityChange(quantity - 1)}
-              disabled={quantity <= 1}
-            >
-              -
-            </Button>
-            <span>{quantity}</span>
-            <Button onClick={() => handleQuantityChange(quantity + 1)}>
-              +
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={() => handleQuantityChange(quantity - 1)}
+                variant="outline"
+                disabled={quantity <= 1}
+              >
+                -
+              </Button>
+              <span className="w-8 text-center">{quantity}</span>
+              <Button
+                onClick={() => handleQuantityChange(quantity + 1)}
+                variant="outline"
+              >
+                +
+              </Button>
+            </div>
+            <span className="text-xl font-bold">
+              ${(currentPrice * quantity).toFixed(2)}
+            </span>
           </div>
 
-          <div className="text-xl font-bold">
-            ${(currentPrice * quantity).toFixed(2)}
-          </div>
-
-          <Button
-            className="w-full"
-            disabled={!canAddToCart}
-            onClick={() => alert("Added to cart!")}
-          >
+          <Button disabled={!canAddToCart} className="w-full">
             Add to Cart
           </Button>
         </div>

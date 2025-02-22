@@ -4,8 +4,6 @@ import { useEffect } from "react";
 import Image from "next/image";
 import { createPortal } from "react-dom";
 
-const R2_URL = process.env.NEXT_PUBLIC_R2_URL;
-
 type LightboxGalleryProps = {
   isOpen: boolean;
   onClose: () => void;
@@ -81,7 +79,7 @@ export default function LightboxGallery({
       </button>
       <div className="relative w-full h-full max-w-7xl max-h-[90vh] mx-4">
         <Image
-          src={`${R2_URL}/${currentImage}`}
+          src={`/${currentImage}`}
           alt="Gallery image"
           fill
           className="object-contain"

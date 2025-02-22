@@ -2,8 +2,7 @@
 
 import { Device } from "@/types/web-project";
 import Image from "next/image";
-
-const R2_URL = process.env.NEXT_PUBLIC_R2_URL;
+import Video from "@/components/ui/Video";
 
 type DevicePreviewProps = {
   device: Device;
@@ -27,7 +26,7 @@ export default function DevicePreview({
       rel="noopener noreferrer"
     >
       <Image
-        src={`${R2_URL}/${mockupFileName}`}
+        src={`/${mockupFileName}`}
         alt={`${device.type} Mockup`}
         className="absolute inset-0 w-full h-full object-contain z-10"
         width={isPhone ? 375 : 1024}
@@ -35,7 +34,8 @@ export default function DevicePreview({
       />
 
       {device.content.type === "video" ? (
-        <video
+        <Video
+          src={`/${device.content.url}`}
           className={`absolute ${
             isPhone
               ? "inset-[3%] bottom-[3.75%] w-[94%] h-[93.25%] rounded-[12%]"
@@ -45,13 +45,10 @@ export default function DevicePreview({
           loop
           muted
           playsInline
-        >
-          <source src={device.content.url} type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
+        />
       ) : (
         <Image
-          src={device.content.url}
+          src={`/${device.content.url}`}
           alt="Screenshot"
           className={`absolute ${
             isPhone

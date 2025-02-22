@@ -19,14 +19,14 @@ export default function ProjectCard({ project }: ProjectCardProps) {
               <div className="col-span-12 lg:col-span-4 mb-6 lg:mb-0">
                 <div className="space-y-4">
                   <Image
-                    src={project.devices[0].content.url}
+                    src={`/${project.devices[0].content.url}`}
                     alt="BeautyFloor Screenshot 1"
                     width={1200}
                     height={800}
                     className="w-[90%] mr-0 h-auto ml-auto rounded-lg"
                   />
                   <Image
-                    src={project.devices[1].content.url}
+                    src={`/${project.devices[1].content.url}`}
                     alt="BeautyFloor Screenshot 2"
                     width={1200}
                     height={800}
@@ -39,14 +39,14 @@ export default function ProjectCard({ project }: ProjectCardProps) {
                       rel="noopener noreferrer"
                     >
                       <Image
-                        src={`${process.env.NEXT_PUBLIC_R2_URL}/iphone-mockup.svg`}
+                        src="/iphone-mockup.svg"
                         alt="iPhone Mockup"
                         width={375}
                         height={812}
                         className="w-full relative z-10"
                       />
                       <Image
-                        src={project.devices[2].content.url}
+                        src={`/${project.devices[2].content.url}`}
                         alt="BeautyFloor Screenshot 3"
                         width={375}
                         height={812}
@@ -123,7 +123,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
                     />
                   ) : (
                     <Image
-                      src={device.content.url}
+                      src={`/${device.content.url}`}
                       alt={`Screenshot ${index + 1}`}
                       width={800}
                       height={600}
@@ -153,7 +153,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
             {project.tools.map((tool, index) => (
               <Image
                 key={index}
-                src={tool.icon}
+                src={`/${tool.icon}`}
                 alt={tool.name}
                 width={29}
                 height={29}

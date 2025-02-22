@@ -5,8 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import styles from "@/styles/branding-photography.module.css";
 
-const R2_URL = process.env.NEXT_PUBLIC_R2_URL;
-
 type GalleryItemProps = {
   item: GalleryItem;
   index: number;
@@ -25,7 +23,7 @@ export default function GalleryItem({
     >
       <div className={styles.photo_item}>
         <Image
-          src={`${R2_URL}/${item.images[0]}`}
+          src={`/${item.images[0]}`}
           alt={`Photo ${index + 1}`}
           width={800}
           height={600}
@@ -33,7 +31,7 @@ export default function GalleryItem({
         />
         {item.images.length > 1 && (
           <Image
-            src={`${R2_URL}/${item.images[1]}`}
+            src={`/${item.images[1]}`}
             alt={`Photo ${index + 1} (hover)`}
             width={800}
             height={600}
@@ -62,7 +60,7 @@ export default function GalleryItem({
             )}
             {item.logo && (
               <Image
-                src={`${R2_URL}/${item.logo}`}
+                src={`/${item.logo}`}
                 alt={`Photo ${index + 1} logo`}
                 width={32}
                 height={32}

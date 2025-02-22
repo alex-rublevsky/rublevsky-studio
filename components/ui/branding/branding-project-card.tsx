@@ -5,8 +5,6 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import styles from "@/styles/branding-photography.module.css";
 
-const R2_URL = process.env.NEXT_PUBLIC_R2_URL;
-
 type BrandingProjectCardProps = {
   project: BrandingProject;
 };
@@ -17,45 +15,39 @@ export default function BrandingProjectCard({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (
-      isHovered &&
-      project.type === "image" &&
-      project.images &&
-      project.images.length > 1
-    ) {
-      // Start with second image
-      setCurrentImageIndex(1);
-
-      // Set up the interval
-      intervalRef.current = setInterval(() => {
-        setCurrentImageIndex((prev) => (prev + 1) % project.images!.length);
-      }, 800);
-    }
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
+    if (project.type === "video" && videoRef.current) {
+      if (isHovered) {
+        videoRef.current.play().catch(() => {
+          // Handle any play() errors silently
+        });
+      } else {
+        videoRef.current.pause();
+        videoRef.current.currentTime = 0;
       }
-      setCurrentImageIndex(0);
-    };
-  }, [isHovered, project]);
+    }
+  }, [isHovered, project.type]);
+
+  useEffect(() => {
+    if (project.type === "image" && project.images && isHovered) {
+      const interval = setInterval(() => {
+        setCurrentImageIndex((prevIndex) =>
+          prevIndex === project.images!.length - 1 ? 0 : prevIndex + 1
+        );
+      }, 800);
+
+      return () => clearInterval(interval);
+    }
+  }, [isHovered, project.type, project.images]);
 
   const handleMouseEnter = () => {
     setIsHovered(true);
-    if (project.type === "video" && videoRef.current) {
-      videoRef.current.play();
-    }
   };
 
   const handleMouseLeave = () => {
     setIsHovered(false);
-    if (project.type === "video" && videoRef.current) {
-      videoRef.current.pause();
-      videoRef.current.currentTime = 0;
-    }
+    setCurrentImageIndex(0);
   };
 
   return (
@@ -68,7 +60,7 @@ export default function BrandingProjectCard({
         {project.type === "image" ? (
           <div>
             <Image
-              src={`${R2_URL}/${project.images![0]}`}
+              src={`/${project.images![0]}`}
               alt={project.name}
               width={800}
               height={600}
@@ -78,7 +70,7 @@ export default function BrandingProjectCard({
             {project.images!.map((image, index) => (
               <Image
                 key={index}
-                src={`${R2_URL}/${image}`}
+                src={`/${image}`}
                 alt={`${project.name} ${index + 1}`}
                 width={800}
                 height={600}
@@ -92,7 +84,7 @@ export default function BrandingProjectCard({
         ) : (
           <div className={styles.video_container}>
             <Image
-              src={`${R2_URL}/${project.preview}`}
+              src={`/${project.preview}`}
               alt={project.name}
               width={800}
               height={600}
@@ -101,9 +93,10 @@ export default function BrandingProjectCard({
             />
             <video
               ref={videoRef}
-              src={`${R2_URL}/${project.src}`}
+              src={`/${project.src}`}
               className="w-full h-full object-cover absolute top-0 left-0 transition-opacity duration-800 ease-in-out"
               style={{ opacity: isHovered ? 1 : 0 }}
+              autoPlay={isHovered}
               loop
               muted
               playsInline
@@ -122,7 +115,7 @@ export default function BrandingProjectCard({
             )}
             {project.logo && (
               <Image
-                src={`${R2_URL}/${project.logo}`}
+                src={`/${project.logo}`}
                 alt={`${project.name} logo`}
                 width={32}
                 height={32}

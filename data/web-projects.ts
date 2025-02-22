@@ -1,11 +1,5 @@
 import { Project } from '@/types/web-project';
 
-const R2_URL = process.env.NEXT_PUBLIC_R2_URL;
-
-if (!R2_URL) {
-  throw new Error('NEXT_PUBLIC_R2_URL environment variable is not set');
-}
-
 export const webProjects: Project[] = [
   {
     title: 'Africa Power Supply',
@@ -13,7 +7,7 @@ export const webProjects: Project[] = [
     tools: [
       {
         name: 'Webflow',
-        icon: `${R2_URL}/webflow.svg`
+        icon: 'webflow.svg'
       }
     ],
     websiteUrl: 'https://aps-cb63ae.webflow.io/',
@@ -23,14 +17,14 @@ export const webProjects: Project[] = [
         type: 'phone',
         content: {
           type: 'video',
-          url: `${R2_URL}/aps_iphone.mp4`
+          url: 'aps_iphone.mp4'
         }
       },
       {
         type: 'tablet',
         content: {
           type: 'video',
-          url: `${R2_URL}/aps_tablet.mp4`
+          url: 'aps_tablet.mp4'
         }
       }
     ]
@@ -41,11 +35,11 @@ export const webProjects: Project[] = [
     tools: [
       {
         name: 'Figma',
-        icon: `${R2_URL}/figma.svg`
+        icon: 'figma.svg'
       },
       {
         name: 'Webflow',
-        icon: `${R2_URL}/webflow.svg`
+        icon: 'webflow.svg'
       }
     ],
     websiteUrl: 'https://bfloor.ru/',
@@ -55,28 +49,28 @@ export const webProjects: Project[] = [
         type: 'desktop',
         content: {
           type: 'image',
-          url: `${R2_URL}/bfloor1.jpg`
+          url: 'bfloor1.jpg'
         }
       },
       {
         type: 'desktop',
         content: {
           type: 'image',
-          url: `${R2_URL}/bfloor2.jpg`
+          url: 'bfloor2.jpg'
         }
       },
       {
         type: 'phone',
         content: {
           type: 'image',
-          url: `${R2_URL}/bfloor3.jpg`
+          url: 'bfloor3.jpg'
         }
       },
       {
         type: 'tablet',
         content: {
           type: 'video',
-          url: `${R2_URL}/bfloor_tablet.mp4`
+          url: 'bfloor_tablet.mp4'
         }
       }
     ]
@@ -87,11 +81,11 @@ export const webProjects: Project[] = [
     tools: [
       {
         name: 'Spline',
-        icon: `${R2_URL}/spline.png`
+        icon: 'spline.png'
       },
       {
         name: 'Webflow',
-        icon: `${R2_URL}/webflow.svg`
+        icon: 'webflow.svg'
       }
     ],
     websiteUrl: 'https://rublevsky-studio.webflow.io/32karata/home',
@@ -101,7 +95,7 @@ export const webProjects: Project[] = [
         type: 'tablet',
         content: {
           type: 'video',
-          url: `${R2_URL}/32karata_tablet.mp4`
+          url: '32karata_tablet.mp4'
         }
       }
     ]
@@ -112,11 +106,11 @@ export const webProjects: Project[] = [
     tools: [
       {
         name: 'Figma',
-        icon: `${R2_URL}/figma.svg`
+        icon: 'figma.svg'
       },
       {
         name: 'Webflow',
-        icon: `${R2_URL}/webflow.svg`
+        icon: 'webflow.svg'
       }
     ],
     websiteUrl: 'https://inksoul.webflow.io/',
@@ -126,14 +120,14 @@ export const webProjects: Project[] = [
         type: 'phone',
         content: {
           type: 'video',
-          url: `${R2_URL}/inksoul-iphone.mp4`
+          url: 'inksoul-iphone.mp4'
         }
       },
       {
         type: 'tablet',
         content: {
           type: 'video',
-          url: `${R2_URL}/inksoul-tablet.mp4`
+          url: 'inksoul-tablet.mp4'
         }
       }
     ]
@@ -144,11 +138,11 @@ export const webProjects: Project[] = [
     tools: [
       {
         name: 'Figma',
-        icon: `${R2_URL}/figma.svg`
+        icon: 'figma.svg'
       },
       {
         name: 'Webflow',
-        icon: `${R2_URL}/webflow.svg`
+        icon: 'webflow.svg'
       }
     ],
     websiteUrl: 'https://www.femtechsearch.com/',
@@ -158,14 +152,14 @@ export const webProjects: Project[] = [
         type: 'phone',
         content: {
           type: 'video',
-          url: `${R2_URL}/femtech_iphone.mp4`
+          url: 'femtech_iphone.mp4'
         }
       },
       {
         type: 'tablet',
         content: {
           type: 'video',
-          url: `${R2_URL}/femtech_tablet.mp4`
+          url: 'femtech_tablet.mp4'
         }
       }
     ]
