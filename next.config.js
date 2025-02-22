@@ -6,10 +6,10 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: new URL(process.env.NEXT_PUBLIC_R2_URL).hostname,
+        hostname: 'assets.rublevsky.studio',
       },
     ],
   },
 }
 
-module.exports = nextConfig 
+module.exports = nextConfig

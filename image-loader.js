@@ -1,4 +1,4 @@
-const R2_URL = process.env.NEXT_PUBLIC_R2_URL;
+const ASSETS_URL = 'https://assets.rublevsky.studio';
 
 export default function cloudflareLoader({ src, width, quality }) {
   // Build the common params for image optimization
@@ -15,5 +15,5 @@ export default function cloudflareLoader({ src, width, quality }) {
   
   // For all other paths (starting with /), treat as R2 images
   const r2Path = src.startsWith('/') ? src.substring(1) : src;
-  return `${R2_URL}/${r2Path}?${queryString}`;
+  return `${ASSETS_URL}/${r2Path}?${queryString}`;
 } 
