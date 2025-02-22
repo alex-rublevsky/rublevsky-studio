@@ -50,6 +50,15 @@ export function ExpertiseSection() {
                 </div>
                 <div className="w-3/4 h-full flex justify-center items-center p-4">
                   <Image
+                    src="/logos/laravel.svg"
+                    alt="Laravel Logo"
+                    width={80}
+                    height={80}
+                    className="hover:opacity-70 transition-opacity"
+                  />
+                </div>
+                <div className="w-3/4 h-full flex justify-center items-center p-4">
+                  <Image
                     src="/logos/html5.svg"
                     alt="HTML5 Logo"
                     width={80}
