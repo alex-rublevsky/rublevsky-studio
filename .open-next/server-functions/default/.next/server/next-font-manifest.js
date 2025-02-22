@@ -1,1 +1,0 @@
-self.__NEXT_FONT_MANIFEST='{"pages":{},"app":{"/Users/rublevskii/Desktop/rublevsky-studio/app/layout":["static/media/1656e9bdc2587d30-s.p.woff2","static/media/058a6640a9b75321-s.p.woff"]},"appUsingSizeAdjust":true,"pagesUsingSizeAdjust":false}';
