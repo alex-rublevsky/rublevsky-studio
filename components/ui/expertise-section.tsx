@@ -170,7 +170,7 @@ export function ExpertiseSection() {
               <strong className="font-semibold">Illustrator</strong>,{" "}
               <strong className="font-semibold">InDesign</strong>, and{" "}
               <strong className="font-semibold">After Effects</strong> for
-              professional digital content creation!!!
+              professional digital content creation!!!!!
             </h3>
           </div>
           <div className="lg:col-span-4 flex justify-center items-center order-1 lg:order-2">
