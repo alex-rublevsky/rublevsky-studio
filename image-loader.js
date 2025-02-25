@@ -5,7 +5,7 @@ export default function cloudflareLoader({ src, width, quality }) {
   if (src.startsWith("https://")) {
     return src;
   }
-  const params = ['format=auto', `width=${width}`];
+  const params = [`width=${width}`];
   if (quality) {
     params.push(`quality=${quality}`);
   }
