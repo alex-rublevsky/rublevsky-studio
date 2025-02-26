@@ -33,10 +33,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files
+# environment variables and secrets
 .env*
-dev.vars
-wrangler.toml
+dev.vars        
 
 # vercel
 .vercel
@@ -44,3 +43,6 @@ wrangler.toml
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Cloudflare
+.wrangler      

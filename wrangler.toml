@@ -1,4 +1,4 @@
-name = "name"
+name = "rublevsky-studio"
 main = ".open-next/worker.js"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
@@ -6,6 +6,6 @@ assets = { directory = ".open-next/assets", binding = "ASSETS" }
 
 [[d1_databases]]
 binding = "DB"
-database_name = "your-database-name"
-database_id = "your-database-id"
+database_name = "rublevsky-studio-storage"
+database_id = "${DATABASE}"
 migrations_dir = "drizzle"
