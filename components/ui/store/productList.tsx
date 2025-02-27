@@ -1,3 +1,5 @@
+"use client";
+
 import { Product, ProductVariation, VariationAttribute } from "@/types";
 import ProductCard from "./productCard";
 

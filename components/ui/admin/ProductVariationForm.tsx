@@ -18,6 +18,10 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { Button } from "@/components/ui/button";
+import { Trash2, Plus, X } from "lucide-react";
+import { ProductVariationFormData, VariationAttributeFormData } from "@/types";
+import { getProductAttributes } from "@/lib/actions/product.actions";
 
 // Define the Variation type since it's not exported from @/types
 interface Variation {
@@ -234,12 +238,8 @@ export default function ProductVariationForm({
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch("/api/admin/product-attributes");
-      if (!response.ok) {
-        throw new Error("Failed to fetch attributes");
-      }
-      const data = await response.json();
-      setAvailableAttributes(data.attributes || []);
+      const result = await getProductAttributes();
+      setAvailableAttributes(result.attributes || []);
     } catch (err) {
       console.error("Error fetching attributes:", err);
       setError(err instanceof Error ? err.message : "An error occurred");

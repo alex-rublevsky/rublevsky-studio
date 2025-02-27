@@ -10,9 +10,16 @@ import {
   ProductsResponse,
   CategoriesResponse,
   BrandsResponse,
+  ProductWithVariations,
 } from "@/types";
 import Image from "next/image";
 import ProductVariationForm from "@/components/ui/admin/ProductVariationForm";
+import {
+  getAdminProducts,
+  getAdminProductById,
+  createProduct,
+  updateProduct,
+} from "@/lib/actions/product.actions";
 
 // Define the Variation interface to match the one in ProductVariationForm
 interface Variation {
@@ -123,11 +130,8 @@ export default function ProductsPage() {
   const fetchProducts = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/admin/products");
-      if (!response.ok) {
-        throw new Error("Failed to fetch products");
-      }
-      const data = (await response.json()) as ProductsResponse;
+      // Use server action instead of fetch
+      const data = await getAdminProducts();
       setProducts(data.products || []);
     } catch (err) {
       console.error("Error fetching products:", err);
@@ -230,39 +234,26 @@ export default function ProductsPage() {
     setError("");
     setSuccess("");
 
-    // Convert variations to the format expected by the API
-    const formattedVariations = variations.map((variation) => ({
-      id: variation.id.startsWith("temp-") ? undefined : parseInt(variation.id),
-      sku: variation.sku,
-      price: variation.price.toString(),
-      stock: variation.stock.toString(),
-      sort: variation.sort,
-      attributes: variation.attributes.map((attr) => ({
-        name: attr.name,
-        value: attr.value,
-      })),
-    }));
-
-    const submissionData = {
-      ...formData,
-      variations: formattedVariations,
-    };
-
     try {
-      const response = await fetch("/api/admin/products", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(submissionData),
-      });
+      // Prepare the data
+      const productData = {
+        ...formData,
+        price: parseFloat(formData.price || "0"),
+        stock: parseInt(formData.stock || "0"),
+        categoryId: formData.categoryId ? parseInt(formData.categoryId) : null,
+        brandId: formData.brandId ? parseInt(formData.brandId) : null,
+        variations: variations.map((v) => ({
+          ...v,
+          productId: 0, // This will be set by the server
+        })),
+      };
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to add product");
-      }
+      // Use server action instead of fetch
+      const result = await createProduct(productData);
 
-      setSuccess("Product added successfully!");
+      setSuccess(result.message || "Product created successfully");
+
+      // Reset form
       setFormData({
         name: "",
         slug: "",
@@ -281,11 +272,12 @@ export default function ProductsPage() {
         variations: [],
       });
       setVariations([]);
-      setIsAutoSlug(true);
-      router.refresh();
+
+      // Refresh products list
       fetchProducts();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      console.error("Error creating product:", err);
+      setError((err as Error).message || "Failed to create product");
     } finally {
       setIsSubmitting(false);
     }
@@ -293,39 +285,6 @@ export default function ProductsPage() {
 
   const handleEdit = async (product: Product) => {
     setEditingProductId(product.id);
-
-    // Fetch product variations if the product has variations
-    let productVariations: Variation[] = [];
-    if (product.hasVariations) {
-      try {
-        const response = await fetch(`/api/admin/products/${product.id}`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data.product && data.product.variations) {
-            // Map the database variations to the form data structure
-            productVariations = data.product.variations.map(
-              (variation: any) => ({
-                id: variation.id.toString(),
-                sku: variation.sku,
-                price: parseFloat(variation.price),
-                stock: parseInt(variation.stock),
-                sort: variation.sort || 0,
-                attributes: variation.attributes
-                  ? variation.attributes.map((attr: any) => ({
-                      name: attr.name,
-                      value: attr.value,
-                    }))
-                  : [],
-              })
-            );
-          }
-        }
-      } catch (e) {
-        console.error("Failed to fetch product variations:", e);
-      }
-    }
-
-    // Update the edit form data instead of the main form data
     setEditFormData({
       name: product.name,
       slug: product.slug,
@@ -333,16 +292,46 @@ export default function ProductsPage() {
       price: product.price.toString(),
       categoryId: product.categoryId ? product.categoryId.toString() : "",
       brandId: product.brandId ? product.brandId.toString() : "",
-      stock: product.stock.toString(),
+      stock: product.stock ? product.stock.toString() : "0",
       isActive: product.isActive,
       isFeatured: product.isFeatured,
       onSale: product.onSale,
       hasVariations: product.hasVariations,
       hasVolume: product.hasVolume,
-      volume: product.volume || "",
+      volume: product.volume ? product.volume.toString() : "",
       images: product.images || "",
-      variations: [],
     });
+
+    let productVariations: Variation[] = [];
+
+    if (product.hasVariations) {
+      try {
+        // Use server action instead of fetch
+        const data = await getAdminProductById(product.id);
+        const productWithVariations = data.product as ProductWithVariations;
+
+        if (productWithVariations && productWithVariations.variations) {
+          // Map the database variations to the form data structure
+          productVariations = productWithVariations.variations.map(
+            (variation: any) => ({
+              id: variation.id.toString(),
+              sku: variation.sku,
+              price: parseFloat(variation.price),
+              stock: parseInt(variation.stock),
+              sort: variation.sort || 0,
+              attributes: variation.attributes
+                ? variation.attributes.map((attr: any) => ({
+                    name: attr.name,
+                    value: attr.value,
+                  }))
+                : [],
+            })
+          );
+        }
+      } catch (e) {
+        console.error("Failed to fetch product variations:", e);
+      }
+    }
 
     // Update the edit variations instead of the main variations
     setEditVariations(productVariations);
@@ -359,67 +348,33 @@ export default function ProductsPage() {
     setError("");
     setSuccess("");
 
-    // Convert variations to the format expected by the API
-    const formattedVariations = editVariations.map((variation) => ({
-      id: variation.id.startsWith("temp-") ? undefined : parseInt(variation.id),
-      sku: variation.sku,
-      price: variation.price.toString(),
-      stock: variation.stock.toString(),
-      sort: variation.sort,
-      attributes: variation.attributes.map((attr) => ({
-        name: attr.name,
-        value: attr.value,
-      })),
-    }));
-
-    const submissionData = {
-      ...editFormData,
-      variations: formattedVariations,
-    };
-
     try {
-      const response = await fetch(`/api/admin/products/${editingProductId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(submissionData),
-      });
+      // Prepare the data
+      const productData = {
+        ...editFormData,
+        price: parseFloat(editFormData.price || "0"),
+        stock: parseInt(editFormData.stock || "0"),
+        categoryId: editFormData.categoryId
+          ? parseInt(editFormData.categoryId)
+          : null,
+        brandId: editFormData.brandId ? parseInt(editFormData.brandId) : null,
+        variations: editVariations.map((v) => ({
+          ...v,
+          productId: editingProductId,
+        })),
+      };
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update product");
-      }
+      // Use server action instead of fetch
+      const result = await updateProduct(editingProductId, productData);
 
-      setSuccess("Product updated successfully!");
-      setShowEditModal(false);
-      setIsEditMode(false);
-      setEditingProductId(null);
-      // Reset the edit form data
-      setEditFormData({
-        name: "",
-        slug: "",
-        description: "",
-        price: "",
-        categoryId: "",
-        brandId: "",
-        stock: "0",
-        isActive: true,
-        isFeatured: false,
-        onSale: false,
-        hasVariations: false,
-        hasVolume: false,
-        volume: "",
-        images: "",
-        variations: [],
-      });
-      // Reset the edit variations
-      setEditVariations([]);
-      setIsEditAutoSlug(false);
-      router.refresh();
+      setSuccess(result.message || "Product updated successfully");
+
+      // Close modal and refresh products list
+      closeEditModal();
       fetchProducts();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      console.error("Error updating product:", err);
+      setError((err as Error).message || "Failed to update product");
     } finally {
       setIsSubmitting(false);
     }

@@ -1,3 +1,19 @@
+CREATE TABLE `account` (
+	`userId` text NOT NULL,
+	`type` text NOT NULL,
+	`provider` text NOT NULL,
+	`providerAccountId` text NOT NULL,
+	`refresh_token` text,
+	`access_token` text,
+	`expires_at` integer,
+	`token_type` text,
+	`scope` text,
+	`id_token` text,
+	`session_state` text,
+	PRIMARY KEY(`provider`, `providerAccountId`),
+	FOREIGN KEY (`userId`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
 CREATE TABLE `addresses` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`order_id` integer,
@@ -15,6 +31,20 @@ CREATE TABLE `addresses` (
 	FOREIGN KEY (`order_id`) REFERENCES `orders`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
+CREATE TABLE `authenticator` (
+	`credentialID` text NOT NULL,
+	`userId` text NOT NULL,
+	`providerAccountId` text NOT NULL,
+	`credentialPublicKey` text NOT NULL,
+	`counter` integer NOT NULL,
+	`credentialDeviceType` text NOT NULL,
+	`credentialBackedUp` integer NOT NULL,
+	`transports` text,
+	PRIMARY KEY(`userId`, `credentialID`),
+	FOREIGN KEY (`userId`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `authenticator_credentialID_unique` ON `authenticator` (`credentialID`);--> statement-breakpoint
 CREATE TABLE `blog_categories` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`name` text NOT NULL,
@@ -48,7 +78,7 @@ CREATE TABLE `brands` (
 	`slug` text NOT NULL,
 	`image` text,
 	`is_active` integer DEFAULT true NOT NULL,
-	`created_at` text,
+	`created_at` text DEFAULT '2025-02-26T23:28:03.751Z' NOT NULL,
 	`updated_at` text
 );
 --> statement-breakpoint
@@ -59,22 +89,11 @@ CREATE TABLE `categories` (
 	`slug` text NOT NULL,
 	`image` text,
 	`is_active` integer DEFAULT true NOT NULL,
-	`created_at` text,
+	`created_at` text DEFAULT '2025-02-26T23:28:03.750Z' NOT NULL,
 	`updated_at` text
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `categories_slug_unique` ON `categories` (`slug`);--> statement-breakpoint
-CREATE TABLE `failed_jobs` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`uuid` text NOT NULL,
-	`connection` text NOT NULL,
-	`queue` text NOT NULL,
-	`payload` text NOT NULL,
-	`exception` text NOT NULL,
-	`failed_at` text NOT NULL
-);
---> statement-breakpoint
-CREATE UNIQUE INDEX `failed_jobs_uuid_unique` ON `failed_jobs` (`uuid`);--> statement-breakpoint
 CREATE TABLE `inquiries` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`name` text NOT NULL,
@@ -85,16 +104,6 @@ CREATE TABLE `inquiries` (
 	`message` text NOT NULL,
 	`created_at` text,
 	`updated_at` text
-);
---> statement-breakpoint
-CREATE TABLE `jobs` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`queue` text NOT NULL,
-	`payload` text NOT NULL,
-	`attempts` integer NOT NULL,
-	`reserved_at` integer,
-	`available_at` integer NOT NULL,
-	`created_at` integer NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE `order_items` (
@@ -126,13 +135,7 @@ CREATE TABLE `orders` (
 	`notes` text,
 	`created_at` text,
 	`updated_at` text,
-	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
-);
---> statement-breakpoint
-CREATE TABLE `password_reset_tokens` (
-	`email` text PRIMARY KEY NOT NULL,
-	`token` text NOT NULL,
-	`created_at` text
+	FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `product_variations` (
@@ -156,7 +159,7 @@ CREATE TABLE `products` (
 	`slug` text NOT NULL,
 	`images` text,
 	`description` text,
-	`price` real,
+	`price` real DEFAULT 0 NOT NULL,
 	`is_active` integer DEFAULT true NOT NULL,
 	`is_featured` integer DEFAULT false NOT NULL,
 	`on_sale` integer DEFAULT false NOT NULL,
@@ -172,28 +175,24 @@ CREATE TABLE `products` (
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `products_slug_unique` ON `products` (`slug`);--> statement-breakpoint
-CREATE TABLE `sessions` (
+CREATE TABLE `session` (
+	`sessionToken` text PRIMARY KEY NOT NULL,
+	`userId` text NOT NULL,
+	`expires` integer NOT NULL,
+	FOREIGN KEY (`userId`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE TABLE `user` (
 	`id` text PRIMARY KEY NOT NULL,
-	`user_id` integer,
-	`ip_address` text(45),
-	`user_agent` text,
-	`payload` text NOT NULL,
-	`last_activity` integer NOT NULL,
-	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action
+	`name` text,
+	`email` text,
+	`role` text DEFAULT 'user' NOT NULL,
+	`password` text,
+	`emailVerified` integer,
+	`image` text
 );
 --> statement-breakpoint
-CREATE TABLE `users` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`name` text NOT NULL,
-	`email` text NOT NULL,
-	`email_verified_at` text,
-	`password` text NOT NULL,
-	`remember_token` text,
-	`created_at` text,
-	`updated_at` text
-);
---> statement-breakpoint
-CREATE UNIQUE INDEX `users_email_unique` ON `users` (`email`);--> statement-breakpoint
+CREATE UNIQUE INDEX `user_email_unique` ON `user` (`email`);--> statement-breakpoint
 CREATE TABLE `variation_attributes` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`product_variation_id` integer,
@@ -202,4 +201,11 @@ CREATE TABLE `variation_attributes` (
 	`created_at` text,
 	`updated_at` text,
 	FOREIGN KEY (`product_variation_id`) REFERENCES `product_variations`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE TABLE `verificationToken` (
+	`identifier` text NOT NULL,
+	`token` text NOT NULL,
+	`expires` integer NOT NULL,
+	PRIMARY KEY(`identifier`, `token`)
 );

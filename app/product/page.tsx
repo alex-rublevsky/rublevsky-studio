@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function ProductRedirectPage() {
+function ProductRedirect() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const slug = searchParams.get("slug");
@@ -20,10 +20,24 @@ export default function ProductRedirectPage() {
 
   // Show a loading state while redirecting
   return (
+    <div className="text-center">
+      <p className="text-lg">Redirecting...</p>
+    </div>
+  );
+}
+
+export default function ProductRedirectPage() {
+  return (
     <main className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <p className="text-lg">Redirecting...</p>
-      </div>
+      <Suspense
+        fallback={
+          <div className="text-center">
+            <p className="text-lg">Loading...</p>
+          </div>
+        }
+      >
+        <ProductRedirect />
+      </Suspense>
     </main>
   );
 }

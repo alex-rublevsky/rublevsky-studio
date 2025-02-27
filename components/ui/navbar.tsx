@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useSession, signOut } from "next-auth/react";
 
 interface NavItem {
   name: string;
@@ -84,6 +85,10 @@ const defaultUtilityItems: NavItem[] = [
   { name: "Blog", url: "/blog" },
   { name: "Store", url: "/store" },
 ];
+
+const authItems: NavItem[] = [{ name: "Login", url: "/api/auth/signin" }];
+
+const logoutItems: NavItem[] = [{ name: "Logout", url: "#logout" }];
 
 interface TabProps {
   children: React.ReactNode;
@@ -184,6 +189,20 @@ const NavGroup = ({ items, className }: NavGroupProps) => {
 };
 
 export function NavBar({ className }: Omit<NavBarProps, "items">) {
+  const pathname = usePathname();
+  const isStorePage = pathname.startsWith("/store");
+  const { data: session, status } = useSession();
+  const [logoutPosition, setLogoutPosition] = useState({
+    left: 0,
+    width: 0,
+    opacity: 0,
+  });
+
+  const handleLogout = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    await signOut({ callbackUrl: "/store" });
+  };
+
   return (
     <nav
       className={cn(
@@ -193,6 +212,34 @@ export function NavBar({ className }: Omit<NavBarProps, "items">) {
     >
       <NavGroup items={defaultWorkItems} />
       <NavGroup items={defaultUtilityItems} />
+      {isStorePage &&
+        status !== "loading" &&
+        (session ? (
+          <ul
+            className="relative flex w-fit rounded-full border border-black bg-white p-1"
+            onMouseLeave={() =>
+              setLogoutPosition((prev) => ({ ...prev, opacity: 0 }))
+            }
+          >
+            <li
+              onClick={handleLogout}
+              onMouseEnter={(e) => {
+                const { width } = e.currentTarget.getBoundingClientRect();
+                setLogoutPosition({
+                  width,
+                  opacity: 1,
+                  left: e.currentTarget.offsetLeft,
+                });
+              }}
+              className="relative z-10 block cursor-pointer px-3 py-1.5 text-xs uppercase text-white mix-blend-difference md:px-4 md:py-2 md:text-base"
+            >
+              Logout
+            </li>
+            <Cursor position={logoutPosition} />
+          </ul>
+        ) : (
+          <NavGroup items={authItems} />
+        ))}
     </nav>
   );
 }

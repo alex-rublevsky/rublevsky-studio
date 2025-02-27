@@ -18,6 +18,11 @@ import { InferSelectModel, InferInsertModel } from "drizzle-orm";
 export type Product = InferSelectModel<typeof products>;
 export type NewProduct = InferInsertModel<typeof products>;
 
+// Extended Product type with variations
+export interface ProductWithVariations extends Product {
+  variations?: (ProductVariation & { attributes?: VariationAttribute[] })[];
+}
+
 // Categories
 export type Category = InferSelectModel<typeof categories>;
 export type NewCategory = InferInsertModel<typeof categories>;

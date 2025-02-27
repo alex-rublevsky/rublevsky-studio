@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { getAdminProducts } from "@/lib/actions/product.actions";
 
 interface DashboardStats {
   totalProducts: number;
@@ -23,16 +24,12 @@ export default function AdminDashboard() {
     const fetchStats = async () => {
       setIsLoading(true);
       try {
-        // In a real app, you would fetch actual stats from an API
-        // For now, we'll just fetch products to get a real count
-        const response = await fetch("/api/admin/products");
-        if (response.ok) {
-          const data = await response.json();
-          setStats({
-            ...stats,
-            totalProducts: data.products.length,
-          });
-        }
+        // Use server action instead of fetch
+        const data = await getAdminProducts();
+        setStats({
+          ...stats,
+          totalProducts: data.products.length,
+        });
       } catch (err) {
         console.error("Error fetching dashboard stats:", err);
       } finally {

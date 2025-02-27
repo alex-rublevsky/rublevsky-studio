@@ -4,6 +4,9 @@ import { categories } from "../../../../server/schema";
 import { eq } from "drizzle-orm";
 import { Category, NewCategory } from "@/types";
 
+// Add dynamic config to prevent static generation
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const allCategories = await db.select().from(categories).all();

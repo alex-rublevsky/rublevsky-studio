@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import "@/styles/globals.css";
+import "./globals.css";
 import "@/styles/links.css";
 import { NavBar } from "@/components/ui/navbar";
 import localFont from "next/font/local";
 import "@/styles/typography.css";
 import { AnimationProvider } from "@/components/providers/animation-provider";
+import { AuthProvider } from "@/components/providers/auth-provider";
 
 const overusedGrotesk = localFont({
   src: [
@@ -37,10 +38,12 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <body className={`${overusedGrotesk.variable} antialiased`}>
-        <AnimationProvider>
-          <NavBar />
-          {children}
-        </AnimationProvider>
+        <AuthProvider>
+          <AnimationProvider>
+            <NavBar />
+            {children}
+          </AnimationProvider>
+        </AuthProvider>
       </body>
     </html>
   );
