@@ -9,7 +9,8 @@ import {
   Keyboard,
   Mousewheel,
 } from "swiper/modules";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import type { Swiper as SwiperType } from "swiper";
 
 // Import Swiper styles
 import "swiper/css";
@@ -27,6 +28,67 @@ interface BlogPostProps {
 
 function BlogPost({ title, body, images }: BlogPostProps) {
   const [isReady, setIsReady] = useState(false);
+  const [swiper, setSwiper] = useState<SwiperType | null>(null);
+  const initializedRef = useRef(false);
+  const imagesLoadedRef = useRef(0);
+
+  // Reset the gallery when images change
+  useEffect(() => {
+    initializedRef.current = false;
+    imagesLoadedRef.current = 0;
+    setIsReady(false);
+  }, [images]);
+
+  // Handle image loading
+  const handleImageLoad = () => {
+    imagesLoadedRef.current += 1;
+
+    // Only proceed when all images are loaded
+    if (imagesLoadedRef.current >= Math.min(images.length, 3)) {
+      if (swiper && !initializedRef.current) {
+        // Reset to first slide with no animation
+        swiper.slideTo(0, 0);
+        initializedRef.current = true;
+
+        // Delay showing the gallery to ensure proper rendering
+        setTimeout(() => {
+          setIsReady(true);
+        }, 200);
+      }
+    }
+  };
+
+  // Ensure the first slide is always selected after initialization
+  useEffect(() => {
+    if (swiper && !initializedRef.current) {
+      // Force slide to index 0 after initialization
+      swiper.slideTo(0, 0);
+
+      // If we already have some images loaded, we can initialize
+      if (imagesLoadedRef.current >= Math.min(images.length, 3)) {
+        initializedRef.current = true;
+        setTimeout(() => {
+          setIsReady(true);
+        }, 100);
+      }
+    }
+  }, [swiper, images]);
+
+  // Additional handler to reset on visibility changes (when returning to the page)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible" && swiper) {
+        // When returning to the page, reset to first slide
+        swiper.slideTo(0, 0);
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [swiper]);
 
   return (
     <article className="max-w-2xl mx-auto">
@@ -45,7 +107,7 @@ function BlogPost({ title, body, images }: BlogPostProps) {
           spaceBetween={-100}
           threshold={0}
           initialSlide={0}
-          onAfterInit={() => setIsReady(true)}
+          onSwiper={setSwiper}
           keyboard={{
             enabled: true,
             onlyInViewport: true,
@@ -87,12 +149,13 @@ function BlogPost({ title, body, images }: BlogPostProps) {
             >
               <div className="relative w-auto overflow-hidden object-contain">
                 <Image
-                  src={image}
+                  src={`/${image}`}
                   alt={title}
                   width={1000}
                   height={1000}
                   className="w-auto h-full max-h-[25rem] md:max-h-[30rem] max-w-full block cursor-zoom-in rounded-lg"
-                  priority={index === 0}
+                  priority={index < 3}
+                  onLoad={handleImageLoad}
                 />
               </div>
             </SwiperSlide>

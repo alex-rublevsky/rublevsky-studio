@@ -14,11 +14,11 @@ const blogPosts = [
     
     Effect Focuses attention, gathers the mind, and energizes the body — a perfect balance! Some deeply immersive ambient for an attentive and meditative tea ritual 🎶`,
     images: [
-      "https://pub-e0cacce632b34b06ae852d50afaa9085.r2.dev/hranitel-6.jpg",
-      "https://pub-e0cacce632b34b06ae852d50afaa9085.r2.dev/hranitel-3.jpg",
-      "https://pub-e0cacce632b34b06ae852d50afaa9085.r2.dev/hranitel-1.jpg",
-      "https://pub-e0cacce632b34b06ae852d50afaa9085.r2.dev/hranitel-2.jpg",
-      "https://pub-e0cacce632b34b06ae852d50afaa9085.r2.dev/hranitel-4.jpg",
+      "hranitel-6.jpg",
+      "hranitel-3.jpg",
+      "hranitel-1.jpg",
+      "hranitel-2.jpg",
+      "hranitel-4.jpg",
     ],
     publishedAt: "2024-01-15",
   },
@@ -34,11 +34,7 @@ const blogPosts = [
     Texture: Silky and full-bodied, coating the mouth without any roughness. The soup is clear and dark amber, showing its clean aging process.
 
     Effect: Grounding and centering, perfect for afternoon contemplation. The energy is steady and lasting, without any sharpness. 🍵✨`,
-    images: [
-      "https://pub-e0cacce632b34b06ae852d50afaa9085.r2.dev/hranitel-2.jpg",
-      "https://pub-e0cacce632b34b06ae852d50afaa9085.r2.dev/hranitel-4.jpg",
-      "https://pub-e0cacce632b34b06ae852d50afaa9085.r2.dev/hranitel-6.jpg",
-    ],
+    images: ["hranitel-2.jpg", "hranitel-4.jpg", "hranitel-6.jpg"],
     publishedAt: "2024-01-10",
   },
 ];
