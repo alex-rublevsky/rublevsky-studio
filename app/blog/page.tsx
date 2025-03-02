@@ -1,4 +1,4 @@
-import BlogPost from "@/components/ui/blogPost";
+import BlogPost from "@/components/ui/blog/blogPost";
 
 const blogPosts = [
   {
