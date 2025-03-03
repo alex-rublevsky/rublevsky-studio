@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useParams } from "next/navigation";
 import { Product, ProductVariation, VariationAttribute } from "@/types";
-import getProductBySlug from "@/lib/actions/getProductBySlug";
+import getProductBySlug from "@/lib/actions/products/getProductBySlug";
 import Link from "next/link";
 
 // Extended product interface with category, brand, and variations information

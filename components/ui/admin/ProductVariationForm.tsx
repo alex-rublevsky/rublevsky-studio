@@ -18,6 +18,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { getProductAttributes } from "@/lib/actions/products";
 
 // Define the Variation type since it's not exported from @/types
 interface Variation {
@@ -234,12 +235,8 @@ export default function ProductVariationForm({
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch("/api/admin/product-attributes");
-      if (!response.ok) {
-        throw new Error("Failed to fetch attributes");
-      }
-      const data = await response.json();
-      setAvailableAttributes(data.attributes || []);
+      const attributes = await getProductAttributes();
+      setAvailableAttributes(attributes || []);
     } catch (err) {
       console.error("Error fetching attributes:", err);
       setError(err instanceof Error ? err.message : "An error occurred");

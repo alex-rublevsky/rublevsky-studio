@@ -5,6 +5,7 @@ import { NavBar } from "@/components/ui/navbar";
 import localFont from "next/font/local";
 import "@/styles/typography.css";
 import { AnimationProvider } from "@/components/providers/animation-provider";
+import { Toaster } from "@/components/ui/sonner";
 
 const overusedGrotesk = localFont({
   src: [
@@ -41,6 +42,7 @@ export default function RootLayout({
           <NavBar />
           {children}
         </AnimationProvider>
+        <Toaster />
       </body>
     </html>
   );

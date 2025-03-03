@@ -3,6 +3,14 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Brand, BrandFormData, BrandsResponse } from "@/types";
+import {
+  getAllBrands,
+  createBrand,
+  updateBrand,
+  deleteBrand,
+} from "@/lib/actions/brands";
+import DeleteConfirmationDialog from "@/components/ui/admin/DeleteConfirmationDialog";
+import { toast } from "sonner";
 
 export default function BrandsPage() {
   const router = useRouter();
@@ -21,13 +29,15 @@ export default function BrandsPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [brands, setBrands] = useState<Brand[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreateAutoSlug, setIsCreateAutoSlug] = useState(true);
   const [isEditAutoSlug, setIsEditAutoSlug] = useState(false);
   const [editingBrandId, setEditingBrandId] = useState<number | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deletingBrandId, setDeletingBrandId] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     fetchBrands();
@@ -70,12 +80,9 @@ export default function BrandsPage() {
   const fetchBrands = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/admin/brands");
-      if (!response.ok) {
-        throw new Error("Failed to fetch brands");
-      }
-      const data = (await response.json()) as BrandsResponse;
-      setBrands(data.brands || []);
+      // Use the server action instead of the API
+      const brandsData = await getAllBrands();
+      setBrands(brandsData || []);
     } catch (err) {
       console.error("Error fetching brands:", err);
     } finally {
@@ -120,23 +127,18 @@ export default function BrandsPage() {
     e.preventDefault();
     setIsSubmitting(true);
     setError("");
-    setSuccess("");
 
     try {
-      const response = await fetch("/api/admin/brands", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(createFormData),
+      // Use the server action instead of the API
+      await createBrand({
+        name: createFormData.name,
+        slug: createFormData.slug,
+        image: createFormData.image || null,
+        isActive: createFormData.isActive,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to add brand");
-      }
+      toast.success("Brand added successfully!");
 
-      setSuccess("Brand added successfully!");
       setCreateFormData({
         name: "",
         slug: "",
@@ -148,6 +150,7 @@ export default function BrandsPage() {
       fetchBrands();
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
+      toast.error(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsSubmitting(false);
     }
@@ -172,23 +175,18 @@ export default function BrandsPage() {
 
     setIsSubmitting(true);
     setError("");
-    setSuccess("");
 
     try {
-      const response = await fetch(`/api/admin/brands/${editingBrandId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(editFormData),
+      // Use the server action instead of the API
+      await updateBrand(editingBrandId, {
+        name: editFormData.name,
+        slug: editFormData.slug,
+        image: editFormData.image || null,
+        isActive: editFormData.isActive,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update brand");
-      }
+      toast.success("Brand updated successfully!");
 
-      setSuccess("Brand updated successfully!");
       setShowEditModal(false);
       setEditingBrandId(null);
       setEditFormData({
@@ -202,6 +200,7 @@ export default function BrandsPage() {
       fetchBrands();
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
+      toast.error(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsSubmitting(false);
     }
@@ -218,7 +217,39 @@ export default function BrandsPage() {
     });
     setIsEditAutoSlug(false);
     setError("");
-    setSuccess("");
+  };
+
+  const handleDeleteClick = (brand: Brand) => {
+    setDeletingBrandId(brand.id);
+    setShowDeleteDialog(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deletingBrandId) return;
+
+    setIsDeleting(true);
+    setError("");
+
+    try {
+      await deleteBrand(deletingBrandId);
+
+      toast.success("Brand deleted successfully!");
+
+      setShowDeleteDialog(false);
+      setDeletingBrandId(null);
+      router.refresh();
+      fetchBrands();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+      toast.error(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteDialog(false);
+    setDeletingBrandId(null);
   };
 
   return (
@@ -233,12 +264,6 @@ export default function BrandsPage() {
         {error && !showEditModal && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
             {error}
-          </div>
-        )}
-
-        {success && !showEditModal && (
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-            {success}
           </div>
         )}
 
@@ -429,12 +454,20 @@ export default function BrandsPage() {
                       ).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <button
-                        onClick={() => handleEdit(brand)}
-                        className="text-indigo-600 hover:text-indigo-900"
-                      >
-                        Edit
-                      </button>
+                      <div className="flex justify-center space-x-2">
+                        <button
+                          onClick={() => handleEdit(brand)}
+                          className="text-blue-600 hover:text-blue-900"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteClick(brand)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -473,12 +506,6 @@ export default function BrandsPage() {
             {error && showEditModal && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                 {error}
-              </div>
-            )}
-
-            {success && showEditModal && (
-              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                {success}
               </div>
             )}
 
@@ -584,6 +611,15 @@ export default function BrandsPage() {
           </div>
         </div>
       )}
+
+      <DeleteConfirmationDialog
+        isOpen={showDeleteDialog}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Brand"
+        description="Are you sure you want to delete this brand? This action cannot be undone."
+        isDeleting={isDeleting}
+      />
     </div>
   );
 }

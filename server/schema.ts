@@ -2,53 +2,6 @@ import { sqliteTable, integer, text, real } from 'drizzle-orm/sqlite-core';
 
 // System Tables
 
-// export const jobs = sqliteTable('jobs', {
-//   id: integer('id').primaryKey({ autoIncrement: true }),
-//   queue: text('queue').notNull(),
-//   payload: text('payload').notNull(),
-//   attempts: integer('attempts').notNull(),
-//   reservedAt: integer('reserved_at'),
-//   availableAt: integer('available_at').notNull(),
-//   createdAt: integer('created_at').notNull(),
-// });
-
-// export const failedJobs = sqliteTable('failed_jobs', {
-//   id: integer('id').primaryKey({ autoIncrement: true }),
-//   uuid: text('uuid').unique().notNull(),
-//   connection: text('connection').notNull(),
-//   queue: text('queue').notNull(),
-//   payload: text('payload').notNull(),
-//   exception: text('exception').notNull(),
-//   failedAt: text('failed_at').notNull(),
-// });
-
-// Users and Authentication
-export const users = sqliteTable('users', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  name: text('name').notNull(),
-  email: text('email').notNull().unique(),
-  emailVerifiedAt: text('email_verified_at'),
-  password: text('password').notNull(),
-  rememberToken: text('remember_token'),
-  createdAt: text('created_at'),
-  updatedAt: text('updated_at'),
-});
-
-// export const passwordResetTokens = sqliteTable('password_reset_tokens', {
-//   email: text('email').primaryKey(),
-//   token: text('token').notNull(),
-//   createdAt: text('created_at'),
-// });
-
-// export const sessions = sqliteTable('sessions', {
-//   id: text('id').primaryKey(),
-//   userId: integer('user_id').references(() => users.id),
-//   ipAddress: text('ip_address', { length: 45 }),
-//   userAgent: text('user_agent'),
-//   payload: text('payload').notNull(),
-//   lastActivity: integer('last_activity').notNull(),
-// });
-
 // Products and Related Tables
 export const products = sqliteTable('products', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -115,7 +68,7 @@ export const brands = sqliteTable('brands', {
 // Orders and Related Tables
 export const orders = sqliteTable('orders', {
   id: integer('id').primaryKey({ autoIncrement: true }),
-  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  //userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
   grandTotal: real('grand_total'), // Using real for decimal in SQLite
   paymentMethod: text('payment_method'),
   paymentStatus: text('payment_status'),

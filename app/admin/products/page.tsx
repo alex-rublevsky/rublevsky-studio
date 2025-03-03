@@ -13,6 +13,17 @@ import {
 } from "@/types";
 import Image from "next/image";
 import ProductVariationForm from "@/components/ui/admin/ProductVariationForm";
+import { getAllBrands } from "@/lib/actions/brands";
+import { getAllCategories } from "@/lib/actions/categories";
+import {
+  getAdminProducts,
+  getProductById,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+} from "@/lib/actions/products";
+import DeleteConfirmationDialog from "@/components/ui/admin/DeleteConfirmationDialog";
+import { toast } from "sonner";
 
 // Define the Variation interface to match the one in ProductVariationForm
 interface Variation {
@@ -67,7 +78,6 @@ export default function ProductsPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
@@ -79,6 +89,11 @@ export default function ProductsPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [variations, setVariations] = useState<Variation[]>([]);
   const [editVariations, setEditVariations] = useState<Variation[]>([]);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deletingProductId, setDeletingProductId] = useState<number | null>(
+    null
+  );
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     fetchProducts();
@@ -123,12 +138,9 @@ export default function ProductsPage() {
   const fetchProducts = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/admin/products");
-      if (!response.ok) {
-        throw new Error("Failed to fetch products");
-      }
-      const data = (await response.json()) as ProductsResponse;
-      setProducts(data.products || []);
+      // Use the server action instead of the API
+      const productsData = await getAdminProducts();
+      setProducts(productsData || []);
     } catch (err) {
       console.error("Error fetching products:", err);
     } finally {
@@ -138,12 +150,9 @@ export default function ProductsPage() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch("/api/admin/categories");
-      if (!response.ok) {
-        throw new Error("Failed to fetch categories");
-      }
-      const data = (await response.json()) as CategoriesResponse;
-      setCategories(data.categories || []);
+      // Use the server action instead of the API
+      const categoriesData = await getAllCategories();
+      setCategories(categoriesData || []);
     } catch (err) {
       console.error("Error fetching categories:", err);
     }
@@ -151,12 +160,9 @@ export default function ProductsPage() {
 
   const fetchBrands = async () => {
     try {
-      const response = await fetch("/api/admin/brands");
-      if (!response.ok) {
-        throw new Error("Failed to fetch brands");
-      }
-      const data = (await response.json()) as BrandsResponse;
-      setBrands(data.brands || []);
+      // Use the server action instead of the API
+      const brandsData = await getAllBrands();
+      setBrands(brandsData || []);
     } catch (err) {
       console.error("Error fetching brands:", err);
     }
@@ -228,7 +234,6 @@ export default function ProductsPage() {
     e.preventDefault();
     setIsSubmitting(true);
     setError("");
-    setSuccess("");
 
     // Convert variations to the format expected by the API
     const formattedVariations = variations.map((variation) => ({
@@ -249,20 +254,12 @@ export default function ProductsPage() {
     };
 
     try {
-      const response = await fetch("/api/admin/products", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(submissionData),
-      });
+      // Use the server action instead of the API
+      await createProduct(submissionData);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to add product");
-      }
+      // Replace success state with toast notification
+      toast.success("Product added successfully!");
 
-      setSuccess("Product added successfully!");
       setFormData({
         name: "",
         slug: "",
@@ -286,6 +283,8 @@ export default function ProductsPage() {
       fetchProducts();
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
+      // Add toast notification for error
+      toast.error(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsSubmitting(false);
     }
@@ -320,12 +319,15 @@ export default function ProductsPage() {
     let productVariations: Variation[] = [];
     if (product.hasVariations) {
       try {
-        const response = await fetch(`/api/admin/products/${product.id}`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data.product && data.product.variations) {
+        // Use the server action instead of the API
+        const productData = await getProductById(product.id);
+        if (productData && productData.hasVariations) {
+          // The Product type might not have variations property in the type definition
+          // but the server action adds it to the returned object
+          const productWithVariations = productData as any;
+          if (productWithVariations.variations) {
             // Map the database variations to the form data structure
-            productVariations = data.product.variations.map(
+            productVariations = productWithVariations.variations.map(
               (variation: any) => ({
                 id: variation.id.toString(),
                 sku: variation.sku,
@@ -357,7 +359,6 @@ export default function ProductsPage() {
 
     setIsSubmitting(true);
     setError("");
-    setSuccess("");
 
     // Convert variations to the format expected by the API
     const formattedVariations = editVariations.map((variation) => ({
@@ -378,20 +379,12 @@ export default function ProductsPage() {
     };
 
     try {
-      const response = await fetch(`/api/admin/products/${editingProductId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(submissionData),
-      });
+      // Use the server action instead of the API
+      await updateProduct(editingProductId, submissionData);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update product");
-      }
+      // Replace success state with toast notification
+      toast.success("Product updated successfully!");
 
-      setSuccess("Product updated successfully!");
       setShowEditModal(false);
       setIsEditMode(false);
       setEditingProductId(null);
@@ -420,6 +413,8 @@ export default function ProductsPage() {
       fetchProducts();
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
+      // Add toast notification for error
+      toast.error(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsSubmitting(false);
     }
@@ -451,7 +446,6 @@ export default function ProductsPage() {
     setEditVariations([]);
     setIsEditAutoSlug(false);
     setError("");
-    setSuccess("");
   };
 
   // Format price as Canadian dollars
@@ -509,6 +503,41 @@ export default function ProductsPage() {
     }));
   }, [editVariations]);
 
+  const handleDeleteClick = (product: Product) => {
+    setDeletingProductId(product.id);
+    setShowDeleteDialog(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deletingProductId) return;
+
+    setIsDeleting(true);
+    setError("");
+
+    try {
+      await deleteProduct(deletingProductId);
+
+      // Replace success state with toast notification
+      toast.success("Product deleted successfully!");
+
+      setShowDeleteDialog(false);
+      setDeletingProductId(null);
+      router.refresh();
+      fetchProducts();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+      // Add toast notification for error
+      toast.error(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteDialog(false);
+    setDeletingProductId(null);
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
@@ -521,12 +550,6 @@ export default function ProductsPage() {
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
             {error}
-          </div>
-        )}
-
-        {success && (
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-            {success}
           </div>
         )}
 
@@ -939,12 +962,20 @@ export default function ProductsPage() {
                       ).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <button
-                        onClick={() => handleEdit(product)}
-                        className="text-indigo-600 hover:text-indigo-900 mr-2"
-                      >
-                        Edit
-                      </button>
+                      <div className="flex justify-center space-x-2">
+                        <button
+                          onClick={() => handleEdit(product)}
+                          className="text-indigo-600 hover:text-indigo-900 mr-2"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteClick(product)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -983,12 +1014,6 @@ export default function ProductsPage() {
             {error && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                 {error}
-              </div>
-            )}
-
-            {success && (
-              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                {success}
               </div>
             )}
 
@@ -1259,6 +1284,16 @@ export default function ProductsPage() {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        isOpen={showDeleteDialog}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Product"
+        description="Are you sure you want to delete this product? This action cannot be undone."
+        isDeleting={isDeleting}
+      />
     </div>
   );
 }
