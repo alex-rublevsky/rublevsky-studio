@@ -15,11 +15,12 @@ interface BlogPostProps {
   body: string;
   images: string[];
   productSlug?: string | null;
+  slug: string;
 }
 
-function BlogPost({ title, body, images, productSlug }: BlogPostProps) {
+function BlogPost({ title, body, images, productSlug, slug }: BlogPostProps) {
   return (
-    <article className="max-w-2xl mx-auto">
+    <article id={`${slug}`} className="max-w-2xl mx-auto">
       <BlogPostImageGallery images={images} title={title} />
 
       <div className="sticky top-0">

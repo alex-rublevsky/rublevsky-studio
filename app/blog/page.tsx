@@ -28,6 +28,7 @@ export default async function Page() {
               body={post.body}
               images={imageArray}
               productSlug={post.productSlug}
+              slug={post.slug}
             />
           );
         })}

@@ -22,6 +22,7 @@ interface ProductWithDetails extends Product {
     title: string;
     slug: string;
     body: string;
+    blogUrl: string;
   } | null;
 }
 
@@ -72,7 +73,10 @@ export default async function getProductBySlug(slug: string): Promise<ProductWit
       .get();
     
     if (relatedBlogPost) {
-      formattedProduct.blogPost = relatedBlogPost;
+      formattedProduct.blogPost = {
+        ...relatedBlogPost,
+        blogUrl: `/blog#${relatedBlogPost.slug}`
+      };
       
       // If the product has no description or a placeholder description, use the blog post body
       if (!formattedProduct.description || formattedProduct.description === "Linked to blog post with the same slug") {

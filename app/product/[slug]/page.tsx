@@ -26,6 +26,7 @@ interface ProductWithDetails extends Product {
     title: string;
     slug: string;
     body: string;
+    blogUrl: string;
   } | null;
 }
 
@@ -324,7 +325,7 @@ export default function ProductPage() {
           <div className="mb-2">
             <span className="text-gray-500">Read more:</span>{" "}
             <Link
-              href={`/blog/${product.blogPost.slug}`}
+              href={product.blogPost.blogUrl}
               className="text-blue-600 hover:underline"
             >
               {product.blogPost.title}
