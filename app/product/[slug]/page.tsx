@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useParams } from "next/navigation";
 import { Product, ProductVariation, VariationAttribute } from "@/types";
+import getProductBySlug from "@/lib/actions/getProductBySlug";
 
 // Extended product interface with category, brand, and variations information
 interface ProductWithDetails extends Product {
@@ -40,7 +41,7 @@ export default function ProductPage() {
     Record<string, string>
   >({});
 
-  // Fetch product data
+  // Fetch product data using the server action
   useEffect(() => {
     const fetchProduct = async () => {
       if (!slug) {
@@ -50,25 +51,20 @@ export default function ProductPage() {
       }
 
       try {
-        const response = await fetch(`/api/store/product?slug=${slug}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch product");
-        }
+        // Use the server action instead of the API
+        const productData = await getProductBySlug(slug);
 
-        const data = await response.json();
-        if (!data.product) {
+        if (!productData) {
           setError("Product not found");
           setLoading(false);
           return;
         }
 
-        setProduct(data.product);
+        setProduct(productData);
 
         // Parse images from JSON string
         try {
-          const imageArray = JSON.parse(
-            data.product.images || "[]"
-          ) as string[];
+          const imageArray = JSON.parse(productData.images || "[]") as string[];
           if (imageArray.length > 0) {
             setSelectedImage(imageArray[0]);
           }
@@ -78,11 +74,11 @@ export default function ProductPage() {
 
         // If product has variations, select the first available one
         if (
-          data.product.hasVariations &&
-          data.product.variations &&
-          data.product.variations.length > 0
+          productData.hasVariations &&
+          productData.variations &&
+          productData.variations.length > 0
         ) {
-          const firstVariation = data.product.variations[0];
+          const firstVariation = productData.variations[0];
           setSelectedVariation(firstVariation);
 
           // Initialize selected attributes from the first variation

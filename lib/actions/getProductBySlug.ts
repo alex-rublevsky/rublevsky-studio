@@ -1,18 +1,28 @@
-import { NextResponse } from "next/server";
-import db from "../../../../server/db";
-import { products, categories, brands, productVariations, variationAttributes } from "../../../../server/schema";
-import { eq } from "drizzle-orm";
+'use server';
 
-export async function GET(request: Request) {
+import { eq } from "drizzle-orm";
+import db from "@/server/db";
+import { products, categories, brands, productVariations, variationAttributes } from "@/server/schema";
+import { Product } from "@/types";
+
+interface ProductWithDetails extends Product {
+  category?: {
+    id: number;
+    name: string;
+    slug: string;
+  } | null;
+  brand?: {
+    id: number;
+    name: string;
+    slug: string;
+  } | null;
+  variations?: any[];
+}
+
+export default async function getProductBySlug(slug: string): Promise<ProductWithDetails | null> {
   try {
-    const { searchParams } = new URL(request.url);
-    const slug = searchParams.get("slug");
-    
     if (!slug) {
-      return NextResponse.json(
-        { message: "Slug parameter is required" },
-        { status: 400 }
-      );
+      throw new Error("Slug parameter is required");
     }
     
     // Get product by slug with category and brand information
@@ -25,14 +35,11 @@ export async function GET(request: Request) {
       .get();
     
     if (!product) {
-      return NextResponse.json(
-        { message: "Product not found" },
-        { status: 404 }
-      );
+      return null;
     }
     
     // Format the response to include category and brand names
-    const formattedProduct = {
+    const formattedProduct: ProductWithDetails = {
       ...product.products,
       category: product.categories ? {
         id: product.categories.id,
@@ -68,15 +75,9 @@ export async function GET(request: Request) {
       formattedProduct.variations = variations;
     }
     
-    return NextResponse.json(
-      { product: formattedProduct },
-      { status: 200 }
-    );
+    return formattedProduct;
   } catch (error) {
     console.error("Error fetching product:", error);
-    return NextResponse.json(
-      { message: "Failed to fetch product", error: (error as Error).message },
-      { status: 500 }
-    );
+    throw new Error(`Failed to fetch product: ${(error as Error).message}`);
   }
-} 
+}

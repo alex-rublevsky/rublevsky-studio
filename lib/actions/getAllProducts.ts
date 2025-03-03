@@ -1,17 +1,24 @@
-import { NextResponse } from "next/server";
-import db from "../../../../server/db";
-import { products, categories, brands, productVariations, variationAttributes } from "../../../../server/schema";
+'use server';
+
 import { eq, desc, and } from "drizzle-orm";
+import db from "@/server/db";
+import { products, categories, brands, productVariations, variationAttributes } from "@/server/schema";
 import { Product } from "@/types";
 
-export async function GET(request: Request) {
+interface GetAllProductsOptions {
+  categorySlug?: string | null;
+  brandSlug?: string | null;
+  featured?: boolean;
+  limit?: number;
+}
+
+export default async function getAllProducts({
+  categorySlug = null,
+  brandSlug = null,
+  featured = false,
+  limit = 12
+}: GetAllProductsOptions = {}): Promise<Product[]> {
   try {
-    const { searchParams } = new URL(request.url);
-    const categorySlug = searchParams.get("category");
-    const brandSlug = searchParams.get("brand");
-    const featured = searchParams.get("featured") === "true";
-    const limit = parseInt(searchParams.get("limit") || "12");
-    
     // Build the query
     let query = db
       .select()
@@ -81,15 +88,9 @@ export async function GET(request: Request) {
       })
     );
     
-    return NextResponse.json(
-      { products: productsWithVariations },
-      { status: 200 }
-    );
+    return productsWithVariations;
   } catch (error) {
     console.error("Error fetching products:", error);
-    return NextResponse.json(
-      { message: "Failed to fetch products", error: (error as Error).message },
-      { status: 500 }
-    );
+    throw new Error(`Failed to fetch products: ${(error as Error).message}`);
   }
-} 
+}

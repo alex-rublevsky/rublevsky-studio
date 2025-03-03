@@ -174,7 +174,7 @@ export const blogPosts = sqliteTable('blog_posts', {
   title: text('title').notNull(),
   slug: text('slug').notNull().unique(),
   body: text('body').notNull(),
-  featuredImage: text('featured_image'),
+  images: text('images'),
   publishedAt: text('published_at'),
   lastEditedAt: text('last_edited_at'),
   createdAt: text('created_at'),

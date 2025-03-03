@@ -15,7 +15,9 @@
     "db:generate": "drizzle-kit generate",
     "db:studio": "drizzle-kit studio",
     "db:migrate:local": "wrangler d1 migrations apply rublevsky-studio-storage --local",
-    "db:migrate:prod": "wrangler d1 migrations apply rublevsky-studio-storage --remote"
+    "db:migrate:prod": "wrangler d1 migrations apply rublevsky-studio-storage --remote",
+    "db:seed": "tsx scripts/seedDatabase.ts",
+    "db:reset": "tsx scripts/resetDatabase.ts && pnpm db:generate && pnpm db:migrate:local"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
