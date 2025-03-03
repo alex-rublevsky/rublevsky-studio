@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "9c1dbfe6-eca0-4eb8-b587-277e1692fe22",
+  "id": "f2a882c2-2f6d-4c9d-b507-7fa834c5067d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "addresses": {
@@ -197,9 +197,9 @@
           "notNull": false,
           "autoincrement": false
         },
-        "product_id": {
-          "name": "product_id",
-          "type": "integer",
+        "product_slug": {
+          "name": "product_slug",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -283,19 +283,6 @@
           ],
           "onDelete": "set null",
           "onUpdate": "no action"
-        },
-        "blog_posts_product_id_products_id_fk": {
-          "name": "blog_posts_product_id_products_id_fk",
-          "tableFrom": "blog_posts",
-          "tableTo": "products",
-          "columnsFrom": [
-            "product_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -347,7 +334,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "'2025-03-03T01:51:26.667Z'"
+          "default": "'2025-03-03T02:28:11.242Z'"
         },
         "updated_at": {
           "name": "updated_at",
@@ -416,7 +403,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "'2025-03-03T01:51:26.666Z'"
+          "default": "'2025-03-03T02:28:11.240Z'"
         },
         "updated_at": {
           "name": "updated_at",

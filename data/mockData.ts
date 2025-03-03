@@ -23,6 +23,11 @@ export const mockBrands = [
     name: "Rublevsky Studio",
     slug: "rublevsky-studio",
     isActive: true,
+  },
+  {
+    name: "Yunnan Sourcing",
+    slug: "yunnan-sourcing",
+    isActive: true,
   }
 ];
 
@@ -100,7 +105,7 @@ export const mockBlogPosts = [
       "hranitel-4.jpg",
     ]),
     publishedAt: "2024-01-15",
-    productId: null, // This will be updated in the seeder script
+    productSlug: "guardian-2",
   },
   {
     title: "2005 Menghai 7542",
@@ -116,6 +121,6 @@ export const mockBlogPosts = [
     Effect: Grounding and centering, perfect for afternoon contemplation. The energy is steady and lasting, without any sharpness. 🍵✨`,
     images: JSON.stringify(["hranitel-2.jpg", "hranitel-4.jpg", "hranitel-6.jpg"]),
     publishedAt: "2024-01-10",
-    productId: null,
+    productSlug: null,
   },
 ]; 

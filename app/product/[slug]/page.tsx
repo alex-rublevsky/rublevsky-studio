@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useParams } from "next/navigation";
 import { Product, ProductVariation, VariationAttribute } from "@/types";
 import getProductBySlug from "@/lib/actions/getProductBySlug";
+import Link from "next/link";
 
 // Extended product interface with category, brand, and variations information
 interface ProductWithDetails extends Product {
@@ -20,6 +21,12 @@ interface ProductWithDetails extends Product {
     slug: string;
   } | null;
   variations?: ProductVariationWithAttributes[];
+  blogPost?: {
+    id: number;
+    title: string;
+    slug: string;
+    body: string;
+  } | null;
 }
 
 interface ProductVariationWithAttributes extends ProductVariation {
@@ -310,6 +317,25 @@ export default function ProductPage() {
     );
   }
 
+  const renderBlogPostLink = () => {
+    if (product?.blogPost) {
+      return (
+        <div className="border-t pt-4 mt-4">
+          <div className="mb-2">
+            <span className="text-gray-500">Read more:</span>{" "}
+            <Link
+              href={`/blog/${product.blogPost.slug}`}
+              className="text-blue-600 hover:underline"
+            >
+              {product.blogPost.title}
+            </Link>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <main className="min-h-screen flex flex-col lg:h-screen lg:overflow-hidden">
       <div className="flex-grow flex items-start justify-center">
@@ -530,6 +556,8 @@ export default function ProductPage() {
                   )}
                 </div>
               )}
+
+              {renderBlogPostLink()}
             </div>
           </div>
         </div>

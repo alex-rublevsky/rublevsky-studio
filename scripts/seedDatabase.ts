@@ -94,8 +94,6 @@ async function seedDatabase() {
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     
-    const productMap = new Map();
-    
     for (const product of mockProducts) {
       const categoryId = categoryMap.get(product.categorySlug);
       const brandId = brandMap.get(product.brandSlug);
@@ -105,12 +103,22 @@ async function seedDatabase() {
         continue;
       }
       
-      const result = insertProduct.run(
+      // Find matching blog post to use its body as product description if needed
+      let description = product.description;
+      if (description === 'Linked to blog post with the same slug') {
+        const matchingBlogPost = mockBlogPosts.find(post => post.slug === product.slug);
+        if (matchingBlogPost) {
+          description = matchingBlogPost.body;
+          console.log(`ℹ️ Using blog post body as description for product: ${product.name}`);
+        }
+      }
+      
+      insertProduct.run(
         categoryId,
         brandId,
         product.name,
         product.slug,
-        product.description,
+        description,
         product.images,
         product.price,
         product.isActive ? 1 : 0,
@@ -125,7 +133,6 @@ async function seedDatabase() {
         new Date().toISOString()
       );
       
-      productMap.set(product.slug, result.lastInsertRowid);
       console.log(`✅ Added product: ${product.name}`);
     }
     
@@ -135,36 +142,27 @@ async function seedDatabase() {
     console.log('🗑️ Cleared existing blog posts');
     
     const insertBlogPost = db.prepare(`
-      INSERT INTO blog_posts (title, slug, body, images, product_id, published_at, created_at, updated_at)
+      INSERT INTO blog_posts (
+        title, slug, body, images, product_slug, 
+        published_at, created_at, updated_at
+      )
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `);
     
     for (const post of mockBlogPosts) {
-      // Check if there's a product with the same slug
-      const productId = productMap.get(post.slug) || null;
-      
       insertBlogPost.run(
         post.title,
         post.slug,
         post.body,
         post.images,
-        productId,
+        post.productSlug,
         post.publishedAt,
         new Date().toISOString(),
         new Date().toISOString()
       );
       
-      if (productId) {
-        console.log(`✅ Added blog post: ${post.title} (linked to product)`);
-        
-        // Update the product description to use the blog post body
-        db.prepare(`
-          UPDATE products 
-          SET description = ? 
-          WHERE id = ?
-        `).run(post.body, productId);
-        
-        console.log(`✅ Updated product description from blog post: ${post.title}`);
+      if (post.productSlug) {
+        console.log(`✅ Added blog post: ${post.title} (linked to product: ${post.productSlug})`);
       } else {
         console.log(`✅ Added blog post: ${post.title}`);
       }

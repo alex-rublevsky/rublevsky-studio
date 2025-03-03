@@ -170,7 +170,7 @@ export const blogCategories = sqliteTable('blog_categories', {
 export const blogPosts = sqliteTable('blog_posts', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   blogCategoryId: integer('blog_category_id').references(() => blogCategories.id, { onDelete: 'set null' }),
-  productId: integer('product_id').references(() => products.id, { onDelete: 'set null' }),
+  productSlug: text('product_slug'),
   title: text('title').notNull(),
   slug: text('slug').notNull().unique(),
   body: text('body').notNull(),

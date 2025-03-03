@@ -28,7 +28,7 @@ CREATE UNIQUE INDEX `blog_categories_slug_unique` ON `blog_categories` (`slug`);
 CREATE TABLE `blog_posts` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`blog_category_id` integer,
-	`product_id` integer,
+	`product_slug` text,
 	`title` text NOT NULL,
 	`slug` text NOT NULL,
 	`body` text NOT NULL,
@@ -37,8 +37,7 @@ CREATE TABLE `blog_posts` (
 	`last_edited_at` text,
 	`created_at` text,
 	`updated_at` text,
-	FOREIGN KEY (`blog_category_id`) REFERENCES `blog_categories`(`id`) ON UPDATE no action ON DELETE set null,
-	FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON UPDATE no action ON DELETE set null
+	FOREIGN KEY (`blog_category_id`) REFERENCES `blog_categories`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `blog_posts_slug_unique` ON `blog_posts` (`slug`);--> statement-breakpoint
@@ -48,7 +47,7 @@ CREATE TABLE `brands` (
 	`slug` text NOT NULL,
 	`image` text,
 	`is_active` integer DEFAULT true NOT NULL,
-	`created_at` text DEFAULT '2025-03-03T01:51:26.667Z' NOT NULL,
+	`created_at` text DEFAULT '2025-03-03T02:28:11.242Z' NOT NULL,
 	`updated_at` text
 );
 --> statement-breakpoint
@@ -59,7 +58,7 @@ CREATE TABLE `categories` (
 	`slug` text NOT NULL,
 	`image` text,
 	`is_active` integer DEFAULT true NOT NULL,
-	`created_at` text DEFAULT '2025-03-03T01:51:26.666Z' NOT NULL,
+	`created_at` text DEFAULT '2025-03-03T02:28:11.240Z' NOT NULL,
 	`updated_at` text
 );
 --> statement-breakpoint

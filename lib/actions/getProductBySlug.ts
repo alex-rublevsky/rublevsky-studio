@@ -2,7 +2,7 @@
 
 import { eq } from "drizzle-orm";
 import db from "@/server/db";
-import { products, categories, brands, productVariations, variationAttributes } from "@/server/schema";
+import { products, categories, brands, productVariations, variationAttributes, blogPosts } from "@/server/schema";
 import { Product } from "@/types";
 
 interface ProductWithDetails extends Product {
@@ -17,6 +17,12 @@ interface ProductWithDetails extends Product {
     slug: string;
   } | null;
   variations?: any[];
+  blogPost?: {
+    id: number;
+    title: string;
+    slug: string;
+    body: string;
+  } | null;
 }
 
 export default async function getProductBySlug(slug: string): Promise<ProductWithDetails | null> {
@@ -52,6 +58,27 @@ export default async function getProductBySlug(slug: string): Promise<ProductWit
         slug: product.brands.slug
       } : null
     };
+    
+    // Look for a related blog post using productSlug
+    const relatedBlogPost = await db
+      .select({
+        id: blogPosts.id,
+        title: blogPosts.title,
+        slug: blogPosts.slug,
+        body: blogPosts.body
+      })
+      .from(blogPosts)
+      .where(eq(blogPosts.productSlug, slug))
+      .get();
+    
+    if (relatedBlogPost) {
+      formattedProduct.blogPost = relatedBlogPost;
+      
+      // If the product has no description or a placeholder description, use the blog post body
+      if (!formattedProduct.description || formattedProduct.description === "Linked to blog post with the same slug") {
+        formattedProduct.description = relatedBlogPost.body;
+      }
+    }
     
     // If product has variations, fetch them
     if (formattedProduct.hasVariations) {

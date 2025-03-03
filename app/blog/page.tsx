@@ -1,3 +1,4 @@
+import Link from "next/link";
 import BlogPost from "@/components/ui/blog/blogPost";
 import getAllBlogPosts from "@/lib/actions/getAllBlogPosts";
 import { BlogPost as BlogPostType } from "@/types";
@@ -16,7 +17,7 @@ export default async function Page() {
       </div>
 
       <div className="space-y-32">
-        {blogPosts.map((post: BlogPostType) => {
+        {blogPosts.map((post) => {
           // Parse the images string into an array or use an empty array if null
           const imageArray = post.images ? JSON.parse(post.images) : [];
 
@@ -26,6 +27,7 @@ export default async function Page() {
               title={post.title}
               body={post.body}
               images={imageArray}
+              productSlug={post.productSlug}
             />
           );
         })}
