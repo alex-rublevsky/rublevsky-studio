@@ -4,7 +4,6 @@ import {
   brands,
   productVariations,
   variationAttributes,
-  users,
   orders,
   orderItems,
   addresses,
@@ -43,10 +42,6 @@ export type NewProductVariation = InferInsertModel<typeof productVariations>;
 // Variation Attributes
 export type VariationAttribute = InferSelectModel<typeof variationAttributes>;
 export type NewVariationAttribute = InferInsertModel<typeof variationAttributes>;
-
-// Users
-export type User = InferSelectModel<typeof users>;
-export type NewUser = InferInsertModel<typeof users>;
 
 // Orders
 export type Order = InferSelectModel<typeof orders>;
@@ -115,8 +110,18 @@ export interface CategoryFormData {
 export interface BrandFormData {
   name: string;
   slug: string;
-  image: string;
+  logo: string;
   isActive: boolean;
+}
+
+export interface BlogPostFormData {
+  title: string;
+  slug: string;
+  body: string;
+  blogCategorySlug: string;
+  productSlug?: string;
+  images?: string;
+  publishedAt?: string;
 }
 
 // API Response Types

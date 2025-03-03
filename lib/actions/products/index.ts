@@ -6,6 +6,7 @@ import createProduct from './createProduct';
 import updateProduct from './updateProduct';
 import deleteProduct from './deleteProduct';
 import getProductAttributes from './getProductAttributes';
+import getProductsForSelection from './getProductsForSelection';
 
 export {
   getAllProducts,
@@ -15,5 +16,6 @@ export {
   createProduct,
   updateProduct,
   deleteProduct,
-  getProductAttributes
+  getProductAttributes,
+  getProductsForSelection
 }; 

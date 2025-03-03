@@ -15,6 +15,7 @@ export default function AdminLayout({
     { name: "Products", path: "/admin/products" },
     { name: "Categories", path: "/admin/categories" },
     { name: "Brands", path: "/admin/brands" },
+    { name: "Blog", path: "/admin/blog" },
     { name: "Orders", path: "/admin/orders" },
     { name: "Customers", path: "/admin/customers" },
   ];
@@ -25,11 +26,6 @@ export default function AdminLayout({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex">
-              <div className="flex-shrink-0 flex items-center">
-                <Link href="/" className="text-xl font-bold text-gray-800">
-                  Admin Panel
-                </Link>
-              </div>
               <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
                 {adminLinks.map((item) => (
                   <Link

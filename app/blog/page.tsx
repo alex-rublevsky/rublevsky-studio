@@ -1,6 +1,6 @@
 import Link from "next/link";
 import BlogPost from "@/components/ui/blog/blogPost";
-import getAllBlogPosts from "@/lib/actions/getAllBlogPosts";
+import getAllBlogPosts from "@/lib/actions/blog/getAllBlogPosts";
 import { BlogPost as BlogPostType } from "@/types";
 
 // Force this page to be dynamically rendered
