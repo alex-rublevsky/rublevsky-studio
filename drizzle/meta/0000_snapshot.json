@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "f2a882c2-2f6d-4c9d-b507-7fa834c5067d",
+  "id": "b3c5b17b-79f6-40c7-bf9b-02d62619d9da",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "addresses": {
@@ -190,9 +190,9 @@
           "notNull": true,
           "autoincrement": true
         },
-        "blog_category_id": {
-          "name": "blog_category_id",
-          "type": "integer",
+        "blog_category_slug": {
+          "name": "blog_category_slug",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -271,15 +271,28 @@
         }
       },
       "foreignKeys": {
-        "blog_posts_blog_category_id_blog_categories_id_fk": {
-          "name": "blog_posts_blog_category_id_blog_categories_id_fk",
+        "blog_posts_blog_category_slug_blog_categories_slug_fk": {
+          "name": "blog_posts_blog_category_slug_blog_categories_slug_fk",
           "tableFrom": "blog_posts",
           "tableTo": "blog_categories",
           "columnsFrom": [
-            "blog_category_id"
+            "blog_category_slug"
           ],
           "columnsTo": [
-            "id"
+            "slug"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "blog_posts_product_slug_products_slug_fk": {
+          "name": "blog_posts_product_slug_products_slug_fk",
+          "tableFrom": "blog_posts",
+          "tableTo": "products",
+          "columnsFrom": [
+            "product_slug"
+          ],
+          "columnsTo": [
+            "slug"
           ],
           "onDelete": "set null",
           "onUpdate": "no action"
@@ -334,7 +347,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "'2025-03-03T02:28:11.242Z'"
+          "default": "'2025-03-03T16:43:50.114Z'"
         },
         "updated_at": {
           "name": "updated_at",
@@ -403,7 +416,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "'2025-03-03T02:28:11.240Z'"
+          "default": "'2025-03-03T16:43:50.113Z'"
         },
         "updated_at": {
           "name": "updated_at",
@@ -829,16 +842,16 @@
           "notNull": true,
           "autoincrement": true
         },
-        "category_id": {
-          "name": "category_id",
-          "type": "integer",
+        "category_slug": {
+          "name": "category_slug",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "brand_id": {
-          "name": "brand_id",
-          "type": "integer",
+        "brand_slug": {
+          "name": "brand_slug",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -967,28 +980,28 @@
         }
       },
       "foreignKeys": {
-        "products_category_id_categories_id_fk": {
-          "name": "products_category_id_categories_id_fk",
+        "products_category_slug_categories_slug_fk": {
+          "name": "products_category_slug_categories_slug_fk",
           "tableFrom": "products",
           "tableTo": "categories",
           "columnsFrom": [
-            "category_id"
+            "category_slug"
           ],
           "columnsTo": [
-            "id"
+            "slug"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "products_brand_id_brands_id_fk": {
-          "name": "products_brand_id_brands_id_fk",
+        "products_brand_slug_brands_slug_fk": {
+          "name": "products_brand_slug_brands_slug_fk",
           "tableFrom": "products",
           "tableTo": "brands",
           "columnsFrom": [
-            "brand_id"
+            "brand_slug"
           ],
           "columnsTo": [
-            "id"
+            "slug"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"

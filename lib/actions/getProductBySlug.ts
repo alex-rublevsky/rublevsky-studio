@@ -7,12 +7,10 @@ import { Product } from "@/types";
 
 interface ProductWithDetails extends Product {
   category?: {
-    id: number;
     name: string;
     slug: string;
   } | null;
   brand?: {
-    id: number;
     name: string;
     slug: string;
   } | null;
@@ -34,11 +32,21 @@ export default async function getProductBySlug(slug: string): Promise<ProductWit
     
     // Get product by slug with category and brand information
     const product = await db
-      .select()
+      .select({
+        products: products,
+        categories: {
+          name: categories.name,
+          slug: categories.slug
+        },
+        brands: {
+          name: brands.name,
+          slug: brands.slug
+        }
+      })
       .from(products)
       .where(eq(products.slug, slug))
-      .leftJoin(categories, eq(products.categoryId, categories.id))
-      .leftJoin(brands, eq(products.brandId, brands.id))
+      .leftJoin(categories, eq(products.categorySlug, categories.slug))
+      .leftJoin(brands, eq(products.brandSlug, brands.slug))
       .get();
     
     if (!product) {
@@ -49,12 +57,10 @@ export default async function getProductBySlug(slug: string): Promise<ProductWit
     const formattedProduct: ProductWithDetails = {
       ...product.products,
       category: product.categories ? {
-        id: product.categories.id,
         name: product.categories.name,
         slug: product.categories.slug
       } : null,
       brand: product.brands ? {
-        id: product.brands.id,
         name: product.brands.name,
         slug: product.brands.slug
       } : null
@@ -78,10 +84,8 @@ export default async function getProductBySlug(slug: string): Promise<ProductWit
         blogUrl: `/blog#${relatedBlogPost.slug}`
       };
       
-      // If the product has no description or a placeholder description, use the blog post body
-      if (!formattedProduct.description || formattedProduct.description === "Linked to blog post with the same slug") {
-        formattedProduct.description = relatedBlogPost.body;
-      }
+      // Always use blog post body as description when available
+      formattedProduct.description = relatedBlogPost.body;
     }
     
     // If product has variations, fetch them

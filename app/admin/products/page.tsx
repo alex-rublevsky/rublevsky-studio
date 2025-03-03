@@ -36,8 +36,8 @@ export default function ProductsPage() {
     slug: "",
     description: "",
     price: "",
-    categoryId: "",
-    brandId: "",
+    categorySlug: "",
+    brandSlug: "",
     stock: "0",
     isActive: true,
     isFeatured: false,
@@ -53,8 +53,8 @@ export default function ProductsPage() {
     slug: "",
     description: "",
     price: "",
-    categoryId: "",
-    brandId: "",
+    categorySlug: "",
+    brandSlug: "",
     stock: "0",
     isActive: true,
     isFeatured: false,
@@ -268,8 +268,8 @@ export default function ProductsPage() {
         slug: "",
         description: "",
         price: "",
-        categoryId: "",
-        brandId: "",
+        categorySlug: "",
+        brandSlug: "",
         stock: "0",
         isActive: true,
         isFeatured: false,
@@ -293,6 +293,28 @@ export default function ProductsPage() {
 
   const handleEdit = async (product: Product) => {
     setEditingProductId(product.id);
+    setShowEditModal(true);
+    setIsEditMode(true);
+    setIsEditAutoSlug(false);
+
+    // Update to use slugs
+    setEditFormData({
+      name: product.name,
+      slug: product.slug,
+      description: product.description || "",
+      price: product.price.toString(),
+      categorySlug: product.categorySlug || "",
+      brandSlug: product.brandSlug || "",
+      stock: product.stock.toString(),
+      isActive: product.isActive,
+      isFeatured: product.isFeatured,
+      onSale: product.onSale,
+      hasVariations: product.hasVariations,
+      hasVolume: product.hasVolume,
+      volume: product.volume || "",
+      images: product.images || "",
+      variations: [],
+    });
 
     // Fetch product variations if the product has variations
     let productVariations: Variation[] = [];
@@ -325,30 +347,8 @@ export default function ProductsPage() {
       }
     }
 
-    // Update the edit form data instead of the main form data
-    setEditFormData({
-      name: product.name,
-      slug: product.slug,
-      description: product.description || "",
-      price: product.price.toString(),
-      categoryId: product.categoryId ? product.categoryId.toString() : "",
-      brandId: product.brandId ? product.brandId.toString() : "",
-      stock: product.stock.toString(),
-      isActive: product.isActive,
-      isFeatured: product.isFeatured,
-      onSale: product.onSale,
-      hasVariations: product.hasVariations,
-      hasVolume: product.hasVolume,
-      volume: product.volume || "",
-      images: product.images || "",
-      variations: [],
-    });
-
     // Update the edit variations instead of the main variations
     setEditVariations(productVariations);
-    setIsEditAutoSlug(false);
-    setIsEditMode(true);
-    setShowEditModal(true);
   };
 
   const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -401,8 +401,8 @@ export default function ProductsPage() {
         slug: "",
         description: "",
         price: "",
-        categoryId: "",
-        brandId: "",
+        categorySlug: "",
+        brandSlug: "",
         stock: "0",
         isActive: true,
         isFeatured: false,
@@ -435,8 +435,8 @@ export default function ProductsPage() {
       slug: "",
       description: "",
       price: "",
-      categoryId: "",
-      brandId: "",
+      categorySlug: "",
+      brandSlug: "",
       stock: "0",
       isActive: true,
       isFeatured: false,
@@ -640,14 +640,14 @@ export default function ProductsPage() {
                 Category
               </label>
               <select
-                name="categoryId"
-                value={formData.categoryId}
+                name="categorySlug"
+                value={formData.categorySlug}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Select a category</option>
                 {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
+                  <option key={category.slug} value={category.slug}>
                     {category.name}
                   </option>
                 ))}
@@ -659,14 +659,14 @@ export default function ProductsPage() {
                 Brand
               </label>
               <select
-                name="brandId"
-                value={formData.brandId}
+                name="brandSlug"
+                value={formData.brandSlug}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Select a brand</option>
                 {brands.map((brand) => (
-                  <option key={brand.id} value={brand.id}>
+                  <option key={brand.slug} value={brand.slug}>
                     {brand.name}
                   </option>
                 ))}
@@ -1099,14 +1099,14 @@ export default function ProductsPage() {
                     Category
                   </label>
                   <select
-                    name="categoryId"
-                    value={editFormData.categoryId}
+                    name="categorySlug"
+                    value={editFormData.categorySlug}
                     onChange={handleEditChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Select a category</option>
                     {categories.map((category) => (
-                      <option key={category.id} value={category.id}>
+                      <option key={category.slug} value={category.slug}>
                         {category.name}
                       </option>
                     ))}
@@ -1118,14 +1118,14 @@ export default function ProductsPage() {
                     Brand
                   </label>
                   <select
-                    name="brandId"
-                    value={editFormData.brandId}
+                    name="brandSlug"
+                    value={editFormData.brandSlug}
                     onChange={handleEditChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Select a brand</option>
                     {brands.map((brand) => (
-                      <option key={brand.id} value={brand.id}>
+                      <option key={brand.slug} value={brand.slug}>
                         {brand.name}
                       </option>
                     ))}

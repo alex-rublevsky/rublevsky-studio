@@ -98,11 +98,6 @@ export const mockBlogPosts = [
     
     Effect Focuses attention, gathers the mind, and energizes the body — a perfect balance! Some deeply immersive ambient for an attentive and meditative tea ritual 🎶`,
     images: JSON.stringify([
-      "hranitel-6.jpg",
-      "hranitel-3.jpg",
-      "hranitel-1.jpg",
-      "hranitel-2.jpg",
-      "hranitel-4.jpg",
     ]),
     publishedAt: "2024-01-15",
     productSlug: "guardian-2",

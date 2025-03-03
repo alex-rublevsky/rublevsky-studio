@@ -11,12 +11,10 @@ import Link from "next/link";
 // Extended product interface with category, brand, and variations information
 interface ProductWithDetails extends Product {
   category?: {
-    id: number;
     name: string;
     slug: string;
   } | null;
   brand?: {
-    id: number;
     name: string;
     slug: string;
   } | null;
@@ -541,7 +539,7 @@ export default function ProductPage() {
               </div>
 
               {/* Category and Brand */}
-              {(product.categoryId || product.brandId) && (
+              {(product.category || product.brand) && (
                 <div className="border-t pt-4 mt-4">
                   {product.category && (
                     <div className="mb-2">

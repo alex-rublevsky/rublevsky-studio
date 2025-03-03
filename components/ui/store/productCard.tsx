@@ -248,7 +248,19 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
   };
 
   // Parse images from JSON string
-  const images = product.images ? JSON.parse(product.images) : [];
+  let images: string[] = [];
+  try {
+    if (product.images) {
+      // Handle both regular JSON strings and double-escaped JSON strings
+      const imagesStr = product.images.replace(/\\"/g, '"');
+      const parsed = JSON.parse(imagesStr);
+      images = Array.isArray(parsed) ? parsed : [];
+    }
+  } catch (error) {
+    console.error("Error parsing product images:", error);
+    images = [];
+  }
+
   const availableStock = getAvailableStock();
   const isAvailable = canAddToCart();
   const currentPrice = selectedVariation

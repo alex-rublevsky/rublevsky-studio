@@ -52,8 +52,8 @@ export const users = sqliteTable('users', {
 // Products and Related Tables
 export const products = sqliteTable('products', {
   id: integer('id').primaryKey({ autoIncrement: true }),
-  categoryId: integer('category_id').references(() => categories.id, { onDelete: 'cascade' }),
-  brandId: integer('brand_id').references(() => brands.id, { onDelete: 'cascade' }),
+  categorySlug: text('category_slug').references(() => categories.slug, { onDelete: 'cascade' }),
+  brandSlug: text('brand_slug').references(() => brands.slug, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   slug: text('slug').notNull().unique(),
   images: text('images'), // JSON stored as text
@@ -169,8 +169,8 @@ export const blogCategories = sqliteTable('blog_categories', {
 
 export const blogPosts = sqliteTable('blog_posts', {
   id: integer('id').primaryKey({ autoIncrement: true }),
-  blogCategoryId: integer('blog_category_id').references(() => blogCategories.id, { onDelete: 'set null' }),
-  productSlug: text('product_slug'),
+  blogCategorySlug: text('blog_category_slug').references(() => blogCategories.slug, { onDelete: 'set null' }),
+  productSlug: text('product_slug').references(() => products.slug, { onDelete: 'set null' }),
   title: text('title').notNull(),
   slug: text('slug').notNull().unique(),
   body: text('body').notNull(),

@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import db from "../../../../server/db";
 import { brands } from "../../../../server/schema";
 
+// Force this API route to be dynamically rendered
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const allBrands = await db.select().from(brands).all();

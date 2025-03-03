@@ -27,7 +27,7 @@ CREATE TABLE `blog_categories` (
 CREATE UNIQUE INDEX `blog_categories_slug_unique` ON `blog_categories` (`slug`);--> statement-breakpoint
 CREATE TABLE `blog_posts` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`blog_category_id` integer,
+	`blog_category_slug` text,
 	`product_slug` text,
 	`title` text NOT NULL,
 	`slug` text NOT NULL,
@@ -37,7 +37,8 @@ CREATE TABLE `blog_posts` (
 	`last_edited_at` text,
 	`created_at` text,
 	`updated_at` text,
-	FOREIGN KEY (`blog_category_id`) REFERENCES `blog_categories`(`id`) ON UPDATE no action ON DELETE set null
+	FOREIGN KEY (`blog_category_slug`) REFERENCES `blog_categories`(`slug`) ON UPDATE no action ON DELETE set null,
+	FOREIGN KEY (`product_slug`) REFERENCES `products`(`slug`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `blog_posts_slug_unique` ON `blog_posts` (`slug`);--> statement-breakpoint
@@ -47,7 +48,7 @@ CREATE TABLE `brands` (
 	`slug` text NOT NULL,
 	`image` text,
 	`is_active` integer DEFAULT true NOT NULL,
-	`created_at` text DEFAULT '2025-03-03T02:28:11.242Z' NOT NULL,
+	`created_at` text DEFAULT '2025-03-03T16:43:50.114Z' NOT NULL,
 	`updated_at` text
 );
 --> statement-breakpoint
@@ -58,7 +59,7 @@ CREATE TABLE `categories` (
 	`slug` text NOT NULL,
 	`image` text,
 	`is_active` integer DEFAULT true NOT NULL,
-	`created_at` text DEFAULT '2025-03-03T02:28:11.240Z' NOT NULL,
+	`created_at` text DEFAULT '2025-03-03T16:43:50.113Z' NOT NULL,
 	`updated_at` text
 );
 --> statement-breakpoint
@@ -122,8 +123,8 @@ CREATE TABLE `product_variations` (
 CREATE UNIQUE INDEX `product_variations_sku_unique` ON `product_variations` (`sku`);--> statement-breakpoint
 CREATE TABLE `products` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`category_id` integer,
-	`brand_id` integer,
+	`category_slug` text,
+	`brand_slug` text,
 	`name` text NOT NULL,
 	`slug` text NOT NULL,
 	`images` text,
@@ -139,8 +140,8 @@ CREATE TABLE `products` (
 	`unlimited_stock` integer DEFAULT false NOT NULL,
 	`created_at` text,
 	`updated_at` text,
-	FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`brand_id`) REFERENCES `brands`(`id`) ON UPDATE no action ON DELETE cascade
+	FOREIGN KEY (`category_slug`) REFERENCES `categories`(`slug`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`brand_slug`) REFERENCES `brands`(`slug`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `products_slug_unique` ON `products` (`slug`);--> statement-breakpoint
