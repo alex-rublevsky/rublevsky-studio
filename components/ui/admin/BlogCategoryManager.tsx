@@ -260,7 +260,7 @@ export default function BlogCategoryManager() {
   };
 
   return (
-    <div className="bg-white p-6 rounded shadow">
+    <div className="bg-card p-6 rounded shadow border border-border">
       <h2 className="text-xl font-semibold mb-4">Blog Categories</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -269,14 +269,14 @@ export default function BlogCategoryManager() {
           <h3 className="text-lg font-medium mb-3">Add New Category</h3>
 
           {error && !showEditModal && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <div className="bg-destructive/20 border border-destructive text-destructive-foreground px-4 py-3 rounded mb-4">
               {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
-              <label className="block text-gray-700 mb-2" htmlFor="name">
+              <label className="block mb-2" htmlFor="name">
                 Name
               </label>
               <input
@@ -285,13 +285,13 @@ export default function BlogCategoryManager() {
                 name="name"
                 value={createFormData.name}
                 onChange={handleCreateChange}
-                className="w-full px-3 py-2 border rounded"
+                className="w-full px-3 py-2 bg-muted border border-input rounded"
                 required
               />
             </div>
 
             <div className="mb-4">
-              <label className="block text-gray-700 mb-2" htmlFor="slug">
+              <label className="block mb-2" htmlFor="slug">
                 Slug
               </label>
               <input
@@ -300,7 +300,7 @@ export default function BlogCategoryManager() {
                 name="slug"
                 value={createFormData.slug}
                 onChange={handleCreateChange}
-                className="w-full px-3 py-2 border rounded"
+                className="w-full px-3 py-2 bg-muted border border-input rounded"
                 required
               />
             </div>
@@ -314,13 +314,13 @@ export default function BlogCategoryManager() {
                   onChange={handleCreateChange}
                   className="mr-2"
                 />
-                <span className="text-gray-700">Active</span>
+                <span>Active</span>
               </label>
             </div>
 
             <button
               type="submit"
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              className="bg-primary text-primary-foreground px-4 py-2 rounded hover:bg-primary/90"
               disabled={isSubmitting}
             >
               {isSubmitting ? "Adding..." : "Add Category"}
@@ -333,24 +333,24 @@ export default function BlogCategoryManager() {
           <h3 className="text-lg font-medium mb-3">Existing Categories</h3>
 
           {isLoading ? (
-            <p>Loading categories...</p>
+            <p className="text-muted-foreground">Loading categories...</p>
           ) : categories.length === 0 ? (
-            <p>No categories found.</p>
+            <p className="text-muted-foreground">No categories found.</p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full bg-white">
+              <table className="min-w-full">
                 <thead>
                   <tr>
-                    <th className="px-4 py-2 border-b-2 border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th className="px-4 py-2 border-b border-border text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       Name
                     </th>
-                    <th className="px-4 py-2 border-b-2 border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th className="px-4 py-2 border-b border-border text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       Slug
                     </th>
-                    <th className="px-4 py-2 border-b-2 border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th className="px-4 py-2 border-b border-border text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-4 py-2 border-b-2 border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th className="px-4 py-2 border-b border-border text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -358,34 +358,34 @@ export default function BlogCategoryManager() {
                 <tbody>
                   {categories.map((category) => (
                     <tr key={category.id}>
-                      <td className="px-4 py-2 border-b border-gray-200 text-sm">
+                      <td className="px-4 py-2 border-b border-border text-sm">
                         {category.name}
                       </td>
-                      <td className="px-4 py-2 border-b border-gray-200 text-sm">
+                      <td className="px-4 py-2 border-b border-border text-sm">
                         {category.slug}
                       </td>
-                      <td className="px-4 py-2 border-b border-gray-200 text-sm">
+                      <td className="px-4 py-2 border-b border-border text-sm">
                         <span
                           className={`inline-block px-2 py-1 text-xs font-semibold rounded ${
                             category.isActive
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
+                              ? "bg-green-900 text-green-100"
+                              : "bg-red-900 text-red-100"
                           }`}
                         >
                           {category.isActive ? "Active" : "Inactive"}
                         </span>
                       </td>
-                      <td className="px-4 py-2 border-b border-gray-200 text-sm">
+                      <td className="px-4 py-2 border-b border-border text-sm">
                         <div className="flex space-x-2">
                           <button
                             onClick={() => handleEdit(category)}
-                            className="text-blue-600 hover:text-blue-900"
+                            className="text-blue-400 hover:text-blue-300"
                           >
                             Edit
                           </button>
                           <button
                             onClick={() => handleDeleteClick(category)}
-                            className="text-red-600 hover:text-red-900"
+                            className="text-destructive hover:text-destructive/80"
                           >
                             Delete
                           </button>
@@ -402,27 +402,27 @@ export default function BlogCategoryManager() {
 
       {/* Edit Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded shadow-lg w-full max-w-md">
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-card p-6 rounded shadow-lg w-full max-w-md border border-border">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">Edit Category</h2>
               <button
                 onClick={closeEditModal}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-muted-foreground hover:text-foreground"
               >
                 ✕
               </button>
             </div>
 
             {error && showEditModal && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+              <div className="bg-destructive/20 border border-destructive text-destructive-foreground px-4 py-3 rounded mb-4">
                 {error}
               </div>
             )}
 
             <form onSubmit={handleUpdate}>
               <div className="mb-4">
-                <label className="block text-gray-700 mb-2" htmlFor="edit-name">
+                <label className="block mb-2" htmlFor="edit-name">
                   Name
                 </label>
                 <input
@@ -431,13 +431,13 @@ export default function BlogCategoryManager() {
                   name="name"
                   value={editFormData.name}
                   onChange={handleEditChange}
-                  className="w-full px-3 py-2 border rounded"
+                  className="w-full px-3 py-2 bg-muted border border-input rounded"
                   required
                 />
               </div>
 
               <div className="mb-4">
-                <label className="block text-gray-700 mb-2" htmlFor="edit-slug">
+                <label className="block mb-2" htmlFor="edit-slug">
                   Slug
                 </label>
                 <input
@@ -446,7 +446,7 @@ export default function BlogCategoryManager() {
                   name="slug"
                   value={editFormData.slug}
                   onChange={handleEditChange}
-                  className="w-full px-3 py-2 border rounded"
+                  className="w-full px-3 py-2 bg-muted border border-input rounded"
                   required
                 />
               </div>
@@ -460,7 +460,7 @@ export default function BlogCategoryManager() {
                     onChange={handleEditChange}
                     className="mr-2"
                   />
-                  <span className="text-gray-700">Active</span>
+                  <span>Active</span>
                 </label>
               </div>
 
@@ -468,13 +468,13 @@ export default function BlogCategoryManager() {
                 <button
                   type="button"
                   onClick={closeEditModal}
-                  className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
+                  className="bg-secondary text-secondary-foreground px-4 py-2 rounded hover:bg-secondary/80"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                  className="bg-primary text-primary-foreground px-4 py-2 rounded hover:bg-primary/90"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? "Updating..." : "Update Category"}
@@ -487,8 +487,8 @@ export default function BlogCategoryManager() {
 
       {/* First Delete Confirmation Dialog */}
       {showDeleteDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded shadow-lg w-full max-w-md">
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-card p-6 rounded shadow-lg w-full max-w-md border border-border">
             <h2 className="text-xl font-semibold mb-4">Delete Category</h2>
             <p className="mb-6">
               Are you sure you want to delete this category? This action cannot
@@ -497,13 +497,13 @@ export default function BlogCategoryManager() {
             <div className="flex justify-end space-x-2">
               <button
                 onClick={handleDeleteCancel}
-                className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
+                className="bg-secondary text-secondary-foreground px-4 py-2 rounded hover:bg-secondary/80"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteConfirm}
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                className="bg-destructive text-destructive-foreground px-4 py-2 rounded hover:bg-destructive/90"
               >
                 Delete
               </button>
@@ -514,10 +514,10 @@ export default function BlogCategoryManager() {
 
       {/* Second Delete Confirmation Dialog */}
       {showDeleteConfirmDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded shadow-lg w-full max-w-md">
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-card p-6 rounded shadow-lg w-full max-w-md border border-border">
             <h2 className="text-xl font-semibold mb-4">Confirm Deletion</h2>
-            <p className="mb-6 text-red-600 font-bold">
+            <p className="mb-6 text-destructive font-bold">
               Are you ABSOLUTELY sure you want to delete this category? This
               action CANNOT be undone and may affect blog posts using this
               category.
@@ -525,13 +525,13 @@ export default function BlogCategoryManager() {
             <div className="flex justify-end space-x-2">
               <button
                 onClick={handleDeleteCancel}
-                className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
+                className="bg-secondary text-secondary-foreground px-4 py-2 rounded hover:bg-secondary/80"
               >
                 Cancel
               </button>
               <button
                 onClick={handleFinalDeleteConfirm}
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                className="bg-destructive text-destructive-foreground px-4 py-2 rounded hover:bg-destructive/90"
                 disabled={isDeleting}
               >
                 {isDeleting ? "Deleting..." : "Yes, Delete It"}

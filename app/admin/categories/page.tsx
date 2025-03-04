@@ -11,6 +11,7 @@ import {
 } from "@/lib/actions/categories";
 import DeleteConfirmationDialog from "@/components/ui/admin/DeleteConfirmationDialog";
 import { toast } from "sonner";
+import Image from "next/image";
 
 export default function CategoriesPage() {
   const router = useRouter();
@@ -259,14 +260,14 @@ export default function CategoriesPage() {
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Categories</h1>
+        <h1 className="text-2xl font-bold">Categories</h1>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 className="text-2xl font-semibold mb-4">Add New Category</h2>
+      <div className="bg-card rounded-lg shadow border border-border p-6 mb-8">
+        <h2 className="text-xl font-semibold mb-4">Add New Category</h2>
 
         {error && !showEditModal && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          <div className="bg-destructive/20 border border-destructive text-destructive-foreground px-4 py-3 rounded mb-4">
             {error}
           </div>
         )}
@@ -274,7 +275,7 @@ export default function CategoriesPage() {
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium mb-1">
                 Category Name *
               </label>
               <input
@@ -283,14 +284,14 @@ export default function CategoriesPage() {
                 value={createFormData.name}
                 onChange={handleCreateChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium mb-1">
                 Slug *{" "}
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-muted-foreground">
                   (Auto-generated from name)
                 </span>
               </label>
@@ -301,7 +302,7 @@ export default function CategoriesPage() {
                   value={createFormData.slug}
                   onChange={handleCreateChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 <button
                   type="button"
@@ -321,7 +322,7 @@ export default function CategoriesPage() {
                       }));
                     }
                   }}
-                  className="ml-2 px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none"
+                  className="ml-2 px-3 py-2 bg-muted hover:bg-muted/80 rounded-md focus:outline-none"
                 >
                   Reset
                 </button>
@@ -329,7 +330,7 @@ export default function CategoriesPage() {
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium mb-1">
                 Image URL
               </label>
               <input
@@ -338,7 +339,7 @@ export default function CategoriesPage() {
                 value={createFormData.image}
                 onChange={handleCreateChange}
                 placeholder="https://example.com/image.jpg"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
@@ -349,9 +350,9 @@ export default function CategoriesPage() {
                   name="isActive"
                   checked={createFormData.isActive}
                   onChange={handleCreateChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-primary focus:ring-primary border-input rounded"
                 />
-                <label className="ml-2 text-sm text-gray-700">Active</label>
+                <label className="ml-2 text-sm">Active</label>
               </div>
             </div>
           </div>
@@ -360,87 +361,66 @@ export default function CategoriesPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50"
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50"
             >
-              {isSubmitting ? "Adding..." : "Add Category"}
+              {isSubmitting ? "Creating..." : "Create Category"}
             </button>
           </div>
         </form>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-2xl font-semibold mb-4">Category List</h2>
+      <div className="bg-card rounded-lg shadow border border-border p-6">
+        <h2 className="text-xl font-semibold mb-4">Categories</h2>
 
         {isLoading ? (
-          <p className="text-gray-500">Loading categories...</p>
+          <div className="text-center py-4">Loading categories...</div>
         ) : categories.length === 0 ? (
-          <p className="text-gray-500">No categories found.</p>
+          <div className="text-center py-4 text-muted-foreground">
+            No categories found
+          </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-border">
+              <thead className="bg-muted">
                 <tr>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    ID
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Name
                   </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    Slug
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Image
                   </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Status
                   </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Created
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="divide-y divide-border">
                 {categories.map((category) => (
                   <tr key={category.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {category.id}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {category.name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {category.name}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {category.slug}
-                      </div>
+                      {category.slug}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap">
                       {category.image ? (
-                        <img
-                          src={category.image}
-                          alt={category.name}
-                          className="h-10 w-10 object-cover rounded"
-                        />
+                        <div className="h-10 w-10 relative">
+                          <Image
+                            src={category.image}
+                            alt={category.name}
+                            fill
+                            className="object-cover rounded"
+                          />
+                        </div>
                       ) : (
-                        <span className="text-gray-400">No image</span>
+                        <span className="text-muted-foreground">No image</span>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -454,26 +434,19 @@ export default function CategoriesPage() {
                         {category.isActive ? "Active" : "Inactive"}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(
-                        category.createdAt || new Date()
-                      ).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <div className="flex justify-center space-x-2">
-                        <button
-                          onClick={() => handleEdit(category)}
-                          className="text-blue-600 hover:text-blue-900"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteClick(category)}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          Delete
-                        </button>
-                      </div>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button
+                        onClick={() => handleEdit(category)}
+                        className="text-primary hover:text-primary/80 mr-4"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteClick(category)}
+                        className="text-destructive hover:text-destructive/80"
+                      >
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -483,34 +456,13 @@ export default function CategoriesPage() {
         )}
       </div>
 
-      {/* Edit Category Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold">Edit Category</h3>
-              <button
-                onClick={closeEditModal}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-card rounded-lg shadow-lg p-6 w-full max-w-2xl">
+            <h2 className="text-xl font-semibold mb-4">Edit Category</h2>
 
             {error && showEditModal && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+              <div className="bg-destructive/20 border border-destructive text-destructive-foreground px-4 py-3 rounded mb-4">
                 {error}
               </div>
             )}
@@ -518,7 +470,7 @@ export default function CategoriesPage() {
             <form onSubmit={handleUpdate}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium mb-1">
                     Category Name *
                   </label>
                   <input
@@ -527,13 +479,16 @@ export default function CategoriesPage() {
                     value={editFormData.name}
                     onChange={handleEditChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Slug *
+                  <label className="block text-sm font-medium mb-1">
+                    Slug *{" "}
+                    <span className="text-xs text-muted-foreground">
+                      (Auto-generated from name)
+                    </span>
                   </label>
                   <div className="flex">
                     <input
@@ -542,7 +497,7 @@ export default function CategoriesPage() {
                       value={editFormData.slug}
                       onChange={handleEditChange}
                       required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                     <button
                       type="button"
@@ -562,7 +517,7 @@ export default function CategoriesPage() {
                           }));
                         }
                       }}
-                      className="ml-2 px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none"
+                      className="ml-2 px-3 py-2 bg-muted hover:bg-muted/80 rounded-md focus:outline-none"
                     >
                       Reset
                     </button>
@@ -570,7 +525,7 @@ export default function CategoriesPage() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium mb-1">
                     Image URL
                   </label>
                   <input
@@ -579,7 +534,7 @@ export default function CategoriesPage() {
                     value={editFormData.image}
                     onChange={handleEditChange}
                     placeholder="https://example.com/image.jpg"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
 
@@ -590,25 +545,25 @@ export default function CategoriesPage() {
                       name="isActive"
                       checked={editFormData.isActive}
                       onChange={handleEditChange}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-primary focus:ring-primary border-input rounded"
                     />
-                    <label className="ml-2 text-sm text-gray-700">Active</label>
+                    <label className="ml-2 text-sm">Active</label>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-6 flex justify-end">
+              <div className="mt-6 flex justify-end space-x-3">
                 <button
                   type="button"
                   onClick={closeEditModal}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md mr-2 hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                  className="px-4 py-2 border border-input bg-muted text-foreground rounded-md hover:bg-muted/80 focus:outline-none"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50"
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 focus:outline-none disabled:opacity-50"
                 >
                   {isSubmitting ? "Updating..." : "Update Category"}
                 </button>
@@ -618,14 +573,16 @@ export default function CategoriesPage() {
         </div>
       )}
 
-      <DeleteConfirmationDialog
-        isOpen={showDeleteDialog}
-        onClose={handleDeleteCancel}
-        onConfirm={handleDeleteConfirm}
-        title="Delete Category"
-        description="Are you sure you want to delete this category? This action cannot be undone."
-        isDeleting={isDeleting}
-      />
+      {showDeleteDialog && (
+        <DeleteConfirmationDialog
+          isOpen={showDeleteDialog}
+          onClose={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+          title="Delete Category"
+          description="Are you sure you want to delete this category? This action cannot be undone."
+          isDeleting={isDeleting}
+        />
+      )}
     </div>
   );
 }

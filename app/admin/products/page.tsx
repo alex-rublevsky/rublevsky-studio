@@ -94,6 +94,7 @@ export default function ProductsPage() {
     null
   );
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(true);
 
   useEffect(() => {
     fetchProducts();
@@ -541,409 +542,351 @@ export default function ProductsPage() {
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Products</h1>
+        <h1 className="text-2xl font-bold">Products</h1>
+        <div className="flex space-x-2">
+          <button
+            onClick={() => setShowCreateForm(!showCreateForm)}
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 focus:outline-none"
+          >
+            {showCreateForm ? "Hide Form" : "Add New Product"}
+          </button>
+        </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 className="text-2xl font-semibold mb-4">Add New Product</h2>
+      {/* Create Product Form */}
+      {showCreateForm && (
+        <div className="bg-card rounded-lg shadow border border-border p-6 mb-8">
+          <h2 className="text-xl font-semibold mb-4">Add New Product</h2>
 
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Product Name *
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Slug *{" "}
-                <span className="text-xs text-gray-500">
-                  (Auto-generated from name)
-                </span>
-              </label>
-              <div className="flex">
-                <input
-                  type="text"
-                  name="slug"
-                  value={formData.slug}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsAutoSlug(true);
-                    if (formData.name) {
-                      const slug = formData.name
-                        .toLowerCase()
-                        .replace(/[^\w\s-]/g, "")
-                        .replace(/\s+/g, "-")
-                        .replace(/-+/g, "-")
-                        .trim();
-
-                      setFormData((prev) => ({
-                        ...prev,
-                        slug,
-                      }));
-                    }
-                  }}
-                  className="ml-2 px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none"
-                >
-                  Reset
-                </button>
-              </div>
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description
-              </label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Price (CAD) *
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="text-gray-500">$</span>
-                </div>
-                <input
-                  type="number"
-                  name="price"
-                  value={formData.price}
-                  onChange={handleChange}
-                  required
-                  step="0.01"
-                  min="0"
-                  className="w-full pl-7 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Stock
-              </label>
-              <input
-                type="number"
-                name="stock"
-                value={formData.stock}
-                onChange={handleChange}
-                min="0"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Category
-              </label>
-              <select
-                name="categorySlug"
-                value={formData.categorySlug}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select a category</option>
-                {categories.map((category) => (
-                  <option key={category.slug} value={category.slug}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Brand
-              </label>
-              <select
-                name="brandSlug"
-                value={formData.brandSlug}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select a brand</option>
-                {brands.map((brand) => (
-                  <option key={brand.slug} value={brand.slug}>
-                    {brand.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Image Identifiers
-              </label>
-              <input
-                type="text"
-                name="images"
-                value={formData.images}
-                onChange={handleChange}
-                placeholder="image1.jpg,image2.jpg,image3.jpg"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <p className="mt-1 text-sm text-gray-500">
-                Enter image identifiers separated by commas. These should match
-                your R2 image filenames.
-              </p>
-            </div>
-
-            <div className="md:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  name="isActive"
-                  checked={formData.isActive}
-                  onChange={handleChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label className="ml-2 text-sm text-gray-700">Active</label>
-              </div>
-
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  name="isFeatured"
-                  checked={formData.isFeatured}
-                  onChange={handleChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label className="ml-2 text-sm text-gray-700">Featured</label>
-              </div>
-
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  name="onSale"
-                  checked={formData.onSale}
-                  onChange={handleChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label className="ml-2 text-sm text-gray-700">On Sale</label>
-              </div>
-
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  name="hasVariations"
-                  checked={formData.hasVariations}
-                  onChange={handleChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label className="ml-2 text-sm text-gray-700">
-                  Has Variations
-                </label>
-              </div>
-
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  name="hasVolume"
-                  checked={formData.hasVolume}
-                  onChange={handleChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label className="ml-2 text-sm text-gray-700">Has Volume</label>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Volume
-              </label>
-              <input
-                type="text"
-                name="volume"
-                value={formData.volume}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-
-          {/* Add the variations form when hasVariations is checked */}
-          {formData.hasVariations && (
-            <div className="mt-6 md:col-span-2">
-              <ProductVariationForm
-                variations={variations}
-                onChange={handleVariationsChange}
-              />
+          {error && !isEditMode && (
+            <div className="bg-destructive/20 border border-destructive text-destructive-foreground px-4 py-3 rounded mb-4">
+              {error}
             </div>
           )}
 
-          <div className="mt-6">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
-            >
-              {isSubmitting ? "Adding..." : "Add Product"}
-            </button>
-          </div>
-        </form>
-      </div>
+          <form onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Product Name *
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-2xl font-semibold mb-4">Product List</h2>
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Slug *{" "}
+                  <span className="text-xs text-muted-foreground">
+                    (Auto-generated from name)
+                  </span>
+                </label>
+                <div className="flex">
+                  <input
+                    type="text"
+                    name="slug"
+                    value={formData.slug}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsAutoSlug(true);
+                      if (formData.name) {
+                        const slug = formData.name
+                          .toLowerCase()
+                          .replace(/[^\w\s-]/g, "")
+                          .replace(/\s+/g, "-")
+                          .replace(/-+/g, "-")
+                          .trim();
+
+                        setFormData((prev) => ({
+                          ...prev,
+                          slug,
+                        }));
+                      }
+                    }}
+                    className="ml-2 px-3 py-2 bg-muted hover:bg-muted/80 rounded-md focus:outline-none"
+                  >
+                    Reset
+                  </button>
+                </div>
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium mb-1">
+                  Description
+                </label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  rows={4}
+                  className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Price (CAD) *
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span className="text-muted-foreground">$</span>
+                  </div>
+                  <input
+                    type="number"
+                    name="price"
+                    value={formData.price}
+                    onChange={handleChange}
+                    required
+                    step="0.01"
+                    min="0"
+                    className="w-full pl-7 px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Stock</label>
+                <input
+                  type="number"
+                  name="stock"
+                  value={formData.stock}
+                  onChange={handleChange}
+                  min="0"
+                  className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Category
+                </label>
+                <select
+                  name="categorySlug"
+                  value={formData.categorySlug}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">Select a category</option>
+                  {categories.map((category) => (
+                    <option key={category.slug} value={category.slug}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Brand</label>
+                <select
+                  name="brandSlug"
+                  value={formData.brandSlug}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">Select a brand</option>
+                  {brands.map((brand) => (
+                    <option key={brand.slug} value={brand.slug}>
+                      {brand.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium mb-1">
+                  Image Identifiers
+                </label>
+                <input
+                  type="text"
+                  name="images"
+                  value={formData.images}
+                  onChange={handleChange}
+                  placeholder="image1.jpg,image2.jpg,image3.jpg"
+                  className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Enter image identifiers separated by commas. These should
+                  match your R2 image filenames.
+                </p>
+              </div>
+
+              <div className="md:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    name="isActive"
+                    checked={formData.isActive}
+                    onChange={handleChange}
+                    className="h-4 w-4 text-primary focus:ring-primary border-input rounded"
+                  />
+                  <label className="ml-2 text-sm">Active</label>
+                </div>
+
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    name="isFeatured"
+                    checked={formData.isFeatured}
+                    onChange={handleChange}
+                    className="h-4 w-4 text-primary focus:ring-primary border-input rounded"
+                  />
+                  <label className="ml-2 text-sm">Featured</label>
+                </div>
+
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    name="onSale"
+                    checked={formData.onSale}
+                    onChange={handleChange}
+                    className="h-4 w-4 text-primary focus:ring-primary border-input rounded"
+                  />
+                  <label className="ml-2 text-sm">On Sale</label>
+                </div>
+
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    name="hasVariations"
+                    checked={formData.hasVariations}
+                    onChange={handleChange}
+                    className="h-4 w-4 text-primary focus:ring-primary border-input rounded"
+                  />
+                  <label className="ml-2 text-sm">Has Variations</label>
+                </div>
+
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    name="hasVolume"
+                    checked={formData.hasVolume}
+                    onChange={handleChange}
+                    className="h-4 w-4 text-primary focus:ring-primary border-input rounded"
+                  />
+                  <label className="ml-2 text-sm">Has Volume</label>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Volume</label>
+                <input
+                  type="text"
+                  name="volume"
+                  value={formData.volume}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+            </div>
+
+            {/* Add the variations form when hasVariations is checked */}
+            {formData.hasVariations && (
+              <div className="mt-6 md:col-span-2">
+                <ProductVariationForm
+                  variations={variations}
+                  onChange={handleVariationsChange}
+                />
+              </div>
+            )}
+
+            <div className="mt-6">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50"
+              >
+                {isSubmitting ? "Creating..." : "Create Product"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Products List */}
+      <div className="bg-card rounded-lg shadow border border-border p-6">
+        <h2 className="text-xl font-semibold mb-4">Products</h2>
 
         {isLoading ? (
-          <p className="text-gray-500">Loading products...</p>
+          <div className="text-center py-4">Loading products...</div>
         ) : products.length === 0 ? (
-          <p className="text-gray-500">No products found.</p>
+          <div className="text-center py-4 text-muted-foreground">
+            No products found
+          </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-border">
+              <thead className="bg-muted">
                 <tr>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    ID
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    Product
                   </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Name
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Images
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Price
                   </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Stock
                   </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    Category
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    Brand
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Status
                   </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Created
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="divide-y divide-border">
                 {products.map((product) => (
                   <tr key={product.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {product.id}
+                    <td className="px-6 py-4">
+                      <div className="flex items-center">
+                        {product.images && (
+                          <div className="h-10 w-10 relative flex-shrink-0 mr-3">
+                            <Image
+                              src={`${process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL}/${
+                                product.images.split(",")[0]
+                              }`}
+                              alt={product.name}
+                              fill
+                              className="object-cover rounded"
+                            />
+                          </div>
+                        )}
+                        <div>
+                          <div className="font-medium">{product.name}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {product.slug}
+                          </div>
+                        </div>
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {product.name}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {product.slug}
-                      </div>
+                      {formatPrice(parseFloat(product.price))}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {product.images ? (
-                        <div className="flex space-x-1">
-                          {(() => {
-                            try {
-                              // Parse the JSON string to get the array of image identifiers
-                              const imageArray = JSON.parse(
-                                product.images
-                              ) as string[];
-                              return imageArray
-                                .slice(0, 3)
-                                .map((image: string, index: number) => (
-                                  <div
-                                    key={index}
-                                    className="h-10 w-10 bg-gray-100 rounded flex items-center justify-center overflow-hidden"
-                                  >
-                                    <Image
-                                      src={`/${image}`}
-                                      alt={`Product image ${index + 1}`}
-                                      width={40}
-                                      height={40}
-                                      className="h-full w-full object-cover"
-                                    />
-                                  </div>
-                                ));
-                            } catch (e) {
-                              return (
-                                <span className="text-gray-400">
-                                  Invalid image format
-                                </span>
-                              );
-                            }
-                          })()}
-                          {(() => {
-                            try {
-                              const imageArray = JSON.parse(
-                                product.images
-                              ) as string[];
-                              return (
-                                imageArray.length > 3 && (
-                                  <div className="h-10 w-10 bg-gray-100 rounded flex items-center justify-center text-xs text-gray-500">
-                                    +{imageArray.length - 3}
-                                  </div>
-                                )
-                              );
-                            } catch (e) {
-                              return null;
-                            }
-                          })()}
-                        </div>
-                      ) : (
-                        <span className="text-gray-400">No images</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatPrice(product.price)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap">
                       {product.stock}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {product.category?.name || "None"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {product.brand?.name || "None"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
@@ -956,26 +899,19 @@ export default function ProductsPage() {
                         {product.isActive ? "Active" : "Inactive"}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(
-                        product.createdAt || new Date()
-                      ).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <div className="flex justify-center space-x-2">
-                        <button
-                          onClick={() => handleEdit(product)}
-                          className="text-indigo-600 hover:text-indigo-900 mr-2"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteClick(product)}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          Delete
-                        </button>
-                      </div>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button
+                        onClick={() => handleEdit(product)}
+                        className="text-primary hover:text-primary/80 mr-4"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteClick(product)}
+                        className="text-destructive hover:text-destructive/80"
+                      >
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -985,15 +921,15 @@ export default function ProductsPage() {
         )}
       </div>
 
-      {/* Edit Product Modal */}
+      {/* Edit Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-card rounded-lg shadow-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold">Edit Product</h3>
+              <h2 className="text-xl font-semibold">Edit Product</h2>
               <button
                 onClick={closeEditModal}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-muted-foreground hover:text-foreground"
               >
                 <svg
                   className="h-6 w-6"
@@ -1011,8 +947,8 @@ export default function ProductsPage() {
               </button>
             </div>
 
-            {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {error && isEditMode && (
+              <div className="bg-destructive/20 border border-destructive text-destructive-foreground px-4 py-3 rounded mb-4">
                 {error}
               </div>
             )}
@@ -1286,14 +1222,16 @@ export default function ProductsPage() {
       )}
 
       {/* Delete Confirmation Dialog */}
-      <DeleteConfirmationDialog
-        isOpen={showDeleteDialog}
-        onClose={handleDeleteCancel}
-        onConfirm={handleDeleteConfirm}
-        title="Delete Product"
-        description="Are you sure you want to delete this product? This action cannot be undone."
-        isDeleting={isDeleting}
-      />
+      {showDeleteDialog && (
+        <DeleteConfirmationDialog
+          isOpen={showDeleteDialog}
+          onClose={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+          title="Delete Product"
+          description="Are you sure you want to delete this product? This action cannot be undone."
+          isDeleting={isDeleting}
+        />
+      )}
     </div>
   );
 }

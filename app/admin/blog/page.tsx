@@ -14,7 +14,6 @@ import {
 import DeleteConfirmationDialog from "@/components/ui/admin/DeleteConfirmationDialog";
 import { toast } from "sonner";
 import ProductSelector from "@/components/ui/admin/ProductSelector";
-import { getProductById } from "@/lib/actions/products";
 import Link from "next/link";
 import BlogCategoryManager from "@/components/ui/admin/BlogCategoryManager";
 
@@ -307,23 +306,23 @@ export default function BlogPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div>
       <h1 className="text-2xl font-bold mb-6">Blog Management</h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
         {/* Create Blog Post Form */}
-        <div className="bg-white p-6 rounded shadow">
+        <div className="bg-card p-6 rounded shadow border border-border">
           <h2 className="text-xl font-semibold mb-4">Add New Blog Post</h2>
 
           {error && !showEditModal && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <div className="bg-destructive/20 border border-destructive text-destructive-foreground px-4 py-3 rounded mb-4">
               {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
-              <label className="block text-gray-700 mb-2" htmlFor="title">
+              <label className="block mb-2" htmlFor="title">
                 Title
               </label>
               <input
@@ -332,13 +331,13 @@ export default function BlogPage() {
                 name="title"
                 value={createFormData.title}
                 onChange={handleCreateChange}
-                className="w-full px-3 py-2 border rounded"
+                className="w-full px-3 py-2 bg-muted border border-input rounded"
                 required
               />
             </div>
 
             <div className="mb-4">
-              <label className="block text-gray-700 mb-2" htmlFor="slug">
+              <label className="block mb-2" htmlFor="slug">
                 Slug
               </label>
               <input
@@ -347,16 +346,13 @@ export default function BlogPage() {
                 name="slug"
                 value={createFormData.slug}
                 onChange={handleCreateChange}
-                className="w-full px-3 py-2 border rounded"
+                className="w-full px-3 py-2 bg-muted border border-input rounded"
                 required
               />
             </div>
 
             <div className="mb-4">
-              <label
-                className="block text-gray-700 mb-2"
-                htmlFor="blogCategorySlug"
-              >
+              <label className="block mb-2" htmlFor="blogCategorySlug">
                 Category
               </label>
               <select
@@ -364,7 +360,7 @@ export default function BlogPage() {
                 name="blogCategorySlug"
                 value={createFormData.blogCategorySlug}
                 onChange={handleCreateChange}
-                className="w-full px-3 py-2 border rounded"
+                className="w-full px-3 py-2 bg-muted border border-input rounded"
               >
                 <option value="">Select a category</option>
                 {blogCategories.map((category) => (
@@ -376,7 +372,7 @@ export default function BlogPage() {
             </div>
 
             <div className="mb-4">
-              <label className="block text-gray-700 mb-2" htmlFor="body">
+              <label className="block mb-2" htmlFor="body">
                 Content
               </label>
               <textarea
@@ -384,14 +380,14 @@ export default function BlogPage() {
                 name="body"
                 value={createFormData.body}
                 onChange={handleCreateChange}
-                className="w-full px-3 py-2 border rounded"
+                className="w-full px-3 py-2 bg-muted border border-input rounded"
                 rows={6}
                 required
               />
             </div>
 
             <div className="mb-4">
-              <label className="block text-gray-700 mb-2" htmlFor="images">
+              <label className="block mb-2" htmlFor="images">
                 Images (comma-separated URLs)
               </label>
               <input
@@ -400,12 +396,12 @@ export default function BlogPage() {
                 name="images"
                 value={createFormData.images}
                 onChange={handleCreateChange}
-                className="w-full px-3 py-2 border rounded"
+                className="w-full px-3 py-2 bg-muted border border-input rounded"
               />
             </div>
 
             <div className="mb-4">
-              <label className="block text-gray-700 mb-2" htmlFor="productSlug">
+              <label className="block mb-2" htmlFor="productSlug">
                 Related Product
               </label>
               <ProductSelector
@@ -416,7 +412,7 @@ export default function BlogPage() {
 
             <button
               type="submit"
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              className="bg-primary text-primary-foreground px-4 py-2 rounded hover:bg-primary/90"
               disabled={isSubmitting}
             >
               {isSubmitting ? "Adding..." : "Add Blog Post"}
@@ -425,31 +421,31 @@ export default function BlogPage() {
         </div>
 
         {/* Blog Posts List */}
-        <div className="bg-white p-6 rounded shadow">
+        <div className="bg-card p-6 rounded shadow border border-border">
           <h2 className="text-xl font-semibold mb-4">Blog Posts</h2>
 
           {isLoading ? (
-            <p>Loading blog posts...</p>
+            <p className="text-muted-foreground">Loading blog posts...</p>
           ) : blogPosts.length === 0 ? (
-            <p>No blog posts found.</p>
+            <p className="text-muted-foreground">No blog posts found.</p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full bg-white">
+              <table className="min-w-full">
                 <thead>
                   <tr>
-                    <th className="px-6 py-3 border-b-2 border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th className="px-6 py-3 border-b border-border text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       Title
                     </th>
-                    <th className="px-6 py-3 border-b-2 border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th className="px-6 py-3 border-b border-border text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       Category
                     </th>
-                    <th className="px-6 py-3 border-b-2 border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th className="px-6 py-3 border-b border-border text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       Published
                     </th>
-                    <th className="px-6 py-3 border-b-2 border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th className="px-6 py-3 border-b border-border text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       Related Product
                     </th>
-                    <th className="px-6 py-3 border-b-2 border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th className="px-6 py-3 border-b border-border text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -457,23 +453,23 @@ export default function BlogPage() {
                 <tbody>
                   {blogPosts.map((post) => (
                     <tr key={post.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
                         {post.title}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
                         {post.blogCategorySlug || "Uncategorized"}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
                         {post.publishedAt
                           ? new Date(post.publishedAt).toLocaleDateString()
                           : "Draft"}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
                         {post.productSlug ? (
                           <Link
                             href={`/products/${post.productSlug}`}
                             target="_blank"
-                            className="text-blue-600 hover:underline"
+                            className="text-blue-400 hover:underline"
                           >
                             {post.productSlug}
                           </Link>
@@ -481,17 +477,17 @@ export default function BlogPage() {
                           "None"
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <div className="flex justify-center space-x-2">
                           <button
                             onClick={() => handleEdit(post)}
-                            className="text-blue-600 hover:text-blue-900"
+                            className="text-blue-400 hover:text-blue-300"
                           >
                             Edit
                           </button>
                           <button
                             onClick={() => handleDeleteClick(post)}
-                            className="text-red-600 hover:text-red-900"
+                            className="text-destructive hover:text-destructive/80"
                           >
                             Delete
                           </button>
@@ -513,30 +509,27 @@ export default function BlogPage() {
 
       {/* Edit Modal */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded shadow-lg w-full max-w-2xl max-h-screen overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-card p-6 rounded shadow-lg w-full max-w-2xl max-h-screen overflow-y-auto border border-border">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">Edit Blog Post</h2>
               <button
                 onClick={closeEditModal}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-muted-foreground hover:text-foreground"
               >
                 ✕
               </button>
             </div>
 
             {error && showEditModal && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+              <div className="bg-destructive/20 border border-destructive text-destructive-foreground px-4 py-3 rounded mb-4">
                 {error}
               </div>
             )}
 
             <form onSubmit={handleUpdate}>
               <div className="mb-4">
-                <label
-                  className="block text-gray-700 mb-2"
-                  htmlFor="edit-title"
-                >
+                <label className="block mb-2" htmlFor="edit-title">
                   Title
                 </label>
                 <input
@@ -545,13 +538,13 @@ export default function BlogPage() {
                   name="title"
                   value={editFormData.title}
                   onChange={handleEditChange}
-                  className="w-full px-3 py-2 border rounded"
+                  className="w-full px-3 py-2 bg-muted border border-input rounded"
                   required
                 />
               </div>
 
               <div className="mb-4">
-                <label className="block text-gray-700 mb-2" htmlFor="edit-slug">
+                <label className="block mb-2" htmlFor="edit-slug">
                   Slug
                 </label>
                 <input
@@ -560,16 +553,13 @@ export default function BlogPage() {
                   name="slug"
                   value={editFormData.slug}
                   onChange={handleEditChange}
-                  className="w-full px-3 py-2 border rounded"
+                  className="w-full px-3 py-2 bg-muted border border-input rounded"
                   required
                 />
               </div>
 
               <div className="mb-4">
-                <label
-                  className="block text-gray-700 mb-2"
-                  htmlFor="edit-blogCategorySlug"
-                >
+                <label className="block mb-2" htmlFor="edit-blogCategorySlug">
                   Category
                 </label>
                 <select
@@ -577,7 +567,7 @@ export default function BlogPage() {
                   name="blogCategorySlug"
                   value={editFormData.blogCategorySlug}
                   onChange={handleEditChange}
-                  className="w-full px-3 py-2 border rounded"
+                  className="w-full px-3 py-2 bg-muted border border-input rounded"
                 >
                   <option value="">Select a category</option>
                   {blogCategories.map((category) => (
@@ -589,7 +579,7 @@ export default function BlogPage() {
               </div>
 
               <div className="mb-4">
-                <label className="block text-gray-700 mb-2" htmlFor="edit-body">
+                <label className="block mb-2" htmlFor="edit-body">
                   Content
                 </label>
                 <textarea
@@ -597,17 +587,14 @@ export default function BlogPage() {
                   name="body"
                   value={editFormData.body}
                   onChange={handleEditChange}
-                  className="w-full px-3 py-2 border rounded"
+                  className="w-full px-3 py-2 bg-muted border border-input rounded"
                   rows={6}
                   required
                 />
               </div>
 
               <div className="mb-4">
-                <label
-                  className="block text-gray-700 mb-2"
-                  htmlFor="edit-images"
-                >
+                <label className="block mb-2" htmlFor="edit-images">
                   Images (comma-separated URLs)
                 </label>
                 <input
@@ -616,15 +603,12 @@ export default function BlogPage() {
                   name="images"
                   value={editFormData.images}
                   onChange={handleEditChange}
-                  className="w-full px-3 py-2 border rounded"
+                  className="w-full px-3 py-2 bg-muted border border-input rounded"
                 />
               </div>
 
               <div className="mb-4">
-                <label
-                  className="block text-gray-700 mb-2"
-                  htmlFor="edit-productSlug"
-                >
+                <label className="block mb-2" htmlFor="edit-productSlug">
                   Related Product
                 </label>
                 <ProductSelector
@@ -634,10 +618,7 @@ export default function BlogPage() {
               </div>
 
               <div className="mb-4">
-                <label
-                  className="block text-gray-700 mb-2"
-                  htmlFor="edit-publishedAt"
-                >
+                <label className="block mb-2" htmlFor="edit-publishedAt">
                   Published Date
                 </label>
                 <input
@@ -652,7 +633,7 @@ export default function BlogPage() {
                       : ""
                   }
                   onChange={handleEditChange}
-                  className="w-full px-3 py-2 border rounded"
+                  className="w-full px-3 py-2 bg-muted border border-input rounded"
                 />
               </div>
 
@@ -660,13 +641,13 @@ export default function BlogPage() {
                 <button
                   type="button"
                   onClick={closeEditModal}
-                  className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400"
+                  className="bg-secondary text-secondary-foreground px-4 py-2 rounded hover:bg-secondary/80"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                  className="bg-primary text-primary-foreground px-4 py-2 rounded hover:bg-primary/90"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? "Updating..." : "Update Blog Post"}
