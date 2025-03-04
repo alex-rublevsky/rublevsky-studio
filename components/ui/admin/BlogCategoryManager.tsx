@@ -9,6 +9,18 @@ import {
   deleteBlogCategory,
 } from "@/lib/actions/blog";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "../button";
+import { Input } from "../input";
+import { OrangeToggle } from "../toggle";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerFooter,
+  DrawerBody,
+} from "../drawer";
 
 interface BlogCategoryFormData {
   name: string;
@@ -279,13 +291,12 @@ export default function BlogCategoryManager() {
               <label className="block mb-2" htmlFor="name">
                 Name
               </label>
-              <input
+              <Input
                 type="text"
                 id="name"
                 name="name"
                 value={createFormData.name}
                 onChange={handleCreateChange}
-                className="w-full px-3 py-2 bg-muted border border-input rounded"
                 required
               />
             </div>
@@ -306,16 +317,14 @@ export default function BlogCategoryManager() {
             </div>
 
             <div className="mb-4">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
+              <div className="flex items-center">
+                <OrangeToggle
                   name="isActive"
                   checked={createFormData.isActive}
                   onChange={handleCreateChange}
-                  className="mr-2"
                 />
-                <span>Active</span>
-              </label>
+                <span className="ml-2">Active</span>
+              </div>
             </div>
 
             <button
@@ -365,30 +374,28 @@ export default function BlogCategoryManager() {
                         {category.slug}
                       </td>
                       <td className="px-4 py-2 border-b border-border text-sm">
-                        <span
-                          className={`inline-block px-2 py-1 text-xs font-semibold rounded ${
-                            category.isActive
-                              ? "bg-green-900 text-green-100"
-                              : "bg-red-900 text-red-100"
-                          }`}
+                        <Badge
+                          variant={category.isActive ? "default" : "secondary"}
                         >
                           {category.isActive ? "Active" : "Inactive"}
-                        </span>
+                        </Badge>
                       </td>
                       <td className="px-4 py-2 border-b border-border text-sm">
                         <div className="flex space-x-2">
-                          <button
+                          <Button
+                            variant="inverted"
+                            size="sm"
                             onClick={() => handleEdit(category)}
-                            className="text-blue-400 hover:text-blue-300"
                           >
                             Edit
-                          </button>
-                          <button
+                          </Button>
+                          <Button
                             onClick={() => handleDeleteClick(category)}
-                            className="text-destructive hover:text-destructive/80"
+                            variant="invertedDestructive"
+                            size="sm"
                           >
                             Delete
-                          </button>
+                          </Button>
                         </div>
                       </td>
                     </tr>
@@ -400,20 +407,13 @@ export default function BlogCategoryManager() {
         </div>
       </div>
 
-      {/* Edit Modal */}
-      {showEditModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-          <div className="bg-card p-6 rounded shadow-lg w-full max-w-md border border-border">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Edit Category</h2>
-              <button
-                onClick={closeEditModal}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                ✕
-              </button>
-            </div>
-
+      {/* Edit Drawer */}
+      <Drawer open={showEditModal} onOpenChange={setShowEditModal}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Edit Category</DrawerTitle>
+          </DrawerHeader>
+          <DrawerBody>
             {error && showEditModal && (
               <div className="bg-destructive/20 border border-destructive text-destructive-foreground px-4 py-3 rounded mb-4">
                 {error}
@@ -421,69 +421,100 @@ export default function BlogCategoryManager() {
             )}
 
             <form onSubmit={handleUpdate}>
-              <div className="mb-4">
-                <label className="block mb-2" htmlFor="edit-name">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  id="edit-name"
-                  name="name"
-                  value={editFormData.name}
-                  onChange={handleEditChange}
-                  className="w-full px-3 py-2 bg-muted border border-input rounded"
-                  required
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block mb-2" htmlFor="edit-slug">
-                  Slug
-                </label>
-                <input
-                  type="text"
-                  id="edit-slug"
-                  name="slug"
-                  value={editFormData.slug}
-                  onChange={handleEditChange}
-                  className="w-full px-3 py-2 bg-muted border border-input rounded"
-                  required
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    name="isActive"
-                    checked={editFormData.isActive}
+              <div className="space-y-4">
+                <div>
+                  <label
+                    className="block text-sm font-medium mb-1"
+                    htmlFor="edit-name"
+                  >
+                    Name
+                  </label>
+                  <Input
+                    type="text"
+                    id="edit-name"
+                    name="name"
+                    value={editFormData.name}
                     onChange={handleEditChange}
-                    className="mr-2"
+                    required
                   />
-                  <span>Active</span>
-                </label>
+                </div>
+
+                <div>
+                  <label
+                    className="block text-sm font-medium mb-1"
+                    htmlFor="edit-slug"
+                  >
+                    Slug
+                  </label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="text"
+                      id="edit-slug"
+                      name="slug"
+                      value={editFormData.slug}
+                      onChange={handleEditChange}
+                      required
+                    />
+                    <Button
+                      variant="inverted"
+                      type="button"
+                      size="sm"
+                      onClick={() => {
+                        setIsEditAutoSlug(true);
+                        if (editFormData.name) {
+                          const slug = editFormData.name
+                            .toLowerCase()
+                            .replace(/[^\w\s-]/g, "")
+                            .replace(/\s+/g, "-")
+                            .replace(/-+/g, "-")
+                            .trim();
+
+                          setEditFormData((prev) => ({
+                            ...prev,
+                            slug,
+                          }));
+                        }
+                      }}
+                    >
+                      Reset
+                    </Button>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center">
+                    <OrangeToggle
+                      name="isActive"
+                      checked={editFormData.isActive}
+                      onChange={handleEditChange}
+                    />
+                    <span className="ml-2 text-sm">Active</span>
+                  </div>
+                </div>
               </div>
 
-              <div className="flex justify-end space-x-2">
-                <button
-                  type="button"
-                  onClick={closeEditModal}
-                  className="bg-secondary text-secondary-foreground px-4 py-2 rounded hover:bg-secondary/80"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-primary text-primary-foreground px-4 py-2 rounded hover:bg-primary/90"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? "Updating..." : "Update Category"}
-                </button>
-              </div>
+              <DrawerFooter>
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="inverted"
+                    type="button"
+                    onClick={closeEditModal}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="greenInverted"
+                    type="submit"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Updating..." : "Update Category"}
+                  </Button>
+                </div>
+              </DrawerFooter>
             </form>
-          </div>
-        </div>
-      )}
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
 
       {/* First Delete Confirmation Dialog */}
       {showDeleteDialog && (

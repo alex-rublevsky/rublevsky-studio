@@ -24,6 +24,26 @@ import {
 } from "@/lib/actions/products";
 import DeleteConfirmationDialog from "@/components/ui/admin/DeleteConfirmationDialog";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { OrangeToggle } from "@/components/ui/toggle";
+import { Badge } from "@/components/ui/badge";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerFooter,
+  DrawerBody,
+} from "@/components/ui/drawer";
 
 // Define the Variation interface to match the one in ProductVariationForm
 interface Variation {
@@ -49,7 +69,7 @@ export default function ProductsPage() {
     price: "",
     categorySlug: "",
     brandSlug: "",
-    stock: "0",
+    stock: "",
     isActive: true,
     isFeatured: false,
     onSale: false,
@@ -66,7 +86,7 @@ export default function ProductsPage() {
     price: "",
     categorySlug: "",
     brandSlug: "",
-    stock: "0",
+    stock: "",
     isActive: true,
     isFeatured: false,
     onSale: false,
@@ -268,7 +288,7 @@ export default function ProductsPage() {
         price: "",
         categorySlug: "",
         brandSlug: "",
-        stock: "0",
+        stock: "",
         isActive: true,
         isFeatured: false,
         onSale: false,
@@ -397,7 +417,7 @@ export default function ProductsPage() {
         price: "",
         categorySlug: "",
         brandSlug: "",
-        stock: "0",
+        stock: "",
         isActive: true,
         isFeatured: false,
         onSale: false,
@@ -433,7 +453,7 @@ export default function ProductsPage() {
       price: "",
       categorySlug: "",
       brandSlug: "",
-      stock: "0",
+      stock: "",
       isActive: true,
       isFeatured: false,
       onSale: false,
@@ -450,12 +470,13 @@ export default function ProductsPage() {
   };
 
   // Format price as Canadian dollars
-  const formatPrice = (price: number | null): string => {
+  const formatPrice = (price: number | string | null): string => {
     if (price === null) return "$0.00";
+    const numericPrice = typeof price === "string" ? parseFloat(price) : price;
     return new Intl.NumberFormat("en-CA", {
       style: "currency",
       currency: "CAD",
-    }).format(price);
+    }).format(numericPrice);
   };
 
   // Handle variations change from ProductVariationForm for the main form
@@ -539,17 +560,31 @@ export default function ProductsPage() {
     setDeletingProductId(null);
   };
 
+  // Helper function to get category name from slug
+  const getCategoryName = (slug: string | null): string | null => {
+    if (!slug) return null;
+    const category = categories.find((cat) => cat.slug === slug);
+    return category?.name || null;
+  };
+
+  // Helper function to get brand name from slug
+  const getBrandName = (slug: string | null): string | null => {
+    if (!slug) return null;
+    const brand = brands.find((b) => b.slug === slug);
+    return brand?.name || null;
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Products</h1>
         <div className="flex space-x-2">
-          <button
+          <Button
+            variant="inverted"
             onClick={() => setShowCreateForm(!showCreateForm)}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 focus:outline-none"
           >
             {showCreateForm ? "Hide Form" : "Add New Product"}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -570,13 +605,12 @@ export default function ProductsPage() {
                 <label className="block text-sm font-medium mb-1">
                   Product Name *
                 </label>
-                <input
+                <Input
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
 
@@ -588,16 +622,17 @@ export default function ProductsPage() {
                   </span>
                 </label>
                 <div className="flex">
-                  <input
+                  <Input
                     type="text"
                     name="slug"
                     value={formData.slug}
                     onChange={handleChange}
                     required
-                    className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                   />
-                  <button
+                  <Button
+                    variant="inverted"
                     type="button"
+                    size="sm"
                     onClick={() => {
                       setIsAutoSlug(true);
                       if (formData.name) {
@@ -614,10 +649,10 @@ export default function ProductsPage() {
                         }));
                       }
                     }}
-                    className="ml-2 px-3 py-2 bg-muted hover:bg-muted/80 rounded-md focus:outline-none"
+                    className="ml-2"
                   >
                     Reset
-                  </button>
+                  </Button>
                 </div>
               </div>
 
@@ -625,12 +660,11 @@ export default function ProductsPage() {
                 <label className="block text-sm font-medium mb-1">
                   Description
                 </label>
-                <textarea
+                <Textarea
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
                   rows={4}
-                  className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
 
@@ -642,7 +676,7 @@ export default function ProductsPage() {
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <span className="text-muted-foreground">$</span>
                   </div>
-                  <input
+                  <Input
                     type="number"
                     name="price"
                     value={formData.price}
@@ -650,20 +684,18 @@ export default function ProductsPage() {
                     required
                     step="0.01"
                     min="0"
-                    className="w-full pl-7 px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium mb-1">Stock</label>
-                <input
+                <Input
                   type="number"
                   name="stock"
                   value={formData.stock}
                   onChange={handleChange}
                   min="0"
-                  className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
 
@@ -671,49 +703,70 @@ export default function ProductsPage() {
                 <label className="block text-sm font-medium mb-1">
                   Category
                 </label>
-                <select
-                  name="categorySlug"
+                <Select
                   value={formData.categorySlug}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                  onValueChange={(value) => {
+                    setFormData({
+                      ...formData,
+                      categorySlug: value,
+                    });
+                  }}
                 >
-                  <option value="">Select a category</option>
-                  {categories.map((category) => (
-                    <option key={category.slug} value={category.slug}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger variant="inverted">
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent variant="inverted">
+                    {categories.map((category: Category) => (
+                      <SelectItem
+                        key={category.slug}
+                        value={category.slug}
+                        variant="inverted"
+                      >
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>
                 <label className="block text-sm font-medium mb-1">Brand</label>
-                <select
-                  name="brandSlug"
+                <Select
                   value={formData.brandSlug}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                  onValueChange={(value) => {
+                    setFormData({
+                      ...formData,
+                      brandSlug: value,
+                    });
+                  }}
                 >
-                  <option value="">Select a brand</option>
-                  {brands.map((brand) => (
-                    <option key={brand.slug} value={brand.slug}>
-                      {brand.name}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger variant="inverted">
+                    <SelectValue placeholder="Select a brand" />
+                  </SelectTrigger>
+                  <SelectContent variant="inverted">
+                    {brands.map((brand: Brand) => (
+                      <SelectItem
+                        key={brand.slug}
+                        value={brand.slug}
+                        variant="inverted"
+                      >
+                        {brand.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium mb-1">
                   Image Identifiers
                 </label>
-                <input
+                <Input
                   type="text"
                   name="images"
                   value={formData.images}
                   onChange={handleChange}
                   placeholder="image1.jpg,image2.jpg,image3.jpg"
-                  className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 <p className="mt-1 text-sm text-muted-foreground">
                   Enter image identifiers separated by commas. These should
@@ -723,56 +776,46 @@ export default function ProductsPage() {
 
               <div className="md:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="flex items-center">
-                  <input
-                    type="checkbox"
+                  <OrangeToggle
                     name="isActive"
                     checked={formData.isActive}
                     onChange={handleChange}
-                    className="h-4 w-4 text-primary focus:ring-primary border-input rounded"
                   />
                   <label className="ml-2 text-sm">Active</label>
                 </div>
 
                 <div className="flex items-center">
-                  <input
-                    type="checkbox"
+                  <OrangeToggle
                     name="isFeatured"
                     checked={formData.isFeatured}
                     onChange={handleChange}
-                    className="h-4 w-4 text-primary focus:ring-primary border-input rounded"
                   />
                   <label className="ml-2 text-sm">Featured</label>
                 </div>
 
                 <div className="flex items-center">
-                  <input
-                    type="checkbox"
+                  <OrangeToggle
                     name="onSale"
                     checked={formData.onSale}
                     onChange={handleChange}
-                    className="h-4 w-4 text-primary focus:ring-primary border-input rounded"
                   />
                   <label className="ml-2 text-sm">On Sale</label>
                 </div>
 
                 <div className="flex items-center">
-                  <input
-                    type="checkbox"
+                  <OrangeToggle
                     name="hasVariations"
                     checked={formData.hasVariations}
                     onChange={handleChange}
-                    className="h-4 w-4 text-primary focus:ring-primary border-input rounded"
                   />
                   <label className="ml-2 text-sm">Has Variations</label>
                 </div>
 
                 <div className="flex items-center">
-                  <input
-                    type="checkbox"
+                  <OrangeToggle
                     name="hasVolume"
                     checked={formData.hasVolume}
                     onChange={handleChange}
-                    className="h-4 w-4 text-primary focus:ring-primary border-input rounded"
                   />
                   <label className="ml-2 text-sm">Has Volume</label>
                 </div>
@@ -780,12 +823,11 @@ export default function ProductsPage() {
 
               <div>
                 <label className="block text-sm font-medium mb-1">Volume</label>
-                <input
+                <Input
                   type="text"
                   name="volume"
                   value={formData.volume}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
             </div>
@@ -801,13 +843,13 @@ export default function ProductsPage() {
             )}
 
             <div className="mt-6">
-              <button
+              <Button
+                variant="greenInverted"
                 type="submit"
                 disabled={isSubmitting}
-                className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50"
               >
                 {isSubmitting ? "Creating..." : "Create Product"}
-              </button>
+              </Button>
             </div>
           </form>
         </div>
@@ -859,12 +901,11 @@ export default function ProductsPage() {
                         {product.images && (
                           <div className="h-10 w-10 relative flex-shrink-0 mr-3">
                             <Image
-                              src={`${process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL}/${
-                                product.images.split(",")[0]
-                              }`}
+                              src={`/${product.images.split(",").map((img) => img.trim())[0]}`}
                               alt={product.name}
                               fill
                               className="object-cover rounded"
+                              sizes="2rem"
                             />
                           </div>
                         )}
@@ -877,41 +918,40 @@ export default function ProductsPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {formatPrice(parseFloat(product.price))}
+                      {formatPrice(product.price)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {product.stock}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {product.category?.name || "None"}
+                      {getCategoryName(product.categorySlug) || "None"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {product.brand?.name || "None"}
+                      {getBrandName(product.brandSlug) || "None"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          product.isActive
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
+                      <Badge
+                        variant={product.isActive ? "default" : "secondary"}
                       >
                         {product.isActive ? "Active" : "Inactive"}
-                      </span>
+                      </Badge>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
+                      <Button
+                        variant="inverted"
+                        size="sm"
                         onClick={() => handleEdit(product)}
-                        className="text-primary hover:text-primary/80 mr-4"
+                        className="mr-2"
                       >
                         Edit
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        variant="invertedDestructive"
+                        size="sm"
                         onClick={() => handleDeleteClick(product)}
-                        className="text-destructive hover:text-destructive/80"
                       >
                         Delete
-                      </button>
+                      </Button>
                     </td>
                   </tr>
                 ))}
@@ -921,305 +961,247 @@ export default function ProductsPage() {
         )}
       </div>
 
-      {/* Edit Modal */}
-      {showEditModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-card rounded-lg shadow-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Edit Product</h2>
-              <button
-                onClick={closeEditModal}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
+      {/* Replace Edit Modal with Drawer */}
+      <Drawer open={showEditModal} onOpenChange={setShowEditModal}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Edit Product</DrawerTitle>
+          </DrawerHeader>
 
+          <DrawerBody>
             {error && isEditMode && (
               <div className="bg-destructive/20 border border-destructive text-destructive-foreground px-4 py-3 rounded mb-4">
                 {error}
               </div>
             )}
 
-            <form onSubmit={handleUpdate}>
+            <form
+              onSubmit={handleUpdate}
+              className="space-y-6"
+              id="editProductForm"
+            >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Product Name *
+                  <label className="block text-sm font-medium mb-1">
+                    Name *
                   </label>
-                  <input
+                  <Input
                     type="text"
                     name="name"
                     value={editFormData.name}
                     onChange={handleEditChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium mb-1">
                     Slug *
                   </label>
-                  <div className="flex">
-                    <input
-                      type="text"
-                      name="slug"
-                      value={editFormData.slug}
-                      onChange={handleEditChange}
-                      required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsEditAutoSlug(true);
-                        if (editFormData.name) {
-                          const slug = editFormData.name
-                            .toLowerCase()
-                            .replace(/[^\w\s-]/g, "")
-                            .replace(/\s+/g, "-")
-                            .replace(/-+/g, "-")
-                            .trim();
-
-                          setEditFormData((prev) => ({
-                            ...prev,
-                            slug,
-                          }));
-                        }
-                      }}
-                      className="ml-2 px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none"
-                    >
-                      Reset
-                    </button>
-                  </div>
+                  <Input
+                    type="text"
+                    name="slug"
+                    value={editFormData.slug}
+                    onChange={handleEditChange}
+                    required
+                  />
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium mb-1">
                     Description
                   </label>
-                  <textarea
+                  <Textarea
                     name="description"
                     value={editFormData.description}
                     onChange={handleEditChange}
-                    rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    rows={3}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Price (CAD) *
+                  <label className="block text-sm font-medium mb-1">
+                    Price *
                   </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <span className="text-gray-500">$</span>
-                    </div>
-                    <input
-                      type="number"
-                      name="price"
-                      value={editFormData.price}
-                      onChange={handleEditChange}
-                      required
-                      step="0.01"
-                      min="0"
-                      className="w-full pl-7 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
+                  <Input
+                    type="number"
+                    name="price"
+                    value={editFormData.price}
+                    onChange={handleEditChange}
+                    step="0.01"
+                    required
+                  />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Stock
+                  <label className="block text-sm font-medium mb-1">
+                    Stock *
                   </label>
-                  <input
+                  <Input
                     type="number"
                     name="stock"
                     value={editFormData.stock}
                     onChange={handleEditChange}
-                    min="0"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium mb-1">
                     Category
                   </label>
-                  <select
+                  <Select
                     name="categorySlug"
                     value={editFormData.categorySlug}
-                    onChange={handleEditChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onValueChange={(value) =>
+                      handleEditChange({
+                        target: { name: "categorySlug", value },
+                      } as any)
+                    }
                   >
-                    <option value="">Select a category</option>
-                    {categories.map((category) => (
-                      <option key={category.slug} value={category.slug}>
-                        {category.name}
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((category) => (
+                        <SelectItem key={category.slug} value={category.slug}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium mb-1">
                     Brand
                   </label>
-                  <select
+                  <Select
                     name="brandSlug"
                     value={editFormData.brandSlug}
-                    onChange={handleEditChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onValueChange={(value) =>
+                      handleEditChange({
+                        target: { name: "brandSlug", value },
+                      } as any)
+                    }
                   >
-                    <option value="">Select a brand</option>
-                    {brands.map((brand) => (
-                      <option key={brand.slug} value={brand.slug}>
-                        {brand.name}
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a brand" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {brands.map((brand) => (
+                        <SelectItem key={brand.slug} value={brand.slug}>
+                          {brand.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Image Identifiers
+                  <label className="block text-sm font-medium mb-1">
+                    Images (URLs, comma-separated)
                   </label>
-                  <input
+                  <Input
                     type="text"
                     name="images"
                     value={editFormData.images}
                     onChange={handleEditChange}
-                    placeholder="image1.jpg,image2.jpg,image3.jpg"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
-                  <p className="mt-1 text-sm text-gray-500">
-                    Enter image identifiers separated by commas. These should
-                    match your R2 image filenames.
-                  </p>
                 </div>
 
                 <div className="md:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="flex items-center">
-                    <input
-                      type="checkbox"
+                    <OrangeToggle
                       name="isActive"
                       checked={editFormData.isActive}
                       onChange={handleEditChange}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <label className="ml-2 text-sm text-gray-700">Active</label>
+                    <label className="ml-2 text-sm">Active</label>
                   </div>
 
                   <div className="flex items-center">
-                    <input
-                      type="checkbox"
+                    <OrangeToggle
                       name="isFeatured"
                       checked={editFormData.isFeatured}
                       onChange={handleEditChange}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <label className="ml-2 text-sm text-gray-700">
-                      Featured
-                    </label>
+                    <label className="ml-2 text-sm">Featured</label>
                   </div>
 
                   <div className="flex items-center">
-                    <input
-                      type="checkbox"
+                    <OrangeToggle
                       name="onSale"
                       checked={editFormData.onSale}
                       onChange={handleEditChange}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <label className="ml-2 text-sm text-gray-700">
-                      On Sale
-                    </label>
+                    <label className="ml-2 text-sm">On Sale</label>
                   </div>
 
                   <div className="flex items-center">
-                    <input
-                      type="checkbox"
+                    <OrangeToggle
                       name="hasVariations"
                       checked={editFormData.hasVariations}
                       onChange={handleEditChange}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <label className="ml-2 text-sm text-gray-700">
-                      Has Variations
-                    </label>
+                    <label className="ml-2 text-sm">Has Variations</label>
                   </div>
 
                   <div className="flex items-center">
-                    <input
-                      type="checkbox"
+                    <OrangeToggle
                       name="hasVolume"
                       checked={editFormData.hasVolume}
                       onChange={handleEditChange}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <label className="ml-2 text-sm text-gray-700">
-                      Has Volume
-                    </label>
+                    <label className="ml-2 text-sm">Has Volume</label>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium mb-1">
                     Volume
                   </label>
-                  <input
+                  <Input
                     type="text"
                     name="volume"
                     value={editFormData.volume}
                     onChange={handleEditChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
-
               {/* Add the variations form when hasVariations is checked */}
               {editFormData.hasVariations && (
-                <div className="mt-6 md:col-span-2">
+                <div className="mt-6">
                   <ProductVariationForm
                     variations={editVariations}
                     onChange={handleEditVariationsChange}
                   />
                 </div>
               )}
-
-              <div className="mt-6 flex justify-end">
-                <button
-                  type="button"
-                  onClick={closeEditModal}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md mr-2 hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
-                >
-                  {isSubmitting ? "Updating..." : "Update Product"}
-                </button>
-              </div>
             </form>
-          </div>
-        </div>
-      )}
+          </DrawerBody>
+
+          <DrawerFooter className="border-t border-border bg-background">
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="secondaryInverted"
+                type="button"
+                onClick={closeEditModal}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="greenInverted"
+                type="submit"
+                form="editProductForm"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Updating..." : "Update Product"}
+              </Button>
+            </div>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
 
       {/* Delete Confirmation Dialog */}
       {showDeleteDialog && (

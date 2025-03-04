@@ -25,6 +25,9 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [imagesLoaded, setImagesLoaded] = useState<boolean[]>([]);
 
+  // Convert comma-separated string to array, or empty array if null
+  const imageArray = product.images?.split(",").map((img) => img.trim()) ?? [];
+
   // Initialize selected variation when product loads
   useEffect(() => {
     if (
@@ -45,8 +48,7 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
     }
 
     // Initialize image loading state
-    const images = product.images ? JSON.parse(product.images) : [];
-    setImagesLoaded(new Array(images.length).fill(false));
+    setImagesLoaded(new Array(imageArray.length).fill(false));
   }, [product]);
 
   // Handle image load events
@@ -202,21 +204,6 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
     });
   };
 
-  // Get attribute display names
-  const getAttributeDisplayName = (name: string): string => {
-    const attributeLabels: Record<string, string> = {
-      apparel_type: "Apparel Type",
-      size: "Size cm",
-      apparel_size: "Size",
-      color: "Color",
-      volume: "Volume g",
-    };
-
-    return (
-      attributeLabels[name] || name.charAt(0).toUpperCase() + name.slice(1)
-    );
-  };
-
   const getAvailableStock = () => {
     if (product.unlimitedStock) return Infinity;
 
@@ -247,20 +234,6 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
     }, 1000);
   };
 
-  // Parse images from JSON string
-  let images: string[] = [];
-  try {
-    if (product.images) {
-      // Handle both regular JSON strings and double-escaped JSON strings
-      const imagesStr = product.images.replace(/\\"/g, '"');
-      const parsed = JSON.parse(imagesStr);
-      images = Array.isArray(parsed) ? parsed : [];
-    }
-  } catch (error) {
-    console.error("Error parsing product images:", error);
-    images = [];
-  }
-
   const availableStock = getAvailableStock();
   const isAvailable = canAddToCart();
   const currentPrice = selectedVariation
@@ -289,9 +262,9 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
             >
               {/* Primary Image */}
               <div className="relative aspect-square flex items-center justify-center overflow-hidden">
-                {images.length > 0 ? (
+                {imageArray.length > 0 ? (
                   <Image
-                    src={`/${images[0]}`}
+                    src={`/${imageArray[0]}`}
                     alt={product.name}
                     fill
                     className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 ease-in-out"
@@ -306,10 +279,10 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
               </div>
 
               {/* Secondary Image (if exists) */}
-              {images.length > 1 && (
+              {imageArray.length > 1 && (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <Image
-                    src={`/${images[1]}`}
+                    src={`/${imageArray[1]}`}
                     alt={product.name}
                     fill
                     className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-500 ease-in-out ${
@@ -411,7 +384,7 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
                   {attributeNames.map((attributeName) => (
                     <div key={attributeName}>
                       <div className="text-xs font-medium text-gray-500 mb-1">
-                        {getAttributeDisplayName(attributeName)}
+                        {attributeName}
                       </div>
                       <div className="flex flex-wrap gap-1">
                         {getUniqueAttributeValues(attributeName).map(

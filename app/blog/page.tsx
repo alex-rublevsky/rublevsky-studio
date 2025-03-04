@@ -2,7 +2,6 @@ import Link from "next/link";
 import BlogPost from "@/components/ui/blog/blogPost";
 import getAllBlogPosts from "@/lib/actions/blog/getAllBlogPosts";
 import { BlogPost as BlogPostType } from "@/types";
-
 // Force this page to be dynamically rendered
 export const dynamic = "force-dynamic";
 
@@ -10,8 +9,7 @@ export default async function Page() {
   try {
     const blogPosts = await getAllBlogPosts();
 
-    // Ensure blogPosts is an array
-    const posts = Array.isArray(blogPosts) ? blogPosts : [];
+    const posts: BlogPostType[] = Array.isArray(blogPosts) ? blogPosts : [];
 
     return (
       <section className="pt-24 sm:pt-32">
@@ -35,7 +33,7 @@ export default async function Page() {
                 key={post.id}
                 title={post.title || "Untitled Post"}
                 body={post.body || ""}
-                images={Array.isArray(post.images) ? post.images : []}
+                images={post.images}
                 productSlug={post.productSlug}
                 slug={post.slug || `post-${post.id}`}
               />

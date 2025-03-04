@@ -13,15 +13,18 @@ import Link from "next/link";
 interface BlogPostProps {
   title: string;
   body: string;
-  images: string[];
+  images: string | null;
   productSlug?: string | null;
   slug: string;
 }
 
 function BlogPost({ title, body, images, productSlug, slug }: BlogPostProps) {
+  // Convert comma-separated string to array, or empty array if null
+  const imageArray = images?.split(",").map((img) => img.trim()) ?? [];
+
   return (
     <article id={`${slug}`} className="max-w-2xl mx-auto">
-      <BlogPostImageGallery images={images} title={title} />
+      <BlogPostImageGallery images={imageArray} title={title} />
 
       <div className="sticky top-0">
         <h3>{title}</h3>

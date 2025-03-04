@@ -4,6 +4,9 @@ import { resolve } from 'path';
 import { readdirSync, existsSync } from 'fs';
 import { execSync } from 'child_process';
 
+// Define types for our data structures
+type Product = typeof mockProducts[0];
+
 // Colors for console output
 const colors = {
   reset: '\x1b[0m',
@@ -113,6 +116,10 @@ async function seedDatabase() {
       
       // Seed products
       console.log('\n🛍️ Seeding products...');
+      await executeRemoteSQL('DELETE FROM products;', 'Clearing products');
+      await executeRemoteSQL('DELETE FROM product_variations;', 'Clearing product variations');
+      await executeRemoteSQL('DELETE FROM variation_attributes;', 'Clearing variation attributes');
+      
       for (const product of mockProducts) {
         // Verify that category and brand exist
         const categoryExists = mockCategories.some(c => c.slug === product.categorySlug);
@@ -152,8 +159,66 @@ async function seedDatabase() {
             '${new Date().toISOString()}'
           );
         `, `Adding product: ${product.name}`);
+
+        // Get the inserted product's ID
+        const productQueryResult = await executeRemoteSQL(
+          `SELECT id FROM products WHERE slug = '${product.slug.replace(/'/g, "''")}'`,
+          'Getting product ID'
+        );
+        const productResult = productQueryResult as unknown as { id: number };
+
+        // Insert variations if they exist
+        if (product.hasVariations && product.variations) {
+          const variations = JSON.parse(product.variations);
+          for (const variation of variations) {
+            // Generate a SKU if not provided
+            const sku = `${product.slug}-${variation.name.toLowerCase().replace(/\s+/g, '-')}`;
+            
+            await executeRemoteSQL(`
+              INSERT INTO product_variations (
+                product_id, sku, price, stock, sort,
+                created_at, updated_at
+              )
+              VALUES (
+                ${productResult.id},
+                '${sku.replace(/'/g, "''")}',
+                ${variation.price},
+                ${variation.stock},
+                ${variation.sort || 0},
+                '${new Date().toISOString()}',
+                '${new Date().toISOString()}'
+              );
+            `, `Adding variation: ${variation.name} for product: ${product.name}`);
+
+            // Get the inserted variation's ID
+            const variationQueryResult = await executeRemoteSQL(
+              `SELECT id FROM product_variations WHERE sku = '${sku.replace(/'/g, "''")}'`,
+              'Getting variation ID'
+            );
+            const variationResult = variationQueryResult as unknown as { id: number };
+
+            // Insert variation attributes
+            if (variation.attributes) {
+              for (const [name, value] of Object.entries(variation.attributes)) {
+                await executeRemoteSQL(`
+                  INSERT INTO variation_attributes (
+                    product_variation_id, name, value,
+                    created_at, updated_at
+                  )
+                  VALUES (
+                    ${variationResult.id},
+                    '${name.replace(/'/g, "''")}',
+                    '${String(value).replace(/'/g, "''")}',
+                    '${new Date().toISOString()}',
+                    '${new Date().toISOString()}'
+                  );
+                `, `Adding attribute: ${name} for variation: ${variation.name}`);
+              }
+            }
+          }
+          console.log(`✅ Added product: ${product.name} with ${variations.length} variations`);
+        }
       }
-      console.log(`✅ Added products successfully`);
       
       // Seed blog posts
       console.log('\n📝 Seeding blog posts...');
@@ -195,142 +260,243 @@ async function seedDatabase() {
       // Connect directly to the SQLite database
       db = new Database(dbPath);
       
-      // Seed categories
-      console.log('\n🏷️ Seeding categories...');
-      db.prepare('DELETE FROM categories').run();
-      console.log('🗑️ Cleared existing categories');
-      
-      const insertCategory = db.prepare(`
-        INSERT INTO categories (name, slug, is_active, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?)
-      `);
-      
-      for (const category of mockCategories) {
-        insertCategory.run(
-          category.name,
-          category.slug,
-          category.isActive ? 1 : 0,
-          new Date().toISOString(),
-          new Date().toISOString()
-        );
-        console.log(`✅ Added category: ${category.name}`);
-      }
-      
-      // Seed brands
-      console.log('\n🏢 Seeding brands...');
-      db.prepare('DELETE FROM brands').run();
-      console.log('🗑️ Cleared existing brands');
-      
-      const insertBrand = db.prepare(`
-        INSERT INTO brands (name, slug, is_active, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?)
-      `);
-      
-      for (const brand of mockBrands) {
-        insertBrand.run(
-          brand.name,
-          brand.slug,
-          brand.isActive ? 1 : 0,
-          new Date().toISOString(),
-          new Date().toISOString()
-        );
-        console.log(`✅ Added brand: ${brand.name}`);
-      }
-      
-      // Seed products
-      console.log('\n🛍️ Seeding products...');
-      db.prepare('DELETE FROM products').run();
-      console.log('🗑️ Cleared existing products');
-      
-      const insertProduct = db.prepare(`
-        INSERT INTO products (
-          category_slug, brand_slug, name, slug, description, images, 
-          price, is_active, is_featured, on_sale, has_variations, 
-          has_volume, volume, stock, unlimited_stock, created_at, updated_at
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `);
-      
-      for (const product of mockProducts) {
-        // Verify that category and brand exist
-        const categoryExists = mockCategories.some(c => c.slug === product.categorySlug);
-        const brandExists = mockBrands.some(b => b.slug === product.brandSlug);
+      try {
+        // Begin transaction
+        db.prepare('BEGIN').run();
         
-        if (!categoryExists || !brandExists) {
-          console.warn(`⚠️ Skipping product ${product.name} due to missing category or brand`);
-          continue;
+        // Clear tables in reverse dependency order
+        console.log('🗑️ Clearing existing data...');
+        const tablesToClear = [
+          'variation_attributes',    // Child of product_variations
+          'product_variations',      // Child of products
+          'blog_posts',             // References products
+          'products',               // Child of categories and brands
+          'categories',             // Independent
+          'brands'                  // Independent
+        ];
+        
+        for (const table of tablesToClear) {
+          db.prepare(`DELETE FROM ${table}`).run();
+          console.log(`✅ Cleared ${table}`);
         }
         
-        // Store minimal description if not linked to a blog post
-        let description = product.description;
-        if (description === 'Linked to blog post with the same slug') {
-          description = ''; // Empty description, will be populated from blog post
+        // Seed categories first (no dependencies)
+        console.log('\n🏷️ Seeding categories...');
+        const insertCategory = db.prepare(`
+          INSERT INTO categories (name, slug, is_active, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?)
+          RETURNING id
+        `);
+        
+        try {
+          for (const category of mockCategories) {
+            const result = insertCategory.run(
+              category.name,
+              category.slug,
+              category.isActive ? 1 : 0,
+              new Date().toISOString(),
+              new Date().toISOString()
+            );
+            console.log(`✅ Added category: ${category.name} (${category.slug})`);
+          }
+        } catch (error) {
+          console.error('❌ Error seeding categories:', error);
+          throw error;
         }
         
-        insertProduct.run(
-          product.categorySlug,
-          product.brandSlug,
-          product.name,
-          product.slug,
-          description,
-          product.images,
-          product.price,
-          product.isActive ? 1 : 0,
-          product.isFeatured ? 1 : 0,
-          product.onSale ? 1 : 0,
-          product.hasVariations ? 1 : 0,
-          product.hasVolume ? 1 : 0,
-          product.volume || null,
-          product.stock,
-          product.unlimitedStock ? 1 : 0,
-          new Date().toISOString(),
-          new Date().toISOString()
-        );
+        // Seed brands next (no dependencies)
+        console.log('\n🏢 Seeding brands...');
+        const insertBrand = db.prepare(`
+          INSERT INTO brands (name, slug, is_active, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?)
+          RETURNING id
+        `);
         
-        console.log(`✅ Added product: ${product.name}`);
-      }
-      
-      // Seed blog posts
-      console.log('\n📝 Seeding blog posts...');
-      db.prepare('DELETE FROM blog_posts').run();
-      console.log('🗑️ Cleared existing blog posts');
-      
-      const insertBlogPost = db.prepare(`
-        INSERT INTO blog_posts (
-          title, slug, body, images, product_slug, 
-          published_at, created_at, updated_at
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-      `);
-      
-      for (const post of mockBlogPosts) {
-        // If post has productSlug, store null for images (they'll come from product)
-        const images = post.productSlug ? null : post.images;
-        
-        insertBlogPost.run(
-          post.title,
-          post.slug,
-          post.body,
-          images,
-          post.productSlug,
-          post.publishedAt,
-          new Date().toISOString(),
-          new Date().toISOString()
-        );
-        
-        if (post.productSlug) {
-          console.log(`✅ Added blog post: ${post.title} (linked to product: ${post.productSlug})`);
-        } else {
-          console.log(`✅ Added blog post: ${post.title}`);
+        try {
+          for (const brand of mockBrands) {
+            const result = insertBrand.run(
+              brand.name,
+              brand.slug,
+              brand.isActive ? 1 : 0,
+              new Date().toISOString(),
+              new Date().toISOString()
+            );
+            console.log(`✅ Added brand: ${brand.name} (${brand.slug})`);
+          }
+        } catch (error) {
+          console.error('❌ Error seeding brands:', error);
+          throw error;
         }
+        
+        // Prepare all statements for products and variations
+        const insertProduct = db.prepare(`
+          INSERT INTO products (
+            category_slug, brand_slug, name, slug, description, images, 
+            price, is_active, is_featured, on_sale, has_variations, 
+            has_volume, volume, stock, unlimited_stock, created_at, updated_at
+          )
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          RETURNING id
+        `);
+
+        const insertVariation = db.prepare(`
+          INSERT INTO product_variations (
+            product_id, sku, price, stock, sort,
+            created_at, updated_at
+          )
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+          RETURNING id
+        `);
+
+        const insertVariationAttribute = db.prepare(`
+          INSERT INTO variation_attributes (
+            product_variation_id, name, value,
+            created_at, updated_at
+          )
+          VALUES (?, ?, ?, ?, ?)
+        `);
+        
+        // Create a compound operation for inserting a product with its variations
+        const insertProductWithVariations = db.transaction((product: Product) => {
+          // Verify category and brand exist
+          const categoryExists = db.prepare('SELECT slug FROM categories WHERE slug = ?').get(product.categorySlug);
+          const brandExists = db.prepare('SELECT slug FROM brands WHERE slug = ?').get(product.brandSlug);
+          
+          if (!categoryExists || !brandExists) {
+            console.warn(`⚠️ Skipping product ${product.name} due to missing category (${product.categorySlug}) or brand (${product.brandSlug})`);
+            return;
+          }
+          
+          try {
+            // Insert the product
+            const { id: productId } = insertProduct.get(
+              product.categorySlug,
+              product.brandSlug,
+              product.name,
+              product.slug,
+              product.description,
+              product.images,
+              product.price,
+              product.isActive ? 1 : 0,
+              product.isFeatured ? 1 : 0,
+              product.onSale ? 1 : 0,
+              product.hasVariations ? 1 : 0,
+              product.hasVolume ? 1 : 0,
+              product.volume || null,
+              product.stock,
+              product.unlimitedStock ? 1 : 0,
+              new Date().toISOString(),
+              new Date().toISOString()
+            );
+            
+            // Insert variations if they exist
+            if (product.hasVariations && product.variations) {
+              const variations = JSON.parse(product.variations);
+              for (const variation of variations) {
+                // Insert variation
+                const { id: variationId } = insertVariation.get(
+                  productId,
+                  variation.sku,
+                  variation.price,
+                  variation.stock,
+                  variation.sort || 0,
+                  new Date().toISOString(),
+                  new Date().toISOString()
+                );
+
+                // Insert variation attributes
+                if (variation.attributes && Array.isArray(variation.attributes)) {
+                  for (const attr of variation.attributes) {
+                    insertVariationAttribute.run(
+                      variationId,
+                      attr.name,
+                      attr.value,
+                      new Date().toISOString(),
+                      new Date().toISOString()
+                    );
+                  }
+                }
+              }
+              console.log(`✅ Added product: ${product.name} with ${variations.length} variations`);
+            } else {
+              console.log(`✅ Added product: ${product.name}`);
+            }
+          } catch (error) {
+            console.error(`❌ Error adding product ${product.name}:`, error);
+            throw error; // Re-throw to trigger transaction rollback
+          }
+        });
+        
+        // Seed products and their variations in a single transaction per product
+        console.log('\n🛍️ Seeding products...');
+        for (const product of mockProducts) {
+          insertProductWithVariations(product);
+        }
+        
+        // Seed blog posts last (they reference products)
+        console.log('\n📝 Seeding blog posts...');
+        const insertBlogPost = db.prepare(`
+          INSERT INTO blog_posts (
+            title, slug, body, images, product_slug, 
+            published_at, created_at, updated_at
+          )
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+
+        const checkProductExists = db.prepare('SELECT slug FROM products WHERE slug = ?');
+
+        try {
+          for (const post of mockBlogPosts) {
+            const images = post.productSlug ? null : post.images;
+            
+            // Verify product exists if productSlug is provided
+            let finalProductSlug: string | null = post.productSlug;
+            if (finalProductSlug) {
+              const productExists = checkProductExists.get(finalProductSlug);
+              if (!productExists) {
+                console.warn(`⚠️ Blog post "${post.title}" references non-existent product "${finalProductSlug}". Setting productSlug to null.`);
+                finalProductSlug = null;
+              }
+            }
+            
+            insertBlogPost.run(
+              post.title,
+              post.slug,
+              post.body,
+              images,
+              finalProductSlug,
+              post.publishedAt,
+              new Date().toISOString(),
+              new Date().toISOString()
+            );
+            
+            if (finalProductSlug) {
+              console.log(`✅ Added blog post: ${post.title} (linked to product: ${finalProductSlug})`);
+            } else {
+              console.log(`✅ Added blog post: ${post.title}`);
+            }
+          }
+        } catch (error) {
+          console.error('❌ Error seeding blog posts:', error);
+          throw error;
+        }
+
+        // Commit the transaction
+        db.prepare('COMMIT').run();
+        console.log('\n✅ All data seeded successfully!');
+
+      } catch (error) {
+        // Rollback on error
+        db.prepare('ROLLBACK').run();
+        throw error;
+      } finally {
+        // Close the database connection
+        db.close();
       }
-      
-      // Close the database connection
-      db.close();
     }
-    
+
     console.log(`\n🎉 ${isRemote ? 'Remote' : 'Local'} database seeded successfully!`);
-    
+
   } catch (error) {
     console.error(`❌ Error seeding ${isRemote ? 'remote' : 'local'} database:`, error);
   } finally {
@@ -338,4 +504,4 @@ async function seedDatabase() {
   }
 }
 
-seedDatabase(); 
+seedDatabase();

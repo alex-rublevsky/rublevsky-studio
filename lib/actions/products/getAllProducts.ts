@@ -47,7 +47,10 @@ export default async function getAllProducts({
     // Fetch variations and blog post descriptions for products
     const enrichedProducts = await Promise.all(
       productList.map(async (product: Product) => {
-        const enrichedProduct: ProductWithVariations = { ...product };
+        const enrichedProduct: ProductWithVariations = { 
+          ...product,
+          images: product.images
+        };
 
         // Check for linked blog post and use its body as description
         const linkedBlogPost = await db

@@ -68,14 +68,11 @@ export default function ProductPage() {
 
         setProduct(productData);
 
-        // Parse images from JSON string
-        try {
-          const imageArray = JSON.parse(productData.images || "[]") as string[];
-          if (imageArray.length > 0) {
-            setSelectedImage(imageArray[0]);
-          }
-        } catch (e) {
-          console.error("Error parsing product images:", e);
+        // Get first image from comma-separated string
+        const imageArray =
+          productData.images?.split(",").map((img) => img.trim()) ?? [];
+        if (imageArray.length > 0) {
+          setSelectedImage(imageArray[0]);
         }
 
         // If product has variations, select the first available one
@@ -125,12 +122,7 @@ export default function ProductPage() {
   // Get images array from product
   const getImages = (): string[] => {
     if (!product || !product.images) return [];
-    try {
-      return JSON.parse(product.images) as string[];
-    } catch (e) {
-      console.error("Error parsing product images:", e);
-      return [];
-    }
+    return product.images.split(",").map((img) => img.trim());
   };
 
   // Get unique attribute names from all variations
@@ -266,21 +258,6 @@ export default function ProductPage() {
 
       return matchesThisAttribute && matchesOtherAttributes;
     });
-  };
-
-  // Get attribute display names
-  const getAttributeDisplayName = (name: string): string => {
-    const attributeLabels: Record<string, string> = {
-      apparel_type: "Apparel Type",
-      size: "Size cm",
-      apparel_size: "Size",
-      color: "Color",
-      volume: "Volume g",
-    };
-
-    return (
-      attributeLabels[name] || name.charAt(0).toUpperCase() + name.slice(1)
-    );
   };
 
   const images = getImages();
@@ -431,7 +408,7 @@ export default function ProductPage() {
                   {attributeNames.map((attributeName) => (
                     <div key={attributeName} className="w-auto min-w-fit">
                       <h4 className="text-lg font-medium mb-1">
-                        {getAttributeDisplayName(attributeName)}
+                        {attributeName}
                       </h4>
                       <div className="flex flex-wrap gap-2">
                         {getUniqueAttributeValues(attributeName).map(

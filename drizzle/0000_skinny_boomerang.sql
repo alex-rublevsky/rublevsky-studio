@@ -48,7 +48,7 @@ CREATE TABLE `brands` (
 	`slug` text NOT NULL,
 	`image` text,
 	`is_active` integer DEFAULT true NOT NULL,
-	`created_at` text DEFAULT '2025-03-03T16:43:50.114Z' NOT NULL,
+	`created_at` text DEFAULT '2025-03-04T17:47:13.058Z' NOT NULL,
 	`updated_at` text
 );
 --> statement-breakpoint
@@ -59,7 +59,7 @@ CREATE TABLE `categories` (
 	`slug` text NOT NULL,
 	`image` text,
 	`is_active` integer DEFAULT true NOT NULL,
-	`created_at` text DEFAULT '2025-03-03T16:43:50.113Z' NOT NULL,
+	`created_at` text DEFAULT '2025-03-04T17:47:13.057Z' NOT NULL,
 	`updated_at` text
 );
 --> statement-breakpoint
@@ -94,7 +94,6 @@ CREATE TABLE `order_items` (
 --> statement-breakpoint
 CREATE TABLE `orders` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`user_id` integer,
 	`grand_total` real,
 	`payment_method` text,
 	`payment_status` text,
@@ -104,8 +103,7 @@ CREATE TABLE `orders` (
 	`shipping_method` text,
 	`notes` text,
 	`created_at` text,
-	`updated_at` text,
-	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
+	`updated_at` text
 );
 --> statement-breakpoint
 CREATE TABLE `product_variations` (
@@ -145,18 +143,6 @@ CREATE TABLE `products` (
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `products_slug_unique` ON `products` (`slug`);--> statement-breakpoint
-CREATE TABLE `users` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`name` text NOT NULL,
-	`email` text NOT NULL,
-	`email_verified_at` text,
-	`password` text NOT NULL,
-	`remember_token` text,
-	`created_at` text,
-	`updated_at` text
-);
---> statement-breakpoint
-CREATE UNIQUE INDEX `users_email_unique` ON `users` (`email`);--> statement-breakpoint
 CREATE TABLE `variation_attributes` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`product_variation_id` integer,

@@ -13,6 +13,17 @@ import DeleteConfirmationDialog from "@/components/ui/admin/DeleteConfirmationDi
 import { toast } from "sonner";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { OrangeToggle } from "@/components/ui/toggle";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerBody,
+  DrawerFooter,
+} from "@/components/ui/drawer";
 
 export default function BrandsPage() {
   const router = useRouter();
@@ -20,13 +31,13 @@ export default function BrandsPage() {
   const [createFormData, setCreateFormData] = useState<BrandFormData>({
     name: "",
     slug: "",
-    image: "",
+    logo: "",
     isActive: true,
   });
   const [editFormData, setEditFormData] = useState<BrandFormData>({
     name: "",
     slug: "",
-    image: "",
+    logo: "",
     isActive: true,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -135,7 +146,7 @@ export default function BrandsPage() {
       await createBrand({
         name: createFormData.name,
         slug: createFormData.slug,
-        image: createFormData.image || null,
+        image: createFormData.logo || null,
         isActive: createFormData.isActive,
       });
 
@@ -144,7 +155,7 @@ export default function BrandsPage() {
       setCreateFormData({
         name: "",
         slug: "",
-        image: "",
+        logo: "",
         isActive: true,
       });
       setIsCreateAutoSlug(true);
@@ -163,7 +174,7 @@ export default function BrandsPage() {
     setEditFormData({
       name: brand.name,
       slug: brand.slug,
-      image: brand.image || "",
+      logo: brand.image || "",
       isActive: brand.isActive,
     });
     // Enable auto-slug generation when editing
@@ -183,7 +194,7 @@ export default function BrandsPage() {
       await updateBrand(editingBrandId, {
         name: editFormData.name,
         slug: editFormData.slug,
-        image: editFormData.image || null,
+        image: editFormData.logo || null,
         isActive: editFormData.isActive,
       });
 
@@ -194,7 +205,7 @@ export default function BrandsPage() {
       setEditFormData({
         name: "",
         slug: "",
-        image: "",
+        logo: "",
         isActive: true,
       });
       setIsEditAutoSlug(false);
@@ -214,7 +225,7 @@ export default function BrandsPage() {
     setEditFormData({
       name: "",
       slug: "",
-      image: "",
+      logo: "",
       isActive: true,
     });
     setIsEditAutoSlug(false);
@@ -275,13 +286,12 @@ export default function BrandsPage() {
               <label className="block text-sm font-medium mb-1">
                 Brand Name *
               </label>
-              <input
+              <Input
                 type="text"
                 name="name"
                 value={createFormData.name}
                 onChange={handleCreateChange}
                 required
-                className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
@@ -293,16 +303,17 @@ export default function BrandsPage() {
                 </span>
               </label>
               <div className="flex">
-                <input
+                <Input
                   type="text"
                   name="slug"
                   value={createFormData.slug}
                   onChange={handleCreateChange}
                   required
-                  className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                 />
-                <button
+                <Button
+                  variant="inverted"
                   type="button"
+                  size="sm"
                   onClick={() => {
                     setIsCreateAutoSlug(true);
                     if (createFormData.name) {
@@ -319,33 +330,30 @@ export default function BrandsPage() {
                       }));
                     }
                   }}
-                  className="ml-2 px-3 py-2 bg-muted hover:bg-muted/80 rounded-md focus:outline-none"
+                  className="ml-2"
                 >
                   Reset
-                </button>
+                </Button>
               </div>
             </div>
 
             <div className="md:col-span-2">
               <label className="block text-sm font-medium mb-1">Logo URL</label>
-              <input
+              <Input
                 type="text"
-                name="image"
-                value={createFormData.image}
+                name="logo"
+                value={createFormData.logo}
                 onChange={handleCreateChange}
                 placeholder="https://example.com/logo.jpg"
-                className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
             <div className="md:col-span-2">
               <div className="flex items-center">
-                <input
-                  type="checkbox"
+                <OrangeToggle
                   name="isActive"
                   checked={createFormData.isActive}
                   onChange={handleCreateChange}
-                  className="h-4 w-4 text-primary focus:ring-primary border-input rounded"
                 />
                 <label className="ml-2 text-sm">Active</label>
               </div>
@@ -353,11 +361,7 @@ export default function BrandsPage() {
           </div>
 
           <div className="mt-6">
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50"
-            >
+            <Button variant="inverted" type="submit" disabled={isSubmitting}>
               {isSubmitting ? "Creating..." : "Create Brand"}
             </Button>
           </div>
@@ -419,29 +423,26 @@ export default function BrandsPage() {
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          brand.isActive
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                      >
+                      <Badge variant={brand.isActive ? "default" : "secondary"}>
                         {brand.isActive ? "Active" : "Inactive"}
-                      </span>
+                      </Badge>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
+                      <Button
+                        variant="inverted"
+                        size="sm"
                         onClick={() => handleEdit(brand)}
-                        className="text-primary hover:text-primary/80 mr-4"
+                        className="mr-4"
                       >
                         Edit
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        variant="invertedDestructive"
+                        size="sm"
                         onClick={() => handleDeleteClick(brand)}
-                        className="text-destructive hover:text-destructive/80"
                       >
                         Delete
-                      </button>
+                      </Button>
                     </td>
                   </tr>
                 ))}
@@ -451,31 +452,31 @@ export default function BrandsPage() {
         )}
       </div>
 
-      {/* Edit Modal */}
-      {showEditModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-card rounded-lg shadow-lg p-6 w-full max-w-2xl">
-            <h2 className="text-xl font-semibold mb-4">Edit Brand</h2>
+      <Drawer open={showEditModal} onOpenChange={setShowEditModal}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Edit Brand</DrawerTitle>
+          </DrawerHeader>
 
+          <DrawerBody>
             {error && showEditModal && (
               <div className="bg-destructive/20 border border-destructive text-destructive-foreground px-4 py-3 rounded mb-4">
                 {error}
               </div>
             )}
 
-            <form onSubmit={handleUpdate}>
+            <form onSubmit={handleUpdate} id="editBrandForm">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium mb-1">
                     Brand Name *
                   </label>
-                  <input
+                  <Input
                     type="text"
                     name="name"
                     value={editFormData.name}
                     onChange={handleEditChange}
                     required
-                    className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
 
@@ -486,17 +487,18 @@ export default function BrandsPage() {
                       (Auto-generated from name)
                     </span>
                   </label>
-                  <div className="flex">
-                    <input
+                  <div className="flex gap-2">
+                    <Input
                       type="text"
                       name="slug"
                       value={editFormData.slug}
                       onChange={handleEditChange}
                       required
-                      className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                     />
-                    <button
+                    <Button
+                      variant="inverted"
                       type="button"
+                      size="sm"
                       onClick={() => {
                         setIsEditAutoSlug(true);
                         if (editFormData.name) {
@@ -513,10 +515,9 @@ export default function BrandsPage() {
                           }));
                         }
                       }}
-                      className="ml-2 px-3 py-2 bg-muted hover:bg-muted/80 rounded-md focus:outline-none"
                     >
                       Reset
-                    </button>
+                    </Button>
                   </div>
                 </div>
 
@@ -524,50 +525,50 @@ export default function BrandsPage() {
                   <label className="block text-sm font-medium mb-1">
                     Logo URL
                   </label>
-                  <input
+                  <Input
                     type="text"
-                    name="image"
-                    value={editFormData.image}
+                    name="logo"
+                    value={editFormData.logo}
                     onChange={handleEditChange}
                     placeholder="https://example.com/logo.jpg"
-                    className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
 
                 <div className="md:col-span-2">
                   <div className="flex items-center">
-                    <input
-                      type="checkbox"
+                    <OrangeToggle
                       name="isActive"
                       checked={editFormData.isActive}
                       onChange={handleEditChange}
-                      className="h-4 w-4 text-primary focus:ring-primary border-input rounded"
                     />
                     <label className="ml-2 text-sm">Active</label>
                   </div>
                 </div>
               </div>
-
-              <div className="mt-6 flex justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={closeEditModal}
-                  className="px-4 py-2 border border-input bg-muted text-foreground rounded-md hover:bg-muted/80 focus:outline-none"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 focus:outline-none disabled:opacity-50"
-                >
-                  {isSubmitting ? "Updating..." : "Update Brand"}
-                </button>
-              </div>
             </form>
-          </div>
-        </div>
-      )}
+          </DrawerBody>
+
+          <DrawerFooter>
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="secondaryInverted"
+                type="button"
+                onClick={closeEditModal}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="greenInverted"
+                type="submit"
+                form="editBrandForm"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Updating..." : "Update Brand"}
+              </Button>
+            </div>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
 
       {/* Delete Confirmation Dialog */}
       {showDeleteDialog && (

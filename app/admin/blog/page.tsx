@@ -16,6 +16,16 @@ import { toast } from "sonner";
 import ProductSelector from "@/components/ui/admin/ProductSelector";
 import Link from "next/link";
 import BlogCategoryManager from "@/components/ui/admin/BlogCategoryManager";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function BlogPage() {
   const router = useRouter();
@@ -132,6 +142,20 @@ export default function BlogPage() {
     setCreateFormData({
       ...createFormData,
       [name]: type === "checkbox" ? checked : value,
+    });
+  };
+
+  const handleCategoryChange = (value: string) => {
+    setCreateFormData({
+      ...createFormData,
+      blogCategorySlug: value,
+    });
+  };
+
+  const handleEditCategoryChange = (value: string) => {
+    setEditFormData({
+      ...editFormData,
+      blogCategorySlug: value,
     });
   };
 
@@ -325,13 +349,12 @@ export default function BlogPage() {
               <label className="block mb-2" htmlFor="title">
                 Title
               </label>
-              <input
+              <Input
                 type="text"
                 id="title"
                 name="title"
                 value={createFormData.title}
                 onChange={handleCreateChange}
-                className="w-full px-3 py-2 bg-muted border border-input rounded"
                 required
               />
             </div>
@@ -340,13 +363,12 @@ export default function BlogPage() {
               <label className="block mb-2" htmlFor="slug">
                 Slug
               </label>
-              <input
+              <Input
                 type="text"
                 id="slug"
                 name="slug"
                 value={createFormData.slug}
                 onChange={handleCreateChange}
-                className="w-full px-3 py-2 bg-muted border border-input rounded"
                 required
               />
             </div>
@@ -355,32 +377,36 @@ export default function BlogPage() {
               <label className="block mb-2" htmlFor="blogCategorySlug">
                 Category
               </label>
-              <select
-                id="blogCategorySlug"
-                name="blogCategorySlug"
+              <Select
                 value={createFormData.blogCategorySlug}
-                onChange={handleCreateChange}
-                className="w-full px-3 py-2 bg-muted border border-input rounded"
+                onValueChange={handleCategoryChange}
               >
-                <option value="">Select a category</option>
-                {blogCategories.map((category) => (
-                  <option key={category.id} value={category.slug}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger variant="inverted">
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent variant="inverted">
+                  {blogCategories.map((category) => (
+                    <SelectItem
+                      key={category.id}
+                      value={category.slug}
+                      variant="inverted"
+                    >
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="mb-4">
               <label className="block mb-2" htmlFor="body">
                 Content
               </label>
-              <textarea
+              <Textarea
                 id="body"
                 name="body"
                 value={createFormData.body}
                 onChange={handleCreateChange}
-                className="w-full px-3 py-2 bg-muted border border-input rounded"
                 rows={6}
                 required
               />
@@ -390,13 +416,12 @@ export default function BlogPage() {
               <label className="block mb-2" htmlFor="images">
                 Images (comma-separated URLs)
               </label>
-              <input
+              <Input
                 type="text"
                 id="images"
                 name="images"
                 value={createFormData.images}
                 onChange={handleCreateChange}
-                className="w-full px-3 py-2 bg-muted border border-input rounded"
               />
             </div>
 
@@ -410,13 +435,9 @@ export default function BlogPage() {
               />
             </div>
 
-            <button
-              type="submit"
-              className="bg-primary text-primary-foreground px-4 py-2 rounded hover:bg-primary/90"
-              disabled={isSubmitting}
-            >
+            <Button variant="inverted" type="submit" disabled={isSubmitting}>
               {isSubmitting ? "Adding..." : "Add Blog Post"}
-            </button>
+            </Button>
           </form>
         </div>
 
@@ -532,13 +553,12 @@ export default function BlogPage() {
                 <label className="block mb-2" htmlFor="edit-title">
                   Title
                 </label>
-                <input
+                <Input
                   type="text"
                   id="edit-title"
                   name="title"
                   value={editFormData.title}
                   onChange={handleEditChange}
-                  className="w-full px-3 py-2 bg-muted border border-input rounded"
                   required
                 />
               </div>
@@ -547,13 +567,12 @@ export default function BlogPage() {
                 <label className="block mb-2" htmlFor="edit-slug">
                   Slug
                 </label>
-                <input
+                <Input
                   type="text"
                   id="edit-slug"
                   name="slug"
                   value={editFormData.slug}
                   onChange={handleEditChange}
-                  className="w-full px-3 py-2 bg-muted border border-input rounded"
                   required
                 />
               </div>
@@ -562,32 +581,41 @@ export default function BlogPage() {
                 <label className="block mb-2" htmlFor="edit-blogCategorySlug">
                   Category
                 </label>
-                <select
-                  id="edit-blogCategorySlug"
-                  name="blogCategorySlug"
+                <Select
                   value={editFormData.blogCategorySlug}
-                  onChange={handleEditChange}
-                  className="w-full px-3 py-2 bg-muted border border-input rounded"
+                  onValueChange={(value) => {
+                    setEditFormData({
+                      ...editFormData,
+                      blogCategorySlug: value,
+                    });
+                  }}
                 >
-                  <option value="">Select a category</option>
-                  {blogCategories.map((category) => (
-                    <option key={category.id} value={category.slug}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger variant="inverted">
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent variant="inverted">
+                    {blogCategories.map((category) => (
+                      <SelectItem
+                        key={category.id}
+                        value={category.slug}
+                        variant="inverted"
+                      >
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="mb-4">
                 <label className="block mb-2" htmlFor="edit-body">
                   Content
                 </label>
-                <textarea
+                <Textarea
                   id="edit-body"
                   name="body"
                   value={editFormData.body}
                   onChange={handleEditChange}
-                  className="w-full px-3 py-2 bg-muted border border-input rounded"
                   rows={6}
                   required
                 />
@@ -597,13 +625,11 @@ export default function BlogPage() {
                 <label className="block mb-2" htmlFor="edit-images">
                   Images (comma-separated URLs)
                 </label>
-                <input
-                  type="text"
+                <Textarea
                   id="edit-images"
                   name="images"
                   value={editFormData.images}
                   onChange={handleEditChange}
-                  className="w-full px-3 py-2 bg-muted border border-input rounded"
                 />
               </div>
 
@@ -621,7 +647,7 @@ export default function BlogPage() {
                 <label className="block mb-2" htmlFor="edit-publishedAt">
                   Published Date
                 </label>
-                <input
+                <Input
                   type="datetime-local"
                   id="edit-publishedAt"
                   name="publishedAt"
@@ -633,7 +659,6 @@ export default function BlogPage() {
                       : ""
                   }
                   onChange={handleEditChange}
-                  className="w-full px-3 py-2 bg-muted border border-input rounded"
                 />
               </div>
 

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 
 export default function AdminLayout({
   children,
@@ -9,6 +10,16 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+
+  // Add dark class to body for admin pages
+  useEffect(() => {
+    document.body.classList.add("dark");
+
+    // Cleanup function to remove the class when navigating away
+    return () => {
+      document.body.classList.remove("dark");
+    };
+  }, []);
 
   const adminLinks = [
     { name: "Dashboard", path: "/admin" },
@@ -54,7 +65,7 @@ export default function AdminLayout({
         </div>
       </nav>
 
-      <main className="py-8 px-4 sm:px-8">
+      <main className="pt-8 pb-24 px-4 sm:px-8">
         <div className="w-full">{children}</div>
       </main>
     </div>

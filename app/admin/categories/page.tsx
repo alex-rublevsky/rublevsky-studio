@@ -12,6 +12,18 @@ import {
 import DeleteConfirmationDialog from "@/components/ui/admin/DeleteConfirmationDialog";
 import { toast } from "sonner";
 import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { OrangeToggle } from "@/components/ui/toggle";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerBody,
+  DrawerFooter,
+} from "@/components/ui/drawer";
+import { Badge } from "@/components/ui/badge";
 
 export default function CategoriesPage() {
   const router = useRouter();
@@ -278,13 +290,12 @@ export default function CategoriesPage() {
               <label className="block text-sm font-medium mb-1">
                 Category Name *
               </label>
-              <input
+              <Input
                 type="text"
                 name="name"
                 value={createFormData.name}
                 onChange={handleCreateChange}
                 required
-                className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
@@ -296,16 +307,18 @@ export default function CategoriesPage() {
                 </span>
               </label>
               <div className="flex">
-                <input
+                <Input
                   type="text"
                   name="slug"
                   value={createFormData.slug}
                   onChange={handleCreateChange}
                   required
-                  className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                 />
-                <button
+                <Button
+                  variant="inverted"
                   type="button"
+                  className="ml-2"
+                  size="sm"
                   onClick={() => {
                     setIsCreateAutoSlug(true);
                     if (createFormData.name) {
@@ -322,10 +335,9 @@ export default function CategoriesPage() {
                       }));
                     }
                   }}
-                  className="ml-2 px-3 py-2 bg-muted hover:bg-muted/80 rounded-md focus:outline-none"
                 >
                   Reset
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -333,24 +345,21 @@ export default function CategoriesPage() {
               <label className="block text-sm font-medium mb-1">
                 Image URL
               </label>
-              <input
+              <Input
                 type="text"
                 name="image"
                 value={createFormData.image}
                 onChange={handleCreateChange}
                 placeholder="https://example.com/image.jpg"
-                className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
             <div className="md:col-span-2">
               <div className="flex items-center">
-                <input
-                  type="checkbox"
+                <OrangeToggle
                   name="isActive"
                   checked={createFormData.isActive}
                   onChange={handleCreateChange}
-                  className="h-4 w-4 text-primary focus:ring-primary border-input rounded"
                 />
                 <label className="ml-2 text-sm">Active</label>
               </div>
@@ -358,13 +367,9 @@ export default function CategoriesPage() {
           </div>
 
           <div className="mt-6">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50"
-            >
+            <Button variant="inverted" type="submit" disabled={isSubmitting}>
               {isSubmitting ? "Creating..." : "Create Category"}
-            </button>
+            </Button>
           </div>
         </form>
       </div>
@@ -424,29 +429,28 @@ export default function CategoriesPage() {
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          category.isActive
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
+                      <Badge
+                        variant={category.isActive ? "default" : "secondary"}
                       >
                         {category.isActive ? "Active" : "Inactive"}
-                      </span>
+                      </Badge>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
+                      <Button
+                        variant="inverted"
+                        className="mr-2"
+                        size="sm"
                         onClick={() => handleEdit(category)}
-                        className="text-primary hover:text-primary/80 mr-4"
                       >
                         Edit
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        variant="invertedDestructive"
+                        size="sm"
                         onClick={() => handleDeleteClick(category)}
-                        className="text-destructive hover:text-destructive/80"
                       >
                         Delete
-                      </button>
+                      </Button>
                     </td>
                   </tr>
                 ))}
@@ -456,30 +460,31 @@ export default function CategoriesPage() {
         )}
       </div>
 
-      {showEditModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-card rounded-lg shadow-lg p-6 w-full max-w-2xl">
-            <h2 className="text-xl font-semibold mb-4">Edit Category</h2>
+      <Drawer open={showEditModal} onOpenChange={setShowEditModal}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Edit Category</DrawerTitle>
+          </DrawerHeader>
 
+          <DrawerBody>
             {error && showEditModal && (
               <div className="bg-destructive/20 border border-destructive text-destructive-foreground px-4 py-3 rounded mb-4">
                 {error}
               </div>
             )}
 
-            <form onSubmit={handleUpdate}>
+            <form onSubmit={handleUpdate} id="editCategoryForm">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium mb-1">
                     Category Name *
                   </label>
-                  <input
+                  <Input
                     type="text"
                     name="name"
                     value={editFormData.name}
                     onChange={handleEditChange}
                     required
-                    className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
 
@@ -490,16 +495,17 @@ export default function CategoriesPage() {
                       (Auto-generated from name)
                     </span>
                   </label>
-                  <div className="flex">
-                    <input
+                  <div className="flex gap-2">
+                    <Input
                       type="text"
                       name="slug"
                       value={editFormData.slug}
                       onChange={handleEditChange}
                       required
-                      className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                     />
-                    <button
+                    <Button
+                      variant="inverted"
+                      size="sm"
                       type="button"
                       onClick={() => {
                         setIsEditAutoSlug(true);
@@ -517,10 +523,9 @@ export default function CategoriesPage() {
                           }));
                         }
                       }}
-                      className="ml-2 px-3 py-2 bg-muted hover:bg-muted/80 rounded-md focus:outline-none"
                     >
                       Reset
-                    </button>
+                    </Button>
                   </div>
                 </div>
 
@@ -528,50 +533,50 @@ export default function CategoriesPage() {
                   <label className="block text-sm font-medium mb-1">
                     Image URL
                   </label>
-                  <input
+                  <Input
                     type="text"
                     name="image"
                     value={editFormData.image}
                     onChange={handleEditChange}
                     placeholder="https://example.com/image.jpg"
-                    className="w-full px-3 py-2 bg-muted border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                 </div>
 
                 <div className="md:col-span-2">
                   <div className="flex items-center">
-                    <input
-                      type="checkbox"
+                    <OrangeToggle
                       name="isActive"
                       checked={editFormData.isActive}
                       onChange={handleEditChange}
-                      className="h-4 w-4 text-primary focus:ring-primary border-input rounded"
                     />
                     <label className="ml-2 text-sm">Active</label>
                   </div>
                 </div>
               </div>
-
-              <div className="mt-6 flex justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={closeEditModal}
-                  className="px-4 py-2 border border-input bg-muted text-foreground rounded-md hover:bg-muted/80 focus:outline-none"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 focus:outline-none disabled:opacity-50"
-                >
-                  {isSubmitting ? "Updating..." : "Update Category"}
-                </button>
-              </div>
             </form>
-          </div>
-        </div>
-      )}
+          </DrawerBody>
+
+          <DrawerFooter>
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="secondaryInverted"
+                type="button"
+                onClick={closeEditModal}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="greenInverted"
+                type="submit"
+                form="editCategoryForm"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Updating..." : "Update Category"}
+              </Button>
+            </div>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
 
       {showDeleteDialog && (
         <DeleteConfirmationDialog
