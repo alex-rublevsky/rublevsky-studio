@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { Drawer, DrawerContent, DrawerTrigger } from "./drawer";
 
 interface NavItem {
   name: string;
@@ -84,6 +85,26 @@ const defaultUtilityItems: NavItem[] = [
   { name: "Blog", url: "/blog" },
   { name: "Store", url: "/store" },
 ];
+
+// Add cart button component
+interface CartButtonProps {
+  onClick: () => void;
+}
+
+const CartButton = ({ onClick }: CartButtonProps) => {
+  const pathname = usePathname();
+
+  if (pathname !== "/store") return null;
+
+  return (
+    <button
+      onClick={onClick}
+      className="flex h-10 items-center justify-center rounded-full border border-black bg-white px-4 text-xs uppercase"
+    >
+      Cart
+    </button>
+  );
+};
 
 interface TabProps {
   children: React.ReactNode;
@@ -184,15 +205,28 @@ const NavGroup = ({ items, className }: NavGroupProps) => {
 };
 
 export function NavBar({ className }: Omit<NavBarProps, "items">) {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
     <nav
       className={cn(
-        "fixed bottom-0 left-0 right-0 z-50 mb-6 flex justify-center gap-4",
+        "fixed bottom-0 left-0 right-0 z-50 mb-6 flex justify-center gap-4 items-center",
         className
       )}
     >
       <NavGroup items={defaultWorkItems} />
       <NavGroup items={defaultUtilityItems} />
+      <Drawer open={isOpen} onOpenChange={setIsOpen}>
+        <DrawerTrigger asChild>
+          <CartButton onClick={() => setIsOpen(true)} />
+        </DrawerTrigger>
+        <DrawerContent>
+          <div className="p-6">
+            <h2 className="text-lg font-semibold mb-4">Shopping Cart</h2>
+            <div className="text-sm text-gray-500">Your cart is empty</div>
+          </div>
+        </DrawerContent>
+      </Drawer>
     </nav>
   );
 }
