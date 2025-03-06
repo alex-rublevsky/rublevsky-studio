@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { X, Plus, Minus } from "lucide-react";
 import { useCart, CartItem as CartItemType } from "@/lib/context/CartContext";
+import { QuantitySelector } from "@/components/ui/shared/QuantitySelector";
 
 interface CartItemProps {
   item: CartItemType;
@@ -36,7 +37,7 @@ export function CartItem({ item }: CartItemProps) {
       <div className="flex-shrink-0 relative w-16 h-16 bg-gray-100 rounded overflow-hidden">
         {item.image ? (
           <Image
-            src={item.image}
+            src={`/${item.image}`}
             alt={item.productName}
             fill
             className="object-cover"
@@ -62,25 +63,13 @@ export function CartItem({ item }: CartItemProps) {
         )}
 
         <div className="flex items-center justify-between mt-2">
-          <div className="flex items-center border border-gray-200 rounded">
-            <button
-              onClick={handleDecrement}
-              disabled={item.quantity <= 1}
-              className="p-1 hover:bg-gray-100 disabled:opacity-50"
-              aria-label="Decrease quantity"
-            >
-              <Minus size={14} />
-            </button>
-            <span className="px-2 min-w-8 text-center">{item.quantity}</span>
-            <button
-              onClick={handleIncrement}
-              disabled={item.quantity >= item.maxStock}
-              className="p-1 hover:bg-gray-100 disabled:opacity-50"
-              aria-label="Increase quantity"
-            >
-              <Plus size={14} />
-            </button>
-          </div>
+          <QuantitySelector
+            quantity={item.quantity}
+            onIncrement={handleIncrement}
+            onDecrement={handleDecrement}
+            maxQuantity={item.maxStock}
+            size="compact"
+          />
           <div className="font-medium">
             ${(item.price * item.quantity).toFixed(2)}
           </div>

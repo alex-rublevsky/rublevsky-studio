@@ -9,6 +9,7 @@ import getProductBySlug from "@/lib/actions/products/getProductBySlug";
 import Link from "next/link";
 import { useCart } from "@/lib/context/CartContext";
 import { toast } from "sonner";
+import { QuantitySelector } from "@/components/ui/shared/QuantitySelector";
 
 // Extended product interface with category, brand, and variations information
 interface ProductWithDetails extends Product {
@@ -501,31 +502,15 @@ export default function ProductPage() {
 
               {/* Quantity selector and Add to cart */}
               <div className="flex flex-wrap items-center gap-4">
-                <div className="flex items-center space-x-4">
-                  <button
-                    onClick={decrementQuantity}
-                    className={`w-10 h-10 rounded-full hover:bg-gray-100 transition flex items-center justify-center ${
-                      quantity <= 1 || !canAddToCart
-                        ? "opacity-50 cursor-not-allowed"
-                        : ""
-                    }`}
-                    disabled={quantity <= 1 || !canAddToCart}
-                  >
-                    <span className="text-2xl">-</span>
-                  </button>
-                  <span className="text-xl font-medium">{quantity}</span>
-                  <button
-                    onClick={incrementQuantity}
-                    className={`w-10 h-10 rounded-full hover:bg-gray-100 transition flex items-center justify-center ${
-                      !canAddToCart || quantity >= effectiveStock
-                        ? "opacity-50 cursor-not-allowed"
-                        : ""
-                    }`}
-                    disabled={!canAddToCart || quantity >= effectiveStock}
-                  >
-                    <span className="text-2xl">+</span>
-                  </button>
-                </div>
+                <QuantitySelector
+                  quantity={quantity}
+                  onIncrement={incrementQuantity}
+                  onDecrement={decrementQuantity}
+                  minQuantity={1}
+                  maxQuantity={effectiveStock}
+                  disabled={!canAddToCart}
+                  size="default"
+                />
                 <Button
                   onClick={handleAddToCart}
                   size="lg"
