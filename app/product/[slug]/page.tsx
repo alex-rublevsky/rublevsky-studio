@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useParams } from "next/navigation";
 import { Product, ProductVariation, VariationAttribute } from "@/types";
 import getProductBySlug from "@/lib/actions/products/getProductBySlug";
 import Link from "next/link";
+import { useCart } from "@/lib/context/CartContext";
+import { toast } from "sonner";
 
 // Extended product interface with category, brand, and variations information
 interface ProductWithDetails extends Product {
@@ -46,6 +48,7 @@ export default function ProductPage() {
   const [selectedAttributes, setSelectedAttributes] = useState<
     Record<string, string>
   >({});
+  const { addProductToCart, cart } = useCart();
 
   // Fetch product data using the server action
   useEffect(() => {
@@ -103,12 +106,28 @@ export default function ProductPage() {
     fetchProduct();
   }, [slug]);
 
+  // Calculate effective stock by subtracting cart quantities
+  const getEffectiveStock = useMemo(() => {
+    if (!product) return 0;
+
+    const dbStock = selectedVariation
+      ? selectedVariation.stock
+      : product.stock || 0;
+
+    // Find matching item in cart (if any)
+    const cartItem = cart.items.find(
+      (item) =>
+        item.productId === product.id &&
+        item.variationId === (selectedVariation?.id || undefined)
+    );
+
+    // Subtract cart quantity from database stock
+    return cartItem ? Math.max(0, dbStock - cartItem.quantity) : dbStock;
+  }, [product, selectedVariation, cart.items]);
+
   // Handle quantity changes
   const incrementQuantity = () => {
-    const maxStock = selectedVariation
-      ? selectedVariation.stock
-      : product?.stock || 0;
-    if (quantity < maxStock) {
+    if (quantity < getEffectiveStock) {
       setQuantity((prev) => prev + 1);
     }
   };
@@ -189,6 +208,8 @@ export default function ProductPage() {
 
     if (newVariation) {
       setSelectedVariation(newVariation);
+      // Reset quantity to 1 when variation changes
+      setQuantity(1);
     }
   };
 
@@ -264,11 +285,27 @@ export default function ProductPage() {
   const currentPrice = selectedVariation
     ? selectedVariation.price
     : product?.price || 0;
-  const currentStock = selectedVariation
-    ? selectedVariation.stock
-    : product?.stock || 0;
-  const canAddToCart = product?.isActive && currentStock > 0;
+
+  // Use the effective stock instead of just the database stock
+  const effectiveStock = getEffectiveStock;
+  const canAddToCart = product?.isActive && effectiveStock > 0;
   const attributeNames = getUniqueAttributeNames();
+
+  const handleAddToCart = async () => {
+    if (!product) return;
+
+    const success = await addProductToCart(
+      product,
+      quantity,
+      selectedVariation,
+      selectedAttributes
+    );
+
+    if (success) {
+      // Reset quantity to 1 after successful add
+      setQuantity(1);
+    }
+  };
 
   if (loading) {
     return (
@@ -363,25 +400,24 @@ export default function ProductPage() {
               </div>
 
               {/* Main image */}
-              <div className="order-1 lg:order-2 flex-grow w-full">
-                <div className="flex items-center justify-center lg:items-start lg:justify-start">
-                  <div className="relative w-full">
-                    {selectedImage ? (
+              <div className="flex items-center justify-center lg:items-start lg:justify-start order-1 flex-grow relative">
+                <div className="relative w-full">
+                  {selectedImage ? (
+                    <div className="relative">
                       <Image
                         src={`/${selectedImage}`}
                         alt={`${product.name} main image`}
-                        width={1200}
-                        height={1200}
-                        className="max-w-full w-full lg:w-auto max-h-[75vh] lg:max-h-[calc(100vh-6rem)] object-contain rounded-none lg:rounded-lg"
+                        width={3000}
+                        height={3000}
                         priority
-                        sizes="(max-width: 1024px) 100vw"
+                        className="max-w-full w-full lg:w-auto max-h-[calc(100vh-5rem)] object-contain rounded-none lg:rounded-lg relative z-[2]"
                       />
-                    ) : (
-                      <div className="w-full h-[75vh] bg-gray-100 flex items-center justify-center rounded-lg">
-                        <p className="text-gray-500">No image available</p>
-                      </div>
-                    )}
-                  </div>
+                    </div>
+                  ) : (
+                    <div className="w-full h-[75vh] bg-gray-100 flex items-center justify-center rounded-lg">
+                      <p className="text-gray-500">No image available</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -454,10 +490,10 @@ export default function ProductPage() {
                 </div>
               )}
 
-              {/* Stock information */}
+              {/* Stock information - updated to show effective stock */}
               <div className="text-sm">
-                {currentStock > 0 ? (
-                  <p>In stock: {currentStock}</p>
+                {effectiveStock > 0 ? (
+                  <p>In stock: {effectiveStock}</p>
                 ) : (
                   <p className="text-red-600">Out of stock</p>
                 )}
@@ -481,58 +517,61 @@ export default function ProductPage() {
                   <button
                     onClick={incrementQuantity}
                     className={`w-10 h-10 rounded-full hover:bg-gray-100 transition flex items-center justify-center ${
-                      !canAddToCart || quantity >= currentStock
+                      !canAddToCart || quantity >= effectiveStock
                         ? "opacity-50 cursor-not-allowed"
                         : ""
                     }`}
-                    disabled={!canAddToCart || quantity >= currentStock}
+                    disabled={!canAddToCart || quantity >= effectiveStock}
                   >
                     <span className="text-2xl">+</span>
                   </button>
                 </div>
-
                 <Button
+                  onClick={handleAddToCart}
                   size="lg"
                   disabled={!canAddToCart}
-                  onClick={() => canAddToCart && alert("Added to cart")}
                 >
-                  {canAddToCart ? (
-                    <>
-                      Add to Cart <span className="opacity-75">CAD</span> $
-                      {(currentPrice * quantity).toFixed(2)}
-                    </>
-                  ) : (
-                    "Out of Stock"
-                  )}
+                  {canAddToCart ? "Add to Cart" : "Out of Stock"}
                 </Button>
               </div>
 
-              {/* Description */}
-              <div className="mt-8">
-                <h4 className="text-lg font-medium mb-2">Description</h4>
-                <div className="prose prose-sm">
-                  {product.description || "No description available."}
-                </div>
+              {/* Product description */}
+              <div className="prose max-w-none">
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: product.description || "",
+                  }}
+                />
               </div>
 
-              {/* Category and Brand */}
-              {(product.category || product.brand) && (
-                <div className="border-t pt-4 mt-4">
-                  {product.category && (
-                    <div className="mb-2">
-                      <span className="text-gray-500">Category:</span>{" "}
+              {/* Metadata */}
+              <div className="space-y-2 text-sm text-gray-600">
+                {product.category && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-500">Category:</span>
+                    <Link
+                      href={`/store?category=${product.category.slug}`}
+                      className="hover:underline hover:text-black"
+                    >
                       {product.category.name}
-                    </div>
-                  )}
-                  {product.brand && (
-                    <div>
-                      <span className="text-gray-500">Brand:</span>{" "}
-                      {product.brand.name}
-                    </div>
-                  )}
-                </div>
-              )}
+                    </Link>
+                  </div>
+                )}
 
+                {product.brand && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-500">Brand:</span>
+                    <Link
+                      href={`/store?brand=${product.brand.slug}`}
+                      className="hover:underline hover:text-black"
+                    >
+                      {product.brand.name}
+                    </Link>
+                  </div>
+                )}
+              </div>
+
+              {/* Blog post link if exists */}
               {renderBlogPostLink()}
             </div>
           </div>

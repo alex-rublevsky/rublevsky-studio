@@ -2,9 +2,10 @@
 
 import { Product, ProductVariation, VariationAttribute } from "@/types";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import styles from "./productCard.module.css";
+import { useCart } from "@/lib/context/CartContext";
 
 // Extended product interface with variations
 interface ProductWithVariations extends Product {
@@ -24,6 +25,7 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
   >({});
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [imagesLoaded, setImagesLoaded] = useState<boolean[]>([]);
+  const { addProductToCart, cart } = useCart();
 
   // Convert comma-separated string to array, or empty array if null
   const imageArray = product.images?.split(",").map((img) => img.trim()) ?? [];
@@ -204,7 +206,8 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
     });
   };
 
-  const getAvailableStock = () => {
+  // Get database stock without considering cart
+  const getDbStock = () => {
     if (product.unlimitedStock) return Infinity;
 
     if (product.hasVariations && selectedVariation) {
@@ -214,27 +217,48 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
     return product.stock;
   };
 
+  // Calculate effective stock (database stock minus cart quantities)
+  const getEffectiveStock = useMemo(() => {
+    const dbStock = getDbStock();
+    if (dbStock === Infinity) return Infinity;
+
+    // Find matching item in cart (if any)
+    const cartItem = cart.items.find(
+      (item) =>
+        item.productId === product.id &&
+        item.variationId === (selectedVariation?.id || undefined)
+    );
+
+    // Subtract cart quantity from database stock
+    return cartItem ? Math.max(0, dbStock - cartItem.quantity) : dbStock;
+  }, [product.id, selectedVariation, cart.items, getDbStock]);
+
   const canAddToCart = () => {
-    const stock = getAvailableStock();
-    return product.isActive && stock > 0;
+    return product.isActive && getEffectiveStock > 0;
   };
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     if (!canAddToCart()) return;
 
     setIsAddingToCart(true);
-    // Simulate adding to cart
-    setTimeout(() => {
-      console.log(`Adding product ${product.id} to cart`);
-      if (selectedVariation) {
-        console.log(`Selected variation: ${selectedVariation.id}`);
-      }
+
+    try {
+      // Use the context function directly
+      await addProductToCart(
+        product,
+        1, // Default quantity of 1 when adding from product card
+        selectedVariation,
+        selectedAttributes
+      );
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+    } finally {
       setIsAddingToCart(false);
-    }, 1000);
+    }
   };
 
-  const availableStock = getAvailableStock();
+  const effectiveStock = getEffectiveStock;
   const isAvailable = canAddToCart();
   const currentPrice = selectedVariation
     ? selectedVariation.price
@@ -357,9 +381,13 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
                 </div>
 
                 {!product.unlimitedStock && (
-                  <span className="text-xs whitespace-nowrap">
-                    {availableStock} in stock
-                  </span>
+                  <div className="mt-1 text-xs text-gray-500">
+                    {effectiveStock > 0 ? (
+                      <span>In stock: {effectiveStock}</span>
+                    ) : (
+                      <span className="text-red-600">Out of stock</span>
+                    )}
+                  </div>
                 )}
               </div>
 
