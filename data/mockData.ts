@@ -1001,6 +1001,230 @@ export const mockProducts = [
       }
     ])
   },
+  {
+    name: "Skateboard Cat Sticker",
+    slug: "skateboard-cat-sticker",
+    description: "cool af!",
+    images: "skateboard-cat-sticker-1.jpg, skateboard-cat-preview.jpg",
+    price: 3.00,
+    isActive: true,
+    isFeatured: false,
+    onSale: false,
+    hasVariations: true,
+    hasVolume: false,
+    stock: 0,
+    unlimitedStock: true,
+    categorySlug: "stickers",
+    brandSlug: "rublevsky-studio",
+    variations: JSON.stringify([
+      {
+        sku: "skateboard-cat-sticker-6x4-3",
+        name: "6x4.3",
+        price: 3.00,
+        stock: 0,
+        sort: 0,
+        attributes: [
+          {
+            attributeId: "SIZE_CM",
+            value: "6x4.3"
+          }
+        ]
+      },
+      {
+        sku: "skateboard-cat-sticker-8x5-7",
+        name: "8x5.7",
+        price: 4.00,
+        stock: 0,
+        sort: 1,
+        attributes: [
+          {
+            attributeId: "SIZE_CM",
+            value: "8x5.7"
+          }
+        ]
+      },
+      {
+        sku: "skateboard-cat-sticker-10x7-1",
+        name: "10x7.1",
+        price: 4.00,
+        stock: 0,
+        sort: 2,
+        attributes: [
+          {
+            attributeId: "SIZE_CM",
+            value: "10x7.1"
+          }
+        ]
+      },
+      {
+        sku: "skateboard-cat-sticker-12x8-6",
+        name: "12x8.6",
+        price: 5.00,
+        stock: 0,
+        sort: 3,
+        attributes: [
+          {
+            attributeId: "SIZE_CM",
+            value: "12x8.6"
+          }
+        ]
+      },
+      {
+        sku: "skateboard-cat-sticker-14x10",
+        name: "14x10",
+        price: 5.00,
+        stock: 0,
+        sort: 4,
+        attributes: [
+          {
+            attributeId: "SIZE_CM",
+            value: "14x10"
+          }
+        ]
+      }
+    ])
+  },
+  {
+    name: "Birch Sticker",
+    slug: "birch-sticker",
+    description: "Illegal eternity",
+    images: "birch.jpg, birch-preview.JPG",
+    price: 3.00,
+    isActive: true,
+    isFeatured: false,
+    onSale: false,
+    hasVariations: true,
+    hasVolume: false,
+    stock: 0,
+    unlimitedStock: true,
+    categorySlug: "stickers",
+    brandSlug: "rublevsky-studio",
+    variations: JSON.stringify([
+      {
+        sku: "birch-sticker-6x8",
+        name: "6x8",
+        price: 3.00,
+        stock: 0,
+        sort: 0,
+        attributes: [
+          {
+            attributeId: "SIZE_CM",
+            value: "6x8"
+          }
+        ]
+      },
+      {
+        sku: "birch-sticker-8x10-6",
+        name: "8x10.6",
+        price: 4.00,
+        stock: 0,
+        sort: 1,
+        attributes: [
+          {
+            attributeId: "SIZE_CM",
+            value: "8x10.6"
+          }
+        ]
+      },
+      {
+        sku: "birch-sticker-10x13-3",
+        name: "10x13.3",
+        price: 4.00,
+        stock: 0,
+        sort: 2,
+        attributes: [
+          {
+            attributeId: "SIZE_CM",
+            value: "10x13.3"
+          }
+        ]
+      },
+      {
+        sku: "birch-sticker-12x16",
+        name: "12x16",
+        price: 5.00,
+        stock: 0,
+        sort: 3,
+        attributes: [
+          {
+            attributeId: "SIZE_CM",
+            value: "12x16"
+          }
+        ]
+      },
+      {
+        sku: "birch-sticker-14x18-6",
+        name: "14x18.6",
+        price: 5.00,
+        stock: 0,
+        sort: 4,
+        attributes: [
+          {
+            attributeId: "SIZE_CM",
+            value: "14x18.6"
+          }
+        ]
+      }
+    ])
+  },
+  {
+    name: "Shu Pu'er \"Black Cat\", Ailao Shan, 70 year old trees, 2022",
+    slug: "black-cat-puer",
+    description: "Linked to blog post with the same slug",
+    images: "black-cat-47-1.jpg, black-cat-26-1.jpg, black-cat-7.jpg, black-cat-18-1.jpg,black-cat-7.jpg, black-cat-6.jpg, black-cat-5.jpg",
+    price: 30.00,
+    isActive: true,
+    isFeatured: true,
+    onSale: false,
+    hasVariations: true,
+    hasWeight: true,
+    weight: "100",
+    stock: 0,
+    unlimitedStock: false,
+    categorySlug: "tea",
+    brandSlug: "yunnan-sourcing",
+    variations: JSON.stringify([
+      {
+        sku: "black-cat-puer-50g",
+        name: "50g",
+        price: 17.00,
+        stock: 0,
+        sort: 0,
+        attributes: [
+          {
+            attributeId: "WEIGHT_G",
+            value: "50"
+          }
+        ]
+      },
+      {
+        sku: "black-cat-puer-75g",
+        name: "75g",
+        price: 23.00,
+        stock: 0,
+        sort: 1,
+        attributes: [
+          {
+            attributeId: "WEIGHT_G",
+            value: "75"
+          }
+        ]
+      },
+      {
+        sku: "black-cat-puer-100g",
+        name: "100g",
+        price: 30.00,
+        stock: 0,
+        sort: 2,
+        attributes: [
+          {
+            attributeId: "WEIGHT_G",
+            value: "100"
+          }
+        ]
+      }
+    ])
+  },
 ];
 
 // Mock Blog Posts
@@ -1112,5 +1336,28 @@ I was hooked by the phenomenon's limitless spectrum of flavors and aromas, where
     images: "hranitel-2.jpg, hranitel-4.jpg, hranitel-6.jpg",
     publishedAt: "2024-01-10",
     productSlug: null,
+  },
+  {
+    title: "Shu Pu-erh \"Black Cat\" 🐈‍⬛",
+    slug: "black-cat-puer",
+    body: `🌿 Harvested in 2022 from 70-year-old trees on Ai Lao Mountain, Pu'er Prefecture, Menghai County, Xishuangbanna. After a year of aging, it was pressed in September 2023.
+
+Aroma
+Hot leaves: a sweetish scent with notes of tree bark, hazelnut, subtle spice, and minerality.
+
+Wet leaves: hematogen, milk chocolate with caramel, cocoa beans.
+
+Taste
+Full-bodied and oily, velvety, slightly metallic, creamy, and pastry-like. Pronounced sweetness, particularly toffee and powdered sugar.
+
+Effect
+Energizing, sharpens focus for a productive mindset.
+
+A cat in a cup—this tea is all about a grin from ear to ear with the first sip, a rich extraction even with less leaf, and a first-class awakening from deep sleep. 🥱
+
+Musical pairing — Falling in Love with the cat . 💃`,
+    images: "black-cat-47-1.jpg, black-cat-26-1.jpg, black-cat-7.jpg",
+    publishedAt: "2025-02-25",
+    productSlug: "black-cat-puer",
   },
 ]; 

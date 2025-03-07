@@ -479,11 +479,6 @@ export default function ProductPage() {
               {/* Price */}
               <div className="text-xl font-medium">
                 ${currentPrice.toFixed(2)} CAD
-                {product.hasWeight && product.weight && (
-                  <span className="text-gray-500 text-lg ml-1">
-                    /{product.weight}
-                  </span>
-                )}
               </div>
 
               {/* Variation selection */}
@@ -492,7 +487,7 @@ export default function ProductPage() {
                   {attributeNames.map((attributeId) => (
                     <div key={attributeId} className="w-auto min-w-fit">
                       <h4 className="text-lg font-medium mb-1">
-                        {attributeId}
+                        {getAttributeDisplayName(attributeId)}
                       </h4>
                       <div className="flex flex-wrap gap-2">
                         {getUniqueAttributeValues(attributeId).map((value) => {

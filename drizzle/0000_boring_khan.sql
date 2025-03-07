@@ -48,7 +48,7 @@ CREATE TABLE `brands` (
 	`slug` text NOT NULL,
 	`image` text,
 	`is_active` integer DEFAULT true NOT NULL,
-	`created_at` text DEFAULT '2025-03-07T17:09:00.907Z' NOT NULL,
+	`created_at` text DEFAULT '2025-03-07T17:26:29.164Z' NOT NULL,
 	`updated_at` text
 );
 --> statement-breakpoint
@@ -59,7 +59,7 @@ CREATE TABLE `categories` (
 	`slug` text NOT NULL,
 	`image` text,
 	`is_active` integer DEFAULT true NOT NULL,
-	`created_at` text DEFAULT '2025-03-07T17:09:00.906Z' NOT NULL,
+	`created_at` text DEFAULT '2025-03-07T17:26:29.163Z' NOT NULL,
 	`updated_at` text
 );
 --> statement-breakpoint
