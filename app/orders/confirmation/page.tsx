@@ -3,60 +3,51 @@
 import React, { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CheckCircle } from "lucide-react";
 
 export default function OrderConfirmationPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId");
 
-  // Redirect to homepage if no order ID is provided
+  // Redirect to store if no order ID is provided
   useEffect(() => {
     if (!orderId) {
-      router.push("/");
+      router.push("/store");
     }
   }, [orderId, router]);
 
+  // Don't render anything if there's no order ID
   if (!orderId) {
     return null;
   }
 
   return (
-    <main className="max-w-3xl mx-auto my-16 px-4">
-      <div className="flex flex-col items-center text-center">
-        <CheckCircle2 className="w-16 h-16 text-green-500 mb-6" />
+    <div className="container max-w-4xl py-16">
+      <div className="bg-white p-8 rounded-lg border text-center">
+        <div className="flex justify-center mb-6">
+          <CheckCircle className="h-16 w-16 text-green-500" />
+        </div>
 
-        <h1 className="text-2xl md:text-3xl font-bold mb-2">
-          Thank You for Your Order!
-        </h1>
-        <p className="text-gray-600 mb-8">
-          Your order #{orderId} has been placed successfully.
+        <h1 className="text-3xl font-bold mb-4">Thank You for Your Order!</h1>
+
+        <p className="text-lg mb-6">
+          Your order #{orderId} has been successfully placed.
         </p>
 
-        <div className="w-full max-w-md p-6 border border-gray-200 rounded-lg mb-8">
-          <h2 className="text-lg font-medium mb-4">Order Summary</h2>
-          <p className="text-gray-600 mb-2">
-            We've sent a confirmation email with all the details of your order.
-          </p>
-          <p className="text-gray-600">
-            You can check the status of your order anytime in your account.
-          </p>
-        </div>
+        <p className="mb-8 text-gray-600">
+          We'll be in touch shortly to discuss shipping details and finalize
+          your order. A confirmation email will be sent to the address you
+          provided.
+        </p>
 
-        <div className="flex flex-col sm:flex-row gap-4">
-          <Button asChild>
+        <div className="flex justify-center gap-4">
+          <Button asChild variant="outline">
             <Link href="/store">Continue Shopping</Link>
           </Button>
-
-          {/* Add this button once you implement the order details page */}
-          {/* <Button variant="outline" asChild>
-            <Link href={`/orders/${orderId}`}>
-              View Order Details
-            </Link>
-          </Button> */}
         </div>
       </div>
-    </main>
+    </div>
   );
 }

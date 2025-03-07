@@ -3,12 +3,10 @@
 import React, { useState } from "react";
 import { useCart } from "@/lib/context/CartContext";
 import { Button } from "@/components/ui/button";
-import { createOrder } from "@/lib/actions/cart/createOrder";
-import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 export function CartSummary() {
-  const { cart, clearCart, setCartOpen } = useCart();
+  const { cart, setCartOpen } = useCart();
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -27,20 +25,12 @@ export function CartSummary() {
     setIsLoading(true);
 
     try {
-      const result = await createOrder(cart.items);
+      // Close the cart drawer
+      setCartOpen(false);
 
-      if (result.success) {
-        toast.success("Order placed successfully!");
-        clearCart();
-        setCartOpen(false);
-
-        // Redirect to order confirmation page
-        router.push(`/orders/confirmation?orderId=${result.orderId}`);
-      } else {
-        toast.error(result.message);
-      }
+      // Redirect to checkout page
+      router.push("/checkout");
     } catch (error) {
-      toast.error("Failed to place order. Please try again.");
       console.error("Checkout error:", error);
     } finally {
       setIsLoading(false);
