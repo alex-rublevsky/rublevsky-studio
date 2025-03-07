@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   DndContext,
   closestCenter,
@@ -18,7 +18,10 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { getProductAttributes } from "@/lib/actions/products";
+import {
+  PRODUCT_ATTRIBUTES,
+  getAttributeDisplayName,
+} from "@/lib/utils/productAttributes";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,7 +43,7 @@ interface Variation {
 }
 
 interface VariationAttribute {
-  name: string;
+  attributeId: string;
   value: string;
 }
 
@@ -62,11 +65,11 @@ function SortableVariationItem({
   variation: Variation;
   onRemove: (id: string) => void;
   onUpdate: (id: string, field: keyof Variation, value: any) => void;
-  onAddAttribute: (variationId: string, attributeName: string) => void;
-  onRemoveAttribute: (variationId: string, attributeName: string) => void;
+  onAddAttribute: (variationId: string, attributeId: string) => void;
+  onRemoveAttribute: (variationId: string, attributeId: string) => void;
   onUpdateAttributeValue: (
     variationId: string,
-    attributeName: string,
+    attributeId: string,
     value: string
   ) => void;
   unusedAttributes: string[];
@@ -154,10 +157,13 @@ function SortableVariationItem({
         {variation.attributes.length > 0 ? (
           <div className="space-y-3">
             {variation.attributes.map((attr) => (
-              <div key={attr.name} className="flex items-center space-x-2">
+              <div
+                key={attr.attributeId}
+                className="flex items-center space-x-2"
+              >
                 <div className="flex-grow grid grid-cols-2 gap-2">
                   <div className="text-sm font-medium text-foreground">
-                    {attr.name}:
+                    {getAttributeDisplayName(attr.attributeId)}:
                   </div>
                   <Input
                     type="text"
@@ -165,7 +171,7 @@ function SortableVariationItem({
                     onChange={(e) =>
                       onUpdateAttributeValue(
                         variation.id,
-                        attr.name,
+                        attr.attributeId,
                         e.target.value
                       )
                     }
@@ -174,7 +180,9 @@ function SortableVariationItem({
                 </div>
                 <Button
                   type="button"
-                  onClick={() => onRemoveAttribute(variation.id, attr.name)}
+                  onClick={() =>
+                    onRemoveAttribute(variation.id, attr.attributeId)
+                  }
                   variant="invertedDestructive"
                   size="icon"
                 >
@@ -206,7 +214,7 @@ function SortableVariationItem({
               <SelectContent>
                 {unusedAttributes.map((attr) => (
                   <SelectItem key={attr} value={attr}>
-                    {attr}
+                    {getAttributeDisplayName(attr)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -231,8 +239,9 @@ export default function ProductVariationForm({
   variations,
   onChange,
 }: ProductVariationFormProps) {
-  const [availableAttributes, setAvailableAttributes] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [availableAttributes] = useState<string[]>(
+    Object.values(PRODUCT_ATTRIBUTES).map((attr) => attr.id)
+  );
   const [error, setError] = useState<string | null>(null);
 
   const sensors = useSensors(
@@ -241,24 +250,6 @@ export default function ProductVariationForm({
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
-
-  useEffect(() => {
-    fetchAttributes();
-  }, []);
-
-  const fetchAttributes = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const attributes = await getProductAttributes();
-      setAvailableAttributes(attributes || []);
-    } catch (err) {
-      console.error("Error fetching attributes:", err);
-      setError(err instanceof Error ? err.message : "An error occurred");
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -306,22 +297,19 @@ export default function ProductVariationForm({
     );
   };
 
-  const handleAddAttribute = (variationId: string, attributeName: string) => {
+  const handleAddAttribute = (variationId: string, attributeId: string) => {
     onChange(
       variations.map((variation) => {
         if (variation.id === variationId) {
           // Check if attribute already exists
           const attributeExists = variation.attributes.some(
-            (attr) => attr.name === attributeName
+            (attr) => attr.attributeId === attributeId
           );
 
           if (!attributeExists) {
             return {
               ...variation,
-              attributes: [
-                ...variation.attributes,
-                { name: attributeName, value: "" },
-              ],
+              attributes: [...variation.attributes, { attributeId, value: "" }],
             };
           }
         }
@@ -330,17 +318,14 @@ export default function ProductVariationForm({
     );
   };
 
-  const handleRemoveAttribute = (
-    variationId: string,
-    attributeName: string
-  ) => {
+  const handleRemoveAttribute = (variationId: string, attributeId: string) => {
     onChange(
       variations.map((variation) => {
         if (variation.id === variationId) {
           return {
             ...variation,
             attributes: variation.attributes.filter(
-              (attr) => attr.name !== attributeName
+              (attr) => attr.attributeId !== attributeId
             ),
           };
         }
@@ -351,7 +336,7 @@ export default function ProductVariationForm({
 
   const handleUpdateAttributeValue = (
     variationId: string,
-    attributeName: string,
+    attributeId: string,
     value: string
   ) => {
     onChange(
@@ -360,7 +345,7 @@ export default function ProductVariationForm({
           return {
             ...variation,
             attributes: variation.attributes.map((attr) =>
-              attr.name === attributeName ? { ...attr, value } : attr
+              attr.attributeId === attributeId ? { ...attr, value } : attr
             ),
           };
         }
@@ -371,17 +356,16 @@ export default function ProductVariationForm({
 
   // Get unused attributes for a specific variation
   const getUnusedAttributes = (variation: Variation) => {
-    const usedAttributeNames = variation.attributes.map((attr) => attr.name);
+    const usedAttributeIds = variation.attributes.map(
+      (attr) => attr.attributeId
+    );
     return availableAttributes.filter(
-      (attr) => !usedAttributeNames.includes(attr)
+      (attr) => !usedAttributeIds.includes(attr)
     );
   };
 
   return (
     <div className="space-y-6 pb-6">
-      {isLoading && (
-        <p className="text-muted-foreground">Loading attributes...</p>
-      )}
       {error && (
         <div className="bg-destructive/10 border border-destructive text-destructive px-4 py-3 rounded">
           Error loading attributes: {error}

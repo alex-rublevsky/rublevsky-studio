@@ -14,20 +14,20 @@ interface CartItemProps {
 export function CartItem({ item }: CartItemProps) {
   const { updateQuantity, removeFromCart, cart } = useCart();
 
-  // Calculate effective max quantity for volume-based products
+  // Calculate effective max quantity for weight-based products
   const effectiveMaxQuantity = useMemo(() => {
     if (item.unlimitedStock) return undefined;
 
-    // For volume-based products
-    if (item.volumeInfo) {
-      const { totalVolume } = item.volumeInfo;
-      const currentVariationVolume = parseInt(
-        item.attributes?.["Volume g"] || "0"
+    // For weight-based products
+    if (item.weightInfo) {
+      const { totalWeight } = item.weightInfo;
+      const currentVariationWeight = parseInt(
+        item.attributes?.["WEIGHT_G"] || "0"
       );
 
-      if (currentVariationVolume) {
-        // Calculate total volume used by all variations in cart EXCEPT current item
-        const volumeUsedInCart = cart.items
+      if (currentVariationWeight) {
+        // Calculate total weight used by all variations in cart EXCEPT current item
+        const weightUsedInCart = cart.items
           .filter(
             (cartItem) =>
               cartItem.productId === item.productId &&
@@ -35,18 +35,18 @@ export function CartItem({ item }: CartItemProps) {
               !(cartItem.variationId === item.variationId)
           )
           .reduce((total, cartItem) => {
-            const cartItemVolume = cartItem.attributes?.["Volume G"];
-            if (cartItemVolume) {
-              return total + parseInt(cartItemVolume) * cartItem.quantity;
+            const cartItemWeight = cartItem.attributes?.["WEIGHT_G"];
+            if (cartItemWeight) {
+              return total + parseInt(cartItemWeight) * cartItem.quantity;
             }
             return total;
           }, 0);
 
-        // Calculate remaining volume (excluding current item's usage)
-        const remainingVolume = Math.max(0, totalVolume - volumeUsedInCart);
+        // Calculate remaining weight (excluding current item's usage)
+        const remainingWeight = Math.max(0, totalWeight - weightUsedInCart);
 
         // Calculate how many packages of current variation can be made
-        return Math.floor(remainingVolume / currentVariationVolume);
+        return Math.floor(remainingWeight / currentVariationWeight);
       }
     }
 

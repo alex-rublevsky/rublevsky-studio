@@ -2,15 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Product,
-  Category,
-  Brand,
-  ProductFormData,
-  ProductsResponse,
-  CategoriesResponse,
-  BrandsResponse,
-} from "@/types";
+import { Product, Category, Brand, ProductFormData } from "@/types";
 import Image from "next/image";
 import ProductVariationForm from "@/components/ui/admin/ProductVariationForm";
 import { getAllBrands } from "@/lib/actions/brands";
@@ -56,7 +48,7 @@ interface Variation {
 }
 
 interface VariationAttribute {
-  name: string;
+  attributeId: string;
   value: string;
 }
 
@@ -74,8 +66,8 @@ export default function ProductsPage() {
     isFeatured: false,
     onSale: false,
     hasVariations: false,
-    hasVolume: false,
-    volume: "",
+    hasWeight: false,
+    weight: "",
     images: "",
     variations: [],
   });
@@ -91,8 +83,8 @@ export default function ProductsPage() {
     isFeatured: false,
     onSale: false,
     hasVariations: false,
-    hasVolume: false,
-    volume: "",
+    hasWeight: false,
+    weight: "",
     images: "",
     variations: [],
   });
@@ -264,7 +256,7 @@ export default function ProductsPage() {
       stock: variation.stock.toString(),
       sort: variation.sort,
       attributes: variation.attributes.map((attr) => ({
-        name: attr.name,
+        attributeId: attr.attributeId,
         value: attr.value,
       })),
     }));
@@ -293,8 +285,8 @@ export default function ProductsPage() {
         isFeatured: false,
         onSale: false,
         hasVariations: false,
-        hasVolume: false,
-        volume: "",
+        hasWeight: false,
+        weight: "",
         images: "",
         variations: [],
       });
@@ -330,8 +322,8 @@ export default function ProductsPage() {
       isFeatured: product.isFeatured,
       onSale: product.onSale,
       hasVariations: product.hasVariations,
-      hasVolume: product.hasVolume,
-      volume: product.volume || "",
+      hasWeight: product.hasWeight,
+      weight: product.weight || "",
       images: product.images || "",
       variations: [],
     });
@@ -357,7 +349,7 @@ export default function ProductsPage() {
                 sort: variation.sort || 0,
                 attributes: variation.attributes
                   ? variation.attributes.map((attr: any) => ({
-                      name: attr.name,
+                      attributeId: attr.attributeId,
                       value: attr.value,
                     }))
                   : [],
@@ -389,7 +381,7 @@ export default function ProductsPage() {
       stock: variation.stock.toString(),
       sort: variation.sort,
       attributes: variation.attributes.map((attr) => ({
-        name: attr.name,
+        attributeId: attr.attributeId,
         value: attr.value,
       })),
     }));
@@ -422,8 +414,8 @@ export default function ProductsPage() {
         isFeatured: false,
         onSale: false,
         hasVariations: false,
-        hasVolume: false,
-        volume: "",
+        hasWeight: false,
+        weight: "",
         images: "",
         variations: [],
       });
@@ -458,8 +450,8 @@ export default function ProductsPage() {
       isFeatured: false,
       onSale: false,
       hasVariations: false,
-      hasVolume: false,
-      volume: "",
+      hasWeight: false,
+      weight: "",
       images: "",
       variations: [],
     });
@@ -500,7 +492,7 @@ export default function ProductsPage() {
         stock: v.stock.toString(),
         sort: v.sort,
         attributes: v.attributes.map((attr) => ({
-          name: attr.name,
+          attributeId: attr.attributeId,
           value: attr.value,
         })),
       })),
@@ -518,7 +510,7 @@ export default function ProductsPage() {
         stock: v.stock.toString(),
         sort: v.sort,
         attributes: v.attributes.map((attr) => ({
-          name: attr.name,
+          attributeId: attr.attributeId,
           value: attr.value,
         })),
       })),
@@ -813,20 +805,22 @@ export default function ProductsPage() {
 
                 <div className="flex items-center">
                   <OrangeToggle
-                    name="hasVolume"
-                    checked={formData.hasVolume}
+                    name="hasWeight"
+                    checked={formData.hasWeight}
                     onChange={handleChange}
                   />
-                  <label className="ml-2 text-sm">Has Volume</label>
+                  <label className="ml-2 text-sm">Has Weight</label>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Volume</label>
+                <label className="block text-sm font-medium mb-1">
+                  Weight g
+                </label>
                 <Input
                   type="text"
-                  name="volume"
-                  value={formData.volume}
+                  name="weight"
+                  value={formData.weight}
                   onChange={handleChange}
                 />
               </div>
@@ -1149,22 +1143,22 @@ export default function ProductsPage() {
 
                   <div className="flex items-center">
                     <OrangeToggle
-                      name="hasVolume"
-                      checked={editFormData.hasVolume}
+                      name="hasWeight"
+                      checked={editFormData.hasWeight}
                       onChange={handleEditChange}
                     />
-                    <label className="ml-2 text-sm">Has Volume</label>
+                    <label className="ml-2 text-sm">Has Weight</label>
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Volume
+                    Weight g
                   </label>
                   <Input
                     type="text"
-                    name="volume"
-                    value={editFormData.volume}
+                    name="weight"
+                    value={editFormData.weight}
                     onChange={handleEditChange}
                   />
                 </div>

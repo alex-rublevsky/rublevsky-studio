@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "18558870-be0f-47b9-b56e-1b7e87e1db3c",
+  "id": "da3611cc-d3b9-4d8e-acf3-c804ebf226af",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "addresses": {
@@ -347,7 +347,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "'2025-03-07T16:02:31.420Z'"
+          "default": "'2025-03-07T17:09:00.907Z'"
         },
         "updated_at": {
           "name": "updated_at",
@@ -416,7 +416,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "'2025-03-07T16:02:31.419Z'"
+          "default": "'2025-03-07T17:09:00.906Z'"
         },
         "updated_at": {
           "name": "updated_at",
@@ -903,16 +903,16 @@
           "autoincrement": false,
           "default": false
         },
-        "has_volume": {
-          "name": "has_volume",
+        "has_weight": {
+          "name": "has_weight",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
           "default": false
         },
-        "volume": {
-          "name": "volume",
+        "weight": {
+          "name": "weight",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -1007,8 +1007,8 @@
           "notNull": false,
           "autoincrement": false
         },
-        "name": {
-          "name": "name",
+        "attributeId": {
+          "name": "attributeId",
           "type": "text",
           "primaryKey": false,
           "notNull": true,

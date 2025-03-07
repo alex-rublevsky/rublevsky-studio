@@ -26,8 +26,8 @@ export async function validateStock(
       .select({
         product: {
           unlimitedStock: products.unlimitedStock,
-          hasVolume: products.hasVolume,
-          volume: products.volume,
+          hasWeight: products.hasWeight,
+          weight: products.weight,
           stock: products.stock,
         },
         variation: variationId ? {
@@ -61,12 +61,12 @@ export async function validateStock(
       };
     }
 
-    // For volume-based products, return the total volume
+    // For weight-based products, return the total weight
     // Client will handle the actual stock calculation
-    if (product.hasVolume && product.volume) {
+    if (product.hasWeight && product.weight) {
       return {
         isAvailable: true, // Client will determine actual availability
-        availableStock: parseInt(product.volume),
+        availableStock: parseInt(product.weight),
         unlimitedStock: false
       };
     }

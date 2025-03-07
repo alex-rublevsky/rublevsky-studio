@@ -15,11 +15,11 @@ export interface CartItem {
   price: number;
   quantity: number;
   image?: string;
-  attributes?: Record<string, string>; // e.g. {color: "red", size: "XL"}
+  attributes?: Record<string, string>; // e.g. {SIZE_CM: "6x6", COLOR: "Red"}
   maxStock: number; // to validate against stock limits
   unlimitedStock: boolean;
-  volumeInfo?: {
-    totalVolume: number;
+  weightInfo?: {
+    totalWeight: number;
   };
 }
 
@@ -190,11 +190,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         attributes: selectedAttributes || {},
         maxStock: result.availableStock,
         unlimitedStock: result.unlimitedStock,
-        // Include volume information for volume-based products
-        ...(product.hasVolume && product.volume
+        // Include weight information for weight-based products
+        ...(product.hasWeight && product.weight
           ? {
-              volumeInfo: {
-                totalVolume: parseInt(product.volume),
+              weightInfo: {
+                totalWeight: parseInt(product.weight),
               },
             }
           : {}),

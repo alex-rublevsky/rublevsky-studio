@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useCart } from "@/lib/context/CartContext";
 import { toast } from "sonner";
 import { QuantitySelector } from "@/components/ui/shared/QuantitySelector";
+import { getAttributeDisplayName } from "@/lib/utils/productAttributes";
 
 // Extended product interface with category, brand, and variations information
 interface ProductWithDetails extends Product {
@@ -91,7 +92,7 @@ export default function ProductPage() {
           // Initialize selected attributes from the first variation
           const initialAttributes: Record<string, string> = {};
           firstVariation.attributes.forEach((attr: VariationAttribute) => {
-            initialAttributes[attr.name] = attr.value;
+            initialAttributes[attr.attributeId] = attr.value;
           });
           setSelectedAttributes(initialAttributes);
         }
@@ -113,33 +114,33 @@ export default function ProductPage() {
 
     if (product.unlimitedStock) return Infinity;
 
-    // For volume-based products with variations
-    if (product.hasVolume && product.volume && selectedVariation) {
-      const volumeAttr = selectedVariation.attributes.find(
-        (attr) => attr.name === "Volume g"
+    // For weight-based products with variations
+    if (product.hasWeight && product.weight && selectedVariation) {
+      const weightAttr = selectedVariation.attributes.find(
+        (attr) => attr.attributeId === "WEIGHT_G"
       );
 
-      if (volumeAttr) {
-        const totalVolume = parseInt(product.volume);
-        const variationVolume = parseInt(volumeAttr.value);
+      if (weightAttr) {
+        const totalWeight = parseInt(product.weight);
+        const variationWeight = parseInt(weightAttr.value);
 
-        // Calculate total volume used by all variations in cart
-        const volumeUsedInCart = cart.items
+        // Calculate total weight used by all variations in cart
+        const weightUsedInCart = cart.items
           .filter((item) => item.productId === product.id)
           .reduce((total, item) => {
-            // Find the volume of this cart item's variation
-            const cartItemVolume = item.attributes?.["Volume G"];
-            if (cartItemVolume) {
-              return total + parseInt(cartItemVolume) * item.quantity;
+            // Find the weight of this cart item's variation
+            const cartItemWeight = item.attributes?.["WEIGHT_G"];
+            if (cartItemWeight) {
+              return total + parseInt(cartItemWeight) * item.quantity;
             }
             return total;
           }, 0);
 
-        // Calculate remaining volume
-        const remainingVolume = Math.max(0, totalVolume - volumeUsedInCart);
+        // Calculate remaining weight
+        const remainingWeight = Math.max(0, totalWeight - weightUsedInCart);
 
         // Calculate how many packages of current variation can be made
-        return Math.floor(remainingVolume / variationVolume);
+        return Math.floor(remainingWeight / variationWeight);
       }
     }
 
@@ -183,21 +184,21 @@ export default function ProductPage() {
     const attributeNames = new Set<string>();
     product.variations.forEach((variation) => {
       variation.attributes.forEach((attr) => {
-        attributeNames.add(attr.name);
+        attributeNames.add(attr.attributeId);
       });
     });
 
     return Array.from(attributeNames);
   };
 
-  // Get unique attribute values for a specific attribute name
-  const getUniqueAttributeValues = (attributeName: string): string[] => {
+  // Get unique attribute values for a specific attribute ID
+  const getUniqueAttributeValues = (attributeId: string): string[] => {
     if (!product?.variations) return [];
 
     const values = new Set<string>();
     product.variations.forEach((variation) => {
       const attribute = variation.attributes.find(
-        (attr) => attr.name === attributeName
+        (attr) => attr.attributeId === attributeId
       );
       if (attribute) {
         values.add(attribute.value);
@@ -207,14 +208,14 @@ export default function ProductPage() {
     return Array.from(values);
   };
 
-  // Select a variation based on attribute name and value
-  const selectVariation = (attributeName: string, attributeValue: string) => {
+  // Select a variation based on attribute ID and value
+  const selectVariation = (attributeId: string, attributeValue: string) => {
     if (!product?.variations) return;
 
     // Update selected attributes
     const newSelectedAttributes = {
       ...selectedAttributes,
-      [attributeName]: attributeValue,
+      [attributeId]: attributeValue,
     };
 
     // First, try to find a variation that matches all selected attributes
@@ -224,7 +225,7 @@ export default function ProductPage() {
     if (!newVariation) {
       // Keep the current attribute selection and find the best matching variation
       const bestAttributes = findBestAttributeCombination(
-        attributeName,
+        attributeId,
         attributeValue
       );
 
@@ -250,9 +251,9 @@ export default function ProductPage() {
     if (!product?.variations) return null;
 
     return product.variations.find((variation) => {
-      return Object.entries(attributes).every(([name, value]) =>
+      return Object.entries(attributes).every(([attributeId, value]) =>
         variation.attributes.some(
-          (attr) => attr.name === name && attr.value === value
+          (attr) => attr.attributeId === attributeId && attr.value === value
         )
       );
     });
@@ -260,7 +261,7 @@ export default function ProductPage() {
 
   // Find the best combination of attributes that includes the selected attribute
   const findBestAttributeCombination = (
-    attributeName: string,
+    attributeId: string,
     attributeValue: string
   ) => {
     if (!product?.variations) return null;
@@ -268,7 +269,8 @@ export default function ProductPage() {
     // Find variations that match the selected attribute
     const matchingVariations = product.variations.filter((variation) =>
       variation.attributes.some(
-        (attr) => attr.name === attributeName && attr.value === attributeValue
+        (attr) =>
+          attr.attributeId === attributeId && attr.value === attributeValue
       )
     );
 
@@ -279,7 +281,7 @@ export default function ProductPage() {
     const bestAttributes: Record<string, string> = {};
 
     bestVariation.attributes.forEach((attr) => {
-      bestAttributes[attr.name] = attr.value;
+      bestAttributes[attr.attributeId] = attr.value;
     });
 
     return bestAttributes;
@@ -287,25 +289,26 @@ export default function ProductPage() {
 
   // Check if a specific attribute value is available with current selections
   const isAttributeValueAvailable = (
-    attributeName: string,
+    attributeId: string,
     attributeValue: string
   ): boolean => {
     if (!product?.variations) return false;
 
     // Get all other selected attributes except the one we're checking
     const otherAttributes = { ...selectedAttributes };
-    delete otherAttributes[attributeName];
+    delete otherAttributes[attributeId];
 
     // Check if there's any variation that matches this attribute value and all other selected attributes
     return product.variations.some((variation) => {
       const matchesThisAttribute = variation.attributes.some(
-        (attr) => attr.name === attributeName && attr.value === attributeValue
+        (attr) =>
+          attr.attributeId === attributeId && attr.value === attributeValue
       );
 
       const matchesOtherAttributes = Object.entries(otherAttributes).every(
-        ([name, value]) =>
+        ([id, value]) =>
           variation.attributes.some(
-            (attr) => attr.name === name && attr.value === value
+            (attr) => attr.attributeId === id && attr.value === value
           )
       );
 
@@ -476,9 +479,9 @@ export default function ProductPage() {
               {/* Price */}
               <div className="text-xl font-medium">
                 ${currentPrice.toFixed(2)} CAD
-                {product.hasVolume && product.volume && (
+                {product.hasWeight && product.weight && (
                   <span className="text-gray-500 text-lg ml-1">
-                    /{product.volume}
+                    /{product.weight}
                   </span>
                 )}
               </div>
@@ -486,28 +489,27 @@ export default function ProductPage() {
               {/* Variation selection */}
               {product.hasVariations && attributeNames.length > 0 && (
                 <div className="flex flex-wrap gap-8">
-                  {attributeNames.map((attributeName) => (
-                    <div key={attributeName} className="w-auto min-w-fit">
+                  {attributeNames.map((attributeId) => (
+                    <div key={attributeId} className="w-auto min-w-fit">
                       <h4 className="text-lg font-medium mb-1">
-                        {attributeName}
+                        {attributeId}
                       </h4>
                       <div className="flex flex-wrap gap-2">
-                        {getUniqueAttributeValues(attributeName).map(
-                          (value) => {
-                            const isAvailable = isAttributeValueAvailable(
-                              attributeName,
-                              value
-                            );
-                            const isSelected =
-                              selectedAttributes[attributeName] === value;
+                        {getUniqueAttributeValues(attributeId).map((value) => {
+                          const isAvailable = isAttributeValueAvailable(
+                            attributeId,
+                            value
+                          );
+                          const isSelected =
+                            selectedAttributes[attributeId] === value;
 
-                            return (
-                              <button
-                                key={value}
-                                onClick={() =>
-                                  selectVariation(attributeName, value)
-                                }
-                                className={`
+                          return (
+                            <button
+                              key={value}
+                              onClick={() =>
+                                selectVariation(attributeId, value)
+                              }
+                              className={`
                                   px-4 py-2 border rounded-md transition-colors duration-200
                                   ${
                                     isSelected
@@ -518,17 +520,16 @@ export default function ProductPage() {
                                   }
                                   ${isAvailable ? "" : "opacity-50"}
                                 `}
-                                title={
-                                  isAvailable
-                                    ? ""
-                                    : "This variation is currently unavailable"
-                                }
-                              >
-                                {value}
-                              </button>
-                            );
-                          }
-                        )}
+                              title={
+                                isAvailable
+                                  ? ""
+                                  : "This variation is currently unavailable"
+                              }
+                            >
+                              {value}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   ))}

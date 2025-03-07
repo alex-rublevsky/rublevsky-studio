@@ -48,7 +48,7 @@ CREATE TABLE `brands` (
 	`slug` text NOT NULL,
 	`image` text,
 	`is_active` integer DEFAULT true NOT NULL,
-	`created_at` text DEFAULT '2025-03-07T16:02:31.420Z' NOT NULL,
+	`created_at` text DEFAULT '2025-03-07T17:09:00.907Z' NOT NULL,
 	`updated_at` text
 );
 --> statement-breakpoint
@@ -59,7 +59,7 @@ CREATE TABLE `categories` (
 	`slug` text NOT NULL,
 	`image` text,
 	`is_active` integer DEFAULT true NOT NULL,
-	`created_at` text DEFAULT '2025-03-07T16:02:31.419Z' NOT NULL,
+	`created_at` text DEFAULT '2025-03-07T17:09:00.906Z' NOT NULL,
 	`updated_at` text
 );
 --> statement-breakpoint
@@ -132,8 +132,8 @@ CREATE TABLE `products` (
 	`is_featured` integer DEFAULT false NOT NULL,
 	`on_sale` integer DEFAULT false NOT NULL,
 	`has_variations` integer DEFAULT false NOT NULL,
-	`has_volume` integer DEFAULT false NOT NULL,
-	`volume` text,
+	`has_weight` integer DEFAULT false NOT NULL,
+	`weight` text,
 	`stock` integer DEFAULT 0 NOT NULL,
 	`unlimited_stock` integer DEFAULT false NOT NULL,
 	`created_at` text,
@@ -146,7 +146,7 @@ CREATE UNIQUE INDEX `products_slug_unique` ON `products` (`slug`);--> statement-
 CREATE TABLE `variation_attributes` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`product_variation_id` integer,
-	`name` text NOT NULL,
+	`attributeId` text NOT NULL,
 	`value` text NOT NULL,
 	`created_at` text,
 	`updated_at` text,

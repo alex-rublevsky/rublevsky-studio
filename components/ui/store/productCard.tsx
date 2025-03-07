@@ -8,6 +8,7 @@ import styles from "./productCard.module.css";
 import { useCart } from "@/lib/context/CartContext";
 import { useCallback, useRef } from "react";
 import { validateStock } from "@/lib/actions/cart/validateStock";
+import { getAttributeDisplayName } from "@/lib/utils/productAttributes";
 
 // Extended product interface with variations
 interface ProductWithVariations extends Product {
@@ -52,7 +53,7 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
       // Initialize selected attributes from the first variation
       const initialAttributes: Record<string, string> = {};
       firstVariation.attributes.forEach((attr: VariationAttribute) => {
-        initialAttributes[attr.name] = attr.value;
+        initialAttributes[attr.attributeId] = attr.value;
       });
       setSelectedAttributes(initialAttributes);
     }
@@ -77,31 +78,22 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
     const attributeNames = new Set<string>();
     product.variations.forEach((variation) => {
       variation.attributes.forEach((attr: VariationAttribute) => {
-        attributeNames.add(attr.name);
+        attributeNames.add(attr.attributeId);
       });
     });
 
-    return Array.from(attributeNames).sort((a, b) => {
-      // Sort attribute types: apparel_type first, then size, then others
-      const order: Record<string, number> = {
-        apparel_type: 1,
-        size: 2,
-        apparel_size: 3,
-        color: 4,
-      };
-      return (order[a] || 99) - (order[b] || 99);
-    });
+    return Array.from(attributeNames);
   }, [product.variations]);
 
-  // Get unique attribute values for a specific attribute name
+  // Get unique attribute values for a specific attribute ID
   const getUniqueAttributeValues = useCallback(
-    (attributeName: string): string[] => {
+    (attributeId: string): string[] => {
       if (!product.variations) return [];
 
       const values = new Set<string>();
       product.variations.forEach((variation) => {
         const attribute = variation.attributes.find(
-          (attr) => attr.name === attributeName
+          (attr) => attr.attributeId === attributeId
         );
         if (attribute) {
           values.add(attribute.value);
@@ -120,9 +112,9 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
 
       return (
         product.variations.find((variation) => {
-          return Object.entries(attributes).every(([name, value]) =>
+          return Object.entries(attributes).every(([attributeId, value]) =>
             variation.attributes.some(
-              (attr) => attr.name === name && attr.value === value
+              (attr) => attr.attributeId === attributeId && attr.value === value
             )
           );
         }) || null
@@ -134,7 +126,7 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
   // Find the best combination of attributes that includes the selected attribute
   const findBestAttributeCombination = useCallback(
     (
-      attributeName: string,
+      attributeId: string,
       attributeValue: string
     ): Record<string, string> | null => {
       if (!product.variations) return null;
@@ -142,7 +134,8 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
       // Find variations that match the selected attribute
       const matchingVariations = product.variations.filter((variation) =>
         variation.attributes.some(
-          (attr) => attr.name === attributeName && attr.value === attributeValue
+          (attr) =>
+            attr.attributeId === attributeId && attr.value === attributeValue
         )
       );
 
@@ -153,7 +146,7 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
       const bestAttributes: Record<string, string> = {};
 
       bestVariation.attributes.forEach((attr) => {
-        bestAttributes[attr.name] = attr.value;
+        bestAttributes[attr.attributeId] = attr.value;
       });
 
       return bestAttributes;
@@ -161,15 +154,15 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
     [product.variations]
   );
 
-  // Select a variation based on attribute name and value
+  // Select a variation based on attribute ID and value
   const selectVariation = useCallback(
-    (attributeName: string, attributeValue: string) => {
+    (attributeId: string, attributeValue: string) => {
       if (!product.variations) return;
 
       // Update selected attributes
       const newSelectedAttributes = {
         ...selectedAttributes,
-        [attributeName]: attributeValue,
+        [attributeId]: attributeValue,
       };
 
       // First, try to find a variation that matches all selected attributes
@@ -179,7 +172,7 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
       if (!newVariation) {
         // Keep the current attribute selection and find the best matching variation
         const bestAttributes = findBestAttributeCombination(
-          attributeName,
+          attributeId,
           attributeValue
         );
 
@@ -207,23 +200,24 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
 
   // Check if a specific attribute value is available with current selections
   const isAttributeValueAvailable = useCallback(
-    (attributeName: string, attributeValue: string): boolean => {
+    (attributeId: string, attributeValue: string): boolean => {
       if (!product.variations) return false;
 
       // Get all other selected attributes except the one we're checking
       const otherAttributes = { ...selectedAttributes };
-      delete otherAttributes[attributeName];
+      delete otherAttributes[attributeId];
 
       // Check if there's any variation that matches this attribute value and all other selected attributes
       return product.variations.some((variation) => {
         const matchesThisAttribute = variation.attributes.some(
-          (attr) => attr.name === attributeName && attr.value === attributeValue
+          (attr) =>
+            attr.attributeId === attributeId && attr.value === attributeValue
         );
 
         const matchesOtherAttributes = Object.entries(otherAttributes).every(
-          ([name, value]) =>
+          ([id, value]) =>
             variation.attributes.some(
-              (attr) => attr.name === name && attr.value === value
+              (attr) => attr.attributeId === id && attr.value === value
             )
         );
 
@@ -236,33 +230,33 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
   // Calculate effective stock by subtracting cart quantities
   const getEffectiveStock = useMemo(() => {
     if (!product.unlimitedStock) {
-      // For volume-based products with variations
-      if (product.hasVolume && product.volume && selectedVariation) {
-        const volumeAttr = selectedVariation.attributes.find(
-          (attr) => attr.name === "Volume g"
+      // For weight-based products with variations
+      if (product.hasWeight && product.weight && selectedVariation) {
+        const weightAttr = selectedVariation.attributes.find(
+          (attr) => attr.attributeId === "WEIGHT_G"
         );
 
-        if (volumeAttr) {
-          const totalVolume = parseInt(product.volume);
-          const variationVolume = parseInt(volumeAttr.value);
+        if (weightAttr) {
+          const totalWeight = parseInt(product.weight);
+          const variationWeight = parseInt(weightAttr.value);
 
-          // Calculate total volume used by all variations in cart
-          const volumeUsedInCart = cart.items
+          // Calculate total weight used by all variations in cart
+          const weightUsedInCart = cart.items
             .filter((item) => item.productId === product.id)
             .reduce((total, item) => {
-              // Find the volume of this cart item's variation
-              const cartItemVolume = item.attributes?.["Volume g"];
-              if (cartItemVolume) {
-                return total + parseInt(cartItemVolume) * item.quantity;
+              // Find the weight of this cart item's variation
+              const cartItemWeight = item.attributes?.["WEIGHT_G"];
+              if (cartItemWeight) {
+                return total + parseInt(cartItemWeight) * item.quantity;
               }
               return total;
             }, 0);
 
-          // Calculate remaining volume
-          const remainingVolume = Math.max(0, totalVolume - volumeUsedInCart);
+          // Calculate remaining weight
+          const remainingWeight = Math.max(0, totalWeight - weightUsedInCart);
 
           // Calculate how many packages of current variation can be made
-          return Math.floor(remainingVolume / variationVolume);
+          return Math.floor(remainingWeight / variationWeight);
         }
       }
 
@@ -304,20 +298,11 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
     const attributeNames = new Set<string>();
     product.variations.forEach((variation) => {
       variation.attributes.forEach((attr: VariationAttribute) => {
-        attributeNames.add(attr.name);
+        attributeNames.add(attr.attributeId);
       });
     });
 
-    return Array.from(attributeNames).sort((a, b) => {
-      // Sort attribute types: apparel_type first, then size, then others
-      const order: Record<string, number> = {
-        apparel_type: 1,
-        size: 2,
-        apparel_size: 3,
-        color: 4,
-      };
-      return (order[a] || 99) - (order[b] || 99);
-    });
+    return Array.from(attributeNames);
   }, [product.variations]);
 
   const handleAddToCart = useCallback(
@@ -506,29 +491,28 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
               product.variations &&
               product.variations.length > 0 && (
                 <div className="space-y-2">
-                  {attributeNames.map((attributeName: string) => (
-                    <div key={attributeName}>
+                  {attributeNames.map((attributeId: string) => (
+                    <div key={attributeId}>
                       <div className="text-xs font-medium text-gray-500 mb-1">
-                        {attributeName}
+                        {getAttributeDisplayName(attributeId)}
                       </div>
                       <div className="flex flex-wrap gap-1">
-                        {getUniqueAttributeValues(attributeName).map(
-                          (value) => {
-                            const isAvailable = isAttributeValueAvailable(
-                              attributeName,
-                              value
-                            );
-                            const isSelected =
-                              selectedAttributes[attributeName] === value;
+                        {getUniqueAttributeValues(attributeId).map((value) => {
+                          const isAvailable = isAttributeValueAvailable(
+                            attributeId,
+                            value
+                          );
+                          const isSelected =
+                            selectedAttributes[attributeId] === value;
 
-                            return (
-                              <button
-                                key={value}
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  selectVariation(attributeName, value);
-                                }}
-                                className={`
+                          return (
+                            <button
+                              key={value}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                selectVariation(attributeId, value);
+                              }}
+                              className={`
                                 px-2 py-1 text-xs rounded-full border transition-colors duration-200
                                 ${
                                   isSelected
@@ -539,17 +523,16 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
                                 }
                                 ${isAvailable ? "" : "opacity-50"}
                               `}
-                                title={
-                                  !isAvailable
-                                    ? "This combination is not available"
-                                    : ""
-                                }
-                              >
-                                {value}
-                              </button>
-                            );
-                          }
-                        )}
+                              title={
+                                !isAvailable
+                                  ? "This combination is not available"
+                                  : ""
+                              }
+                            >
+                              {value}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   ))}

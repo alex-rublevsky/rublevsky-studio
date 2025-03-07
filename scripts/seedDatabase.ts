@@ -137,7 +137,7 @@ async function seedDatabase() {
           INSERT INTO products (
             category_slug, brand_slug, name, slug, description, images, 
             price, is_active, is_featured, on_sale, has_variations, 
-            has_volume, volume, stock, unlimited_stock, created_at, updated_at
+            has_weight, weight, stock, unlimited_stock, created_at, updated_at
           )
           VALUES (
             '${product.categorySlug.replace(/'/g, "''")}',
@@ -151,8 +151,8 @@ async function seedDatabase() {
             ${product.isFeatured ? 1 : 0},
             ${product.onSale ? 1 : 0},
             ${product.hasVariations ? 1 : 0},
-            ${product.hasVolume ? 1 : 0},
-            ${product.volume ? `'${product.volume.replace(/'/g, "''")}'` : 'NULL'},
+            ${product.hasWeight ? 1 : 0},
+            ${product.weight ? `'${product.weight.replace(/'/g, "''")}'` : 'NULL'},
             ${product.stock},
             ${product.unlimitedStock ? 1 : 0},
             '${new Date().toISOString()}',
@@ -198,21 +198,21 @@ async function seedDatabase() {
             const variationResult = variationQueryResult as unknown as { id: number };
 
             // Insert variation attributes
-            if (variation.attributes) {
-              for (const [name, value] of Object.entries(variation.attributes)) {
+            if (variation.attributes && Array.isArray(variation.attributes)) {
+              for (const attr of variation.attributes) {
                 await executeRemoteSQL(`
                   INSERT INTO variation_attributes (
-                    product_variation_id, name, value,
+                    product_variation_id, attributeId, value,
                     created_at, updated_at
                   )
                   VALUES (
                     ${variationResult.id},
-                    '${name.replace(/'/g, "''")}',
-                    '${String(value).replace(/'/g, "''")}',
+                    '${attr.attributeId}',
+                    '${attr.value}',
                     '${new Date().toISOString()}',
                     '${new Date().toISOString()}'
                   );
-                `, `Adding attribute: ${name} for variation: ${variation.name}`);
+                `, `Adding attribute: ${attr.name} for variation: ${variation.name}`);
               }
             }
           }
@@ -331,11 +331,24 @@ async function seedDatabase() {
         // Prepare all statements for products and variations
         const insertProduct = db.prepare(`
           INSERT INTO products (
-            category_slug, brand_slug, name, slug, description, images, 
-            price, is_active, is_featured, on_sale, has_variations, 
-            has_volume, volume, stock, unlimited_stock, created_at, updated_at
-          )
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            category_slug,
+            brand_slug,
+            name,
+            slug,
+            description,
+            images,
+            price,
+            is_active,
+            is_featured,
+            on_sale,
+            has_variations,
+            has_weight,
+            weight,
+            stock,
+            unlimited_stock,
+            created_at,
+            updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           RETURNING id
         `);
 
@@ -350,7 +363,7 @@ async function seedDatabase() {
 
         const insertVariationAttribute = db.prepare(`
           INSERT INTO variation_attributes (
-            product_variation_id, name, value,
+            product_variation_id, attributeId, value,
             created_at, updated_at
           )
           VALUES (?, ?, ?, ?, ?)
@@ -381,8 +394,8 @@ async function seedDatabase() {
               product.isFeatured ? 1 : 0,
               product.onSale ? 1 : 0,
               product.hasVariations ? 1 : 0,
-              product.hasVolume ? 1 : 0,
-              product.volume || null,
+              product.hasWeight ? 1 : 0,
+              product.weight || null,
               product.stock,
               product.unlimitedStock ? 1 : 0,
               new Date().toISOString(),
@@ -409,7 +422,7 @@ async function seedDatabase() {
                   for (const attr of variation.attributes) {
                     insertVariationAttribute.run(
                       variationId,
-                      attr.name,
+                      attr.attributeId,
                       attr.value,
                       new Date().toISOString(),
                       new Date().toISOString()

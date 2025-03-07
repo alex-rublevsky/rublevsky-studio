@@ -40,8 +40,19 @@ export type ProductVariation = InferSelectModel<typeof productVariations>;
 export type NewProductVariation = InferInsertModel<typeof productVariations>;
 
 // Variation Attributes
-export type VariationAttribute = InferSelectModel<typeof variationAttributes>;
-export type NewVariationAttribute = InferInsertModel<typeof variationAttributes>;
+export interface VariationAttribute {
+  id?: number;
+  productVariationId?: number;
+  attributeId: string;
+  value: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface NewVariationAttribute {
+  attributeId: string;
+  value: string;
+}
 
 // Orders
 export type Order = InferSelectModel<typeof orders>;
@@ -80,10 +91,10 @@ export interface ProductFormData {
   isFeatured: boolean;
   onSale: boolean;
   hasVariations: boolean;
-  hasVolume: boolean;
-  volume: string;
+  hasWeight: boolean;
+  weight: string;
   images: string;
-  variations?: ProductVariationFormData[];
+  variations: ProductVariationFormData[];
 }
 
 export interface ProductVariationFormData {
@@ -96,7 +107,7 @@ export interface ProductVariationFormData {
 }
 
 export interface VariationAttributeFormData {
-  name: string;
+  attributeId: string;
   value: string;
 }
 
@@ -153,4 +164,20 @@ export interface BrandsResponse extends ApiResponse<Brand[]> {
 
 export interface BrandResponse extends ApiResponse<Brand> {
   brand?: Brand;
+}
+
+export interface CartItem {
+  productId: number;
+  productName: string;
+  productSlug: string;
+  variationId?: number;
+  quantity: number;
+  price: number;
+  maxStock: number;
+  unlimitedStock: boolean;
+  image?: string;
+  attributes?: Record<string, string>;
+  weightInfo?: {
+    totalWeight: number;
+  };
 }

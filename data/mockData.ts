@@ -72,7 +72,7 @@ export const mockProducts = [
         sort: 0,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "6x6"
           }
         ]
@@ -85,7 +85,7 @@ export const mockProducts = [
         sort: 1,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "8x8"
           }
         ]
@@ -98,7 +98,7 @@ export const mockProducts = [
         sort: 2,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "10x10"
           }
         ]
@@ -111,7 +111,7 @@ export const mockProducts = [
         sort: 3,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "12x12"
           }
         ]
@@ -124,7 +124,7 @@ export const mockProducts = [
         sort: 4,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "14x14"
           }
         ]
@@ -155,7 +155,7 @@ export const mockProducts = [
         sort: 0,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "6x8.4"
           }
         ]
@@ -168,7 +168,7 @@ export const mockProducts = [
         sort: 1,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "6x11.3"
           }
         ]
@@ -181,7 +181,7 @@ export const mockProducts = [
         sort: 2,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "10x14.1"
           }
         ]
@@ -194,7 +194,7 @@ export const mockProducts = [
         sort: 3,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "12x16.9"
           }
         ]
@@ -207,7 +207,7 @@ export const mockProducts = [
         sort: 4,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "14x19.7"
           }
         ]
@@ -238,7 +238,7 @@ export const mockProducts = [
         sort: 0,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "6x8.4"
           }
         ]
@@ -251,7 +251,7 @@ export const mockProducts = [
         sort: 1,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "8x11.2"
           }
         ]
@@ -264,7 +264,7 @@ export const mockProducts = [
         sort: 2,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "10x14.1"
           }
         ]
@@ -277,7 +277,7 @@ export const mockProducts = [
         sort: 3,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "12x16.9"
           }
         ]
@@ -290,7 +290,7 @@ export const mockProducts = [
         sort: 4,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "14x19.7"
           }
         ]
@@ -321,7 +321,7 @@ export const mockProducts = [
         sort: 0,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "6x6.1"
           }
         ]
@@ -334,7 +334,7 @@ export const mockProducts = [
         sort: 1,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "8x8.2"
           }
         ]
@@ -347,7 +347,7 @@ export const mockProducts = [
         sort: 2,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "10x10.2"
           }
         ]
@@ -360,7 +360,7 @@ export const mockProducts = [
         sort: 3,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "12x12.3"
           }
         ]
@@ -373,7 +373,7 @@ export const mockProducts = [
         sort: 4,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "14x14.3"
           }
         ]
@@ -404,7 +404,7 @@ export const mockProducts = [
         sort: 0,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "6x6.6"
           }
         ]
@@ -417,7 +417,7 @@ export const mockProducts = [
         sort: 1,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "8x8.7"
           }
         ]
@@ -430,7 +430,7 @@ export const mockProducts = [
         sort: 2,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "10x11"
           }
         ]
@@ -443,7 +443,7 @@ export const mockProducts = [
         sort: 3,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "12x13.1"
           }
         ]
@@ -456,7 +456,7 @@ export const mockProducts = [
         sort: 4,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "14x15.3"
           }
         ]
@@ -487,7 +487,7 @@ export const mockProducts = [
         sort: 0,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "6x8.4"
           }
         ]
@@ -500,7 +500,7 @@ export const mockProducts = [
         sort: 1,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "8x11.2"
           }
         ]
@@ -513,7 +513,7 @@ export const mockProducts = [
         sort: 2,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "10x14"
           }
         ]
@@ -526,7 +526,7 @@ export const mockProducts = [
         sort: 3,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "12x16.9"
           }
         ]
@@ -539,7 +539,7 @@ export const mockProducts = [
         sort: 4,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "14x19.7"
           }
         ]
@@ -570,7 +570,7 @@ export const mockProducts = [
         sort: 0,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "6x6"
           }
         ]
@@ -583,7 +583,7 @@ export const mockProducts = [
         sort: 1,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "8x8"
           }
         ]
@@ -596,7 +596,7 @@ export const mockProducts = [
         sort: 2,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "10x10"
           }
         ]
@@ -609,7 +609,7 @@ export const mockProducts = [
         sort: 3,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "12x12"
           }
         ]
@@ -622,7 +622,7 @@ export const mockProducts = [
         sort: 4,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "14x14"
           }
         ]
@@ -653,7 +653,7 @@ export const mockProducts = [
         sort: 0,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "6x6"
           }
         ]
@@ -666,7 +666,7 @@ export const mockProducts = [
         sort: 1,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "8x8"
           }
         ]
@@ -679,7 +679,7 @@ export const mockProducts = [
         sort: 2,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "10x10"
           }
         ]
@@ -692,7 +692,7 @@ export const mockProducts = [
         sort: 3,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "12x12"
           }
         ]
@@ -705,7 +705,7 @@ export const mockProducts = [
         sort: 4,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "14x14"
           }
         ]
@@ -736,7 +736,7 @@ export const mockProducts = [
         sort: 0,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "6x6"
           }
         ]
@@ -749,7 +749,7 @@ export const mockProducts = [
         sort: 1,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "8x8"
           }
         ]
@@ -762,7 +762,7 @@ export const mockProducts = [
         sort: 2,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "10x10"
           }
         ]
@@ -775,7 +775,7 @@ export const mockProducts = [
         sort: 3,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "12x12"
           }
         ]
@@ -788,7 +788,7 @@ export const mockProducts = [
         sort: 4,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "14x14"
           }
         ]
@@ -819,7 +819,7 @@ export const mockProducts = [
         sort: 0,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "6x8.1"
           }
         ]
@@ -832,7 +832,7 @@ export const mockProducts = [
         sort: 1,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "8x10.8"
           }
         ]
@@ -845,7 +845,7 @@ export const mockProducts = [
         sort: 2,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "10x13.5"
           }
         ]
@@ -858,7 +858,7 @@ export const mockProducts = [
         sort: 3,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "12x16.2"
           }
         ]
@@ -871,7 +871,7 @@ export const mockProducts = [
         sort: 4,
         attributes: [
           {
-            name: "Size cm",
+            attributeId: "SIZE_CM",
             value: "14x19"
           }
         ]
@@ -902,11 +902,11 @@ export const mockProducts = [
         sort: 0,
         attributes: [
           {
-            name: "color",
+            attributeId: "COLOR",
             value: "Blue"
           },
           {
-            name: "size",
+            attributeId: "APPAREL_TYPE",
             value: "XL"
           }
         ]
@@ -919,11 +919,11 @@ export const mockProducts = [
         sort: 1,
         attributes: [
           {
-            name: "color",
+            attributeId: "COLOR",
             value: "Red"
           },
           {
-            name: "size",
+            attributeId: "APPAREL_TYPE",
             value: "XXL"
           }
         ]
@@ -940,8 +940,8 @@ export const mockProducts = [
     isFeatured: true,
     onSale: false,
     hasVariations: true,
-    hasVolume: true,
-    volume: "300",
+    hasWeight: true,
+    weight: "300",
     stock: 0,
     unlimitedStock: false,
     categorySlug: "tea",
@@ -955,7 +955,7 @@ export const mockProducts = [
         sort: 0,
         attributes: [
           {
-            name: "Volume g",
+            attributeId: "WEIGHT_G",
             value: "25"
           }
         ]
@@ -968,7 +968,7 @@ export const mockProducts = [
         sort: 1,
         attributes: [
           {
-            name: "Volume g",
+            attributeId: "WEIGHT_G",
             value: "50"
           }
         ]
@@ -981,7 +981,7 @@ export const mockProducts = [
         sort: 2,
         attributes: [
           {
-            name: "Volume g",
+            attributeId: "WEIGHT_G",
             value: "100"
           }
         ]
@@ -994,7 +994,7 @@ export const mockProducts = [
         sort: 3,
         attributes: [
           {
-            name: "Volume g",
+            attributeId: "WEIGHT_G",
             value: "150"
           }
         ]
