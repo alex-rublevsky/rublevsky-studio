@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "8bc6d690-a3da-49e2-8e91-ee554116d159",
+  "id": "3ff32f5e-7d7a-41d4-b236-42ecb63a6e05",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "addresses": {
@@ -347,7 +347,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "'2025-03-04T17:47:13.058Z'"
+          "default": "'2025-03-07T15:00:40.691Z'"
         },
         "updated_at": {
           "name": "updated_at",
@@ -416,7 +416,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "'2025-03-04T17:47:13.057Z'"
+          "default": "'2025-03-07T15:00:40.690Z'"
         },
         "updated_at": {
           "name": "updated_at",

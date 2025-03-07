@@ -261,8 +261,8 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
 
   // Calculate if the product is available to add to cart
   const isAvailable = useMemo(() => {
-    return product.isActive && effectiveStock > 0;
-  }, [product.isActive, effectiveStock]);
+    return product.isActive && (product.unlimitedStock || effectiveStock > 0);
+  }, [product.isActive, product.unlimitedStock, effectiveStock]);
 
   // Calculate current price based on selected variation
   const currentPrice = useMemo(() => {

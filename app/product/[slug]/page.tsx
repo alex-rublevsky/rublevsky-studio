@@ -111,6 +111,8 @@ export default function ProductPage() {
   const getEffectiveStock = useMemo(() => {
     if (!product) return 0;
 
+    if (product.unlimitedStock) return Infinity;
+
     const dbStock = selectedVariation
       ? selectedVariation.stock
       : product.stock || 0;
@@ -128,10 +130,10 @@ export default function ProductPage() {
 
   // Handle quantity changes
   const incrementQuantity = useCallback(() => {
-    if (quantity < getEffectiveStock) {
+    if (product?.unlimitedStock || quantity < getEffectiveStock) {
       setQuantity((prev) => prev + 1);
     }
-  }, [quantity, getEffectiveStock]);
+  }, [quantity, getEffectiveStock, product?.unlimitedStock]);
 
   const decrementQuantity = useCallback(() => {
     if (quantity > 1) {
@@ -504,14 +506,16 @@ export default function ProductPage() {
                 </div>
               )}
 
-              {/* Stock information - updated to show effective stock */}
-              <div className="text-sm">
-                {effectiveStock > 0 ? (
-                  <p>In stock: {effectiveStock}</p>
-                ) : (
-                  <p className="text-red-600">Out of stock</p>
-                )}
-              </div>
+              {/* Stock information - updated to hide for unlimited stock */}
+              {!product.unlimitedStock && (
+                <div className="text-sm">
+                  {effectiveStock > 0 ? (
+                    <p>In stock: {effectiveStock}</p>
+                  ) : (
+                    <p className="text-red-600">Out of stock</p>
+                  )}
+                </div>
+              )}
 
               {/* Quantity selector and Add to cart */}
               <div className="flex flex-wrap items-center gap-4">
@@ -520,7 +524,9 @@ export default function ProductPage() {
                   onIncrement={incrementQuantity}
                   onDecrement={decrementQuantity}
                   minQuantity={1}
-                  maxQuantity={effectiveStock}
+                  maxQuantity={
+                    product.unlimitedStock ? undefined : effectiveStock
+                  }
                   disabled={!canAddToCart}
                   size="default"
                 />

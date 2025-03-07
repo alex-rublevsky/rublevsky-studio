@@ -67,7 +67,7 @@ export function CartItem({ item }: CartItemProps) {
             quantity={item.quantity}
             onIncrement={handleIncrement}
             onDecrement={handleDecrement}
-            maxQuantity={item.maxStock}
+            maxQuantity={item.unlimitedStock ? undefined : item.maxStock}
             size="compact"
           />
           <div className="font-medium">

@@ -60,7 +60,7 @@ export const mockProducts = [
     hasVariations: true,
     hasVolume: false,
     stock: 0,
-    unlimitedStock: false,
+    unlimitedStock: true,
     categorySlug: "stickers",
     brandSlug: "rublevsky-studio",
     variations: JSON.stringify([
@@ -68,7 +68,7 @@ export const mockProducts = [
         sku: "squirrel-sticker-6x6",
         name: "6x6",
         price: 3.00,
-        stock: 50,
+        stock: 0,
         sort: 0,
         attributes: [
           {
@@ -80,8 +80,8 @@ export const mockProducts = [
       {
         sku: "squirrel-sticker-8x8",
         name: "8x8",
-        price: 3.00,
-        stock: 50,
+        price: 4.00,
+        stock: 0,
         sort: 1,
         attributes: [
           {
@@ -93,8 +93,8 @@ export const mockProducts = [
       {
         sku: "squirrel-sticker-10x10",
         name: "10x10",
-        price: 3.00,
-        stock: 50,
+        price: 4.00,
+        stock: 0,
         sort: 2,
         attributes: [
           {
@@ -106,8 +106,8 @@ export const mockProducts = [
       {
         sku: "squirrel-sticker-12x12",
         name: "12x12",
-        price: 3.00,
-        stock: 50,
+        price: 5.00,
+        stock: 0,
         sort: 3,
         attributes: [
           {
@@ -119,13 +119,760 @@ export const mockProducts = [
       {
         sku: "squirrel-sticker-14x14",
         name: "14x14",
-        price: 3.00,
-        stock: 50,
+        price: 5.00,
+        stock: 0,
         sort: 4,
         attributes: [
           {
             name: "Size cm",
             value: "14x14"
+          }
+        ]
+      }
+    ])
+  },
+  {
+    name: "Mushroom Girl Sticker",
+    slug: "mushroom-girl-sticker",
+    description: "Mycelium!",
+    images: "devochka.jpg, devochka-preview.jpg",
+    price: 3.00,
+    isActive: true,
+    isFeatured: false,
+    onSale: false,
+    hasVariations: true,
+    hasVolume: false,
+    stock: 0,
+    unlimitedStock: true,
+    categorySlug: "stickers",
+    brandSlug: "rublevsky-studio",
+    variations: JSON.stringify([
+      {
+        sku: "mushroom-girl-sticker-6x8-4",
+        name: "6x8.4",
+        price: 3.00,
+        stock: 0,
+        sort: 0,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "6x8.4"
+          }
+        ]
+      },
+      {
+        sku: "mushroom-girl-sticker-6x11-3",
+        name: "6x11.3",
+        price: 4.00,
+        stock: 0,
+        sort: 1,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "6x11.3"
+          }
+        ]
+      },
+      {
+        sku: "mushroom-girl-sticker-10x14-1",
+        name: "10x14.1",
+        price: 4.00,
+        stock: 0,
+        sort: 2,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "10x14.1"
+          }
+        ]
+      },
+      {
+        sku: "mushroom-girl-sticker-12x16-9",
+        name: "12x16.9",
+        price: 5.00,
+        stock: 0,
+        sort: 3,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "12x16.9"
+          }
+        ]
+      },
+      {
+        sku: "mushroom-girl-sticker-14x19-7",
+        name: "14x19.7",
+        price: 5.00,
+        stock: 0,
+        sort: 4,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "14x19.7"
+          }
+        ]
+      }
+    ])
+  },
+  {
+    name: "Shroom Brain Sticker",
+    slug: "shroom-brain-sticker",
+    description: "Psychedelic experience",
+    images: "shroom-brain.jpg, shroom-brain-preview.jpg",
+    price: 3.00,
+    isActive: true,
+    isFeatured: false,
+    onSale: false,
+    hasVariations: true,
+    hasVolume: false,
+    stock: 0,
+    unlimitedStock: true,
+    categorySlug: "stickers",
+    brandSlug: "rublevsky-studio",
+    variations: JSON.stringify([
+      {
+        sku: "shroom-brain-sticker-6x8-4",
+        name: "6x8.4",
+        price: 3.00,
+        stock: 0,
+        sort: 0,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "6x8.4"
+          }
+        ]
+      },
+      {
+        sku: "shroom-brain-sticker-8x11-2",
+        name: "8x11.2",
+        price: 4.00,
+        stock: 0,
+        sort: 1,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "8x11.2"
+          }
+        ]
+      },
+      {
+        sku: "shroom-brain-sticker-10x14-1",
+        name: "10x14.1",
+        price: 4.00,
+        stock: 0,
+        sort: 2,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "10x14.1"
+          }
+        ]
+      },
+      {
+        sku: "shroom-brain-sticker-12x16-9",
+        name: "12x16.9",
+        price: 5.00,
+        stock: 0,
+        sort: 3,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "12x16.9"
+          }
+        ]
+      },
+      {
+        sku: "shroom-brain-sticker-14x19-7",
+        name: "14x19.7",
+        price: 5.00,
+        stock: 0,
+        sort: 4,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "14x19.7"
+          }
+        ]
+      }
+    ])
+  },
+  {
+    name: "Swirl Sticker",
+    slug: "swirl-sticker",
+    description: "Interconnected interaction",
+    images: "triple-person-swirl.jpg, triple-person-swirl-preview.jpg",
+    price: 3.00,
+    isActive: true,
+    isFeatured: false,
+    onSale: false,
+    hasVariations: true,
+    hasVolume: false,
+    stock: 0,
+    unlimitedStock: true,
+    categorySlug: "stickers",
+    brandSlug: "rublevsky-studio",
+    variations: JSON.stringify([
+      {
+        sku: "swirl-sticker-6x6-1",
+        name: "6x6.1",
+        price: 3.00,
+        stock: 0,
+        sort: 0,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "6x6.1"
+          }
+        ]
+      },
+      {
+        sku: "swirl-sticker-8x8-2",
+        name: "8x8.2",
+        price: 4.00,
+        stock: 0,
+        sort: 1,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "8x8.2"
+          }
+        ]
+      },
+      {
+        sku: "swirl-sticker-10x10-2",
+        name: "10x10.2",
+        price: 4.00,
+        stock: 0,
+        sort: 2,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "10x10.2"
+          }
+        ]
+      },
+      {
+        sku: "swirl-sticker-12x12-3",
+        name: "12x12.3",
+        price: 5.00,
+        stock: 0,
+        sort: 3,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "12x12.3"
+          }
+        ]
+      },
+      {
+        sku: "swirl-sticker-14x14-3",
+        name: "14x14.3",
+        price: 5.00,
+        stock: 0,
+        sort: 4,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "14x14.3"
+          }
+        ]
+      }
+    ])
+  },
+  {
+    name: "Leaf Sticker",
+    slug: "leaf-sticker",
+    description: "Photosynthesis :)",
+    images: "leaf.jpg, leaf-preview.jpg",
+    price: 3.00,
+    isActive: true,
+    isFeatured: false,
+    onSale: false,
+    hasVariations: true,
+    hasVolume: false,
+    stock: 0,
+    unlimitedStock: true,
+    categorySlug: "stickers",
+    brandSlug: "rublevsky-studio",
+    variations: JSON.stringify([
+      {
+        sku: "leaf-sticker-6x6-6",
+        name: "6x6.6",
+        price: 3.00,
+        stock: 0,
+        sort: 0,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "6x6.6"
+          }
+        ]
+      },
+      {
+        sku: "leaf-sticker-8x8-7",
+        name: "8x8.7",
+        price: 4.00,
+        stock: 0,
+        sort: 1,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "8x8.7"
+          }
+        ]
+      },
+      {
+        sku: "leaf-sticker-10x11",
+        name: "10x11",
+        price: 4.00,
+        stock: 0,
+        sort: 2,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "10x11"
+          }
+        ]
+      },
+      {
+        sku: "leaf-sticker-12x13-1",
+        name: "12x13.1",
+        price: 5.00,
+        stock: 0,
+        sort: 3,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "12x13.1"
+          }
+        ]
+      },
+      {
+        sku: "leaf-sticker-14x15-3",
+        name: "14x15.3",
+        price: 5.00,
+        stock: 0,
+        sort: 4,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "14x15.3"
+          }
+        ]
+      }
+    ])
+  },
+  {
+    name: "Shroom Sticker",
+    slug: "shroom-sticker",
+    description: "The only way our is through!",
+    images: "shroom.jpg, shroom-preview.jpg",
+    price: 3.00,
+    isActive: true,
+    isFeatured: false,
+    onSale: false,
+    hasVariations: true,
+    hasVolume: false,
+    stock: 0,
+    unlimitedStock: true,
+    categorySlug: "stickers",
+    brandSlug: "rublevsky-studio",
+    variations: JSON.stringify([
+      {
+        sku: "shroom-sticker-6x8-4",
+        name: "6x8.4",
+        price: 3.00,
+        stock: 0,
+        sort: 0,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "6x8.4"
+          }
+        ]
+      },
+      {
+        sku: "shroom-sticker-8x11-2",
+        name: "8x11.2",
+        price: 4.00,
+        stock: 0,
+        sort: 1,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "8x11.2"
+          }
+        ]
+      },
+      {
+        sku: "shroom-sticker-10x14",
+        name: "10x14",
+        price: 4.00,
+        stock: 0,
+        sort: 2,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "10x14"
+          }
+        ]
+      },
+      {
+        sku: "shroom-sticker-12x16-9",
+        name: "12x16.9",
+        price: 5.00,
+        stock: 0,
+        sort: 3,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "12x16.9"
+          }
+        ]
+      },
+      {
+        sku: "shroom-sticker-14x19-7",
+        name: "14x19.7",
+        price: 5.00,
+        stock: 0,
+        sort: 4,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "14x19.7"
+          }
+        ]
+      }
+    ])
+  },
+  {
+    name: "Graffiti Bark Sticker 2.0",
+    slug: "graffiti-bark-sticker-2",
+    description: "Fractal x Streets",
+    images: "graffiti-bark-abalych-second.jpg, graffiti-bark-abalych-second-preview.jpg",
+    price: 3.00,
+    isActive: true,
+    isFeatured: false,
+    onSale: false,
+    hasVariations: true,
+    hasVolume: false,
+    stock: 0,
+    unlimitedStock: true,
+    categorySlug: "stickers",
+    brandSlug: "abalych",
+    variations: JSON.stringify([
+      {
+        sku: "graffiti-bark-sticker-2-6x6",
+        name: "6x6",
+        price: 3.00,
+        stock: 0,
+        sort: 0,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "6x6"
+          }
+        ]
+      },
+      {
+        sku: "graffiti-bark-sticker-2-8x8",
+        name: "8x8",
+        price: 4.00,
+        stock: 0,
+        sort: 1,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "8x8"
+          }
+        ]
+      },
+      {
+        sku: "graffiti-bark-sticker-2-10x10",
+        name: "10x10",
+        price: 4.00,
+        stock: 0,
+        sort: 2,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "10x10"
+          }
+        ]
+      },
+      {
+        sku: "graffiti-bark-sticker-2-12x12",
+        name: "12x12",
+        price: 5.00,
+        stock: 0,
+        sort: 3,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "12x12"
+          }
+        ]
+      },
+      {
+        sku: "graffiti-bark-sticker-2-14x14",
+        name: "14x14",
+        price: 5.00,
+        stock: 0,
+        sort: 4,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "14x14"
+          }
+        ]
+      }
+    ])
+  },
+  {
+    name: "Graffiti Bark Sticker 1.0",
+    slug: "graffiti-bark-sticker-1",
+    description: "Fractal x Streets",
+    images: "graffiti-bark-abalych-1.jpg, graffiti-bark-abalych-1-preview.jpg",
+    price: 3.00,
+    isActive: true,
+    isFeatured: false,
+    onSale: false,
+    hasVariations: true,
+    hasVolume: false,
+    stock: 0,
+    unlimitedStock: true,
+    categorySlug: "stickers",
+    brandSlug: "abalych",
+    variations: JSON.stringify([
+      {
+        sku: "graffiti-bark-sticker-1-6x6",
+        name: "6x6",
+        price: 3.00,
+        stock: 0,
+        sort: 0,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "6x6"
+          }
+        ]
+      },
+      {
+        sku: "graffiti-bark-sticker-1-8x8",
+        name: "8x8",
+        price: 4.00,
+        stock: 0,
+        sort: 1,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "8x8"
+          }
+        ]
+      },
+      {
+        sku: "graffiti-bark-sticker-1-10x10",
+        name: "10x10",
+        price: 4.00,
+        stock: 0,
+        sort: 2,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "10x10"
+          }
+        ]
+      },
+      {
+        sku: "graffiti-bark-sticker-1-12x12",
+        name: "12x12",
+        price: 5.00,
+        stock: 0,
+        sort: 3,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "12x12"
+          }
+        ]
+      },
+      {
+        sku: "graffiti-bark-sticker-1-14x14",
+        name: "14x14",
+        price: 5.00,
+        stock: 0,
+        sort: 4,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "14x14"
+          }
+        ]
+      }
+    ])
+  },
+  {
+    name: "Yin Yang",
+    slug: "yin-yang-sticker",
+    description: "Eternally balanced, at peace",
+    images: "yinyan.jpg, yinyan-preview.jpg",
+    price: 3.00,
+    isActive: true,
+    isFeatured: false,
+    onSale: false,
+    hasVariations: true,
+    hasVolume: false,
+    stock: 0,
+    unlimitedStock: true,
+    categorySlug: "stickers",
+    brandSlug: "rublevsky-studio",
+    variations: JSON.stringify([
+      {
+        sku: "yin-yang-sticker-6x6",
+        name: "6x6",
+        price: 3.00,
+        stock: 0,
+        sort: 0,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "6x6"
+          }
+        ]
+      },
+      {
+        sku: "yin-yang-sticker-8x8",
+        name: "8x8",
+        price: 4.00,
+        stock: 0,
+        sort: 1,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "8x8"
+          }
+        ]
+      },
+      {
+        sku: "yin-yang-sticker-10x10",
+        name: "10x10",
+        price: 4.00,
+        stock: 0,
+        sort: 2,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "10x10"
+          }
+        ]
+      },
+      {
+        sku: "yin-yang-sticker-12x12",
+        name: "12x12",
+        price: 5.00,
+        stock: 0,
+        sort: 3,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "12x12"
+          }
+        ]
+      },
+      {
+        sku: "yin-yang-sticker-14x14",
+        name: "14x14",
+        price: 5.00,
+        stock: 0,
+        sort: 4,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "14x14"
+          }
+        ]
+      }
+    ])
+  },
+  {
+    name: "God Nature Art Peace & Hip Hop Sticker",
+    slug: "god-nature-art-peace-hip-hop-sticker",
+    description: "Творчество говорит само за себя, если бы я могла это описать — я бы не сделала стикос.\n— Abalych",
+    images: "hiphop1.jpg, hiphop2.jpg, hiphop-preview.jpg",
+    price: 3.00,
+    isActive: true,
+    isFeatured: false,
+    onSale: false,
+    hasVariations: true,
+    hasVolume: false,
+    stock: 0,
+    unlimitedStock: true,
+    categorySlug: "stickers",
+    brandSlug: "abalych",
+    variations: JSON.stringify([
+      {
+        sku: "god-nature-art-peace-hip-hop-sticker-6x8-1",
+        name: "6x8.1",
+        price: 3.00,
+        stock: 0,
+        sort: 0,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "6x8.1"
+          }
+        ]
+      },
+      {
+        sku: "god-nature-art-peace-hip-hop-sticker-8x10-8",
+        name: "8x10.8",
+        price: 4.00,
+        stock: 0,
+        sort: 1,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "8x10.8"
+          }
+        ]
+      },
+      {
+        sku: "god-nature-art-peace-hip-hop-sticker-10x13-5",
+        name: "10x13.5",
+        price: 4.00,
+        stock: 0,
+        sort: 2,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "10x13.5"
+          }
+        ]
+      },
+      {
+        sku: "god-nature-art-peace-hip-hop-sticker-12x16-2",
+        name: "12x16.2",
+        price: 5.00,
+        stock: 0,
+        sort: 3,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "12x16.2"
+          }
+        ]
+      },
+      {
+        sku: "god-nature-art-peace-hip-hop-sticker-14x19",
+        name: "14x19",
+        price: 5.00,
+        stock: 0,
+        sort: 4,
+        attributes: [
+          {
+            name: "Size cm",
+            value: "14x19"
           }
         ]
       }

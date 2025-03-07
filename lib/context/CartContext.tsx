@@ -17,6 +17,7 @@ export interface CartItem {
   image?: string;
   attributes?: Record<string, string>; // e.g. {color: "red", size: "XL"}
   maxStock: number; // to validate against stock limits
+  unlimitedStock: boolean;
 }
 
 export interface Cart {
@@ -101,32 +102,32 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       let newItems = [...prevCart.items];
 
       if (existingItemIndex >= 0) {
-        // Item exists, update quantity if within stock limit
+        // Item exists, update quantity
         const existingItem = newItems[existingItemIndex];
         const newQuantity = existingItem.quantity + item.quantity;
 
-        // Don't exceed the max stock
-        if (newQuantity <= item.maxStock) {
+        // Don't apply stock limits for unlimited stock items
+        if (existingItem.unlimitedStock) {
           newItems[existingItemIndex] = {
             ...existingItem,
             quantity: newQuantity,
           };
         } else {
-          // Set to max stock if over
+          // Apply stock limits for limited stock items
           newItems[existingItemIndex] = {
             ...existingItem,
-            quantity: item.maxStock,
+            quantity: Math.min(newQuantity, item.maxStock),
           };
         }
       } else {
-        // Item doesn't exist, add it if quantity is valid
-        if (item.quantity <= item.maxStock) {
+        // Item doesn't exist, add it
+        if (item.unlimitedStock) {
           newItems.push(item);
         } else {
-          // Add with max stock quantity if over
+          // Apply stock limits for limited stock items
           newItems.push({
             ...item,
-            quantity: item.maxStock,
+            quantity: Math.min(item.quantity, item.maxStock),
           });
         }
       }
@@ -162,7 +163,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         selectedVariation?.id
       );
 
-      if (!result.isAvailable) {
+      if (!result.isAvailable && !result.unlimitedStock) {
         toast.error(
           "This item is out of stock or not available in the requested quantity"
         );
@@ -185,6 +186,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         image: firstImage,
         attributes: selectedAttributes || {},
         maxStock: result.availableStock,
+        unlimitedStock: result.unlimitedStock,
       };
 
       // Add to cart
@@ -222,12 +224,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setCart((prevCart) => {
       const newItems = prevCart.items.map((item) => {
         if (item.productId === productId && item.variationId === variationId) {
-          // Validate against max stock
-          const validQuantity = Math.min(Math.max(1, quantity), item.maxStock);
-
+          // Don't apply stock limits for unlimited stock items
+          if (item.unlimitedStock) {
+            return {
+              ...item,
+              quantity: Math.max(1, quantity), // Only enforce minimum of 1
+            };
+          }
+          // Apply stock limits for limited stock items
           return {
             ...item,
-            quantity: validQuantity,
+            quantity: Math.min(Math.max(1, quantity), item.maxStock),
           };
         }
         return item;
