@@ -44,9 +44,29 @@ export default async function getAllProducts({
     // Execute the query
     const productList = await query.all();
     
+    // Define category order
+    const categoryOrder = {
+      'apparel': 1,
+      'posters': 2,
+      'produce': 3,
+      'tea': 4,
+      'stickers': 5
+    };
+    
+    // Sort products by category order and then by creation date
+    const sortedProductList = [...productList].sort((a, b) => {
+      const orderA = categoryOrder[a.categorySlug as keyof typeof categoryOrder] || 999;
+      const orderB = categoryOrder[b.categorySlug as keyof typeof categoryOrder] || 999;
+      if (orderA !== orderB) {
+        return orderA - orderB;
+      }
+      // If categories are the same, sort by creation date (newest first)
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+    
     // Fetch variations and blog post descriptions for products
     const enrichedProducts = await Promise.all(
-      productList.map(async (product: Product) => {
+      sortedProductList.map(async (product: Product) => {
         const enrichedProduct: ProductWithVariations = { 
           ...product,
           images: product.images
