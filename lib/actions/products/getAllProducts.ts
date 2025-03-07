@@ -1,6 +1,6 @@
 'use server';
 
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, SQL } from "drizzle-orm";
 import db from "@/server/db";
 import { products, categories, brands, productVariations, variationAttributes, blogPosts } from "@/server/schema";
 import { Product, ProductWithVariations, ProductVariationWithAttributes } from "@/types";
@@ -9,114 +9,102 @@ interface GetAllProductsOptions {
   categorySlug?: string | null;
   brandSlug?: string | null;
   featured?: boolean;
-  limit?: number;
+}
+
+interface EnrichedProductWithVariations extends ProductWithVariations {
+  _categoryOrder: number;
+  variations: ProductVariationWithAttributes[];
 }
 
 export default async function getAllProducts({
   categorySlug = null,
   brandSlug = null,
-  featured = false,
-  limit = 12
+  featured = false
 }: GetAllProductsOptions = {}): Promise<ProductWithVariations[]> {
   try {
-    // Build the query
-    let query = db
-      .select()
+    // Execute a single query to get all related data
+    const result = await db
+      .select({
+        product: products,
+        blogPost: {
+          body: blogPosts.body
+        },
+        variations: productVariations,
+        attributes: variationAttributes
+      })
       .from(products)
-      .where(eq(products.isActive, true));
-    
-    // Add filters
-    if (categorySlug) {
-      query = query.where(eq(products.categorySlug, categorySlug));
-    }
-    
-    if (brandSlug) {
-      query = query.where(eq(products.brandSlug, brandSlug));
-    }
-    
-    if (featured) {
-      query = query.where(eq(products.isFeatured, true));
-    }
-    
-    // Order by newest first and limit results
-    query = query.orderBy(desc(products.createdAt)).limit(limit);
-    
-    // Execute the query
-    const productList = await query.all();
-    
-    // Define category order
-    const categoryOrder = {
-      'apparel': 1,
-      'posters': 2,
-      'produce': 3,
-      'tea': 4,
-      'stickers': 5
-    };
-    
-    // Sort products by category order and then by creation date
-    const sortedProductList = [...productList].sort((a, b) => {
-      const orderA = categoryOrder[a.categorySlug as keyof typeof categoryOrder] || 999;
-      const orderB = categoryOrder[b.categorySlug as keyof typeof categoryOrder] || 999;
-      if (orderA !== orderB) {
-        return orderA - orderB;
-      }
-      // If categories are the same, sort by creation date (newest first)
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
-    
-    // Fetch variations and blog post descriptions for products
-    const enrichedProducts = await Promise.all(
-      sortedProductList.map(async (product: Product) => {
-        const enrichedProduct: ProductWithVariations = { 
-          ...product,
-          images: product.images
+      .leftJoin(blogPosts, eq(blogPosts.productSlug, products.slug))
+      .leftJoin(productVariations, eq(productVariations.productId, products.id))
+      .leftJoin(
+        variationAttributes,
+        productVariations.id
+          ? eq(variationAttributes.productVariationId, productVariations.id)
+          : undefined
+      )
+      .where(eq(products.isActive, true))
+      .where(categorySlug ? eq(products.categorySlug, categorySlug) : undefined)
+      .where(brandSlug ? eq(products.brandSlug, brandSlug) : undefined)
+      .where(featured ? eq(products.isFeatured, true) : undefined)
+      .orderBy(desc(products.createdAt))
+      .all();
+
+    // Process the results to group variations and attributes
+    const productMap = new Map<number, EnrichedProductWithVariations>();
+
+    result.forEach((row: any) => {
+      if (!productMap.has(row.product.id)) {
+        // Define category order
+        const categoryOrder = {
+          'apparel': 1,
+          'posters': 2,
+          'produce': 3,
+          'tea': 4,
+          'stickers': 5
         };
 
-        // Check for linked blog post and use its body as description
-        const linkedBlogPost = await db
-          .select({
-            body: blogPosts.body
-          })
-          .from(blogPosts)
-          .where(eq(blogPosts.productSlug, product.slug))
-          .get();
+        productMap.set(row.product.id, {
+          ...row.product,
+          images: row.product.images,
+          description: row.blogPost?.body || row.product.description,
+          variations: [],
+          _categoryOrder: categoryOrder[row.product.categorySlug as keyof typeof categoryOrder] || 999
+        });
+      }
 
-        if (linkedBlogPost) {
-          enrichedProduct.description = linkedBlogPost.body;
+      const product = productMap.get(row.product.id)!;
+
+      if (row.variations && !product.variations.find(v => v.id === row.variations.id)) {
+        const variation: ProductVariationWithAttributes = {
+          ...row.variations,
+          attributes: []
+        };
+
+        if (row.attributes) {
+          variation.attributes = [row.attributes];
         }
 
-        // Fetch variations if product has them
-        if (product.hasVariations) {
-          const variations = await db
-            .select()
-            .from(productVariations)
-            .where(eq(productVariations.productId, product.id))
-            .all();
-          
-          // Get attributes for each variation and convert to ProductVariationWithAttributes
-          const enrichedVariations: ProductVariationWithAttributes[] = [];
-          
-          for (const variation of variations) {
-            const attributes = await db
-              .select()
-              .from(variationAttributes)
-              .where(eq(variationAttributes.productVariationId, variation.id))
-              .all();
-            
-            enrichedVariations.push({
-              ...variation,
-              attributes
-            });
-          }
-          
-          enrichedProduct.variations = enrichedVariations;
+        product.variations.push(variation);
+      } else if (row.attributes && row.variations) {
+        const variation = product.variations.find(v => v.id === row.variations.id);
+        if (variation && !variation.attributes.find(a => a.id === row.attributes.id)) {
+          variation.attributes.push(row.attributes);
         }
-        
-        return enrichedProduct;
-      })
-    );
-    
-    return enrichedProducts;
+      }
+    });
+
+    // Convert map to array and sort by category order
+    const sortedProducts = Array.from(productMap.values()).sort((a, b) => {
+      if (a._categoryOrder !== b._categoryOrder) {
+        return a._categoryOrder - b._categoryOrder;
+      }
+      // Ensure createdAt is not null before creating Date objects
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return dateB - dateA;
+    });
+
+    // Remove the temporary _categoryOrder property and return the products
+    return sortedProducts.map(({ _categoryOrder, ...product }) => product);
   } catch (error) {
     console.error("Error fetching products:", error);
     throw new Error(`Failed to fetch products: ${(error as Error).message}`);

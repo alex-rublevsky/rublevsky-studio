@@ -10,7 +10,7 @@ export default async function StorePage() {
 
   return (
     <div className="space-y-8">
-      <ProductList title="Latest Products" data={products} />
+      <ProductList title="All Products" data={products} />
     </div>
   );
 }
