@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { createOrder } from "@/lib/actions/cart/createOrder";
 import Image from "next/image";
+import { getAttributeDisplayName } from "@/lib/utils/productAttributes";
 
 interface CustomerInfo {
   firstName: string;
@@ -337,7 +338,10 @@ export default function CheckoutPage() {
                         Object.keys(item.attributes).length > 0 && (
                           <p className="text-sm text-gray-500">
                             {Object.entries(item.attributes)
-                              .map(([key, value]) => `${key}: ${value}`)
+                              .map(
+                                ([key, value]) =>
+                                  `${getAttributeDisplayName(key)}: ${value}`
+                              )
                               .join(", ")}
                           </p>
                         )}

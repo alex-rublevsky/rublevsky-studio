@@ -6,6 +6,7 @@ import Link from "next/link";
 import { X } from "lucide-react";
 import { useCart, CartItem as CartItemType } from "@/lib/context/CartContext";
 import { QuantitySelector } from "@/components/ui/shared/QuantitySelector";
+import { getAttributeDisplayName } from "@/lib/utils/productAttributes";
 
 interface CartItemProps {
   item: CartItemType;
@@ -69,7 +70,7 @@ export function CartItem({ item }: CartItemProps) {
   // Format attributes for display
   const attributeText = item.attributes
     ? Object.entries(item.attributes)
-        .map(([key, value]) => `${key}: ${value}`)
+        .map(([key, value]) => `${getAttributeDisplayName(key)}: ${value}`)
         .join(", ")
     : "";
 

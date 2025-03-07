@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import { CartItem } from "@/lib/context/CartContext";
+import { getAttributeDisplayName } from "@/lib/utils/productAttributes";
 
 interface CheckoutItemsProps {
   items: CartItem[];
@@ -43,7 +44,10 @@ export default function CheckoutItems({ items }: CheckoutItemsProps) {
             {item.attributes && Object.keys(item.attributes).length > 0 && (
               <p className="text-xs text-gray-500">
                 {Object.entries(item.attributes)
-                  .map(([key, value]) => `${key}: ${value}`)
+                  .map(
+                    ([key, value]) =>
+                      `${getAttributeDisplayName(key)}: ${value}`
+                  )
                   .join(", ")}
               </p>
             )}
