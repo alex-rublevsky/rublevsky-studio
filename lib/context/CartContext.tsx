@@ -18,6 +18,9 @@ export interface CartItem {
   attributes?: Record<string, string>; // e.g. {color: "red", size: "XL"}
   maxStock: number; // to validate against stock limits
   unlimitedStock: boolean;
+  volumeInfo?: {
+    totalVolume: number;
+  };
 }
 
 export interface Cart {
@@ -187,6 +190,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         attributes: selectedAttributes || {},
         maxStock: result.availableStock,
         unlimitedStock: result.unlimitedStock,
+        // Include volume information for volume-based products
+        ...(product.hasVolume && product.volume
+          ? {
+              volumeInfo: {
+                totalVolume: parseInt(product.volume),
+              },
+            }
+          : {}),
       };
 
       // Add to cart
@@ -216,11 +227,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Update item quantity
-  const updateQuantity = (
+  const updateQuantity = async (
     productId: number,
     quantity: number,
     variationId?: number
   ) => {
+    // Validate stock before updating
+    const result = await validateStock(productId, quantity, variationId);
+
+    if (!result.isAvailable && !result.unlimitedStock) {
+      toast.error("Requested quantity is not available");
+      return;
+    }
+
     setCart((prevCart) => {
       const newItems = prevCart.items.map((item) => {
         if (item.productId === productId && item.variationId === variationId) {
@@ -234,7 +253,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           // Apply stock limits for limited stock items
           return {
             ...item,
-            quantity: Math.min(Math.max(1, quantity), item.maxStock),
+            quantity: Math.min(Math.max(1, quantity), result.availableStock),
+            maxStock: result.availableStock, // Update maxStock with latest value
           };
         }
         return item;

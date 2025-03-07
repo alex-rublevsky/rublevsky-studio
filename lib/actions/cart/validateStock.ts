@@ -2,7 +2,7 @@
 
 import db from "@/server/db";
 import { products, productVariations } from "@/server/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 export interface StockValidationResult {
   isAvailable: boolean;
@@ -13,6 +13,7 @@ export interface StockValidationResult {
 /**
  * Validates if a product or variation has sufficient stock
  * This is a server action that can be called from client components
+ * Note: Volume-based stock calculations are now handled on the client side
  */
 export async function validateStock(
   productId: number,
@@ -20,22 +21,38 @@ export async function validateStock(
   variationId?: number
 ): Promise<StockValidationResult> {
   try {
-    // First, check if the product has unlimited stock
-    const product = await db
+    // Single query to get all necessary data
+    const result = await db
       .select({
-        unlimitedStock: products.unlimitedStock,
-        hasVariations: products.hasVariations,
-        stock: products.stock,
+        product: {
+          unlimitedStock: products.unlimitedStock,
+          hasVolume: products.hasVolume,
+          volume: products.volume,
+          stock: products.stock,
+        },
+        variation: variationId ? {
+          stock: productVariations.stock,
+        } : undefined,
       })
       .from(products)
+      .leftJoin(
+        productVariations,
+        variationId ? 
+          and(
+            eq(productVariations.productId, products.id),
+            eq(productVariations.id, variationId)
+          ) : undefined
+      )
       .where(eq(products.id, productId))
       .get();
 
-    if (!product) {
+    if (!result?.product) {
       return { isAvailable: false, availableStock: 0, unlimitedStock: false };
     }
 
-    // If product has unlimited stock, it's always available regardless of variations
+    const { product } = result;
+
+    // Handle unlimited stock products
     if (product.unlimitedStock) {
       return {
         isAvailable: true,
@@ -44,31 +61,26 @@ export async function validateStock(
       };
     }
 
-    // If we have a variation ID, check the variation stock
-    if (variationId) {
-      const variation = await db
-        .select({ stock: productVariations.stock })
-        .from(productVariations)
-        .where(eq(productVariations.id, variationId))
-        .get();
-
-      if (!variation) {
-        return { isAvailable: false, availableStock: 0, unlimitedStock: false };
-      }
-
+    // For volume-based products, return the total volume
+    // Client will handle the actual stock calculation
+    if (product.hasVolume && product.volume) {
       return {
-        isAvailable: variation.stock >= requestedQuantity,
-        availableStock: variation.stock,
+        isAvailable: true, // Client will determine actual availability
+        availableStock: parseInt(product.volume),
         unlimitedStock: false
       };
     }
 
-    // If product has variations but no variation ID was provided
-    if (product.hasVariations && !variationId) {
-      return { isAvailable: false, availableStock: 0, unlimitedStock: false };
+    // For regular variations
+    if (variationId && result.variation) {
+      return {
+        isAvailable: result.variation.stock >= requestedQuantity,
+        availableStock: result.variation.stock,
+        unlimitedStock: false
+      };
     }
 
-    // Check product stock for non-variation products
+    // For non-variation products
     return {
       isAvailable: product.stock >= requestedQuantity,
       availableStock: product.stock,

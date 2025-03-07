@@ -7,6 +7,7 @@ import Image from "next/image";
 import styles from "./productCard.module.css";
 import { useCart } from "@/lib/context/CartContext";
 import { useCallback, useRef } from "react";
+import { validateStock } from "@/lib/actions/cart/validateStock";
 
 // Extended product interface with variations
 interface ProductWithVariations extends Product {
@@ -232,37 +233,64 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
     [product.variations, selectedAttributes]
   );
 
-  // Get database stock without considering cart
-  const getDbStock = useCallback(() => {
-    if (product.unlimitedStock) return Infinity;
+  // Calculate effective stock by subtracting cart quantities
+  const getEffectiveStock = useMemo(() => {
+    if (!product.unlimitedStock) {
+      // For volume-based products with variations
+      if (product.hasVolume && product.volume && selectedVariation) {
+        const volumeAttr = selectedVariation.attributes.find(
+          (attr) => attr.name === "Volume g"
+        );
 
-    if (product.hasVariations && selectedVariation) {
-      return selectedVariation.stock;
+        if (volumeAttr) {
+          const totalVolume = parseInt(product.volume);
+          const variationVolume = parseInt(volumeAttr.value);
+
+          // Calculate total volume used by all variations in cart
+          const volumeUsedInCart = cart.items
+            .filter((item) => item.productId === product.id)
+            .reduce((total, item) => {
+              // Find the volume of this cart item's variation
+              const cartItemVolume = item.attributes?.["Volume g"];
+              if (cartItemVolume) {
+                return total + parseInt(cartItemVolume) * item.quantity;
+              }
+              return total;
+            }, 0);
+
+          // Calculate remaining volume
+          const remainingVolume = Math.max(0, totalVolume - volumeUsedInCart);
+
+          // Calculate how many packages of current variation can be made
+          return Math.floor(remainingVolume / variationVolume);
+        }
+      }
+
+      // For regular variations
+      const dbStock = selectedVariation
+        ? selectedVariation.stock
+        : product.stock;
+
+      // Find matching item in cart (if any)
+      const cartItem = cart.items.find(
+        (item) =>
+          item.productId === product.id &&
+          item.variationId === (selectedVariation?.id || undefined)
+      );
+
+      // Subtract cart quantity from database stock
+      return cartItem ? Math.max(0, dbStock - cartItem.quantity) : dbStock;
     }
 
-    return product.stock;
-  }, [product, selectedVariation]);
-
-  // Calculate effective stock (database stock minus cart quantities)
-  const effectiveStock = useMemo(() => {
-    const dbStock = getDbStock();
-    if (dbStock === Infinity) return Infinity;
-
-    // Find matching item in cart (if any)
-    const cartItem = cart.items.find(
-      (item) =>
-        item.productId === product.id &&
-        item.variationId === (selectedVariation?.id || undefined)
-    );
-
-    // Subtract cart quantity from database stock
-    return cartItem ? Math.max(0, dbStock - cartItem.quantity) : dbStock;
-  }, [getDbStock, cart.items, product.id, selectedVariation]);
+    return Infinity;
+  }, [product, selectedVariation, cart.items]);
 
   // Calculate if the product is available to add to cart
   const isAvailable = useMemo(() => {
-    return product.isActive && (product.unlimitedStock || effectiveStock > 0);
-  }, [product.isActive, product.unlimitedStock, effectiveStock]);
+    return (
+      product.isActive && (product.unlimitedStock || getEffectiveStock > 0)
+    );
+  }, [product.isActive, product.unlimitedStock, getEffectiveStock]);
 
   // Calculate current price based on selected variation
   const currentPrice = useMemo(() => {
@@ -446,18 +474,13 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
                 <div className="flex items-baseline gap-1">
                   <span className="text-lg font-light text-black whitespace-nowrap">
                     ${currentPrice?.toFixed(2)} CAD
-                    {product.hasVolume && product.volume && (
-                      <span className="text-black text-sm font-light">
-                        /{product.volume}
-                      </span>
-                    )}
                   </span>
                 </div>
 
                 {!product.unlimitedStock && (
                   <div className="mt-1 text-xs text-gray-500">
-                    {effectiveStock > 0 ? (
-                      <span>In stock: {effectiveStock}</span>
+                    {getEffectiveStock > 0 ? (
+                      <span>In stock: {getEffectiveStock}</span>
                     ) : (
                       <span className="text-red-600">Out of stock</span>
                     )}

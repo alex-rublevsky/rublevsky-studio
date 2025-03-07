@@ -113,9 +113,38 @@ export default function ProductPage() {
 
     if (product.unlimitedStock) return Infinity;
 
-    const dbStock = selectedVariation
-      ? selectedVariation.stock
-      : product.stock || 0;
+    // For volume-based products with variations
+    if (product.hasVolume && product.volume && selectedVariation) {
+      const volumeAttr = selectedVariation.attributes.find(
+        (attr) => attr.name === "Volume g"
+      );
+
+      if (volumeAttr) {
+        const totalVolume = parseInt(product.volume);
+        const variationVolume = parseInt(volumeAttr.value);
+
+        // Calculate total volume used by all variations in cart
+        const volumeUsedInCart = cart.items
+          .filter((item) => item.productId === product.id)
+          .reduce((total, item) => {
+            // Find the volume of this cart item's variation
+            const cartItemVolume = item.attributes?.["Volume G"];
+            if (cartItemVolume) {
+              return total + parseInt(cartItemVolume) * item.quantity;
+            }
+            return total;
+          }, 0);
+
+        // Calculate remaining volume
+        const remainingVolume = Math.max(0, totalVolume - volumeUsedInCart);
+
+        // Calculate how many packages of current variation can be made
+        return Math.floor(remainingVolume / variationVolume);
+      }
+    }
+
+    // For regular variations
+    const dbStock = selectedVariation ? selectedVariation.stock : product.stock;
 
     // Find matching item in cart (if any)
     const cartItem = cart.items.find(

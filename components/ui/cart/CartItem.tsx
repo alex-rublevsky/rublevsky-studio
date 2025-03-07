@@ -1,9 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { X, Plus, Minus } from "lucide-react";
+import { X } from "lucide-react";
 import { useCart, CartItem as CartItemType } from "@/lib/context/CartContext";
 import { QuantitySelector } from "@/components/ui/shared/QuantitySelector";
 
@@ -12,10 +12,52 @@ interface CartItemProps {
 }
 
 export function CartItem({ item }: CartItemProps) {
-  const { updateQuantity, removeFromCart } = useCart();
+  const { updateQuantity, removeFromCart, cart } = useCart();
+
+  // Calculate effective max quantity for volume-based products
+  const effectiveMaxQuantity = useMemo(() => {
+    if (item.unlimitedStock) return undefined;
+
+    // For volume-based products
+    if (item.volumeInfo) {
+      const { totalVolume } = item.volumeInfo;
+      const currentVariationVolume = parseInt(
+        item.attributes?.["Volume g"] || "0"
+      );
+
+      if (currentVariationVolume) {
+        // Calculate total volume used by all variations in cart EXCEPT current item
+        const volumeUsedInCart = cart.items
+          .filter(
+            (cartItem) =>
+              cartItem.productId === item.productId &&
+              // Exclude current item from calculation
+              !(cartItem.variationId === item.variationId)
+          )
+          .reduce((total, cartItem) => {
+            const cartItemVolume = cartItem.attributes?.["Volume G"];
+            if (cartItemVolume) {
+              return total + parseInt(cartItemVolume) * cartItem.quantity;
+            }
+            return total;
+          }, 0);
+
+        // Calculate remaining volume (excluding current item's usage)
+        const remainingVolume = Math.max(0, totalVolume - volumeUsedInCart);
+
+        // Calculate how many packages of current variation can be made
+        return Math.floor(remainingVolume / currentVariationVolume);
+      }
+    }
+
+    // For regular products, use the maxStock from the item
+    return item.maxStock;
+  }, [item, cart.items]);
 
   const handleIncrement = () => {
-    updateQuantity(item.productId, item.quantity + 1, item.variationId);
+    if (item.unlimitedStock || item.quantity < effectiveMaxQuantity!) {
+      updateQuantity(item.productId, item.quantity + 1, item.variationId);
+    }
   };
 
   const handleDecrement = () => {
@@ -67,7 +109,7 @@ export function CartItem({ item }: CartItemProps) {
             quantity={item.quantity}
             onIncrement={handleIncrement}
             onDecrement={handleDecrement}
-            maxQuantity={item.unlimitedStock ? undefined : item.maxStock}
+            maxQuantity={effectiveMaxQuantity}
             size="compact"
           />
           <div className="font-medium">

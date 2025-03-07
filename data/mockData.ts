@@ -939,14 +939,68 @@ export const mockProducts = [
     isActive: true,
     isFeatured: true,
     onSale: false,
-    hasVariations: false,
+    hasVariations: true,
     hasVolume: true,
-    volume: "357g",
-    stock: 1,
+    volume: "300",
+    stock: 0,
     unlimitedStock: false,
     categorySlug: "tea",
-    brandSlug: "yunnan-sourcing"
-  }
+    brandSlug: "yunnan-sourcing",
+    variations: JSON.stringify([
+      {
+        sku: "guardian-2-25g",
+        name: "25g",
+        price: 12.99,
+        stock: 0,
+        sort: 0,
+        attributes: [
+          {
+            name: "Volume g",
+            value: "25"
+          }
+        ]
+      },
+      {
+        sku: "guardian-2-50g",
+        name: "50g",
+        price: 24.99,
+        stock: 0,
+        sort: 1,
+        attributes: [
+          {
+            name: "Volume g",
+            value: "50"
+          }
+        ]
+      },
+      {
+        sku: "guardian-2-100g",
+        name: "100g",
+        price: 44.99,
+        stock: 0,
+        sort: 2,
+        attributes: [
+          {
+            name: "Volume g",
+            value: "100"
+          }
+        ]
+      },
+      {
+        sku: "guardian-2-150g",
+        name: "150g",
+        price: 64.99,
+        stock: 0,
+        sort: 3,
+        attributes: [
+          {
+            name: "Volume g",
+            value: "150"
+          }
+        ]
+      }
+    ])
+  },
 ];
 
 // Mock Blog Posts
