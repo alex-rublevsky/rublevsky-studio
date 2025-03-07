@@ -6,7 +6,6 @@ import localFont from "next/font/local";
 import "@/styles/typography.css";
 import { AnimationProvider } from "@/components/providers/animation-provider";
 import { Toaster } from "@/components/ui/sonner";
-import { CartProvider } from "@/lib/context/CartContext";
 
 const overusedGrotesk = localFont({
   src: [
@@ -39,13 +38,11 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <body className={`${overusedGrotesk.variable} antialiased`}>
-        <CartProvider>
-          <AnimationProvider>
-            <NavBar />
-            {children}
-          </AnimationProvider>
-        </CartProvider>
-        <Toaster />
+        <AnimationProvider>
+          <NavBar />
+          {children}
+        </AnimationProvider>
+        <Toaster position="top-right" richColors />
       </body>
     </html>
   );

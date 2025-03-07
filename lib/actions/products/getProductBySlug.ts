@@ -1,6 +1,7 @@
 'use server';
 
 import { eq } from "drizzle-orm";
+import { unstable_cache } from 'next/cache';
 import db from "@/server/db";
 import { products, categories, brands, productVariations, variationAttributes, blogPosts } from "@/server/schema";
 import { Product } from "@/types";
@@ -24,90 +25,121 @@ interface ProductWithDetails extends Product {
   } | null;
 }
 
-export default async function getProductBySlug(slug: string): Promise<ProductWithDetails | null> {
+interface QueryResult {
+  product: Product;
+  category: {
+    name: string;
+    slug: string;
+  } | null;
+  brand: {
+    name: string;
+    slug: string;
+  } | null;
+  blogPost: {
+    id: number;
+    title: string;
+    slug: string;
+    body: string;
+  } | null;
+  variation: any;
+  attributes: any;
+}
+
+// Function to fetch product from database
+async function fetchProduct(slug: string): Promise<ProductWithDetails | null> {
   try {
     if (!slug) {
       throw new Error("Slug parameter is required");
     }
     
-    // Get product by slug with category and brand information
-    const product = await db
+    // Execute a single query to get all related data
+    const result = await db
       .select({
-        products: products,
-        categories: {
+        product: products,
+        category: {
           name: categories.name,
           slug: categories.slug
         },
-        brands: {
+        brand: {
           name: brands.name,
           slug: brands.slug
-        }
+        },
+        blogPost: {
+          id: blogPosts.id,
+          title: blogPosts.title,
+          slug: blogPosts.slug,
+          body: blogPosts.body
+        },
+        variation: productVariations,
+        attributes: variationAttributes
       })
       .from(products)
       .where(eq(products.slug, slug))
       .leftJoin(categories, eq(products.categorySlug, categories.slug))
       .leftJoin(brands, eq(products.brandSlug, brands.slug))
-      .get();
+      .leftJoin(blogPosts, eq(blogPosts.productSlug, products.slug))
+      .leftJoin(productVariations, eq(productVariations.productId, products.id))
+      .leftJoin(
+        variationAttributes,
+        productVariations.id
+          ? eq(variationAttributes.productVariationId, productVariations.id)
+          : undefined
+      )
+      .all();
     
-    if (!product) {
+    if (!result.length) {
       return null;
     }
+
+    // Get the first row for base product data
+    const firstRow = result[0] as QueryResult;
     
-    // Format the response to include category and brand names
+    // Format the base product with category and brand
     const formattedProduct: ProductWithDetails = {
-      ...product.products,
-      category: product.categories ? {
-        name: product.categories.name,
-        slug: product.categories.slug
+      ...firstRow.product,
+      category: firstRow.category ? {
+        name: firstRow.category.name,
+        slug: firstRow.category.slug
       } : null,
-      brand: product.brands ? {
-        name: product.brands.name,
-        slug: product.brands.slug
+      brand: firstRow.brand ? {
+        name: firstRow.brand.name,
+        slug: firstRow.brand.slug
       } : null
     };
-    
-    // Look for a related blog post using productSlug
-    const relatedBlogPost = await db
-      .select({
-        id: blogPosts.id,
-        title: blogPosts.title,
-        slug: blogPosts.slug,
-        body: blogPosts.body
-      })
-      .from(blogPosts)
-      .where(eq(blogPosts.productSlug, slug))
-      .get();
-    
-    if (relatedBlogPost) {
+
+    // Add blog post if exists
+    if (firstRow.blogPost) {
       formattedProduct.blogPost = {
-        ...relatedBlogPost,
-        blogUrl: `/blog#${relatedBlogPost.slug}`
+        ...firstRow.blogPost,
+        blogUrl: `/blog#${firstRow.blogPost.slug}`
       };
-      
-      // Always use blog post body as description when available
-      formattedProduct.description = relatedBlogPost.body;
+      // Use blog post body as description when available
+      formattedProduct.description = firstRow.blogPost.body;
     }
-    
-    // If product has variations, fetch them
+
+    // Process variations and attributes if product has variations
     if (formattedProduct.hasVariations) {
-      const variations = await db
-        .select()
-        .from(productVariations)
-        .where(eq(productVariations.productId, formattedProduct.id))
-        .all();
-      
-      // Get attributes for each variation
-      for (const variation of variations) {
-        const attributes = await db
-          .select()
-          .from(variationAttributes)
-          .where(eq(variationAttributes.productVariationId, variation.id))
-          .all();
-        
-        variation.attributes = attributes;
-      }
-      
-      formattedProduct.variations = variations;
+      const variationsMap = new Map();
+
+      (result as QueryResult[]).forEach(row => {
+        if (row.variation) {
+          if (!variationsMap.has(row.variation.id)) {
+            variationsMap.set(row.variation.id, {
+              ...row.variation,
+              attributes: []
+            });
+          }
+
+          if (row.attributes) {
+            const variation = variationsMap.get(row.variation.id);
+            if (!variation.attributes.find((attr: any) => attr.id === row.attributes.id)) {
+              variation.attributes.push(row.attributes);
+            }
+          }
+        }
+      });
+
+      formattedProduct.variations = Array.from(variationsMap.values());
     }
     
     return formattedProduct;
@@ -115,4 +147,16 @@ export default async function getProductBySlug(slug: string): Promise<ProductWit
     console.error("Error fetching product:", error);
     throw new Error(`Failed to fetch product: ${(error as Error).message}`);
   }
+}
+
+// Cached version of getProductBySlug
+export default async function getProductBySlug(slug: string): Promise<ProductWithDetails | null> {
+  return unstable_cache(
+    async () => fetchProduct(slug),
+    ['product', slug],
+    {
+      revalidate: 259200, // Cache for 3 days
+      tags: ['products', `product-${slug}`] // Tags for cache invalidation
+    }
+  )();
 }

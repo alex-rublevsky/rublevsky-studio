@@ -3,8 +3,8 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { getCookie, setCookie } from "cookies-next";
 import { toast } from "sonner";
-import { Product, ProductVariation } from "@/types";
-import { validateStock } from "@/lib/actions/cart/validateStock";
+import { Product, ProductVariation, ProductWithVariations } from "@/types";
+import { validateStock } from "@/lib/utils/validateStock";
 
 // Types
 export interface CartItem {
@@ -54,7 +54,12 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 // Cookie name constant
 const CART_COOKIE_NAME = "rublevsky-cart";
 
-export function CartProvider({ children }: { children: React.ReactNode }) {
+interface CartProviderProps {
+  children: React.ReactNode;
+  initialProducts: ProductWithVariations[];
+}
+
+export function CartProvider({ children, initialProducts }: CartProviderProps) {
   const [cart, setCart] = useState<Cart>({
     items: [],
     lastUpdated: Date.now(),
@@ -145,7 +150,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setCartOpen(true);
   };
 
-  // Combined function to add a product to cart using the server action for validation
+  // Combined function to add a product to cart using client-side validation
   const addProductToCart = async (
     product: Product,
     quantity: number = 1,
@@ -159,8 +164,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         return false;
       }
 
-      // Validate stock availability using server action
-      const result = await validateStock(
+      // Validate stock using client-side validation
+      const result = validateStock(
+        initialProducts,
+        cart.items,
         product.id,
         quantity,
         selectedVariation?.id
@@ -232,8 +239,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     quantity: number,
     variationId?: number
   ) => {
-    // Validate stock before updating
-    const result = await validateStock(productId, quantity, variationId);
+    // Validate stock using client-side validation
+    const result = validateStock(
+      initialProducts,
+      cart.items,
+      productId,
+      quantity,
+      variationId
+    );
 
     if (!result.isAvailable && !result.unlimitedStock) {
       toast.error("Requested quantity is not available");

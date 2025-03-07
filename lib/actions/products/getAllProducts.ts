@@ -1,6 +1,11 @@
 'use server';
 
+//TODO add data caching for getAllProducts and getProductBySlug
+//TODO optimize stock validation to check with locally stored value?
+//TODO implement bulk stock validation (all items at once) for cart
+
 import { eq, desc, and, SQL } from "drizzle-orm";
+import { unstable_cache } from 'next/cache';
 import db from "@/server/db";
 import { products, categories, brands, productVariations, variationAttributes, blogPosts } from "@/server/schema";
 import { Product, ProductWithVariations, ProductVariationWithAttributes } from "@/types";
@@ -16,7 +21,8 @@ interface EnrichedProductWithVariations extends ProductWithVariations {
   variations: ProductVariationWithAttributes[];
 }
 
-export default async function getAllProducts({
+// Function to fetch products from database
+async function fetchProducts({
   categorySlug = null,
   brandSlug = null,
   featured = false
@@ -109,4 +115,16 @@ export default async function getAllProducts({
     console.error("Error fetching products:", error);
     throw new Error(`Failed to fetch products: ${(error as Error).message}`);
   }
+}
+
+// Cached version of getAllProducts
+export default async function getAllProducts(options: GetAllProductsOptions = {}): Promise<ProductWithVariations[]> {
+  return unstable_cache(
+    async () => fetchProducts(options),
+    ['all-products', options.categorySlug || 'all', options.brandSlug || 'all', options.featured ? 'featured' : 'all'],
+    {
+      revalidate: 259200, // Cache for 3 days
+      tags: ['products'] // Tag for cache invalidation
+    }
+  )();
 }

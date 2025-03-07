@@ -1,10 +1,11 @@
 'use server';
 
 import db from "@/server/db";
-import { orders, orderItems, addresses } from "@/server/schema";
+import { orders, orderItems } from "@/server/schema";
 import { CartItem } from "@/lib/context/CartContext";
 import { eq } from "drizzle-orm";
-import { validateStock, type StockValidationResult } from "./validateStock";
+import { validateStock, type StockValidationResult } from "@/lib/utils/validateStock";
+import getAllProducts from "../products/getAllProducts";
 
 interface CustomerInfo {
   firstName: string;
@@ -24,89 +25,63 @@ interface CreateOrderResult {
   orderId?: number;
 }
 
-export async function createOrder(
-  cartItems: CartItem[],
-  customerInfo?: CustomerInfo
-): Promise<CreateOrderResult> {
+export async function createOrder(customerInfo: CustomerInfo, cartItems: CartItem[]): Promise<CreateOrderResult> {
   try {
-    // First validate all items are still in stock
+    // Validate stock for all items before creating order
+    const products = await getAllProducts();
+    
+    // Check stock availability for all items
     for (const item of cartItems) {
-      const stockResult = await validateStock(
+      const result = validateStock(
+        products,
+        cartItems,
         item.productId,
         item.quantity,
         item.variationId
       );
-      
-      if (!stockResult.isAvailable) {
-        return {
-          success: false,
-          message: `${item.productName} is no longer available in the requested quantity. Available: ${stockResult.availableStock}`,
-        };
+
+      if (!result.isAvailable && !result.unlimitedStock) {
+        throw new Error(`Insufficient stock for product: ${item.productName}`);
       }
     }
-    
-    // Calculate total amount
-    const grandTotal = cartItems.reduce(
-      (total, item) => total + item.price * item.quantity,
-      0
-    );
-    
-    // Create the order
-    const order = await db
-      .insert(orders)
-      .values({
-        grandTotal,
-        status: 'new',
-        paymentStatus: 'pending',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      })
-      .returning({ id: orders.id })
-      .get();
-    
+
+    // Create order
+    const order = await db.insert(orders).values({
+      firstName: customerInfo.firstName,
+      lastName: customerInfo.lastName,
+      email: customerInfo.email,
+      phone: customerInfo.phone,
+      streetAddress: customerInfo.streetAddress,
+      city: customerInfo.city,
+      state: customerInfo.state,
+      country: customerInfo.country,
+      zipCode: customerInfo.zipCode,
+      status: "pending",
+      total: cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
+    }).returning();
+
     // Create order items
-    for (const item of cartItems) {
-      await db.insert(orderItems).values({
-        orderId: order.id,
+    await db.insert(orderItems).values(
+      cartItems.map(item => ({
+        orderId: order[0].id,
         productId: item.productId,
-        productVariationId: item.variationId,
+        variationId: item.variationId,
         quantity: item.quantity,
-        unitAmount: item.price,
-        totalAmount: item.price * item.quantity,
-        attributes: item.attributes ? JSON.stringify(item.attributes) : null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-    }
-    
-    // Save customer information if provided
-    if (customerInfo) {
-      await db.insert(addresses).values({
-        orderId: order.id,
-        firstName: customerInfo.firstName,
-        lastName: customerInfo.lastName,
-        email: customerInfo.email,
-        phone: customerInfo.phone,
-        streetAddress: customerInfo.streetAddress,
-        city: customerInfo.city,
-        state: customerInfo.state,
-        country: customerInfo.country,
-        zipCode: customerInfo.zipCode,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-    }
-    
-    return {
-      success: true,
+        price: item.price,
+        attributes: item.attributes || {},
+      }))
+    );
+
+    return { 
+      success: true, 
       message: 'Order created successfully',
-      orderId: order.id,
+      orderId: order[0].id 
     };
   } catch (error) {
     console.error('Error creating order:', error);
     return {
       success: false,
-      message: `Failed to create order: ${(error as Error).message}`,
+      message: `Failed to create order: ${(error as Error).message}`
     };
   }
 } 
