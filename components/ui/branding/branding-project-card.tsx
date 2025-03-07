@@ -2,14 +2,15 @@
 
 import { BrandingProject } from "@/types/branding-project";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import styles from "@/styles/branding-photography.module.css";
+import { memo } from "react";
 
 type BrandingProjectCardProps = {
   project: BrandingProject;
 };
 
-export default function BrandingProjectCard({
+export default memo(function BrandingProjectCard({
   project,
 }: BrandingProjectCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -41,14 +42,14 @@ export default function BrandingProjectCard({
     }
   }, [isHovered, project.type, project.images]);
 
-  const handleMouseEnter = () => {
+  const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
-  };
+  }, []);
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = useCallback(() => {
     setIsHovered(false);
     setCurrentImageIndex(0);
-  };
+  }, []);
 
   return (
     <div
@@ -64,8 +65,8 @@ export default function BrandingProjectCard({
               alt={project.name}
               width={800}
               height={600}
-              className="w-full h-auto transition-opacity duration-800 ease-in-out"
-              style={{ opacity: isHovered ? 0 : 1 }}
+              className={`w-full h-auto transition-opacity duration-800 ease-in-out ${isHovered ? "opacity-0" : "opacity-100"}`}
+              loading="lazy"
             />
             {project.images!.map((image, index) => (
               <Image
@@ -74,10 +75,8 @@ export default function BrandingProjectCard({
                 alt={`${project.name} ${index + 1}`}
                 width={800}
                 height={600}
-                className="w-full h-full object-cover absolute top-0 left-0 transition-opacity duration-800 ease-in-out"
-                style={{
-                  opacity: isHovered && currentImageIndex === index ? 1 : 0,
-                }}
+                className={`w-full h-full object-cover absolute top-0 left-0 transition-opacity duration-800 ease-in-out ${isHovered && currentImageIndex === index ? "opacity-100" : "opacity-0"}`}
+                loading="lazy"
               />
             ))}
           </div>
@@ -88,18 +87,18 @@ export default function BrandingProjectCard({
               alt={project.name}
               width={800}
               height={600}
-              className="w-full h-auto transition-opacity duration-800 ease-in-out"
-              style={{ opacity: isHovered ? 0 : 1 }}
+              className={`w-full h-auto transition-opacity duration-800 ease-in-out ${isHovered ? "opacity-0" : "opacity-100"}`}
+              loading="lazy"
             />
             <video
               ref={videoRef}
               src={`/${project.src}`}
-              className="w-full h-full object-cover absolute top-0 left-0 transition-opacity duration-800 ease-in-out"
-              style={{ opacity: isHovered ? 1 : 0 }}
+              className={`w-full h-full object-cover absolute top-0 left-0 transition-opacity duration-800 ease-in-out ${isHovered ? "opacity-100" : "opacity-0"}`}
               autoPlay={isHovered}
               loop
               muted
               playsInline
+              preload="none"
             />
           </div>
         )}
@@ -120,6 +119,7 @@ export default function BrandingProjectCard({
                 width={32}
                 height={32}
                 className={styles.work_visual_item_overlay_logo}
+                loading="lazy"
               />
             )}
           </div>
@@ -127,4 +127,4 @@ export default function BrandingProjectCard({
       )}
     </div>
   );
-}
+});

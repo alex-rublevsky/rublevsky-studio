@@ -6,6 +6,7 @@ import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import styles from "./productCard.module.css";
 import { useCart } from "@/lib/context/CartContext";
+import { useCallback, useRef } from "react";
 
 // Extended product interface with variations
 interface ProductWithVariations extends Product {
@@ -27,8 +28,14 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
   const [imagesLoaded, setImagesLoaded] = useState<boolean[]>([]);
   const { addProductToCart, cart } = useCart();
 
+  // Ref for debouncing hover state
+  const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
+
   // Convert comma-separated string to array, or empty array if null
-  const imageArray = product.images?.split(",").map((img) => img.trim()) ?? [];
+  const imageArray = useMemo(
+    () => product.images?.split(",").map((img) => img.trim()) ?? [],
+    [product.images]
+  );
 
   // Initialize selected variation when product loads
   useEffect(() => {
@@ -51,19 +58,19 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
 
     // Initialize image loading state
     setImagesLoaded(new Array(imageArray.length).fill(false));
-  }, [product]);
+  }, [product, imageArray.length]);
 
-  // Handle image load events
-  const handleImageLoad = (index: number) => {
+  // Handle image load events with useCallback
+  const handleImageLoad = useCallback((index: number) => {
     setImagesLoaded((prev) => {
       const newState = [...prev];
       newState[index] = true;
       return newState;
     });
-  };
+  }, []);
 
   // Get unique attribute names from all variations
-  const getUniqueAttributeNames = (): string[] => {
+  const getUniqueAttributeNames = useMemo((): string[] => {
     if (!product.variations) return [];
 
     const attributeNames = new Set<string>();
@@ -83,131 +90,150 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
       };
       return (order[a] || 99) - (order[b] || 99);
     });
-  };
+  }, [product.variations]);
 
   // Get unique attribute values for a specific attribute name
-  const getUniqueAttributeValues = (attributeName: string): string[] => {
-    if (!product.variations) return [];
+  const getUniqueAttributeValues = useCallback(
+    (attributeName: string): string[] => {
+      if (!product.variations) return [];
 
-    const values = new Set<string>();
-    product.variations.forEach((variation) => {
-      const attribute = variation.attributes.find(
-        (attr) => attr.name === attributeName
-      );
-      if (attribute) {
-        values.add(attribute.value);
-      }
-    });
-
-    return Array.from(values);
-  };
-
-  // Select a variation based on attribute name and value
-  const selectVariation = (attributeName: string, attributeValue: string) => {
-    if (!product.variations) return;
-
-    // Update selected attributes
-    const newSelectedAttributes = {
-      ...selectedAttributes,
-      [attributeName]: attributeValue,
-    };
-
-    // First, try to find a variation that matches all selected attributes
-    let newVariation = findMatchingVariation(newSelectedAttributes);
-
-    // If no matching variation found, adjust other attributes to find a valid combination
-    if (!newVariation) {
-      // Keep the current attribute selection and find the best matching variation
-      const bestAttributes = findBestAttributeCombination(
-        attributeName,
-        attributeValue
-      );
-
-      if (bestAttributes) {
-        newVariation = findMatchingVariation(bestAttributes);
-        if (newVariation) {
-          setSelectedAttributes(bestAttributes);
+      const values = new Set<string>();
+      product.variations.forEach((variation) => {
+        const attribute = variation.attributes.find(
+          (attr) => attr.name === attributeName
+        );
+        if (attribute) {
+          values.add(attribute.value);
         }
-      }
-    } else {
-      setSelectedAttributes(newSelectedAttributes);
-    }
+      });
 
-    if (newVariation) {
-      setSelectedVariation(newVariation);
-    }
-  };
+      return Array.from(values);
+    },
+    [product.variations]
+  );
 
   // Find a variation that matches all the selected attributes
-  const findMatchingVariation = (attributes: Record<string, string>) => {
-    if (!product.variations) return null;
+  const findMatchingVariation = useCallback(
+    (attributes: Record<string, string>) => {
+      if (!product.variations) return null;
 
-    return product.variations.find((variation) => {
-      return Object.entries(attributes).every(([name, value]) =>
-        variation.attributes.some(
-          (attr) => attr.name === name && attr.value === value
-        )
+      return (
+        product.variations.find((variation) => {
+          return Object.entries(attributes).every(([name, value]) =>
+            variation.attributes.some(
+              (attr) => attr.name === name && attr.value === value
+            )
+          );
+        }) || null
       );
-    });
-  };
+    },
+    [product.variations]
+  );
 
   // Find the best combination of attributes that includes the selected attribute
-  const findBestAttributeCombination = (
-    attributeName: string,
-    attributeValue: string
-  ) => {
-    if (!product.variations) return null;
+  const findBestAttributeCombination = useCallback(
+    (
+      attributeName: string,
+      attributeValue: string
+    ): Record<string, string> | null => {
+      if (!product.variations) return null;
 
-    // Find variations that match the selected attribute
-    const matchingVariations = product.variations.filter((variation) =>
-      variation.attributes.some(
-        (attr) => attr.name === attributeName && attr.value === attributeValue
-      )
-    );
+      // Find variations that match the selected attribute
+      const matchingVariations = product.variations.filter((variation) =>
+        variation.attributes.some(
+          (attr) => attr.name === attributeName && attr.value === attributeValue
+        )
+      );
 
-    if (matchingVariations.length === 0) return null;
+      if (matchingVariations.length === 0) return null;
 
-    // Use the first matching variation's attributes
-    const bestVariation = matchingVariations[0];
-    const bestAttributes: Record<string, string> = {};
+      // Use the first matching variation's attributes
+      const bestVariation = matchingVariations[0];
+      const bestAttributes: Record<string, string> = {};
 
-    bestVariation.attributes.forEach((attr) => {
-      bestAttributes[attr.name] = attr.value;
-    });
+      bestVariation.attributes.forEach((attr) => {
+        bestAttributes[attr.name] = attr.value;
+      });
 
-    return bestAttributes;
-  };
+      return bestAttributes;
+    },
+    [product.variations]
+  );
+
+  // Select a variation based on attribute name and value
+  const selectVariation = useCallback(
+    (attributeName: string, attributeValue: string) => {
+      if (!product.variations) return;
+
+      // Update selected attributes
+      const newSelectedAttributes = {
+        ...selectedAttributes,
+        [attributeName]: attributeValue,
+      };
+
+      // First, try to find a variation that matches all selected attributes
+      let newVariation = findMatchingVariation(newSelectedAttributes);
+
+      // If no matching variation found, adjust other attributes to find a valid combination
+      if (!newVariation) {
+        // Keep the current attribute selection and find the best matching variation
+        const bestAttributes = findBestAttributeCombination(
+          attributeName,
+          attributeValue
+        );
+
+        if (bestAttributes) {
+          newVariation = findMatchingVariation(bestAttributes);
+          if (newVariation) {
+            setSelectedAttributes(bestAttributes);
+          }
+        }
+      } else {
+        setSelectedAttributes(newSelectedAttributes);
+      }
+
+      if (newVariation) {
+        setSelectedVariation(newVariation);
+      }
+    },
+    [
+      product.variations,
+      selectedAttributes,
+      findMatchingVariation,
+      findBestAttributeCombination,
+    ]
+  );
 
   // Check if a specific attribute value is available with current selections
-  const isAttributeValueAvailable = (
-    attributeName: string,
-    attributeValue: string
-  ): boolean => {
-    if (!product.variations) return false;
+  const isAttributeValueAvailable = useCallback(
+    (attributeName: string, attributeValue: string): boolean => {
+      if (!product.variations) return false;
 
-    // Get all other selected attributes except the one we're checking
-    const otherAttributes = { ...selectedAttributes };
-    delete otherAttributes[attributeName];
+      // Get all other selected attributes except the one we're checking
+      const otherAttributes = { ...selectedAttributes };
+      delete otherAttributes[attributeName];
 
-    // Check if there's any variation that matches this attribute value and all other selected attributes
-    return product.variations.some((variation) => {
-      const matchesThisAttribute = variation.attributes.some(
-        (attr) => attr.name === attributeName && attr.value === attributeValue
-      );
+      // Check if there's any variation that matches this attribute value and all other selected attributes
+      return product.variations.some((variation) => {
+        const matchesThisAttribute = variation.attributes.some(
+          (attr) => attr.name === attributeName && attr.value === attributeValue
+        );
 
-      const matchesOtherAttributes = Object.entries(otherAttributes).every(
-        ([name, value]) =>
-          variation.attributes.some(
-            (attr) => attr.name === name && attr.value === value
-          )
-      );
+        const matchesOtherAttributes = Object.entries(otherAttributes).every(
+          ([name, value]) =>
+            variation.attributes.some(
+              (attr) => attr.name === name && attr.value === value
+            )
+        );
 
-      return matchesThisAttribute && matchesOtherAttributes;
-    });
-  };
+        return matchesThisAttribute && matchesOtherAttributes;
+      });
+    },
+    [product.variations, selectedAttributes]
+  );
 
   // Get database stock without considering cart
-  const getDbStock = () => {
+  const getDbStock = useCallback(() => {
     if (product.unlimitedStock) return Infinity;
 
     if (product.hasVariations && selectedVariation) {
@@ -215,10 +241,10 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
     }
 
     return product.stock;
-  };
+  }, [product, selectedVariation]);
 
   // Calculate effective stock (database stock minus cart quantities)
-  const getEffectiveStock = useMemo(() => {
+  const effectiveStock = useMemo(() => {
     const dbStock = getDbStock();
     if (dbStock === Infinity) return Infinity;
 
@@ -231,44 +257,92 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
 
     // Subtract cart quantity from database stock
     return cartItem ? Math.max(0, dbStock - cartItem.quantity) : dbStock;
-  }, [product.id, selectedVariation, cart.items, getDbStock]);
+  }, [getDbStock, cart.items, product.id, selectedVariation]);
 
-  const canAddToCart = () => {
-    return product.isActive && getEffectiveStock > 0;
-  };
+  // Calculate if the product is available to add to cart
+  const isAvailable = useMemo(() => {
+    return product.isActive && effectiveStock > 0;
+  }, [product.isActive, effectiveStock]);
 
-  const handleAddToCart = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (!canAddToCart()) return;
+  // Calculate current price based on selected variation
+  const currentPrice = useMemo(() => {
+    return selectedVariation ? selectedVariation.price : product.price;
+  }, [selectedVariation, product.price]);
 
-    setIsAddingToCart(true);
+  // Get attribute names to display in the card
+  const attributeNames = useMemo(() => {
+    if (!product.variations) return [];
 
-    try {
-      // Use the context function directly
-      await addProductToCart(
-        product,
-        1, // Default quantity of 1 when adding from product card
-        selectedVariation,
-        selectedAttributes
-      );
-    } catch (error) {
-      console.error("Error adding to cart:", error);
-    } finally {
-      setIsAddingToCart(false);
-    }
-  };
+    const attributeNames = new Set<string>();
+    product.variations.forEach((variation) => {
+      variation.attributes.forEach((attr: VariationAttribute) => {
+        attributeNames.add(attr.name);
+      });
+    });
 
-  const effectiveStock = getEffectiveStock;
-  const isAvailable = canAddToCart();
-  const currentPrice = selectedVariation
-    ? selectedVariation.price
-    : product.price;
+    return Array.from(attributeNames).sort((a, b) => {
+      // Sort attribute types: apparel_type first, then size, then others
+      const order: Record<string, number> = {
+        apparel_type: 1,
+        size: 2,
+        apparel_size: 3,
+        color: 4,
+      };
+      return (order[a] || 99) - (order[b] || 99);
+    });
+  }, [product.variations]);
+
+  const handleAddToCart = useCallback(
+    async (e: React.MouseEvent) => {
+      e.preventDefault();
+      if (!isAvailable) return;
+
+      setIsAddingToCart(true);
+
+      try {
+        // Use the context function directly
+        await addProductToCart(
+          product,
+          1, // Default quantity of 1 when adding from product card
+          selectedVariation,
+          selectedAttributes
+        );
+      } catch (error) {
+        console.error("Error adding to cart:", error);
+      } finally {
+        setIsAddingToCart(false);
+      }
+    },
+    [
+      isAvailable,
+      addProductToCart,
+      product,
+      selectedVariation,
+      selectedAttributes,
+    ]
+  );
 
   // Check if product is coming soon (not in the type, so we'll use a placeholder)
   const isComingSoon = false; // Replace with actual logic when available
 
-  // Get attribute names to display in the card
-  const attributeNames = getUniqueAttributeNames();
+  // Debounced handlers for hovering
+  const handleMouseEnter = useCallback(() => {
+    if (hoverTimeout.current) {
+      clearTimeout(hoverTimeout.current);
+    }
+    hoverTimeout.current = setTimeout(() => {
+      setIsHovering(true);
+    }, 100);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    if (hoverTimeout.current) {
+      clearTimeout(hoverTimeout.current);
+    }
+    hoverTimeout.current = setTimeout(() => {
+      setIsHovering(false);
+    }, 100);
+  }, []);
 
   return (
     <div
@@ -281,8 +355,8 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
             <Link
               href={`/product/${product.slug}`}
               className="block h-full relative"
-              onMouseEnter={() => setIsHovering(true)}
-              onMouseLeave={() => setIsHovering(false)}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
             >
               {/* Primary Image */}
               <div className="relative aspect-square flex items-center justify-center overflow-hidden">
@@ -409,7 +483,7 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
               product.variations &&
               product.variations.length > 0 && (
                 <div className="space-y-2">
-                  {attributeNames.map((attributeName) => (
+                  {attributeNames.map((attributeName: string) => (
                     <div key={attributeName}>
                       <div className="text-xs font-medium text-gray-500 mb-1">
                         {attributeName}
@@ -432,16 +506,16 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
                                   selectVariation(attributeName, value);
                                 }}
                                 className={`
-                              px-2 py-1 text-xs rounded-full border transition-colors duration-200
-                              ${
-                                isSelected
-                                  ? "border-black bg-black text-white"
-                                  : isAvailable
-                                    ? "border-gray-300 hover:border-black"
-                                    : "border-gray-200 text-gray-400"
-                              }
-                              ${isAvailable ? "" : "opacity-50"}
-                            `}
+                                px-2 py-1 text-xs rounded-full border transition-colors duration-200
+                                ${
+                                  isSelected
+                                    ? "border-black bg-black text-white"
+                                    : isAvailable
+                                      ? "border-gray-300 hover:border-black"
+                                      : "border-gray-200 text-gray-400"
+                                }
+                                ${isAvailable ? "" : "opacity-50"}
+                              `}
                                 title={
                                   !isAvailable
                                     ? "This combination is not available"

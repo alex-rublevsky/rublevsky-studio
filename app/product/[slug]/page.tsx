@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useParams } from "next/navigation";
@@ -127,17 +127,17 @@ export default function ProductPage() {
   }, [product, selectedVariation, cart.items]);
 
   // Handle quantity changes
-  const incrementQuantity = () => {
+  const incrementQuantity = useCallback(() => {
     if (quantity < getEffectiveStock) {
       setQuantity((prev) => prev + 1);
     }
-  };
+  }, [quantity, getEffectiveStock]);
 
-  const decrementQuantity = () => {
+  const decrementQuantity = useCallback(() => {
     if (quantity > 1) {
       setQuantity((prev) => prev - 1);
     }
-  };
+  }, [quantity]);
 
   // Get images array from product
   const getImages = (): string[] => {
@@ -292,7 +292,7 @@ export default function ProductPage() {
   const canAddToCart = product?.isActive && effectiveStock > 0;
   const attributeNames = getUniqueAttributeNames();
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = useCallback(async () => {
     if (!product) return;
 
     const success = await addProductToCart(
@@ -306,7 +306,29 @@ export default function ProductPage() {
       // Reset quantity to 1 after successful add
       setQuantity(1);
     }
-  };
+  }, [
+    product,
+    addProductToCart,
+    quantity,
+    selectedVariation,
+    selectedAttributes,
+  ]);
+
+  // Memoize the Image component to prevent unnecessary re-renders
+  const memoizedImage = useMemo(() => {
+    if (!product || !selectedImage) return null;
+
+    return (
+      <Image
+        src={`/${selectedImage}`}
+        alt={`${product.name} main image`}
+        width={3000}
+        height={3000}
+        priority
+        className="max-w-full w-full lg:w-auto max-h-[calc(100vh-5rem)] object-contain rounded-none lg:rounded-lg relative z-[2]"
+      />
+    );
+  }, [selectedImage, product?.name]);
 
   if (loading) {
     return (
@@ -404,16 +426,7 @@ export default function ProductPage() {
               <div className="flex items-center justify-center lg:items-start lg:justify-start order-1 flex-grow relative">
                 <div className="relative w-full">
                   {selectedImage ? (
-                    <div className="relative">
-                      <Image
-                        src={`/${selectedImage}`}
-                        alt={`${product.name} main image`}
-                        width={3000}
-                        height={3000}
-                        priority
-                        className="max-w-full w-full lg:w-auto max-h-[calc(100vh-5rem)] object-contain rounded-none lg:rounded-lg relative z-[2]"
-                      />
-                    </div>
+                    <div className="relative">{memoizedImage}</div>
                   ) : (
                     <div className="w-full h-[75vh] bg-gray-100 flex items-center justify-center rounded-lg">
                       <p className="text-gray-500">No image available</p>
