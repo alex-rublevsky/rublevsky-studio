@@ -43,8 +43,8 @@ export default async function createProduct(data: ProductFormData): Promise<Prod
         isFeatured: data.isFeatured,
         onSale: data.onSale,
         hasVariations: data.hasVariations,
-        hasVolume: data.hasVolume,
-        volume: data.volume || null,
+        hasWeight: data.hasWeight,
+        weight: data.weight || null,
         images: data.images || null,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -77,7 +77,7 @@ export default async function createProduct(data: ProductFormData): Promise<Prod
               .insert(variationAttributes)
               .values({
                 productVariationId: variationResult.id,
-                name: attribute.name,
+                name: attribute.attributeId,
                 value: attribute.value,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),

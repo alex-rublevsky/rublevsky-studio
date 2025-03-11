@@ -7,7 +7,6 @@ import Image from "next/image";
 import styles from "./productCard.module.css";
 import { useCart } from "@/lib/context/CartContext";
 import { useCallback, useRef } from "react";
-import { validateStock } from "@/lib/actions/cart/validateStock";
 import { getAttributeDisplayName } from "@/lib/utils/productAttributes";
 
 // Extended product interface with variations

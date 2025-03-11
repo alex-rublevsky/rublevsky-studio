@@ -59,8 +59,8 @@ export default async function updateProduct(id: number, data: ProductFormData): 
         isFeatured: data.isFeatured,
         onSale: data.onSale,
         hasVariations: data.hasVariations,
-        hasVolume: data.hasVolume,
-        volume: data.volume || null,
+        hasWeight: data.hasWeight,
+        weight: data.weight || null,
         images: data.images || null,
         updatedAt: new Date().toISOString(),
       })
@@ -100,7 +100,7 @@ export default async function updateProduct(id: number, data: ProductFormData): 
               .insert(variationAttributes)
               .values({
                 productVariationId: variationResult.id,
-                name: attribute.name,
+                name: attribute.attributeId,
                 value: attribute.value,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),

@@ -1,13 +1,12 @@
-import getAllProducts from "@/lib/actions/products/getAllProducts";
+// Add dynamic export
+export const dynamic = "force-dynamic";
+
 import { CartProvider } from "@/lib/context/CartContext";
 
-export default async function CheckoutLayout({
+export default function CheckoutLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // Fetch all products for stock validation
-  const products = await getAllProducts({});
-
-  return <CartProvider initialProducts={products}>{children}</CartProvider>;
+  return <CartProvider initialProducts={[]}>{children}</CartProvider>;
 }

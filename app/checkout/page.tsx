@@ -1,5 +1,8 @@
 "use client";
 
+// Add dynamic export
+export const dynamic = "force-dynamic";
+
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/context/CartContext";
@@ -99,7 +102,7 @@ export default function CheckoutPage() {
 
     try {
       // Pass customer info to createOrder
-      const result = await createOrder(cart.items, customerInfo);
+      const result = await createOrder(customerInfo, cart.items);
 
       if (result.success) {
         toast.success("Order placed successfully!");

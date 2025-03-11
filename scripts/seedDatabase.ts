@@ -41,12 +41,28 @@ function executeRemoteSQL(command: string, description?: string) {
     if (description) {
       console.log(`${colors.blue}Executing: ${description}${colors.reset}`);
     }
-    execSync(`npx wrangler d1 execute ${DB_NAME} --remote --command="${command.replace(/"/g, '\\"')}"`, {
-      stdio: 'inherit'
+    const output = execSync(`npx wrangler d1 execute ${DB_NAME} --remote --command="${command.replace(/"/g, '\\"')}"`, {
+      encoding: 'utf-8'
     });
+
     if (description) {
       console.log(`${colors.green}✅ Successfully executed: ${description}${colors.reset}`);
     }
+
+    // Try to parse the output as JSON
+    try {
+      // Find the JSON part of the output (it's usually after some wrangler logs)
+      const jsonStart = output.indexOf('[');
+      if (jsonStart !== -1) {
+        const jsonPart = output.slice(jsonStart);
+        const results = JSON.parse(jsonPart);
+        return results[0]; // Return the first result
+      }
+    } catch (parseError) {
+      console.log('Could not parse results as JSON:', parseError);
+    }
+
+    return null;
   } catch (error) {
     console.error(`${colors.red}❌ Error executing remote SQL:${colors.reset}`, error);
     throw error;
@@ -133,6 +149,7 @@ async function seedDatabase() {
         // Store minimal description if linked to a blog post
         const description = product.description === 'Linked to blog post with the same slug' ? '' : product.description;
         
+        // Insert the product
         await executeRemoteSQL(`
           INSERT INTO products (
             category_slug, brand_slug, name, slug, description, images, 
@@ -160,13 +177,6 @@ async function seedDatabase() {
           );
         `, `Adding product: ${product.name}`);
 
-        // Get the inserted product's ID
-        const productQueryResult = await executeRemoteSQL(
-          `SELECT id FROM products WHERE slug = '${product.slug.replace(/'/g, "''")}'`,
-          'Getting product ID'
-        );
-        const productResult = productQueryResult as unknown as { id: number };
-
         // Insert variations if they exist
         if (product.hasVariations && product.variations) {
           const variations = JSON.parse(product.variations);
@@ -174,45 +184,49 @@ async function seedDatabase() {
             // Generate a SKU if not provided
             const sku = `${product.slug}-${variation.name.toLowerCase().replace(/\s+/g, '-')}`;
             
+            // Insert variation
             await executeRemoteSQL(`
+              WITH product_id AS (
+                SELECT id FROM products WHERE slug = '${product.slug.replace(/'/g, "''")}'
+              )
               INSERT INTO product_variations (
                 product_id, sku, price, stock, sort,
                 created_at, updated_at
               )
-              VALUES (
-                ${productResult.id},
+              SELECT 
+                product_id.id,
                 '${sku.replace(/'/g, "''")}',
                 ${variation.price},
                 ${variation.stock},
                 ${variation.sort || 0},
                 '${new Date().toISOString()}',
                 '${new Date().toISOString()}'
-              );
+              FROM product_id;
             `, `Adding variation: ${variation.name} for product: ${product.name}`);
-
-            // Get the inserted variation's ID
-            const variationQueryResult = await executeRemoteSQL(
-              `SELECT id FROM product_variations WHERE sku = '${sku.replace(/'/g, "''")}'`,
-              'Getting variation ID'
-            );
-            const variationResult = variationQueryResult as unknown as { id: number };
 
             // Insert variation attributes
             if (variation.attributes && Array.isArray(variation.attributes)) {
               for (const attr of variation.attributes) {
                 await executeRemoteSQL(`
+                  WITH variation_id AS (
+                    SELECT pv.id 
+                    FROM product_variations pv
+                    JOIN products p ON p.id = pv.product_id
+                    WHERE p.slug = '${product.slug.replace(/'/g, "''")}' 
+                    AND pv.sku = '${sku.replace(/'/g, "''")}'
+                  )
                   INSERT INTO variation_attributes (
                     product_variation_id, attributeId, value,
                     created_at, updated_at
                   )
-                  VALUES (
-                    ${variationResult.id},
+                  SELECT 
+                    variation_id.id,
                     '${attr.attributeId}',
                     '${attr.value}',
                     '${new Date().toISOString()}',
                     '${new Date().toISOString()}'
-                  );
-                `, `Adding attribute: ${attr.name} for variation: ${variation.name}`);
+                  FROM variation_id;
+                `, `Adding attribute: ${attr.attributeId} for variation: ${variation.name}`);
               }
             }
           }
