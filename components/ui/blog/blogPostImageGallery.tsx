@@ -143,7 +143,7 @@ function BlogPostImageGallery({ images, title }: BlogPostImageGalleryProps) {
                   alt={`Photo of ${title} number ${index + 1}`}
                   width={1000}
                   height={1000}
-                  className="w-auto h-full max-h-[25rem] md:max-h-[30rem] max-w-full block cursor-zoom-in rounded-lg"
+                  className="w-full h-auto max-h-[25rem] md:max-h-[30rem] max-w-full block cursor-zoom-in rounded-lg"
                   priority={index < 3}
                   onLoad={handleImageLoad}
                 />

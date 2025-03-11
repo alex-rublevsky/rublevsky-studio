@@ -1,4 +1,5 @@
 "use client";
+//TODO: update input to include label
 
 // Add dynamic export
 export const dynamic = "force-dynamic";
@@ -149,129 +150,94 @@ export default function CheckoutPage() {
                 <h2 className="text-xl font-bold mb-4">Delivery details</h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  <div>
-                    <label htmlFor="firstName" className="block mb-2">
-                      First Name
-                    </label>
-                    <Input
-                      id="firstName"
-                      name="firstName"
-                      value={customerInfo.firstName}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="lastName" className="block mb-2">
-                      Last Name
-                    </label>
-                    <Input
-                      id="lastName"
-                      name="lastName"
-                      value={customerInfo.lastName}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  <div>
-                    <label htmlFor="email" className="block mb-2">
-                      Email
-                    </label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      value={customerInfo.email}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="phone" className="block mb-2">
-                      Phone
-                    </label>
-                    <Input
-                      id="phone"
-                      name="phone"
-                      type="tel"
-                      value={customerInfo.phone}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="mb-6">
-                  <label htmlFor="streetAddress" className="block mb-2">
-                    Address
-                  </label>
                   <Input
-                    id="streetAddress"
-                    name="streetAddress"
-                    value={customerInfo.streetAddress}
+                    label="First Name"
+                    id="firstName"
+                    name="firstName"
+                    value={customerInfo.firstName}
+                    onChange={handleInputChange}
+                    required
+                  />
+
+                  <Input
+                    label="Last Name"
+                    id="lastName"
+                    name="lastName"
+                    value={customerInfo.lastName}
                     onChange={handleInputChange}
                     required
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  <div>
-                    <label htmlFor="state" className="block mb-2">
-                      State
-                    </label>
-                    <Input
-                      id="state"
-                      name="state"
-                      value={customerInfo.state}
-                      onChange={handleInputChange}
-                    />
-                  </div>
+                  <Input
+                    label="Email"
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={customerInfo.email}
+                    onChange={handleInputChange}
+                    required
+                  />
 
-                  <div>
-                    <label htmlFor="city" className="block mb-2">
-                      City
-                    </label>
-                    <Input
-                      id="city"
-                      name="city"
-                      value={customerInfo.city}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
+                  <Input
+                    label="Phone"
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    value={customerInfo.phone}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+
+                <Input
+                  className="mb-6"
+                  label="Address"
+                  id="streetAddress"
+                  name="streetAddress"
+                  value={customerInfo.streetAddress}
+                  onChange={handleInputChange}
+                  required
+                />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <Input
+                    label="State"
+                    id="state"
+                    name="state"
+                    value={customerInfo.state}
+                    onChange={handleInputChange}
+                  />
+
+                  <Input
+                    label="City"
+                    id="city"
+                    name="city"
+                    value={customerInfo.city}
+                    onChange={handleInputChange}
+                    required
+                  />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="country" className="block mb-2">
-                      Country
-                    </label>
-                    <Input
-                      id="country"
-                      name="country"
-                      value={customerInfo.country}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
+                  <Input
+                    label="Country"
+                    id="country"
+                    name="country"
+                    value={customerInfo.country}
+                    onChange={handleInputChange}
+                    required
+                  />
 
-                  <div>
-                    <label htmlFor="zipCode" className="block mb-2">
-                      ZIP code
-                    </label>
-                    <Input
-                      id="zipCode"
-                      name="zipCode"
-                      value={customerInfo.zipCode}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
+                  <Input
+                    label="ZIP code"
+                    id="zipCode"
+                    name="zipCode"
+                    value={customerInfo.zipCode}
+                    onChange={handleInputChange}
+                    required
+                  />
                 </div>
               </div>
             </form>

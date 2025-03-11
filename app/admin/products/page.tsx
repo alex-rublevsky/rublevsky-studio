@@ -1,4 +1,5 @@
 "use client";
+//TODO: update input to include label
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -813,17 +814,13 @@ export default function ProductsPage() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Weight g
-                </label>
-                <Input
-                  type="text"
-                  name="weight"
-                  value={formData.weight}
-                  onChange={handleChange}
-                />
-              </div>
+              <Input
+                label="Weight g"
+                type="text"
+                name="weight"
+                value={formData.weight}
+                onChange={handleChange}
+              />
             </div>
 
             {/* Add the variations form when hasVariations is checked */}
@@ -975,32 +972,23 @@ export default function ProductsPage() {
               id="editProductForm"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Name *
-                  </label>
-                  <Input
-                    type="text"
-                    name="name"
-                    value={editFormData.name}
-                    onChange={handleEditChange}
-                    required
-                  />
-                </div>
+                <Input
+                  label="Name *"
+                  type="text"
+                  name="name"
+                  value={editFormData.name}
+                  onChange={handleEditChange}
+                  required
+                />
 
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Slug *
-                  </label>
-                  <Input
-                    type="text"
-                    name="slug"
-                    value={editFormData.slug}
-                    onChange={handleEditChange}
-                    required
-                  />
-                </div>
-
+                <Input
+                  label="Slug *"
+                  type="text"
+                  name="slug"
+                  value={editFormData.slug}
+                  onChange={handleEditChange}
+                  required
+                />
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium mb-1">
                     Description

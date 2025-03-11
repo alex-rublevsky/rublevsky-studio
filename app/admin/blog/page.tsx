@@ -1,5 +1,7 @@
 "use client";
 
+//TODO: update input to include label
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { BlogPost, BlogPostFormData, BlogCategory } from "@/types";

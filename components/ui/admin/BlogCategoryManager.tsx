@@ -1,4 +1,5 @@
 "use client";
+//TODO: update input to include label
 
 import { useState, useEffect } from "react";
 import { BlogCategory } from "@/types";
