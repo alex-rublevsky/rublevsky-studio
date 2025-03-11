@@ -81,6 +81,7 @@ const defaultWorkItems: NavItem[] = [
 ];
 
 const defaultUtilityItems: NavItem[] = [
+  { name: "Work", url: "/" },
   { name: "Blog", url: "/blog" },
   { name: "Store", url: "/store" },
 ];
@@ -113,7 +114,7 @@ const Tab = ({ children, setPosition, href, isActive }: TabProps) => {
           });
         }}
         className={cn(
-          "relative z-10 block cursor-pointer px-3 py-1.5 text-xs uppercase text-white mix-blend-difference md:px-4 md:py-2 md:text-base",
+          "relative z-10 block cursor-pointer px-3 py-1.5 text-xs uppercase text-white mix-blend-difference md:px-4 md:py-2 md:text-sm",
           isActive && "underline underline-offset-4"
         )}
       >
@@ -137,7 +138,7 @@ const Cursor = ({
   return (
     <motion.li
       animate={position}
-      className="absolute z-0 h-7 rounded-full bg-black md:h-10"
+      className="absolute z-0 h-7 rounded-full bg-black md:h-9"
     />
   );
 };
@@ -159,7 +160,7 @@ const NavGroup = ({ items, className }: NavGroupProps) => {
   return (
     <ul
       className={cn(
-        "relative flex w-fit rounded-full border border-black bg-white p-1",
+        "relative flex w-fit rounded-full border border-black bg-white p-[0.3rem]",
         className
       )}
       onMouseLeave={() => setPosition((prev) => ({ ...prev, opacity: 0 }))}
@@ -184,14 +185,16 @@ const NavGroup = ({ items, className }: NavGroupProps) => {
 };
 
 export function NavBar({ className }: Omit<NavBarProps, "items">) {
+  const pathname = usePathname();
+
   return (
     <nav
       className={cn(
-        "fixed bottom-0 left-0 right-0 z-50 mb-6 flex justify-center gap-4 items-center",
+        "fixed bottom-0 left-0 right-0 z-50 mb-2 flex flex-col justify-center gap-2 items-center",
         className
       )}
     >
-      <NavGroup items={defaultWorkItems} />
+      {pathname === "/" && <NavGroup items={defaultWorkItems} />}
       <NavGroup items={defaultUtilityItems} />
     </nav>
   );
