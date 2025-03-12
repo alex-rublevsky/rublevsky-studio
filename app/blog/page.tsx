@@ -22,7 +22,7 @@ export default async function Page() {
           </h5>
         </div>
 
-        <div className="space-y-32">
+        <div className="space-y-24 md:space-y-32">
           {posts.length === 0 ? (
             <p className="text-center text-lg">
               No blog posts found. Check back soon!
@@ -36,7 +36,7 @@ export default async function Page() {
                 images={post.images}
                 productSlug={post.productSlug}
                 slug={post.slug || `post-${post.id}`}
-                createdAt={post.createdAt || ""}
+                publishedAt={post.publishedAt || ""}
               />
             ))
           )}

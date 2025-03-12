@@ -83,7 +83,7 @@ function BlogPostImageGallery({ images, title }: BlogPostImageGalleryProps) {
   return (
     <>
       <div
-        className={`relative left-[50%] right-[50%] w-screen -translate-x-1/2 mb-4 overflow-x-hidden ${
+        className={`relative left-[50%] right-[50%] w-screen -translate-x-1/2 overflow-x-hidden ${
           isReady
             ? "blog-post-gallery-container-ready"
             : "blog-post-gallery-container-loading"

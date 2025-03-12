@@ -45,8 +45,12 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
       product.variations &&
       product.variations.length > 0
     ) {
+      // Sort variations by sort property (descending order)
+      const sortedVariations = [...product.variations].sort(
+        (a, b) => (b.sort ?? 0) - (a.sort ?? 0)
+      );
       // Select first available variation
-      const firstVariation = product.variations[0];
+      const firstVariation = sortedVariations[0];
       setSelectedVariation(firstVariation);
 
       // Initialize selected attributes from the first variation
@@ -89,8 +93,13 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
     (attributeId: string): string[] => {
       if (!product.variations) return [];
 
+      // Sort variations by sort property (descending order)
+      const sortedVariations = [...product.variations].sort(
+        (a, b) => (b.sort ?? 0) - (a.sort ?? 0)
+      );
+
       const values = new Set<string>();
-      product.variations.forEach((variation) => {
+      sortedVariations.forEach((variation) => {
         const attribute = variation.attributes.find(
           (attr) => attr.attributeId === attributeId
         );

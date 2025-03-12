@@ -1,5 +1,5 @@
 "use client";
-
+import "./blogPost.css";
 import ReactMarkdown from "react-markdown";
 // Import Swiper styles
 import "swiper/css";
@@ -17,7 +17,7 @@ interface BlogPostProps {
   images: string | null;
   productSlug?: string | null;
   slug: string;
-  createdAt: string;
+  publishedAt: string;
 }
 
 function BlogPost({
@@ -26,37 +26,44 @@ function BlogPost({
   images,
   productSlug,
   slug,
-  createdAt,
+  publishedAt,
 }: BlogPostProps) {
   // Convert comma-separated string to array, or empty array if null
   const imageArray = images?.split(",").map((img) => img.trim()) ?? [];
 
   return (
     <article id={`${slug}`} className="max-w-2xl mx-auto">
-      <BlogPostImageGallery images={imageArray} title={title} />
+      {imageArray.length > 0 && (
+        <BlogPostImageGallery images={imageArray} title={title} />
+      )}
 
-      <div className="sticky top-0">
-        <h3 className="my-4">{title}</h3>
+      <div className="sticky-header-container">
+        <div className="relative max-w-2xl mx-auto z-[1]">
+          <h3>{title}</h3>
 
-        <div className="mb-8 flex gap-4 items-center">
-          <div className="flex gap-4">
-            {productSlug && (
-              <Link href={`/product/${productSlug}`} className="blurLink">
-                <h6>Buy this tea →</h6>
-              </Link>
-            )}
-            <time className="">
-              {new Date(createdAt).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
-            </time>
+          <div className="my-2 flex gap-4 items-center">
+            <div className="flex gap-4">
+              {productSlug && (
+                <Link href={`/product/${productSlug}`} className="blurLink">
+                  <h6 className="whitespace-nowrap">Purchase →</h6>
+                </Link>
+              )}
+              <time className="whitespace-nowrap">
+                {publishedAt
+                  ? new Date(publishedAt).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                      timeZone: "UTC",
+                    })
+                  : ""}
+              </time>
+            </div>
+            <CopyLinkButton sectionId={slug} />
           </div>
-          <CopyLinkButton />
         </div>
       </div>
-      <div className="prose prose-lg">
+      <div className="prose prose-lg -mt-6">
         <ReactMarkdown>{body}</ReactMarkdown>
       </div>
     </article>

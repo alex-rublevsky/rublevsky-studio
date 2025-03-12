@@ -86,13 +86,19 @@ export default function ProductPage() {
           productData.variations &&
           productData.variations.length > 0
         ) {
-          const firstVariation = productData.variations[0];
+          // Sort variations by sort property (descending order)
+          const sortedVariations = [...productData.variations].sort(
+            (a, b) => (b.sort ?? 0) - (a.sort ?? 0)
+          );
+
+          // Select first available variation
+          const firstVariation = sortedVariations[0];
           setSelectedVariation(firstVariation);
 
           // Initialize selected attributes from the first variation
           const initialAttributes: Record<string, string> = {};
-          firstVariation.attributes.forEach((attr: VariationAttribute) => {
-            initialAttributes[attr.attributeId] = attr.value;
+          firstVariation.attributes.forEach((attribute: VariationAttribute) => {
+            initialAttributes[attribute.attributeId] = attribute.value;
           });
           setSelectedAttributes(initialAttributes);
         }
@@ -192,21 +198,29 @@ export default function ProductPage() {
   };
 
   // Get unique attribute values for a specific attribute ID
-  const getUniqueAttributeValues = (attributeId: string): string[] => {
-    if (!product?.variations) return [];
+  const getUniqueAttributeValues = useCallback(
+    (attributeId: string): string[] => {
+      if (!product?.variations) return [];
 
-    const values = new Set<string>();
-    product.variations.forEach((variation) => {
-      const attribute = variation.attributes.find(
-        (attr) => attr.attributeId === attributeId
+      // Sort variations by sort property (descending order)
+      const sortedVariations = [...product.variations].sort(
+        (a, b) => (b.sort ?? 0) - (a.sort ?? 0)
       );
-      if (attribute) {
-        values.add(attribute.value);
-      }
-    });
 
-    return Array.from(values);
-  };
+      const values = new Set<string>();
+      sortedVariations.forEach((variation) => {
+        const attribute = variation.attributes.find(
+          (attr) => attr.attributeId === attributeId
+        );
+        if (attribute) {
+          values.add(attribute.value);
+        }
+      });
+
+      return Array.from(values);
+    },
+    [product?.variations]
+  );
 
   // Select a variation based on attribute ID and value
   const selectVariation = (attributeId: string, attributeValue: string) => {

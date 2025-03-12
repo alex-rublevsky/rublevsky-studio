@@ -46,12 +46,20 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {}
 
-export function CopyLinkButton() {
+interface CopyLinkButtonProps {
+  sectionId?: string;
+}
+
+export function CopyLinkButton({ sectionId }: CopyLinkButtonProps) {
   const [copied, setCopied] = useState<boolean>(false);
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      const url = new URL(window.location.href);
+      if (sectionId) {
+        url.hash = sectionId;
+      }
+      await navigator.clipboard.writeText(url.toString());
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch (err) {

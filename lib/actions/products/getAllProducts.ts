@@ -123,7 +123,7 @@ export default async function getAllProducts(options: GetAllProductsOptions = {}
     async () => fetchProducts(options),
     ['all-products', options.categorySlug || 'all', options.brandSlug || 'all', options.featured ? 'featured' : 'all'],
     {
-      revalidate: 259200, // Cache for 3 days
+      revalidate: 1, // TODO: Change to 259200 (3 days)
       tags: ['products'] // Tag for cache invalidation
     }
   )();
