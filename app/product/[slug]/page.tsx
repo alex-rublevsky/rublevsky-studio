@@ -435,7 +435,7 @@ export default function ProductPage() {
           {/* Product information */}
           <div className="w-full lg:w-2/5 xl:w-1/3 px-4 lg:px-0 lg:min-h-[calc(100vh-2rem)] lg:flex lg:items-center mt-4 lg:mt-0 mb-40 lg:mb-0">
             <div className="space-y-6 w-full">
-              <h3 className="text-2xl font-bold">{product.name}</h3>
+              <h3>{product.name}</h3>
 
               {/* Price */}
               <div className="text-xl font-medium">
