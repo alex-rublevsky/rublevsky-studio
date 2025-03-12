@@ -67,6 +67,7 @@ p {
   @apply max-w-none;
   @apply px-0 !important;
   overflow-x: visible;
+  color: #000;
 }
 
 .prose h6 {

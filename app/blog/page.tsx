@@ -36,6 +36,7 @@ export default async function Page() {
                 images={post.images}
                 productSlug={post.productSlug}
                 slug={post.slug || `post-${post.id}`}
+                createdAt={post.createdAt || ""}
               />
             ))
           )}
