@@ -1,7 +1,7 @@
 "use client";
 
 import { Project } from "@/types/web-project";
-import ProjectCard from "./project-card";
+import ProjectCard from "./webProjectEntry";
 
 type WebProjectsSectionProps = {
   projects: Project[];

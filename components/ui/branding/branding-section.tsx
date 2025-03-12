@@ -12,6 +12,7 @@ import {
   DrawerBody,
 } from "@/components/ui/drawer";
 import Image from "next/image";
+import ImageGallery from "@/components/ui/shared/ImageGallery";
 
 export default function BrandingSection() {
   const [selectedProject, setSelectedProject] = useState(brandingProjects[0]);
@@ -44,27 +45,19 @@ export default function BrandingSection() {
       </div>
 
       <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <DrawerContent className="h-[85vh]">
-          <DrawerHeader>
-            <DrawerTitle>{selectedProject.name}</DrawerTitle>
-          </DrawerHeader>
+        <DrawerContent className="" width="full">
           <DrawerBody>
-            <div className="grid lg:grid-cols-2 gap-6">
-              {/* Gallery Section */}
-              <div className="space-y-4">
+            <div className="min-h-[calc(85vh-2rem)] flex flex-col lg:flex-row gap-0 lg:gap-10 items-start">
+              {/* Left column - Gallery */}
+              <div className="w-full lg:w-3/5 xl:w-2/3 flex flex-col lg:flex-row gap-2 lg:h-full self-start">
                 {selectedProject.type === "image" && selectedProject.images ? (
-                  selectedProject.images.map((image, index) => (
-                    <div key={index} className="relative aspect-[4/3]">
-                      <Image
-                        src={`/${image}`}
-                        alt={`${selectedProject.name} ${index + 1}`}
-                        fill
-                        className="object-cover rounded-lg"
-                      />
-                    </div>
-                  ))
+                  <ImageGallery
+                    images={selectedProject.images}
+                    alt={selectedProject.name}
+                    size="compact"
+                  />
                 ) : selectedProject.type === "video" && selectedProject.src ? (
-                  <div className="relative aspect-[4/3]">
+                  <div className="relative aspect-[4/3] w-full">
                     <video
                       src={`/${selectedProject.src}`}
                       className="w-full h-full rounded-lg"
@@ -78,24 +71,29 @@ export default function BrandingSection() {
                 ) : null}
               </div>
 
-              {/* Description Section */}
-              <div className="space-y-6">
-                {selectedProject.description && (
-                  <div className="prose prose-sm dark:prose-invert">
-                    <p className="text-lg">{selectedProject.description}</p>
-                  </div>
-                )}
-                {selectedProject.logo && (
-                  <div className="flex items-center justify-start">
-                    <Image
-                      src={`/${selectedProject.logo}`}
-                      alt={`${selectedProject.name} logo`}
-                      width={64}
-                      height={64}
-                      className="object-contain"
-                    />
-                  </div>
-                )}
+              {/* Right column - Project Information */}
+              <div className="w-full lg:w-2/5 xl:w-1/3 px-4 lg:px-0 mt-4 lg:mt-0">
+                <div className="space-y-6">
+                  <h3 className="text-2xl font-bold">{selectedProject.name}</h3>
+
+                  {selectedProject.description && (
+                    <div className="prose prose-sm dark:prose-invert">
+                      <p className="text-lg">{selectedProject.description}</p>
+                    </div>
+                  )}
+
+                  {selectedProject.logo && (
+                    <div className="flex items-center justify-start">
+                      <Image
+                        src={`/${selectedProject.logo}`}
+                        alt={`${selectedProject.name} logo`}
+                        width={64}
+                        height={64}
+                        className="object-contain"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </DrawerBody>

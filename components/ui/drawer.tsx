@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Drawer as DrawerPrimitive } from "vaul";
+import { VariantProps, cva } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
@@ -37,10 +38,29 @@ const DrawerOverlay = React.forwardRef<
 ));
 DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName;
 
+const drawerContentVariants = cva(
+  "mx-auto w-full flex-1 flex flex-col min-h-0",
+  {
+    variants: {
+      width: {
+        default: "max-w-3xl",
+        full: "max-w-none",
+      },
+    },
+    defaultVariants: {
+      width: "default",
+    },
+  }
+);
+
+interface DrawerContentProps
+  extends React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content>,
+    VariantProps<typeof drawerContentVariants> {}
+
 const DrawerContent = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content>
->(({ className, children, ...props }, ref) => (
+  DrawerContentProps
+>(({ className, children, width, ...props }, ref) => (
   <DrawerPortal>
     <DrawerOverlay />
     <DrawerPrimitive.Content
@@ -53,9 +73,7 @@ const DrawerContent = React.forwardRef<
       {...props}
     >
       <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted flex-shrink-0" />
-      <div className="mx-auto w-full max-w-3xl flex-1 flex flex-col min-h-0">
-        {children}
-      </div>
+      <div className={drawerContentVariants({ width })}>{children}</div>
     </DrawerPrimitive.Content>
   </DrawerPortal>
 ));

@@ -2,13 +2,17 @@
 
 import { Project } from "@/types/web-project";
 import Image from "next/image";
-import DevicePreview from "./device-preview";
+import DevicePreview from "./webDevicePreview";
 
 type ProjectCardProps = {
   project: Project;
 };
 
 export default function ProjectCard({ project }: ProjectCardProps) {
+  // Pre-find devices to ensure consistent rendering
+  const phoneDevice = project.devices.find((d) => d.type === "phone");
+  const tabletDevice = project.devices.find((d) => d.type === "tablet");
+
   const renderDevices = () => {
     switch (project.layout) {
       case "full":
@@ -58,10 +62,12 @@ export default function ProjectCard({ project }: ProjectCardProps) {
               </div>
               <div className="col-span-12 lg:col-span-8">
                 <div className="lg:sticky lg:top-8">
-                  <DevicePreview
-                    device={project.devices.find((d) => d.type === "tablet")!}
-                    websiteUrl={project.websiteUrl}
-                  />
+                  {tabletDevice && (
+                    <DevicePreview
+                      device={tabletDevice}
+                      websiteUrl={project.websiteUrl}
+                    />
+                  )}
                 </div>
               </div>
             </>
@@ -72,18 +78,22 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           <>
             <div className="col-span-12 lg:col-span-4 mb-6 lg:mb-0">
               <div className="max-w-[300px] mx-auto lg:max-w-none">
-                <DevicePreview
-                  device={project.devices.find((d) => d.type === "phone")!}
-                  websiteUrl={project.websiteUrl}
-                />
+                {phoneDevice && (
+                  <DevicePreview
+                    device={phoneDevice}
+                    websiteUrl={project.websiteUrl}
+                  />
+                )}
               </div>
             </div>
             <div className="col-span-12 lg:col-span-8">
               <div className="lg:sticky lg:top-8">
-                <DevicePreview
-                  device={project.devices.find((d) => d.type === "tablet")!}
-                  websiteUrl={project.websiteUrl}
-                />
+                {tabletDevice && (
+                  <DevicePreview
+                    device={tabletDevice}
+                    websiteUrl={project.websiteUrl}
+                  />
+                )}
               </div>
             </div>
           </>
@@ -93,10 +103,12 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         return (
           <div className="col-span-12 lg:col-span-6">
             <div className="lg:sticky lg:top-8">
-              <DevicePreview
-                device={project.devices.find((d) => d.type === "tablet")!}
-                websiteUrl={project.websiteUrl}
-              />
+              {tabletDevice && (
+                <DevicePreview
+                  device={tabletDevice}
+                  websiteUrl={project.websiteUrl}
+                />
+              )}
             </div>
           </div>
         );

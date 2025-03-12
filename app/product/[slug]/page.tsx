@@ -11,6 +11,7 @@ import { useCart } from "@/lib/context/CartContext";
 import { toast } from "sonner";
 import { QuantitySelector } from "@/components/ui/shared/QuantitySelector";
 import { getAttributeDisplayName } from "@/lib/utils/productAttributes";
+import ImageGallery from "@/components/ui/shared/ImageGallery";
 
 // Extended product interface with category, brand, and variations information
 interface ProductWithDetails extends Product {
@@ -426,63 +427,9 @@ export default function ProductPage() {
         <div className="w-full h-full flex flex-col lg:flex-row gap-0 lg:gap-10 items-start lg:p-4">
           {/* Image gallery */}
           <div className="w-full lg:w-3/5 xl:w-2/3 flex flex-col lg:flex-row gap-2 lg:h-full self-start">
-            <div className="gallery-stack flex flex-col lg:flex-row w-full gap-2">
-              {/* Thumbnails */}
-              <div className="order-2 lg:order-1 flex-shrink-0 w-full lg:w-24 overflow-x-auto lg:overflow-x-hidden">
-                {/* Scrollable container */}
-                <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-y-auto px-4 lg:px-0">
-                  {images.map((image, index) => (
-                    <div
-                      key={index}
-                      className="
-                        flex-shrink-0
-                        w-24 h-24
-                        relative
-                        cursor-pointer
-                        last:mb-2
-                      "
-                      onClick={() => setSelectedImage(image)}
-                      onMouseEnter={() => {
-                        // Only change image on hover for desktop
-                        if (window.matchMedia("(min-width: 1024px)").matches) {
-                          setSelectedImage(image);
-                        }
-                      }}
-                    >
-                      <div
-                        className={`
-                        absolute inset-0
-                        rounded-lg
-                        ${selectedImage === image ? "border-2 border-black" : "border border-transparent"}
-                        transition-colors duration-200
-                      `}
-                      />
-                      <div className="absolute inset-[2px] rounded-[6px] overflow-hidden">
-                        <Image
-                          src={`/${image}`}
-                          alt={`${product.name} thumbnail ${index + 1}`}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Main image */}
-              <div className="flex items-center justify-center lg:items-start lg:justify-start order-1 flex-grow relative">
-                <div className="relative w-full">
-                  {selectedImage ? (
-                    <div className="relative">{memoizedImage}</div>
-                  ) : (
-                    <div className="w-full h-[75vh] bg-gray-100 flex items-center justify-center rounded-lg">
-                      <p className="text-gray-500">No image available</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+            {images.length > 0 && (
+              <ImageGallery images={images} alt={product.name} />
+            )}
           </div>
 
           {/* Product information */}
@@ -608,34 +555,26 @@ export default function ProductPage() {
                 {product.category && (
                   <div className="flex items-center gap-2">
                     <span className="text-gray-500">Category:</span>
-                    <Link
-                      href={`/store?category=${product.category.slug}`}
-                      className="hover:underline hover:text-black"
-                    >
+                    <Link href={`/store?category=${product.category.slug}`}>
                       {product.category.name}
                     </Link>
                   </div>
                 )}
-
                 {product.brand && (
                   <div className="flex items-center gap-2">
                     <span className="text-gray-500">Brand:</span>
-                    <Link
-                      href={`/store?brand=${product.brand.slug}`}
-                      className="hover:underline hover:text-black"
-                    >
+                    <Link href={`/store?brand=${product.brand.slug}`}>
                       {product.brand.name}
                     </Link>
                   </div>
                 )}
               </div>
-
-              {/* Blog post link if exists */}
-              {renderBlogPostLink()}
             </div>
           </div>
         </div>
       </div>
+
+      {renderBlogPostLink()}
     </main>
   );
 }

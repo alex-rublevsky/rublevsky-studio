@@ -5,6 +5,7 @@
     z-index: -3;
     margin: 0 auto;
     width: 100%;
+    position: relative;
 }
 
 .experienceTimelineComponent {
@@ -33,10 +34,9 @@
     left: 50%;
     transform: translateX(-50%);
     top: 0;
-    bottom: 5vh;
     height: 50vh;
     width: 0.3rem;
-    background: var(--accent-color);
+    background: #ff6f61;
     z-index: -1;
     pointer-events: none;
 }
@@ -97,6 +97,7 @@
     display: flex;
     justify-content: center;
     align-items: flex-start;
+    z-index: 1;
 }
 
 .experienceTimelineCircle {
@@ -107,6 +108,7 @@
     z-index: 3;
     transition: all 0.3s ease;
     transform: none;
+    position: relative;
 }
 
 .experienceTimelineContent {
@@ -145,7 +147,7 @@
     .experienceTimelineItem {
         grid-template-columns: auto 1fr;
         grid-template-rows: auto auto;
-        gap: 1rem;
+        gap: 2rem;
         grid-template-areas:
             "center right"
             "center content";
@@ -154,6 +156,11 @@
     .experienceTimelineCenter {
         grid-area: center;
         height: 100%;
+      
+    }
+
+    .experienceTimelineCircleWrapper {
+        transform: translateX(1.05rem);
     }
 
     .experienceTimelineLeft {
