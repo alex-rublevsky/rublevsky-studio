@@ -103,10 +103,8 @@ async function fetchProducts({
       if (a._categoryOrder !== b._categoryOrder) {
         return a._categoryOrder - b._categoryOrder;
       }
-      // Ensure createdAt is not null before creating Date objects
-      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-      return dateB - dateA;
+      // Remove timestamp-based sorting or replace with another sorting criteria
+      return 0; // Or use another field for secondary sorting
     });
 
     // Remove the temporary _categoryOrder property and return the products

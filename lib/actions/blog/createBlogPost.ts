@@ -37,9 +37,6 @@ export default async function createBlogPost(data: BlogPostFormData): Promise<Bl
       productSlug: data.productSlug || null,
       images: data.images || null,
       publishedAt: data.publishedAt || new Date().toISOString(),
-      lastEditedAt: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     };
 
     // Insert blog post into database

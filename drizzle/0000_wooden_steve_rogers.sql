@@ -34,9 +34,6 @@ CREATE TABLE `blog_posts` (
 	`body` text NOT NULL,
 	`images` text,
 	`published_at` text,
-	`last_edited_at` text,
-	`created_at` text,
-	`updated_at` text,
 	FOREIGN KEY (`blog_category_slug`) REFERENCES `blog_categories`(`slug`) ON UPDATE no action ON DELETE set null,
 	FOREIGN KEY (`product_slug`) REFERENCES `products`(`slug`) ON UPDATE no action ON DELETE set null
 );
@@ -47,9 +44,7 @@ CREATE TABLE `brands` (
 	`name` text NOT NULL,
 	`slug` text NOT NULL,
 	`image` text,
-	`is_active` integer DEFAULT true NOT NULL,
-	`created_at` text DEFAULT '2025-03-11T20:58:22.984Z' NOT NULL,
-	`updated_at` text
+	`is_active` integer DEFAULT true NOT NULL
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `brands_slug_unique` ON `brands` (`slug`);--> statement-breakpoint
@@ -58,9 +53,7 @@ CREATE TABLE `categories` (
 	`name` text NOT NULL,
 	`slug` text NOT NULL,
 	`image` text,
-	`is_active` integer DEFAULT true NOT NULL,
-	`created_at` text DEFAULT '2025-03-11T20:58:22.983Z' NOT NULL,
-	`updated_at` text
+	`is_active` integer DEFAULT true NOT NULL
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `categories_slug_unique` ON `categories` (`slug`);--> statement-breakpoint
@@ -130,9 +123,8 @@ CREATE TABLE `products` (
 	`price` real DEFAULT 0 NOT NULL,
 	`is_active` integer DEFAULT true NOT NULL,
 	`is_featured` integer DEFAULT false NOT NULL,
-	`on_sale` integer DEFAULT false NOT NULL,
+	`discount` integer,
 	`has_variations` integer DEFAULT false NOT NULL,
-	`has_weight` integer DEFAULT false NOT NULL,
 	`weight` text,
 	`stock` integer DEFAULT 0 NOT NULL,
 	`unlimited_stock` integer DEFAULT false NOT NULL,

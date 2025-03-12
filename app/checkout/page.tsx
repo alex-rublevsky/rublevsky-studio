@@ -122,12 +122,22 @@ export default function CheckoutPage() {
     }
   };
 
-  // Calculate cart total
+  // Calculate cart totals
   const subtotal = cart.items.reduce(
     (total, item) => total + item.price * item.quantity,
     0
   );
-  const total = subtotal;
+
+  // Calculate total discounts
+  const totalDiscount = cart.items.reduce((total, item) => {
+    if (item.discount) {
+      const itemDiscount = item.price * item.quantity * (item.discount / 100);
+      return total + itemDiscount;
+    }
+    return total;
+  }, 0);
+
+  const total = subtotal - totalDiscount;
 
   return (
     <div className="w-full px-4 py-10">
@@ -253,6 +263,13 @@ export default function CheckoutPage() {
                 <span>CA${subtotal.toFixed(2)}</span>
               </div>
 
+              {totalDiscount > 0 && (
+                <div className="flex justify-between my-2 text-red-600">
+                  <span>Discount</span>
+                  <span>-CA${totalDiscount.toFixed(2)}</span>
+                </div>
+              )}
+
               <div className="flex justify-between mb-4">
                 <span>Shipping</span>
                 <span className="text-right">
@@ -321,9 +338,30 @@ export default function CheckoutPage() {
 
                     {/* Price */}
                     <div className="text-right">
-                      <p className="font-medium">
-                        CA${(item.price * item.quantity).toFixed(2)}
-                      </p>
+                      {item.discount ? (
+                        <>
+                          <p className="text-sm font-medium line-through text-gray-500">
+                            CA${(item.price * item.quantity).toFixed(2)}
+                          </p>
+                          <div className="flex items-center justify-end gap-2">
+                            <p className="text-sm font-medium">
+                              CA$
+                              {(
+                                item.price *
+                                (1 - item.discount / 100) *
+                                item.quantity
+                              ).toFixed(2)}
+                            </p>
+                            <span className="text-xs text-red-600">
+                              {item.discount}% OFF
+                            </span>
+                          </div>
+                        </>
+                      ) : (
+                        <p className="text-sm font-medium">
+                          CA${(item.price * item.quantity).toFixed(2)}
+                        </p>
+                      )}
                     </div>
                   </div>
                 ))}

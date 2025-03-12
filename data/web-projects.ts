@@ -7,7 +7,7 @@ export const webProjects: Project[] = [
     tools: [
       {
         name: 'Webflow',
-        icon: 'webflow.svg'
+        icon: 'logos/webflow-text.svg'
       }
     ],
     websiteUrl: 'https://aps-cb63ae.webflow.io/',
@@ -35,11 +35,11 @@ export const webProjects: Project[] = [
     tools: [
       {
         name: 'Figma',
-        icon: 'figma.svg'
+        icon: 'logos/figma.svg'
       },
       {
         name: 'Webflow',
-        icon: 'webflow.svg'
+        icon: 'logos/webflow-text.svg'
       }
     ],
     websiteUrl: 'https://bfloor.ru/',
@@ -85,7 +85,7 @@ export const webProjects: Project[] = [
       },
       {
         name: 'Webflow',
-        icon: 'webflow.svg'
+        icon: 'logos/webflow-text.svg'
       }
     ],
     websiteUrl: 'https://rublevsky-studio.webflow.io/32karata/home',
@@ -106,11 +106,11 @@ export const webProjects: Project[] = [
     tools: [
       {
         name: 'Figma',
-        icon: 'figma.svg'
+        icon: 'logos/figma.svg'
       },
       {
         name: 'Webflow',
-        icon: 'webflow.svg'
+        icon: 'logos/webflow-text.svg'
       }
     ],
     websiteUrl: 'https://inksoul.webflow.io/',
@@ -138,11 +138,11 @@ export const webProjects: Project[] = [
     tools: [
       {
         name: 'Figma',
-        icon: 'figma.svg'
+        icon: 'logos/figma.svg'
       },
       {
         name: 'Webflow',
-        icon: 'webflow.svg'
+        icon: 'logos/webflow-text.svg'
       }
     ],
     websiteUrl: 'https://www.femtechsearch.com/',

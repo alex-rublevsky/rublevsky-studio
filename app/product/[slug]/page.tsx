@@ -121,7 +121,7 @@ export default function ProductPage() {
     if (product.unlimitedStock) return Infinity;
 
     // For weight-based products with variations
-    if (product.hasWeight && product.weight && selectedVariation) {
+    if (product.weight && selectedVariation) {
       const weightAttr = selectedVariation.attributes.find(
         (attr) => attr.attributeId === "WEIGHT_G"
       );
@@ -492,7 +492,23 @@ export default function ProductPage() {
 
               {/* Price */}
               <div className="text-xl font-medium">
-                ${currentPrice.toFixed(2)} CAD
+                {product.discount ? (
+                  <div className="flex items-baseline gap-2">
+                    <span className="line-through text-gray-500">
+                      ${currentPrice.toFixed(2)}
+                    </span>
+                    <span>
+                      $
+                      {(currentPrice * (1 - product.discount / 100)).toFixed(2)}{" "}
+                      CAD
+                    </span>
+                    <span className="text-sm text-red-600">
+                      {product.discount}% OFF
+                    </span>
+                  </div>
+                ) : (
+                  <span>${currentPrice.toFixed(2)} CAD</span>
+                )}
               </div>
 
               {/* Variation selection */}

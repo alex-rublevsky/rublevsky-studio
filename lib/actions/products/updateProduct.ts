@@ -45,28 +45,25 @@ export default async function updateProduct(id: number, data: ProductFormData): 
     }
     
     // Update the product
-    const result = await db
+    const updatedProduct = await db
       .update(products)
       .set({
         name: data.name,
         slug: data.slug,
-        description: data.description || null,
+        description: data.description,
         price: parseFloat(data.price),
-        categorySlug: data.categorySlug || null,
-        brandSlug: data.brandSlug || null,
-        stock: parseInt(data.stock || "0"),
+        categorySlug: data.categorySlug,
+        brandSlug: data.brandSlug,
+        stock: parseInt(data.stock),
         isActive: data.isActive,
         isFeatured: data.isFeatured,
-        onSale: data.onSale,
+        discount: data.discount,
         hasVariations: data.hasVariations,
-        hasWeight: data.hasWeight,
         weight: data.weight || null,
-        images: data.images || null,
-        updatedAt: new Date().toISOString(),
+        images: data.images
       })
       .where(eq(products.id, id))
-      .returning()
-      .get();
+      .returning();
     
     // If product has variations, update them
     if (data.hasVariations && data.variations && data.variations.length > 0) {
@@ -88,7 +85,6 @@ export default async function updateProduct(id: number, data: ProductFormData): 
             stock: parseInt(variation.stock.toString()),
             sort: variation.sort,
             createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
           })
           .returning()
           .get();
@@ -100,10 +96,9 @@ export default async function updateProduct(id: number, data: ProductFormData): 
               .insert(variationAttributes)
               .values({
                 productVariationId: variationResult.id,
-                name: attribute.attributeId,
+                attributeId: attribute.attributeId,
                 value: attribute.value,
                 createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
               })
               .run();
           }
@@ -117,7 +112,7 @@ export default async function updateProduct(id: number, data: ProductFormData): 
         .run();
     }
     
-    return result;
+    return updatedProduct;
   } catch (error) {
     console.error("Error updating product:", error);
     throw new Error(`Failed to update product: ${(error as Error).message}`);

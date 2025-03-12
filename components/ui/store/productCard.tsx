@@ -239,7 +239,7 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
   const getEffectiveStock = useMemo(() => {
     if (!product.unlimitedStock) {
       // For weight-based products with variations
-      if (product.hasWeight && product.weight && selectedVariation) {
+      if (product.weight && selectedVariation) {
         const weightAttr = selectedVariation.attributes.find(
           (attr) => attr.attributeId === "WEIGHT_G"
         );
@@ -465,9 +465,27 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
             <div className="flex flex-col mb-2">
               <div className="flex flex-wrap items-baseline justify-between w-full gap-x-2">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-lg font-light text-black whitespace-nowrap">
-                    ${currentPrice?.toFixed(2)} CAD
-                  </span>
+                  {product.discount ? (
+                    <>
+                      <span className="text-lg font-light text-black line-through text-gray-500">
+                        ${currentPrice?.toFixed(2)}
+                      </span>
+                      <span className="text-lg font-light text-black whitespace-nowrap">
+                        $
+                        {(currentPrice * (1 - product.discount / 100)).toFixed(
+                          2
+                        )}{" "}
+                        CAD
+                      </span>
+                      <span className="text-sm text-red-600">
+                        {product.discount}% OFF
+                      </span>
+                    </>
+                  ) : (
+                    <span className="text-lg font-light text-black whitespace-nowrap">
+                      ${currentPrice?.toFixed(2)} CAD
+                    </span>
+                  )}
                 </div>
 
                 {!product.unlimitedStock && (

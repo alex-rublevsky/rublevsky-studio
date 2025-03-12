@@ -15,7 +15,7 @@ export default async function getAdminBlogPosts(): Promise<BlogPost[]> {
     const allBlogPosts = await db
       .select()
       .from(blogPosts)
-      .orderBy(desc(blogPosts.createdAt))
+      .orderBy(desc(blogPosts.publishedAt))
       .all();
     
     return allBlogPosts;

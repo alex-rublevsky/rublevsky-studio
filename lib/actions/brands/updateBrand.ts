@@ -56,7 +56,6 @@ export default async function updateBrand(id: number, data: UpdateBrandData): Pr
       slug: data.slug,
       image: data.image || null,
       isActive: data.isActive !== undefined ? data.isActive : existingBrand.isActive,
-      updatedAt: new Date().toISOString(),
     };
     
     // Update brand in database
@@ -70,7 +69,6 @@ export default async function updateBrand(id: number, data: UpdateBrandData): Pr
     return {
       id,
       ...brandData,
-      createdAt: existingBrand.createdAt
     };
   } catch (error) {
     console.error("Error updating brand:", error);

@@ -102,13 +102,11 @@ async function seedDatabase() {
       console.log('\n🏷️ Seeding categories...');
       for (const category of mockCategories) {
         await executeRemoteSQL(`
-          INSERT INTO categories (name, slug, is_active, created_at, updated_at)
+          INSERT INTO categories (name, slug, is_active)
           VALUES (
             '${category.name.replace(/'/g, "''")}',
             '${category.slug.replace(/'/g, "''")}',
-            ${category.isActive ? 1 : 0},
-            '${new Date().toISOString()}',
-            '${new Date().toISOString()}'
+            ${category.isActive ? 1 : 0}
           );
         `, `Adding category: ${category.name}`);
       }
@@ -118,13 +116,11 @@ async function seedDatabase() {
       console.log('\n🏢 Seeding brands...');
       for (const brand of mockBrands) {
         await executeRemoteSQL(`
-          INSERT INTO brands (name, slug, is_active, created_at, updated_at)
+          INSERT INTO brands (name, slug, is_active)
           VALUES (
             '${brand.name.replace(/'/g, "''")}',
             '${brand.slug.replace(/'/g, "''")}',
-            ${brand.isActive ? 1 : 0},
-            '${new Date().toISOString()}',
-            '${new Date().toISOString()}'
+            ${brand.isActive ? 1 : 0}
           );
         `, `Adding brand: ${brand.name}`);
       }
@@ -153,8 +149,8 @@ async function seedDatabase() {
         await executeRemoteSQL(`
           INSERT INTO products (
             category_slug, brand_slug, name, slug, description, images, 
-            price, is_active, is_featured, on_sale, has_variations, 
-            has_weight, weight, stock, unlimited_stock, created_at, updated_at
+            price, is_active, is_featured, discount, has_variations, 
+            weight, stock, unlimited_stock, created_at
           )
           VALUES (
             '${product.categorySlug.replace(/'/g, "''")}',
@@ -166,13 +162,11 @@ async function seedDatabase() {
             ${product.price},
             ${product.isActive ? 1 : 0},
             ${product.isFeatured ? 1 : 0},
-            ${product.onSale ? 1 : 0},
+            ${product.discount === null ? 'NULL' : product.discount},
             ${product.hasVariations ? 1 : 0},
-            ${product.hasWeight ? 1 : 0},
             ${product.weight ? `'${product.weight.replace(/'/g, "''")}'` : 'NULL'},
             ${product.stock},
             ${product.unlimitedStock ? 1 : 0},
-            '${new Date().toISOString()}',
             '${new Date().toISOString()}'
           );
         `, `Adding product: ${product.name}`);
@@ -243,7 +237,7 @@ async function seedDatabase() {
         await executeRemoteSQL(`
           INSERT INTO blog_posts (
             title, slug, body, images, product_slug, 
-            published_at, created_at, updated_at
+            published_at
           )
           VALUES (
             '${post.title.replace(/'/g, "''")}',
@@ -251,9 +245,7 @@ async function seedDatabase() {
             '${post.body.replace(/'/g, "''")}',
             ${images ? `'${images.replace(/'/g, "''")}'` : 'NULL'},
             ${post.productSlug ? `'${post.productSlug.replace(/'/g, "''")}'` : 'NULL'},
-            '${post.publishedAt}',
-            '${new Date().toISOString()}',
-            '${new Date().toISOString()}'
+            '${post.publishedAt}'
           );
         `, `Adding blog post: ${post.title}`);
       }
@@ -297,8 +289,8 @@ async function seedDatabase() {
         // Seed categories first (no dependencies)
         console.log('\n🏷️ Seeding categories...');
         const insertCategory = db.prepare(`
-          INSERT INTO categories (name, slug, is_active, created_at, updated_at)
-          VALUES (?, ?, ?, ?, ?)
+          INSERT INTO categories (name, slug, is_active)
+          VALUES (?, ?, ?)
           RETURNING id
         `);
         
@@ -307,9 +299,7 @@ async function seedDatabase() {
             const result = insertCategory.run(
               category.name,
               category.slug,
-              category.isActive ? 1 : 0,
-              new Date().toISOString(),
-              new Date().toISOString()
+              category.isActive ? 1 : 0
             );
             console.log(`✅ Added category: ${category.name} (${category.slug})`);
           }
@@ -321,8 +311,8 @@ async function seedDatabase() {
         // Seed brands next (no dependencies)
         console.log('\n🏢 Seeding brands...');
         const insertBrand = db.prepare(`
-          INSERT INTO brands (name, slug, is_active, created_at, updated_at)
-          VALUES (?, ?, ?, ?, ?)
+          INSERT INTO brands (name, slug, is_active)
+          VALUES (?, ?, ?)
           RETURNING id
         `);
         
@@ -331,9 +321,7 @@ async function seedDatabase() {
             const result = insertBrand.run(
               brand.name,
               brand.slug,
-              brand.isActive ? 1 : 0,
-              new Date().toISOString(),
-              new Date().toISOString()
+              brand.isActive ? 1 : 0
             );
             console.log(`✅ Added brand: ${brand.name} (${brand.slug})`);
           }
@@ -354,15 +342,13 @@ async function seedDatabase() {
             price,
             is_active,
             is_featured,
-            on_sale,
+            discount,
             has_variations,
-            has_weight,
             weight,
             stock,
             unlimited_stock,
-            created_at,
-            updated_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            created_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           RETURNING id
         `);
 
@@ -406,13 +392,11 @@ async function seedDatabase() {
               product.price,
               product.isActive ? 1 : 0,
               product.isFeatured ? 1 : 0,
-              product.onSale ? 1 : 0,
+              product.discount === null ? null : product.discount,
               product.hasVariations ? 1 : 0,
-              product.hasWeight ? 1 : 0,
               product.weight || null,
               product.stock,
               product.unlimitedStock ? 1 : 0,
-              new Date().toISOString(),
               new Date().toISOString()
             );
             
@@ -465,9 +449,9 @@ async function seedDatabase() {
         const insertBlogPost = db.prepare(`
           INSERT INTO blog_posts (
             title, slug, body, images, product_slug, 
-            published_at, created_at, updated_at
+            published_at
           )
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          VALUES (?, ?, ?, ?, ?, ?)
         `);
 
         const checkProductExists = db.prepare('SELECT slug FROM products WHERE slug = ?');
@@ -492,9 +476,7 @@ async function seedDatabase() {
               post.body,
               images,
               finalProductSlug,
-              post.publishedAt,
-              new Date().toISOString(),
-              new Date().toISOString()
+              post.publishedAt
             );
             
             if (finalProductSlug) {

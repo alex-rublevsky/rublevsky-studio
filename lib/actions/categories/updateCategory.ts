@@ -56,7 +56,6 @@ export default async function updateCategory(id: number, data: UpdateCategoryDat
       slug: data.slug,
       image: data.image || null,
       isActive: data.isActive !== undefined ? data.isActive : existingCategory.isActive,
-      updatedAt: new Date().toISOString(),
     };
     
     // Update category in database
@@ -70,7 +69,6 @@ export default async function updateCategory(id: number, data: UpdateCategoryDat
     return {
       id,
       ...categoryData,
-      createdAt: existingCategory.createdAt
     };
   } catch (error) {
     console.error("Error updating category:", error);

@@ -55,9 +55,30 @@ export default function CheckoutItems({ items }: CheckoutItemsProps) {
 
           {/* Quantity and price */}
           <div className="text-right">
-            <p className="text-sm font-medium">
-              ${(item.price * item.quantity).toFixed(2)}
-            </p>
+            {item.discount ? (
+              <>
+                <p className="text-sm font-medium line-through text-gray-500">
+                  ${(item.price * item.quantity).toFixed(2)}
+                </p>
+                <div className="flex items-center justify-end gap-2">
+                  <p className="text-sm font-medium">
+                    $
+                    {(
+                      item.price *
+                      (1 - item.discount / 100) *
+                      item.quantity
+                    ).toFixed(2)}
+                  </p>
+                  <span className="text-xs text-red-600">
+                    {item.discount}% OFF
+                  </span>
+                </div>
+              </>
+            ) : (
+              <p className="text-sm font-medium">
+                ${(item.price * item.quantity).toFixed(2)}
+              </p>
+            )}
             <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
           </div>
         </div>

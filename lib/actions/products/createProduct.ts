@@ -29,28 +29,22 @@ export default async function createProduct(data: ProductFormData): Promise<Prod
     }
 
     // Insert the product
-    const result = await db
-      .insert(products)
-      .values({
-        name: data.name,
-        slug: data.slug,
-        description: data.description || null,
-        price: parseFloat(data.price),
-        categorySlug: data.categorySlug || null,
-        brandSlug: data.brandSlug || null,
-        stock: parseInt(data.stock || "0"),
-        isActive: data.isActive,
-        isFeatured: data.isFeatured,
-        onSale: data.onSale,
-        hasVariations: data.hasVariations,
-        hasWeight: data.hasWeight,
-        weight: data.weight || null,
-        images: data.images || null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      })
-      .returning()
-      .get();
+    const product = await db.insert(products).values({
+      name: data.name,
+      slug: data.slug,
+      description: data.description,
+      price: parseFloat(data.price),
+      categorySlug: data.categorySlug,
+      brandSlug: data.brandSlug,
+      stock: parseInt(data.stock),
+      isActive: data.isActive,
+      isFeatured: data.isFeatured,
+      discount: data.discount,
+      hasVariations: data.hasVariations,
+      weight: data.weight || null,
+      images: data.images,
+      createdAt: new Date().toISOString()
+    }).returning();
 
     // If product has variations, insert them into the productVariations table
     if (data.hasVariations && data.variations && data.variations.length > 0) {
@@ -59,13 +53,12 @@ export default async function createProduct(data: ProductFormData): Promise<Prod
         const variationResult = await db
           .insert(productVariations)
           .values({
-            productId: result.id,
+            productId: product.id,
             sku: variation.sku,
             price: parseFloat(variation.price.toString()),
             stock: parseInt(variation.stock.toString()),
             sort: variation.sort,
             createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
           })
           .returning()
           .get();
@@ -80,7 +73,6 @@ export default async function createProduct(data: ProductFormData): Promise<Prod
                 name: attribute.attributeId,
                 value: attribute.value,
                 createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
               })
               .run();
           }
@@ -88,7 +80,7 @@ export default async function createProduct(data: ProductFormData): Promise<Prod
       }
     }
 
-    return result;
+    return product;
   } catch (error) {
     console.error("Error creating product:", error);
     throw new Error(`Failed to create product: ${(error as Error).message}`);

@@ -33,61 +33,56 @@ export function validateStock(
   }
 
   // For weight-based products with variations
-  if (product.hasWeight && product.weight && variationId) {
+  if (product.weight && variationId) {
     const variation = product.variations?.find(v => v.id === variationId);
-    if (!variation) {
-      return { isAvailable: false, availableStock: 0, unlimitedStock: false };
-    }
+    if (!variation) return { isAvailable: false, availableStock: 0, unlimitedStock: false };
 
-    const weightAttr = variation.attributes.find(
-      (attr) => attr.attributeId === "WEIGHT_G"
-    );
+    const weightAttr = variation.attributes.find(attr => attr.attributeId === "WEIGHT_G");
+    if (!weightAttr) return { isAvailable: false, availableStock: 0, unlimitedStock: false };
 
-    if (weightAttr) {
-      const totalWeight = parseInt(product.weight);
-      const variationWeight = parseInt(weightAttr.value);
+    const totalWeight = parseInt(product.weight);
+    const variationWeight = parseInt(weightAttr.value);
 
-      // Calculate total weight used by all variations in cart
-      const weightUsedInCart = cartItems
-        .filter((item) => item.productId === product.id)
-        .reduce((total, item) => {
-          // Skip the current variation if we're updating its quantity
-          if (item.variationId === variationId) {
-            return total;
-          }
-          // Find the weight of other cart items' variations
-          const cartItemWeight = item.attributes?.["WEIGHT_G"];
-          if (cartItemWeight) {
-            return total + parseInt(cartItemWeight) * item.quantity;
-          }
+    // Calculate total weight used by all variations in cart
+    const weightUsedInCart = cartItems
+      .filter((item) => item.productId === product.id)
+      .reduce((total, item) => {
+        // Skip the current variation if we're updating its quantity
+        if (item.variationId === variationId) {
           return total;
-        }, 0);
+        }
+        // Find the weight of other cart items' variations
+        const cartItemWeight = item.attributes?.["WEIGHT_G"];
+        if (cartItemWeight) {
+          return total + parseInt(cartItemWeight) * item.quantity;
+        }
+        return total;
+      }, 0);
 
-      // Add the weight that would be used by the requested quantity
-      const requestedWeight = variationWeight * requestedQuantity;
-      const totalRequestedWeight = weightUsedInCart + requestedWeight;
+    // Add the weight that would be used by the requested quantity
+    const requestedWeight = variationWeight * requestedQuantity;
+    const totalRequestedWeight = weightUsedInCart + requestedWeight;
 
-      // Check if the total requested weight exceeds the available weight
-      if (totalRequestedWeight > totalWeight) {
-        const remainingWeight = Math.max(0, totalWeight - weightUsedInCart);
-        const availableStock = Math.floor(remainingWeight / variationWeight);
-        return {
-          isAvailable: false,
-          availableStock,
-          unlimitedStock: false
-        };
-      }
-
-      // Calculate how many more packages can be made after this request
-      const remainingWeight = totalWeight - totalRequestedWeight;
-      const additionalAvailableStock = Math.floor(remainingWeight / variationWeight);
-
+    // Check if the total requested weight exceeds the available weight
+    if (totalRequestedWeight > totalWeight) {
+      const remainingWeight = Math.max(0, totalWeight - weightUsedInCart);
+      const availableStock = Math.floor(remainingWeight / variationWeight);
       return {
-        isAvailable: true,
-        availableStock: requestedQuantity + additionalAvailableStock,
+        isAvailable: false,
+        availableStock,
         unlimitedStock: false
       };
     }
+
+    // Calculate how many more packages can be made after this request
+    const remainingWeight = totalWeight - totalRequestedWeight;
+    const additionalAvailableStock = Math.floor(remainingWeight / variationWeight);
+
+    return {
+      isAvailable: true,
+      availableStock: requestedQuantity + additionalAvailableStock,
+      unlimitedStock: false
+    };
   }
 
   // For regular variations

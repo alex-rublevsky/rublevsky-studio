@@ -37,8 +37,6 @@ export default async function createBlogCategory(data: BlogCategoryFormData) {
     name: data.name,
     slug: data.slug,
     isActive: data.isActive !== undefined ? data.isActive : true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
   };
 
   // Insert the new category

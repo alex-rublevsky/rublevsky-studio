@@ -53,8 +53,6 @@ export default async function updateBlogPost(id: number, data: BlogPostFormData)
       productSlug: data.productSlug || null,
       images: data.images || null,
       publishedAt: data.publishedAt || existingPost.publishedAt,
-      lastEditedAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     };
     
     // Update blog post in database

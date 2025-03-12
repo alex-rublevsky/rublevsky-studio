@@ -55,40 +55,26 @@ interface VariationAttribute {
 
 export default function ProductsPage() {
   const router = useRouter();
-  const [formData, setFormData] = useState<ProductFormData>({
+  const defaultFormData = {
     name: "",
     slug: "",
     description: "",
     price: "",
     categorySlug: "",
     brandSlug: "",
-    stock: "",
+    stock: "0",
     isActive: true,
     isFeatured: false,
-    onSale: false,
+    discount: null,
     hasVariations: false,
-    hasWeight: false,
     weight: "",
     images: "",
     variations: [],
-  });
-  const [editFormData, setEditFormData] = useState<ProductFormData>({
-    name: "",
-    slug: "",
-    description: "",
-    price: "",
-    categorySlug: "",
-    brandSlug: "",
-    stock: "",
-    isActive: true,
-    isFeatured: false,
-    onSale: false,
-    hasVariations: false,
-    hasWeight: false,
-    weight: "",
-    images: "",
-    variations: [],
-  });
+  };
+
+  const [formData, setFormData] = useState<ProductFormData>(defaultFormData);
+  const [editFormData, setEditFormData] =
+    useState<ProductFormData>(defaultFormData);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
@@ -281,12 +267,11 @@ export default function ProductsPage() {
         price: "",
         categorySlug: "",
         brandSlug: "",
-        stock: "",
+        stock: "0",
         isActive: true,
         isFeatured: false,
-        onSale: false,
+        discount: null,
         hasVariations: false,
-        hasWeight: false,
         weight: "",
         images: "",
         variations: [],
@@ -321,9 +306,8 @@ export default function ProductsPage() {
       stock: product.stock.toString(),
       isActive: product.isActive,
       isFeatured: product.isFeatured,
-      onSale: product.onSale,
+      discount: product.discount,
       hasVariations: product.hasVariations,
-      hasWeight: product.hasWeight,
       weight: product.weight || "",
       images: product.images || "",
       variations: [],
@@ -410,12 +394,11 @@ export default function ProductsPage() {
         price: "",
         categorySlug: "",
         brandSlug: "",
-        stock: "",
+        stock: "0",
         isActive: true,
         isFeatured: false,
-        onSale: false,
+        discount: null,
         hasVariations: false,
-        hasWeight: false,
         weight: "",
         images: "",
         variations: [],
@@ -446,12 +429,11 @@ export default function ProductsPage() {
       price: "",
       categorySlug: "",
       brandSlug: "",
-      stock: "",
+      stock: "0",
       isActive: true,
       isFeatured: false,
-      onSale: false,
+      discount: null,
       hasVariations: false,
-      hasWeight: false,
       weight: "",
       images: "",
       variations: [],
@@ -787,12 +769,17 @@ export default function ProductsPage() {
                 </div>
 
                 <div className="flex items-center">
-                  <OrangeToggle
-                    name="onSale"
-                    checked={formData.onSale}
+                  <Input
+                    type="number"
+                    name="discount"
+                    value={formData.discount || ""}
                     onChange={handleChange}
+                    placeholder="Discount %"
+                    min="0"
+                    max="100"
+                    className="w-24"
                   />
-                  <label className="ml-2 text-sm">On Sale</label>
+                  <label className="ml-2 text-sm">% Off</label>
                 </div>
 
                 <div className="flex items-center">
@@ -803,23 +790,16 @@ export default function ProductsPage() {
                   />
                   <label className="ml-2 text-sm">Has Variations</label>
                 </div>
-
-                <div className="flex items-center">
-                  <OrangeToggle
-                    name="hasWeight"
-                    checked={formData.hasWeight}
-                    onChange={handleChange}
-                  />
-                  <label className="ml-2 text-sm">Has Weight</label>
-                </div>
               </div>
 
               <Input
-                label="Weight g"
-                type="text"
+                label="Weight (in grams)"
+                id="weight"
                 name="weight"
+                type="text"
                 value={formData.weight}
                 onChange={handleChange}
+                placeholder="Enter weight in grams"
               />
             </div>
 
@@ -1112,12 +1092,17 @@ export default function ProductsPage() {
                   </div>
 
                   <div className="flex items-center">
-                    <OrangeToggle
-                      name="onSale"
-                      checked={editFormData.onSale}
+                    <Input
+                      type="number"
+                      name="discount"
+                      value={editFormData.discount || ""}
                       onChange={handleEditChange}
+                      placeholder="Discount %"
+                      min="0"
+                      max="100"
+                      className="w-24"
                     />
-                    <label className="ml-2 text-sm">On Sale</label>
+                    <label className="ml-2 text-sm">% Off</label>
                   </div>
 
                   <div className="flex items-center">
@@ -1128,26 +1113,18 @@ export default function ProductsPage() {
                     />
                     <label className="ml-2 text-sm">Has Variations</label>
                   </div>
-
-                  <div className="flex items-center">
-                    <OrangeToggle
-                      name="hasWeight"
-                      checked={editFormData.hasWeight}
-                      onChange={handleEditChange}
-                    />
-                    <label className="ml-2 text-sm">Has Weight</label>
-                  </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Weight g
+                    Weight (in grams)
                   </label>
                   <Input
                     type="text"
                     name="weight"
                     value={editFormData.weight}
                     onChange={handleEditChange}
+                    placeholder="Enter weight in grams"
                   />
                 </div>
               </div>

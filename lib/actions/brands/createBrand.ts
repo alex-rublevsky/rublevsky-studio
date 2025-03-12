@@ -41,8 +41,6 @@ export default async function createBrand(data: CreateBrandData): Promise<Brand>
       slug: data.slug,
       image: data.image || null,
       isActive: data.isActive !== undefined ? data.isActive : true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     };
     
     // Insert brand into database

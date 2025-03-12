@@ -18,6 +18,7 @@ export interface CartItem {
   attributes?: Record<string, string>; // e.g. {SIZE_CM: "6x6", COLOR: "Red"}
   maxStock: number; // to validate against stock limits
   unlimitedStock: boolean;
+  discount?: number | null; // Percentage discount (e.g., 20 for 20% off)
   weightInfo?: {
     totalWeight: number;
   };
@@ -153,17 +154,11 @@ export function CartProvider({ children, initialProducts }: CartProviderProps) {
   // Combined function to add a product to cart using client-side validation
   const addProductToCart = async (
     product: Product,
-    quantity: number = 1,
+    quantity: number,
     selectedVariation?: ProductVariation | null,
     selectedAttributes?: Record<string, string>
-  ) => {
+  ): Promise<boolean> => {
     try {
-      // For products with variations without a selected variation, show a message
-      if (product.hasVariations && !selectedVariation) {
-        toast.info("Please select product options first");
-        return false;
-      }
-
       // Validate stock using client-side validation
       const result = validateStock(
         initialProducts,
@@ -174,16 +169,9 @@ export function CartProvider({ children, initialProducts }: CartProviderProps) {
       );
 
       if (!result.isAvailable && !result.unlimitedStock) {
-        toast.error(
-          "This item is out of stock or not available in the requested quantity"
-        );
+        toast.error("Requested quantity is not available");
         return false;
       }
-
-      // Get first product image
-      const firstImage = product.images
-        ? product.images.split(",")[0].trim()
-        : "";
 
       // Create cart item
       const cartItem: CartItem = {
@@ -193,12 +181,12 @@ export function CartProvider({ children, initialProducts }: CartProviderProps) {
         variationId: selectedVariation?.id,
         price: selectedVariation ? selectedVariation.price : product.price,
         quantity: quantity,
-        image: firstImage,
-        attributes: selectedAttributes || {},
         maxStock: result.availableStock,
         unlimitedStock: result.unlimitedStock,
-        // Include weight information for weight-based products
-        ...(product.hasWeight && product.weight
+        discount: product.discount,
+        image: product.images?.split(",")[0].trim(),
+        attributes: selectedAttributes,
+        ...(product.weight
           ? {
               weightInfo: {
                 totalWeight: parseInt(product.weight),
@@ -207,13 +195,11 @@ export function CartProvider({ children, initialProducts }: CartProviderProps) {
           : {}),
       };
 
-      // Add to cart
       addToCart(cartItem);
-      toast.success("Added to cart");
       return true;
     } catch (error) {
-      console.error("Error adding to cart:", error);
-      toast.error("Failed to add item to cart");
+      console.error("Error adding product to cart:", error);
+      toast.error("Failed to add product to cart");
       return false;
     }
   };

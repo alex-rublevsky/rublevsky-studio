@@ -89,9 +89,8 @@ export interface ProductFormData {
   stock: string;
   isActive: boolean;
   isFeatured: boolean;
-  onSale: boolean;
+  discount: number | null;
   hasVariations: boolean;
-  hasWeight: boolean;
   weight: string;
   images: string;
   variations: ProductVariationFormData[];
@@ -175,6 +174,7 @@ export interface CartItem {
   price: number;
   maxStock: number;
   unlimitedStock: boolean;
+  discount?: number | null;
   image?: string;
   attributes?: Record<string, string>;
   weightInfo?: {

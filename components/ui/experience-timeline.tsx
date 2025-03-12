@@ -16,14 +16,14 @@ interface TimelineItem {
 const timelineItems: TimelineItem[] = [
   {
     date: "01/22 — 04/24",
-    logo: "/mohawk.svg",
+    logo: "/logos/mohawk.svg",
     title: "Graphic design advanced 3 year program",
     description:
       "Gained hands-on experience in various aspects of graphic design, including print, branding, web design, through a comprehensive 3-year advanced program.",
   },
   {
     date: "05/23 - 09/23",
-    logo: "/beautyfloor.svg",
+    logo: "/logos/beautyfloor.svg",
     title: "Flooring Business",
     description:
       "I have designed an e-commerce website for a flooring Business.",
@@ -37,21 +37,21 @@ const timelineItems: TimelineItem[] = [
   },
   {
     date: "01/24 - 04/24",
-    logo: "/inksoul.svg",
+    logo: "/logos/inksoul.svg",
     title: "Tattoo studio",
     description:
       "I have designed and developed a website for a tattoo studio based in Vladivostok, Russia.",
   },
   {
     date: "04/24 - 05/24",
-    logo: "/aps.svg",
+    logo: "/logos/aps.svg",
     title: "Africa Power Supply",
     description:
       "I have designed and developed a website for a Canadian startup that strives to revolutionize African waste-to-energy systems.",
   },
   {
     date: "01/24 - 04/24",
-    logo: "/centre3.png",
+    logo: "/logos/Centre.png",
     title: "Centre3 for Artistic + Social Practice",
     description:
       "Participated in screen printing workshops and contributed to the Digital Pipeline 4 Youth program.",

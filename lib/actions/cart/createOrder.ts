@@ -57,7 +57,12 @@ export async function createOrder(customerInfo: CustomerInfo, cartItems: CartIte
       country: customerInfo.country,
       zipCode: customerInfo.zipCode,
       status: "pending",
-      total: cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
+      total: cartItems.reduce((sum, item) => {
+        const itemPrice = item.discount 
+          ? item.price * (1 - item.discount / 100)
+          : item.price;
+        return sum + itemPrice * item.quantity;
+      }, 0),
     }).returning();
 
     // Create order items
@@ -68,6 +73,7 @@ export async function createOrder(customerInfo: CustomerInfo, cartItems: CartIte
         variationId: item.variationId,
         quantity: item.quantity,
         price: item.price,
+        discount: item.discount,
         attributes: item.attributes || {},
       }))
     );

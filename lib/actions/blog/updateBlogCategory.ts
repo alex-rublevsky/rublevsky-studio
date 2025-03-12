@@ -52,7 +52,6 @@ export default async function updateBlogCategory(data: UpdateBlogCategoryData) {
       name: data.name,
       slug: data.slug,
       isActive: data.isActive !== undefined ? data.isActive : existingCategory.isActive,
-      updatedAt: new Date().toISOString(),
     })
     .where(eq(blogCategories.id, data.id))
     .run();
@@ -66,7 +65,5 @@ export default async function updateBlogCategory(data: UpdateBlogCategoryData) {
     name: data.name,
     slug: data.slug,
     isActive: data.isActive !== undefined ? data.isActive : existingCategory.isActive,
-    createdAt: existingCategory.createdAt,
-    updatedAt: new Date().toISOString(),
   };
 } 

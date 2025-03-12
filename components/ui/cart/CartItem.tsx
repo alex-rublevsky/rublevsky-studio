@@ -114,7 +114,28 @@ export function CartItem({ item }: CartItemProps) {
             size="compact"
           />
           <div className="font-medium">
-            ${(item.price * item.quantity).toFixed(2)}
+            {item.discount ? (
+              <div className="flex flex-col items-end">
+                <span className="line-through text-sm text-gray-500">
+                  ${(item.price * item.quantity).toFixed(2)}
+                </span>
+                <div className="flex items-center gap-2">
+                  <span>
+                    $
+                    {(
+                      item.price *
+                      (1 - item.discount / 100) *
+                      item.quantity
+                    ).toFixed(2)}
+                  </span>
+                  <span className="text-xs text-red-600">
+                    {item.discount}% OFF
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <span>${(item.price * item.quantity).toFixed(2)}</span>
+            )}
           </div>
         </div>
       </div>
