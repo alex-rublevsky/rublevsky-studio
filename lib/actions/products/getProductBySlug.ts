@@ -155,7 +155,7 @@ export default async function getProductBySlug(slug: string): Promise<ProductWit
     async () => fetchProduct(slug),
     ['product', slug],
     {
-      revalidate: 259200, // Cache for 3 days
+      revalidate: 1, // TODO: change to 259200
       tags: ['products', `product-${slug}`] // Tags for cache invalidation
     }
   )();

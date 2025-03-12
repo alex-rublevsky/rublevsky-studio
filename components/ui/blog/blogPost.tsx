@@ -1,5 +1,6 @@
 "use client";
 
+import ReactMarkdown from "react-markdown";
 // Import Swiper styles
 import "swiper/css";
 import "swiper/css/effect-coverflow";
@@ -39,7 +40,9 @@ function BlogPost({ title, body, images, productSlug, slug }: BlogPostProps) {
           </div>
         )}
       </div>
-      <p className="whitespace-pre-line">{body}</p>
+      <div className="prose prose-lg">
+        <ReactMarkdown>{body}</ReactMarkdown>
+      </div>
     </article>
   );
 }

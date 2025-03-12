@@ -9,8 +9,15 @@ export default async function getAllBlogPosts(): Promise<BlogPost[]> {
   try {
     // Get all blog posts ordered by publish date
     const allBlogPosts = await db
-      .select()
+      .select({
+        ...blogPosts,
+        productImages: products.images
+      })
       .from(blogPosts)
+      .leftJoin(
+        products,
+        eq(blogPosts.productSlug, products.slug)
+      )
       .orderBy(desc(blogPosts.publishedAt))
       .all();
     
@@ -19,24 +26,10 @@ export default async function getAllBlogPosts(): Promise<BlogPost[]> {
       return [];
     }
 
-    const enrichedBlogPosts = await Promise.all(allBlogPosts.map(async (post) => {
-      // If there's a linked product, use its images
-      if (post.productSlug) {
-        const linkedProduct = await db
-          .select({
-            images: products.images
-          })
-          .from(products)
-          .where(eq(products.slug, post.productSlug))
-          .get();
-        
-        return {
-          ...post,
-          images: linkedProduct?.images
-        };
-      }
-
-      return post;
+    // Transform the results to match the expected format
+    const enrichedBlogPosts = allBlogPosts.map((post) => ({
+      ...post,
+      images: post.productSlug ? post.productImages : post.images
     }));
     
     return enrichedBlogPosts;

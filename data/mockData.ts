@@ -1002,6 +1002,90 @@ export const mockProducts = [
     ])
   },
   {
+    name: "Purple Yue Guang Bai 2023",
+    slug: "purple-yue-guang-bai-2023",
+    description: "Linked to blog post with the same slug",
+    images: "products/purple-yue-guan-bai-2023-1.jpg, products/purple-yue-guan-bai-2023-2.jpg, products/purple-yue-guan-bai-2023-3.jpg, products/purple-yue-guan-bai-2023-4.jpg, products/purple-yue-guan-bai-2023-5.jpg",
+    price: 129.99,
+    isActive: true,
+    isFeatured: true,
+    onSale: false,
+    hasVariations: true,
+    hasWeight: true,
+    weight: "300",
+    stock: 0,
+    unlimitedStock: false,
+    categorySlug: "tea",
+    brandSlug: "yunnan-sourcing",
+    variations: JSON.stringify([
+      {
+        sku: "purple-yue-guang-bai-2023-25g",
+        name: "25g",
+        price: 11,
+        stock: 0,
+        sort: 0,
+        attributes: [
+          {
+            attributeId: "WEIGHT_G",
+            value: "25"
+          }
+        ]
+      },
+      {
+        sku: "purple-yue-guang-bai-2023-50g",
+        name: "50g",
+        price: 21,
+        stock: 0,
+        sort: 1,
+        attributes: [
+          {
+            attributeId: "WEIGHT_G",
+            value: "50"
+          }
+        ]
+      },
+      {
+        sku: "purple-yue-guang-bai-2023-75g",
+        name: "75g",
+        price: 29,
+        stock: 0,
+        sort: 1,
+        attributes: [
+          {
+            attributeId: "WEIGHT_G",
+            value: "50"
+          }
+        ]
+      },
+      {
+        sku: "purple-yue-guang-bai-2023-100g",
+        name: "100g",
+        price: 38,
+        stock: 0,
+        sort: 2,
+        attributes: [
+          {
+            attributeId: "WEIGHT_G",
+            value: "100"
+          }
+        ]
+      },
+      {
+        sku: "purple-yue-guang-bai-2023-115g",
+        name: "115g",
+        price: 44,
+        stock: 0,
+        sort: 3,
+        attributes: [
+          {
+            attributeId: "WEIGHT_G",
+            value: "150"
+          }
+        ]
+      }
+    ])
+  },
+  {
     name: "Skateboard Cat Sticker",
     slug: "skateboard-cat-sticker",
     description: "cool af!",
@@ -1253,7 +1337,7 @@ Organoleptics 🐽
 The dry leaves mesmerize with a bright aroma of coffee beans and the pastry "sweet potato." When warmed, it releases a dark hot chocolate, rye bread, and a wealth of sweet raisin notes like those found in Easter cake. In the wet leaves, the rye aroma intensifies, and the raisins take on a slightly fermented quality, like in kvass. After steaming, delicate baked notes and an oyster shell mineral quality emerge.
 
 The taste carries all the above descriptors, with rye bread and a generous amount of raisins standing out the most.`,
-    images: "blog-images/Sweet Potato Zheng Shan Xiao Zhong Black Tea spring 2024-1.jpg, Sweet Potato Zheng Shan Xiao Zhong Black Tea spring 2024-2.jpg",
+    images: "blog-images/sweet-potato-zheng-shan-xiao-zhong-black-tea-spring-2024-1.jpg, blog-images/sweet-potato-zheng-shan-xiao-zhong-black-tea-spring-2024-2.jpg",
     publishedAt: "2024-12-24",
     productSlug: null,
   },
@@ -1273,9 +1357,9 @@ The taste combines the tartness of currant leaves with the tang of pineapple rin
 Tea effect (cha qi):
 
 The experience is meditative yet energizing, inspiring movement and creativity.`,
-    images: "purple-yue-guan-bai-2023-1.jpg, purple-yue-guan-bai-2023-2.jpg, purple-yue-guan-bai-2023-3.jpg, purple-yue-guan-bai-2023-4.jpg, purple-yue-guan-bai-2023-5.jpg",
+    images: null,
     publishedAt: "2024-12-21",
-    productSlug: null,
+    productSlug: "purple-yue-guang-bai-2023",
   },
   {
     title: "Lincang Arbor Gong Ting Ripe Pu'er 2009 Spring",
@@ -1291,6 +1375,27 @@ Gunthinchik classically gives off an ultra-fast leaf extraction, but this copy s
     publishedAt: "2024-12-19",
     productSlug: null,
   },
+  
+  {
+    title: "Ripe Pu'er Ku Zhu Shan \"Guardian 2.0\"",
+    slug: "guardian-2",
+    body: `📍Ancient trees from Ku Zhu Shan Mountain, Jinggu County. 🌿Fermentation was carried out in small-volume baskets. 
+    
+###### Aroma
+    
+Creamy and nutty, with confectionery notes: burnt brownie crust, condensed milk, chocolate sponge cake, and a hint of vanilla pod. 
+    
+###### Taste
+Grainy sweetness reminiscent of a "Kinder Country" bar, Neapolitan vanilla wafers, the astringency of grape seeds, a coppery tang, and the distinct flavor of Brazil nuts. The infusion is deep, smooth, and oily in texture. 
+    
+Hui Gan (returning sweetness, 回甘) is pronounced — the tea starts fresh and sweet with a clean bitterness. The aftertaste lingers and evolves gradually: the bitterness recedes, the sweetness intensifies, and ultimately, the sweetness prevails over bitterness. 
+    
+Effect Focuses attention, gathers the mind, and energizes the body — a perfect balance! Some deeply immersive ambient for an attentive and meditative tea ritual 🎶`,
+    images: "",
+    publishedAt: "2024-12-18",
+    productSlug: "guardian-2",
+  },
+  
   {
     title: "Greetings!",
     slug: "greetings",
@@ -1302,62 +1407,7 @@ I discovered the tea world in 2021, and began conducting ceremonies this year.
 
 I was hooked by the phenomenon's limitless spectrum of flavors and aromas, where the final product is shaped by a myriad of variables. Among them: the location and altitude of the Camellia sinensis (tea tree), its age, cultivar, season, year and batch of harvest, as well as the choice of the part of the plant: leaf, bud or cuttings. Equally important is the processing of the raw material: every tiny detail, from the roasting temperature to the type of fermentation, forms the unique categories of Chinese tea, each of which would take more than a lifetime to study....`,
     images: "me.jpg",
-    publishedAt: "2024-12-19",
+    publishedAt: "2024-12-18",
     productSlug: null,
-  },
-  {
-    title: "Ripe Pu'er Ku Zhu Shan \"Guardian 2.0\"",
-    slug: "guardian-2",
-    body: `📍Ancient trees from Ku Zhu Shan Mountain, Jinggu County. 🌿Fermentation was carried out in small-volume baskets. 
-    
-    Aroma Creamy and nutty, with confectionery notes: burnt brownie crust, condensed milk, chocolate sponge cake, and a hint of vanilla pod. 
-    
-    Taste Grainy sweetness reminiscent of a "Kinder Country" bar, Neapolitan vanilla wafers, the astringency of grape seeds, a coppery tang, and the distinct flavor of Brazil nuts. The infusion is deep, smooth, and oily in texture. 
-    
-    Hui Gan (returning sweetness, 回甘) is pronounced — the tea starts fresh and sweet with a clean bitterness. The aftertaste lingers and evolves gradually: the bitterness recedes, the sweetness intensifies, and ultimately, the sweetness prevails over bitterness. 
-    
-    Effect Focuses attention, gathers the mind, and energizes the body — a perfect balance! Some deeply immersive ambient for an attentive and meditative tea ritual 🎶`,
-    images: "",
-    publishedAt: "2024-01-15",
-    productSlug: "guardian-2",
-  },
-  {
-    title: "2005 Menghai 7542",
-    slug: "menghai-7542",
-    body: `🍂 A classic recipe from one of the most renowned factories. This 7542 from 2005 represents the golden era of Menghai production.
-
-    Aroma: Aged wood, leather, and dark fruits create a complex bouquet that speaks of careful aging. Hints of camphor emerge as the tea opens up.
-
-    Taste: Smooth and well-balanced with a pronounced sweetness. Notes of aged wood, dark chocolate, and a subtle earthiness that doesn't overwhelm. The finish is clean with a pleasant mineral quality.
-
-    Texture: Silky and full-bodied, coating the mouth without any roughness. The soup is clear and dark amber, showing its clean aging process.
-
-    Effect: Grounding and centering, perfect for afternoon contemplation. The energy is steady and lasting, without any sharpness. 🍵✨`,
-    images: "hranitel-2.jpg, hranitel-4.jpg, hranitel-6.jpg",
-    publishedAt: "2024-01-10",
-    productSlug: null,
-  },
-  {
-    title: "Shu Pu-erh \"Black Cat\" 🐈‍⬛",
-    slug: "black-cat-puer",
-    body: `🌿 Harvested in 2022 from 70-year-old trees on Ai Lao Mountain, Pu'er Prefecture, Menghai County, Xishuangbanna. After a year of aging, it was pressed in September 2023.
-
-Aroma
-Hot leaves: a sweetish scent with notes of tree bark, hazelnut, subtle spice, and minerality.
-
-Wet leaves: hematogen, milk chocolate with caramel, cocoa beans.
-
-Taste
-Full-bodied and oily, velvety, slightly metallic, creamy, and pastry-like. Pronounced sweetness, particularly toffee and powdered sugar.
-
-Effect
-Energizing, sharpens focus for a productive mindset.
-
-A cat in a cup—this tea is all about a grin from ear to ear with the first sip, a rich extraction even with less leaf, and a first-class awakening from deep sleep. 🥱
-
-Musical pairing — Falling in Love with the cat . 💃`,
-    images: "black-cat-47-1.jpg, black-cat-26-1.jpg, black-cat-7.jpg",
-    publishedAt: "2025-02-25",
-    productSlug: "black-cat-puer",
   },
 ]; 

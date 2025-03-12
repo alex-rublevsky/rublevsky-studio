@@ -95,9 +95,13 @@ function BlogPostImageGallery({ images, title }: BlogPostImageGalleryProps) {
           centeredSlides={true}
           slidesPerView={"auto"}
           spaceBetween={-100}
-          threshold={0}
+          threshold={5}
           initialSlide={0}
           onSwiper={setSwiper}
+          updateOnWindowResize={true}
+          observer={true}
+          observeParents={true}
+          resizeObserver={true}
           keyboard={{
             enabled: true,
             onlyInViewport: true,

@@ -62,3 +62,18 @@ p {
     font-size: 1.6rem;
   }
 } 
+
+.prose {
+  @apply max-w-none;
+  @apply px-0 !important;
+  overflow-x: visible;
+}
+
+.prose h6 {
+  margin-top: 0rem !important;
+  margin-bottom: 0.3rem !important;
+} 
+
+.prose p {
+  margin-top: 0rem !important;
+}
