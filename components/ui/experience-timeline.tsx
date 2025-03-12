@@ -11,6 +11,7 @@ interface TimelineItem {
   title: string;
   description: string;
   additionalImage?: string;
+  wideLogo?: boolean;
 }
 
 const timelineItems: TimelineItem[] = [
@@ -20,6 +21,7 @@ const timelineItems: TimelineItem[] = [
     title: "Graphic design advanced 3 year program",
     description:
       "Gained hands-on experience in various aspects of graphic design, including print, branding, web design, through a comprehensive 3-year advanced program.",
+    wideLogo: true,
   },
   {
     date: "05/23 - 09/23",
@@ -27,6 +29,7 @@ const timelineItems: TimelineItem[] = [
     title: "Flooring Business",
     description:
       "I have designed an e-commerce website for a flooring Business.",
+    wideLogo: true,
   },
   {
     date: "01/24 - 04/24",
@@ -56,6 +59,7 @@ const timelineItems: TimelineItem[] = [
     description:
       "Participated in screen printing workshops and contributed to the Digital Pipeline 4 Youth program.",
     additionalImage: "/screen-printing-me.jpg",
+    wideLogo: true,
   },
 ];
 
@@ -96,9 +100,13 @@ export function ExperienceTimeline() {
                   <Image
                     src={item.logo}
                     alt={`${item.title} Logo`}
-                    width={200}
-                    height={80}
-                    className="w-full mb-8"
+                    width={item.wideLogo ? 300 : 200}
+                    height={item.wideLogo ? 60 : 40}
+                    className={`mb-8 w-auto ${
+                      item.wideLogo
+                        ? "h-[2rem] md:h-[4rem]"
+                        : "h-[5rem] md:h-[7rem]"
+                    }`}
                   />
                   <h5 className="font-semibold">{item.title}</h5>
                   <p>{item.description}</p>
