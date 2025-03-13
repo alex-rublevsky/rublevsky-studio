@@ -11,7 +11,6 @@ CREATE TABLE `addresses` (
 	`zip_code` text,
 	`country` text,
 	`created_at` text,
-	`updated_at` text,
 	FOREIGN KEY (`order_id`) REFERENCES `orders`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
@@ -19,9 +18,7 @@ CREATE TABLE `blog_categories` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`name` text NOT NULL,
 	`slug` text NOT NULL,
-	`is_active` integer DEFAULT true NOT NULL,
-	`created_at` text,
-	`updated_at` text
+	`is_active` integer DEFAULT true NOT NULL
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `blog_categories_slug_unique` ON `blog_categories` (`slug`);--> statement-breakpoint
@@ -65,8 +62,7 @@ CREATE TABLE `inquiries` (
 	`role` text,
 	`budget` real,
 	`message` text NOT NULL,
-	`created_at` text,
-	`updated_at` text
+	`created_at` text
 );
 --> statement-breakpoint
 CREATE TABLE `order_items` (
@@ -76,10 +72,9 @@ CREATE TABLE `order_items` (
 	`product_variation_id` integer,
 	`quantity` integer DEFAULT 1 NOT NULL,
 	`unit_amount` real,
-	`total_amount` real,
 	`attributes` text,
+	`discount` integer,
 	`created_at` text,
-	`updated_at` text,
 	FOREIGN KEY (`order_id`) REFERENCES `orders`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`product_variation_id`) REFERENCES `product_variations`(`id`) ON UPDATE no action ON DELETE set null
@@ -87,6 +82,8 @@ CREATE TABLE `order_items` (
 --> statement-breakpoint
 CREATE TABLE `orders` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`subtotal` real,
+	`total_discount` real,
 	`grand_total` real,
 	`payment_method` text,
 	`payment_status` text,
@@ -95,8 +92,7 @@ CREATE TABLE `orders` (
 	`shipping_amount` real,
 	`shipping_method` text,
 	`notes` text,
-	`created_at` text,
-	`updated_at` text
+	`created_at` text
 );
 --> statement-breakpoint
 CREATE TABLE `product_variations` (
@@ -107,7 +103,6 @@ CREATE TABLE `product_variations` (
 	`stock` integer DEFAULT 0 NOT NULL,
 	`sort` integer,
 	`created_at` text,
-	`updated_at` text,
 	FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
@@ -129,7 +124,6 @@ CREATE TABLE `products` (
 	`stock` integer DEFAULT 0 NOT NULL,
 	`unlimited_stock` integer DEFAULT false NOT NULL,
 	`created_at` text,
-	`updated_at` text,
 	FOREIGN KEY (`category_slug`) REFERENCES `categories`(`slug`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`brand_slug`) REFERENCES `brands`(`slug`) ON UPDATE no action ON DELETE cascade
 );
@@ -141,6 +135,5 @@ CREATE TABLE `variation_attributes` (
 	`attributeId` text NOT NULL,
 	`value` text NOT NULL,
 	`created_at` text,
-	`updated_at` text,
 	FOREIGN KEY (`product_variation_id`) REFERENCES `product_variations`(`id`) ON UPDATE no action ON DELETE cascade
 );

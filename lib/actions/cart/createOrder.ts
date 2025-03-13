@@ -1,7 +1,7 @@
 'use server';
 
 import db from "@/server/db";
-import { orders, orderItems } from "@/server/schema";
+import { orders, orderItems, addresses } from "@/server/schema";
 import { CartItem } from "@/lib/context/CartContext";
 import { eq } from "drizzle-orm";
 import { validateStock, type StockValidationResult } from "@/lib/utils/validateStock";
@@ -47,34 +47,50 @@ export async function createOrder(customerInfo: CustomerInfo, cartItems: CartIte
 
     // Create order
     const order = await db.insert(orders).values({
-      firstName: customerInfo.firstName,
-      lastName: customerInfo.lastName,
-      email: customerInfo.email,
-      phone: customerInfo.phone,
-      streetAddress: customerInfo.streetAddress,
-      city: customerInfo.city,
-      state: customerInfo.state,
-      country: customerInfo.country,
-      zipCode: customerInfo.zipCode,
       status: "pending",
-      total: cartItems.reduce((sum, item) => {
+      subtotal: cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
+      total_discount: cartItems.reduce((sum, item) => {
+        if (item.discount) {
+          return sum + (item.price * item.quantity * (item.discount / 100));
+        }
+        return sum;
+      }, 0),
+      grand_total: cartItems.reduce((sum, item) => {
         const itemPrice = item.discount 
           ? item.price * (1 - item.discount / 100)
           : item.price;
         return sum + itemPrice * item.quantity;
       }, 0),
+      currency: "CAD",
+      created_at: new Date().toISOString(),
     }).returning();
+
+    // Create address record
+    await db.insert(addresses).values({
+      order_id: order[0].id,
+      first_name: customerInfo.firstName,
+      last_name: customerInfo.lastName,
+      email: customerInfo.email,
+      phone: customerInfo.phone,
+      street_address: customerInfo.streetAddress,
+      city: customerInfo.city,
+      state: customerInfo.state,
+      country: customerInfo.country,
+      zip_code: customerInfo.zipCode,
+      created_at: new Date().toISOString(),
+    });
 
     // Create order items
     await db.insert(orderItems).values(
       cartItems.map(item => ({
-        orderId: order[0].id,
-        productId: item.productId,
-        variationId: item.variationId,
+        order_id: order[0].id,
+        product_id: item.productId,
+        product_variation_id: item.variationId,
         quantity: item.quantity,
-        price: item.price,
+        unit_amount: item.price,
         discount: item.discount,
-        attributes: item.attributes || {},
+        attributes: JSON.stringify(item.attributes || {}),
+        created_at: new Date().toISOString(),
       }))
     );
 

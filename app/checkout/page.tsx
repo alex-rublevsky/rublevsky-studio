@@ -102,7 +102,40 @@ export default function CheckoutPage() {
     setIsLoading(true);
 
     try {
+      await fetch("/api/emails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          firstName: customerInfo.firstName,
+          lastName: customerInfo.lastName,
+          email: customerInfo.email,
+          orderItems: cart.items.map((item) => ({
+            name: item.productName,
+            quantity: item.quantity,
+            price: item.discount
+              ? (item.price * (1 - item.discount / 100)).toFixed(2)
+              : item.price.toFixed(2),
+            originalPrice: item.price.toFixed(2),
+            discount: item.discount,
+            image: item.image
+              ? `https://assets.rublevsky.studio/${item.image}`
+              : undefined,
+          })),
+          subtotal: subtotal.toFixed(2),
+          totalDiscount: totalDiscount.toFixed(2),
+          orderTotal: total.toFixed(2),
+        }),
+      });
+    } catch (error) {
+      toast.error("Failed to send email. Please try again.");
+      console.error("Checkout error:", error);
+    }
+
+    try {
       // Pass customer info to createOrder
+
       const result = await createOrder(customerInfo, cart.items);
 
       if (result.success) {

@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "73889dc0-ca4e-4c00-b575-6f396e109bdd",
+  "id": "1e70f0d2-0bfc-4921-94a7-dc7f6e52e045",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "addresses": {
@@ -90,13 +90,6 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
         }
       },
       "indexes": {},
@@ -150,20 +143,6 @@
           "notNull": true,
           "autoincrement": false,
           "default": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
         }
       },
       "indexes": {
@@ -447,13 +426,6 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
         }
       },
       "indexes": {},
@@ -508,13 +480,6 @@
           "notNull": false,
           "autoincrement": false
         },
-        "total_amount": {
-          "name": "total_amount",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
         "attributes": {
           "name": "attributes",
           "type": "text",
@@ -522,15 +487,15 @@
           "notNull": false,
           "autoincrement": false
         },
-        "created_at": {
-          "name": "created_at",
-          "type": "text",
+        "discount": {
+          "name": "discount",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "updated_at": {
-          "name": "updated_at",
+        "created_at": {
+          "name": "created_at",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -592,6 +557,20 @@
           "primaryKey": true,
           "notNull": true,
           "autoincrement": true
+        },
+        "subtotal": {
+          "name": "subtotal",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "total_discount": {
+          "name": "total_discount",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         },
         "grand_total": {
           "name": "grand_total",
@@ -656,13 +635,6 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
         }
       },
       "indexes": {},
@@ -719,13 +691,6 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "updated_at": {
-          "name": "updated_at",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -880,13 +845,6 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
         }
       },
       "indexes": {
@@ -963,13 +921,6 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "updated_at": {
-          "name": "updated_at",
           "type": "text",
           "primaryKey": false,
           "notNull": false,

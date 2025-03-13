@@ -185,7 +185,7 @@ async function seedDatabase() {
               )
               INSERT INTO product_variations (
                 product_id, sku, price, stock, sort,
-                created_at, updated_at
+                created_at
               )
               SELECT 
                 product_id.id,
@@ -193,7 +193,6 @@ async function seedDatabase() {
                 ${variation.price},
                 ${variation.stock},
                 ${variation.sort || 0},
-                '${new Date().toISOString()}',
                 '${new Date().toISOString()}'
               FROM product_id;
             `, `Adding variation: ${variation.name} for product: ${product.name}`);
@@ -211,13 +210,12 @@ async function seedDatabase() {
                   )
                   INSERT INTO variation_attributes (
                     product_variation_id, attributeId, value,
-                    created_at, updated_at
+                    created_at
                   )
                   SELECT 
                     variation_id.id,
                     '${attr.attributeId}',
                     '${attr.value}',
-                    '${new Date().toISOString()}',
                     '${new Date().toISOString()}'
                   FROM variation_id;
                 `, `Adding attribute: ${attr.attributeId} for variation: ${variation.name}`);
@@ -355,18 +353,18 @@ async function seedDatabase() {
         const insertVariation = db.prepare(`
           INSERT INTO product_variations (
             product_id, sku, price, stock, sort,
-            created_at, updated_at
+            created_at
           )
-          VALUES (?, ?, ?, ?, ?, ?, ?)
+          VALUES (?, ?, ?, ?, ?, ?)
           RETURNING id
         `);
 
         const insertVariationAttribute = db.prepare(`
           INSERT INTO variation_attributes (
             product_variation_id, attributeId, value,
-            created_at, updated_at
+            created_at
           )
-          VALUES (?, ?, ?, ?, ?)
+          VALUES (?, ?, ?, ?)
         `);
         
         // Create a compound operation for inserting a product with its variations
@@ -411,7 +409,6 @@ async function seedDatabase() {
                   variation.price,
                   variation.stock,
                   variation.sort || 0,
-                  new Date().toISOString(),
                   new Date().toISOString()
                 );
 
@@ -422,7 +419,6 @@ async function seedDatabase() {
                       variationId,
                       attr.attributeId,
                       attr.value,
-                      new Date().toISOString(),
                       new Date().toISOString()
                     );
                   }
