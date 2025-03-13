@@ -7,9 +7,9 @@ import {
   orders,
   orderItems,
   addresses,
-  blogCategories,
   blogPosts,
-  inquiries
+  inquiries,
+  teaCategories
 } from "@/server/schema";
 import { InferSelectModel, InferInsertModel } from "drizzle-orm";
 
@@ -66,9 +66,9 @@ export type NewOrderItem = InferInsertModel<typeof orderItems>;
 export type Address = InferSelectModel<typeof addresses>;
 export type NewAddress = InferInsertModel<typeof addresses>;
 
-// Blog Categories
-export type BlogCategory = InferSelectModel<typeof blogCategories>;
-export type NewBlogCategory = InferInsertModel<typeof blogCategories>;
+// Tea Categories
+export type TeaCategory = InferSelectModel<typeof teaCategories>;
+export type NewTeaCategory = InferInsertModel<typeof teaCategories>;
 
 // Blog Posts
 export type BlogPost = InferSelectModel<typeof blogPosts>;
@@ -86,6 +86,7 @@ export interface ProductFormData {
   price: string;
   categorySlug: string;
   brandSlug: string;
+  teaCategorySlug?: string;
   stock: string;
   isActive: boolean;
   isFeatured: boolean;
@@ -128,7 +129,7 @@ export interface BlogPostFormData {
   title: string;
   slug: string;
   body: string;
-  blogCategorySlug: string;
+  teaCategorySlug?: string;
   productSlug?: string;
   images?: string;
   publishedAt?: string;

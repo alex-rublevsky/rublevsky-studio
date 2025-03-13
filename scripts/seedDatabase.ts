@@ -1,4 +1,4 @@
-import { mockBlogPosts, mockProducts, mockCategories, mockBrands } from '../data/mockData';
+import { mockBlogPosts, mockProducts, mockCategories, mockBrands, mockTeaCategories } from '../data/mockData';
 import Database from 'better-sqlite3';
 import { resolve } from 'path';
 import { readdirSync, existsSync } from 'fs';
@@ -92,11 +92,25 @@ async function seedDatabase() {
       
       // Clear all existing data without using transactions
       console.log('\n🗑️ Clearing existing data...');
-      const tablesToClear = ['categories', 'brands', 'products', 'blog_posts'];
+      const tablesToClear = ['categories', 'brands', 'tea_categories', 'products', 'blog_posts'];
       for (const table of tablesToClear) {
         await executeRemoteSQL(`DELETE FROM ${table};`, `Clearing ${table}`);
         console.log(`✅ Cleared ${table}`);
       }
+      
+      // Seed tea categories first
+      console.log('\n🍵 Seeding tea categories...');
+      for (const teaCategory of mockTeaCategories) {
+        await executeRemoteSQL(`
+          INSERT INTO tea_categories (name, slug, is_active)
+          VALUES (
+            '${teaCategory.name.replace(/'/g, "''")}',
+            '${teaCategory.slug.replace(/'/g, "''")}',
+            ${teaCategory.isActive ? 1 : 0}
+          );
+        `, `Adding tea category: ${teaCategory.name}`);
+      }
+      console.log(`✅ Added ${mockTeaCategories.length} tea categories`);
       
       // Seed categories
       console.log('\n🏷️ Seeding categories...');
@@ -133,31 +147,19 @@ async function seedDatabase() {
       await executeRemoteSQL('DELETE FROM variation_attributes;', 'Clearing variation attributes');
       
       for (const product of mockProducts) {
-        // Verify that category and brand exist
-        const categoryExists = mockCategories.some(c => c.slug === product.categorySlug);
-        const brandExists = mockBrands.some(b => b.slug === product.brandSlug);
-        
-        if (!categoryExists || !brandExists) {
-          console.warn(`⚠️ Skipping product ${product.name} due to missing category or brand`);
-          continue;
-        }
-        
-        // Store minimal description if linked to a blog post
-        const description = product.description === 'Linked to blog post with the same slug' ? '' : product.description;
-        
-        // Insert the product
         await executeRemoteSQL(`
           INSERT INTO products (
-            category_slug, brand_slug, name, slug, description, images, 
+            category_slug, brand_slug, tea_category_slug, name, slug, description, images, 
             price, is_active, is_featured, discount, has_variations, 
             weight, stock, unlimited_stock, created_at
           )
           VALUES (
             '${product.categorySlug.replace(/'/g, "''")}',
             '${product.brandSlug.replace(/'/g, "''")}',
+            ${product.teaCategorySlug ? `'${product.teaCategorySlug}'` : 'NULL'},
             '${product.name.replace(/'/g, "''")}',
             '${product.slug.replace(/'/g, "''")}',
-            '${description.replace(/'/g, "''")}',
+            '${product.description.replace(/'/g, "''")}',
             '${product.images.replace(/'/g, "''")}',
             ${product.price},
             ${product.isActive ? 1 : 0},
@@ -229,20 +231,18 @@ async function seedDatabase() {
       // Seed blog posts
       console.log('\n📝 Seeding blog posts...');
       for (const post of mockBlogPosts) {
-        // If post has productSlug, store null for images (they'll come from product)
-        const images = post.productSlug ? null : post.images;
-        
         await executeRemoteSQL(`
           INSERT INTO blog_posts (
-            title, slug, body, images, product_slug, 
+            title, slug, body, images, product_slug, tea_category_slug,
             published_at
           )
           VALUES (
             '${post.title.replace(/'/g, "''")}',
             '${post.slug.replace(/'/g, "''")}',
             '${post.body.replace(/'/g, "''")}',
-            ${images ? `'${images.replace(/'/g, "''")}'` : 'NULL'},
+            ${post.images ? `'${post.images.replace(/'/g, "''")}'` : 'NULL'},
             ${post.productSlug ? `'${post.productSlug.replace(/'/g, "''")}'` : 'NULL'},
+            ${post.teaCategorySlug ? `'${post.teaCategorySlug}'` : 'NULL'},
             '${post.publishedAt}'
           );
         `, `Adding blog post: ${post.title}`);
@@ -271,17 +271,39 @@ async function seedDatabase() {
         // Clear tables in reverse dependency order
         console.log('🗑️ Clearing existing data...');
         const tablesToClear = [
-          'variation_attributes',    // Child of product_variations
-          'product_variations',      // Child of products
-          'blog_posts',             // References products
-          'products',               // Child of categories and brands
-          'categories',             // Independent
-          'brands'                  // Independent
+          'variation_attributes',
+          'product_variations',
+          'blog_posts',
+          'products',
+          'tea_categories',
+          'categories',
+          'brands'
         ];
         
         for (const table of tablesToClear) {
           db.prepare(`DELETE FROM ${table}`).run();
           console.log(`✅ Cleared ${table}`);
+        }
+        
+        // Seed tea categories first
+        console.log('\n🍵 Seeding tea categories...');
+        const insertTeaCategory = db.prepare(`
+          INSERT INTO tea_categories (name, slug, is_active)
+          VALUES (?, ?, ?)
+        `);
+        
+        try {
+          for (const category of mockTeaCategories) {
+            insertTeaCategory.run(
+              category.name,
+              category.slug,
+              category.isActive ? 1 : 0
+            );
+            console.log(`✅ Added tea category: ${category.name}`);
+          }
+        } catch (error) {
+          console.error('❌ Error seeding tea categories:', error);
+          throw error;
         }
         
         // Seed categories first (no dependencies)
@@ -333,6 +355,7 @@ async function seedDatabase() {
           INSERT INTO products (
             category_slug,
             brand_slug,
+            tea_category_slug,
             name,
             slug,
             description,
@@ -346,7 +369,7 @@ async function seedDatabase() {
             stock,
             unlimited_stock,
             created_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           RETURNING id
         `);
 
@@ -379,10 +402,11 @@ async function seedDatabase() {
           }
           
           try {
-            // Insert the product
+            // Insert the product with tea category
             const { id: productId } = insertProduct.get(
               product.categorySlug,
               product.brandSlug,
+              product.teaCategorySlug || null,
               product.name,
               product.slug,
               product.description,
@@ -444,10 +468,10 @@ async function seedDatabase() {
         console.log('\n📝 Seeding blog posts...');
         const insertBlogPost = db.prepare(`
           INSERT INTO blog_posts (
-            title, slug, body, images, product_slug, 
+            title, slug, body, images, product_slug, tea_category_slug,
             published_at
           )
-          VALUES (?, ?, ?, ?, ?, ?)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
         `);
 
         const checkProductExists = db.prepare('SELECT slug FROM products WHERE slug = ?');
@@ -472,14 +496,11 @@ async function seedDatabase() {
               post.body,
               images,
               finalProductSlug,
+              post.teaCategorySlug,
               post.publishedAt
             );
             
-            if (finalProductSlug) {
-              console.log(`✅ Added blog post: ${post.title} (linked to product: ${finalProductSlug})`);
-            } else {
-              console.log(`✅ Added blog post: ${post.title}`);
-            }
+            console.log(`✅ Added blog post: ${post.title}`);
           }
         } catch (error) {
           console.error('❌ Error seeding blog posts:', error);

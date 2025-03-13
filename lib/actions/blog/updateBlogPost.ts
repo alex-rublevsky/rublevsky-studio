@@ -49,7 +49,7 @@ export default async function updateBlogPost(id: number, data: BlogPostFormData)
       title: data.title,
       slug: data.slug,
       body: data.body,
-      blogCategorySlug: data.blogCategorySlug || null,
+      teaCategorySlug: data.teaCategorySlug || null,
       productSlug: data.productSlug || null,
       images: data.images || null,
       publishedAt: data.publishedAt || existingPost.publishedAt,

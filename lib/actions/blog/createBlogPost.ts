@@ -33,7 +33,7 @@ export default async function createBlogPost(data: BlogPostFormData): Promise<Bl
       title: data.title,
       slug: data.slug,
       body: data.body,
-      blogCategorySlug: data.blogCategorySlug || null,
+      teaCategorySlug: data.teaCategorySlug || null,
       productSlug: data.productSlug || null,
       images: data.images || null,
       publishedAt: data.publishedAt || new Date().toISOString(),

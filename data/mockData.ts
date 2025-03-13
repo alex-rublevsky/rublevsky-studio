@@ -29,6 +29,39 @@ export const mockCategories = [
   },
 ];
 
+export const mockTeaCategories = [
+  {
+    name: "Ripe Pu'er",
+    slug: "ripe-pu-er",
+    isActive: true,
+  },
+  {
+    name: "Raw Pu'er",
+    slug: "raw-pu-er",
+    isActive: true,
+  },
+  {
+    name: "White Tea",
+    slug: "white-tea",
+    isActive: true,
+  },
+  {
+    name: "Green Tea",
+    slug: "green-tea",
+    isActive: true,
+  },
+  {
+    name: "Oolong Tea",
+    slug: "oolong-tea",
+    isActive: true,
+  },
+  {
+    name: "Gaba Tea",
+    slug: "gaba-tea",
+    isActive: true,
+  },
+];
+
 // Mock Brands
 export const mockBrands = [
   {
@@ -1540,6 +1573,7 @@ export const mockProducts = [
   {
     name: `Shu Pu'er “Dao Shi”, Mengku, Kun Lu Shan, Old Trees`,
     slug: "shu-puer-dao-shi-mengku-kun-lu-shan-old-trees",
+    teaCategorySlug: "ripe-pu-er",
     description: "Linked to blog post with the same slug",
     images: "products/shu-puer-dao-shi-mengku-kun-lu-shan-old-trees-1.jpg, products/shu-puer-dao-shi-mengku-kun-lu-shan-old-trees-2.jpg, products/shu-puer-dao-shi-mengku-kun-lu-shan-old-trees-3.jpg, products/shu-puer-dao-shi-mengku-kun-lu-shan-old-trees-4.jpg, products/shu-puer-dao-shi-mengku-kun-lu-shan-old-trees-5.jpg, products/shu-puer-dao-shi-mengku-kun-lu-shan-old-trees-6.jpg, products/shu-puer-dao-shi-mengku-kun-lu-shan-old-trees-7.jpg",
     price: 0,
@@ -1676,6 +1710,7 @@ export const mockBlogPosts = [
   {
     title: `Ripe Pu-erh “Black Cat” 🐈‍⬛`,
     slug: "ripe-pu-erh-black-cat",
+    teaCategorySlug: "ripe-pu-er",
     body: `
 🌿 Harvested in 2022 from 70-year-old trees on Ai Lao Mountain, Pu’er Prefecture, Menghai County, Xishuangbanna. After a year of aging, it was pressed in September 2023.
 
@@ -1700,6 +1735,7 @@ Musical pairing — Falling in Love with the cat . 💃`,
   {
     title: `Sheng Puer Impression 2021`,
     slug: "sheng-puer-impression-2021",
+    teaCategorySlug: "raw-pu-er",
     body: `
 How many cups have been drunk, how many moments filled with sweetness… Today, we finished a favorite—if not a legend—a deep, multi-layered sheng pu-erh that fully lives up to its name: “Impression.”
 
@@ -1874,6 +1910,7 @@ Sign up for the ceremony 🔜 @alexrublevsky`,
   {
     title: `Ripe Pu'er "Clean Flavor" 2019 Menghai`,
     slug: "ripe-puer-clean-flavor-2019-menghai",
+    teaCategorySlug: "ripe-pu-er",
     body: `
 📍 Tea Plantations in Menghai County.
 

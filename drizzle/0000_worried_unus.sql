@@ -14,25 +14,17 @@ CREATE TABLE `addresses` (
 	FOREIGN KEY (`order_id`) REFERENCES `orders`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE TABLE `blog_categories` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`name` text NOT NULL,
-	`slug` text NOT NULL,
-	`is_active` integer DEFAULT true NOT NULL
-);
---> statement-breakpoint
-CREATE UNIQUE INDEX `blog_categories_slug_unique` ON `blog_categories` (`slug`);--> statement-breakpoint
 CREATE TABLE `blog_posts` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`blog_category_slug` text,
 	`product_slug` text,
+	`tea_category_slug` text,
 	`title` text NOT NULL,
 	`slug` text NOT NULL,
 	`body` text NOT NULL,
 	`images` text,
 	`published_at` text,
-	FOREIGN KEY (`blog_category_slug`) REFERENCES `blog_categories`(`slug`) ON UPDATE no action ON DELETE set null,
-	FOREIGN KEY (`product_slug`) REFERENCES `products`(`slug`) ON UPDATE no action ON DELETE set null
+	FOREIGN KEY (`product_slug`) REFERENCES `products`(`slug`) ON UPDATE no action ON DELETE set null,
+	FOREIGN KEY (`tea_category_slug`) REFERENCES `tea_categories`(`slug`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `blog_posts_slug_unique` ON `blog_posts` (`slug`);--> statement-breakpoint
@@ -111,6 +103,7 @@ CREATE TABLE `products` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`category_slug` text,
 	`brand_slug` text,
+	`tea_category_slug` text,
 	`name` text NOT NULL,
 	`slug` text NOT NULL,
 	`images` text,
@@ -125,10 +118,17 @@ CREATE TABLE `products` (
 	`unlimited_stock` integer DEFAULT false NOT NULL,
 	`created_at` text,
 	FOREIGN KEY (`category_slug`) REFERENCES `categories`(`slug`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`brand_slug`) REFERENCES `brands`(`slug`) ON UPDATE no action ON DELETE cascade
+	FOREIGN KEY (`brand_slug`) REFERENCES `brands`(`slug`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`tea_category_slug`) REFERENCES `tea_categories`(`slug`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `products_slug_unique` ON `products` (`slug`);--> statement-breakpoint
+CREATE TABLE `tea_categories` (
+	`slug` text PRIMARY KEY NOT NULL,
+	`name` text NOT NULL,
+	`is_active` integer DEFAULT true NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE `variation_attributes` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`product_variation_id` integer,

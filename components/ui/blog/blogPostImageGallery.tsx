@@ -7,7 +7,7 @@ import {
   Keyboard,
   Mousewheel,
 } from "swiper/modules";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, memo } from "react";
 import type { Swiper as SwiperType } from "swiper";
 import "./blogPostImageGallery.css";
 
@@ -21,13 +21,20 @@ function BlogPostImageGallery({ images, title }: BlogPostImageGalleryProps) {
   const [swiper, setSwiper] = useState<SwiperType | null>(null);
   const initializedRef = useRef(false);
   const imagesLoadedRef = useRef(0);
+  const mountedRef = useRef(false);
 
-  // Reset the gallery when images change
+  // Only reset on mount, not on re-renders or image changes
   useEffect(() => {
-    initializedRef.current = false;
-    imagesLoadedRef.current = 0;
-    setIsReady(false);
-  }, [images]);
+    if (!mountedRef.current) {
+      initializedRef.current = false;
+      imagesLoadedRef.current = 0;
+      setIsReady(false);
+      mountedRef.current = true;
+    }
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   // Handle image loading
   const handleImageLoad = () => {
@@ -67,18 +74,34 @@ function BlogPostImageGallery({ images, title }: BlogPostImageGalleryProps) {
   // Additional handler to reset on visibility changes (when returning to the page)
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible" && swiper) {
-        // When returning to the page, reset to first slide
-        swiper.slideTo(0, 0);
+      if (
+        document.visibilityState === "visible" &&
+        swiper &&
+        mountedRef.current
+      ) {
+        requestAnimationFrame(() => {
+          if (mountedRef.current) {
+            swiper.slideTo(0, 0);
+            swiper.update();
+
+            // Re-initialize if needed
+            if (
+              !initializedRef.current &&
+              imagesLoadedRef.current >= Math.min(images.length, 3)
+            ) {
+              initializedRef.current = true;
+              setIsReady(true);
+            }
+          }
+        });
       }
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
-
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [swiper]);
+  }, [swiper, images]);
 
   return (
     <>
@@ -138,7 +161,7 @@ function BlogPostImageGallery({ images, title }: BlogPostImageGalleryProps) {
         >
           {images.map((image, index) => (
             <SwiperSlide
-              key={index}
+              key={`${image}-${index}`}
               className="w-auto max-w-[85%] transition-all duration-300 ease-in-out overflow-hidden origin-center opacity-[0.5] height-auto flex items-center justify-center"
             >
               <div className="relative w-auto overflow-hidden object-contain">
@@ -162,4 +185,6 @@ function BlogPostImageGallery({ images, title }: BlogPostImageGalleryProps) {
     </>
   );
 }
-export default BlogPostImageGallery;
+
+// Memoize the component to prevent unnecessary re-renders
+export default memo(BlogPostImageGallery);

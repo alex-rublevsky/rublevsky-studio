@@ -3,11 +3,18 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Product, Category, Brand, ProductFormData } from "@/types";
+import {
+  Product,
+  Category,
+  Brand,
+  ProductFormData,
+  TeaCategory,
+} from "@/types";
 import Image from "next/image";
 import ProductVariationForm from "@/components/ui/admin/ProductVariationForm";
 import { getAllBrands } from "@/lib/actions/brands";
 import { getAllCategories } from "@/lib/actions/categories";
+import { getAllTeaCategories } from "@/lib/actions/blog";
 import {
   getAdminProducts,
   getProductById,
@@ -62,6 +69,7 @@ export default function ProductsPage() {
     price: "",
     categorySlug: "",
     brandSlug: "",
+    teaCategorySlug: "",
     stock: "0",
     isActive: true,
     isFeatured: false,
@@ -94,11 +102,13 @@ export default function ProductsPage() {
   );
   const [isDeleting, setIsDeleting] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(true);
+  const [teaCategories, setTeaCategories] = useState<TeaCategory[]>([]);
 
   useEffect(() => {
     fetchProducts();
     fetchCategories();
     fetchBrands();
+    fetchTeaCategories();
   }, []);
 
   // Generate slug from product name for the main form
@@ -165,6 +175,15 @@ export default function ProductsPage() {
       setBrands(brandsData || []);
     } catch (err) {
       console.error("Error fetching brands:", err);
+    }
+  };
+
+  const fetchTeaCategories = async () => {
+    try {
+      const categoriesData = await getAllTeaCategories();
+      setTeaCategories(categoriesData || []);
+    } catch (err) {
+      console.error("Error fetching tea categories:", err);
     }
   };
 
@@ -251,38 +270,20 @@ export default function ProductsPage() {
     const submissionData = {
       ...formData,
       variations: formattedVariations,
+      teaCategorySlug: formData.teaCategorySlug || undefined,
     };
 
     try {
-      // Use the server action instead of the API
       await createProduct(submissionData);
-
-      // Replace success state with toast notification
       toast.success("Product added successfully!");
 
-      setFormData({
-        name: "",
-        slug: "",
-        description: "",
-        price: "",
-        categorySlug: "",
-        brandSlug: "",
-        stock: "0",
-        isActive: true,
-        isFeatured: false,
-        discount: null,
-        hasVariations: false,
-        weight: "",
-        images: "",
-        variations: [],
-      });
+      setFormData(defaultFormData);
       setVariations([]);
       setIsAutoSlug(true);
       router.refresh();
       fetchProducts();
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
-      // Add toast notification for error
       toast.error(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsSubmitting(false);
@@ -419,26 +420,8 @@ export default function ProductsPage() {
 
   const closeEditModal = () => {
     setShowEditModal(false);
-    setIsEditMode(false);
     setEditingProductId(null);
-    // Reset the edit form data
-    setEditFormData({
-      name: "",
-      slug: "",
-      description: "",
-      price: "",
-      categorySlug: "",
-      brandSlug: "",
-      stock: "0",
-      isActive: true,
-      isFeatured: false,
-      discount: null,
-      hasVariations: false,
-      weight: "",
-      images: "",
-      variations: [],
-    });
-    // Reset the edit variations
+    setEditFormData(defaultFormData);
     setEditVariations([]);
     setIsEditAutoSlug(false);
     setError("");
@@ -547,6 +530,13 @@ export default function ProductsPage() {
     if (!slug) return null;
     const brand = brands.find((b) => b.slug === slug);
     return brand?.name || null;
+  };
+
+  const getTeaCategoryName = (slug: string | null): string | null => {
+    if (!slug) return null;
+    return (
+      teaCategories.find((category) => category.slug === slug)?.name || null
+    );
   };
 
   return (
@@ -732,6 +722,36 @@ export default function ProductsPage() {
                 </Select>
               </div>
 
+              <div>
+                <label
+                  htmlFor="teaCategory"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Tea Category
+                </label>
+                <Select
+                  value={formData.teaCategorySlug || "none"}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      teaCategorySlug: value === "none" ? "" : value,
+                    }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a tea category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    {teaCategories.map((category) => (
+                      <SelectItem key={category.slug} value={category.slug}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium mb-1">
                   Image Identifiers
@@ -857,6 +877,9 @@ export default function ProductsPage() {
                     Brand
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    Tea Category
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
@@ -899,6 +922,9 @@ export default function ProductsPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {getBrandName(product.brandSlug) || "None"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {getTeaCategoryName(product.teaCategorySlug) || "None"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <Badge
@@ -1054,6 +1080,36 @@ export default function ProductsPage() {
                       {brands.map((brand) => (
                         <SelectItem key={brand.slug} value={brand.slug}>
                           {brand.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="editTeaCategory"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    Tea Category
+                  </label>
+                  <Select
+                    value={editFormData.teaCategorySlug || "none"}
+                    onValueChange={(value) =>
+                      setEditFormData((prev) => ({
+                        ...prev,
+                        teaCategorySlug: value === "none" ? "" : value,
+                      }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a tea category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      {teaCategories.map((category) => (
+                        <SelectItem key={category.slug} value={category.slug}>
+                          {category.name}
                         </SelectItem>
                       ))}
                     </SelectContent>

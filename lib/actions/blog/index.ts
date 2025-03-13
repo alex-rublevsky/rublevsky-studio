@@ -4,7 +4,7 @@ import getBlogPostById from './getBlogPostById';
 import createBlogPost from './createBlogPost';
 import updateBlogPost from './updateBlogPost';
 import deleteBlogPost from './deleteBlogPost';
-import getAllBlogCategories from './getAllBlogCategories';
+import getAllTeaCategories from './getAllTeaCategories';
 import createBlogCategory from './createBlogCategory';
 import updateBlogCategory from './updateBlogCategory';
 import deleteBlogCategory from './deleteBlogCategory';
@@ -16,7 +16,7 @@ export {
   createBlogPost,
   updateBlogPost,
   deleteBlogPost,
-  getAllBlogCategories,
+  getAllTeaCategories,
   createBlogCategory,
   updateBlogCategory,
   deleteBlogCategory

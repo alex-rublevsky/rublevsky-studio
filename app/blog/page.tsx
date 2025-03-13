@@ -1,13 +1,16 @@
-import Link from "next/link";
-import BlogPost from "@/components/ui/blog/blogPost";
+import BlogPostsList from "@/components/ui/blog/blogPostsList";
 import getAllBlogPosts from "@/lib/actions/blog/getAllBlogPosts";
+import getAllTeaCategories from "@/lib/actions/tea/getAllTeaCategories";
 import { BlogPost as BlogPostType } from "@/types";
 // Force this page to be dynamically rendered
 export const dynamic = "force-dynamic";
 
 export default async function Page() {
   try {
-    const blogPosts = await getAllBlogPosts();
+    const [blogPosts, teaCategories] = await Promise.all([
+      getAllBlogPosts(),
+      getAllTeaCategories(),
+    ]);
 
     const posts: BlogPostType[] = Array.isArray(blogPosts) ? blogPosts : [];
 
@@ -22,25 +25,7 @@ export default async function Page() {
           </h5>
         </div>
 
-        <div className="space-y-24 md:space-y-32">
-          {posts.length === 0 ? (
-            <p className="text-center text-lg">
-              No blog posts found. Check back soon!
-            </p>
-          ) : (
-            posts.map((post) => (
-              <BlogPost
-                key={post.id}
-                title={post.title || "Untitled Post"}
-                body={post.body || ""}
-                images={post.images}
-                productSlug={post.productSlug}
-                slug={post.slug || `post-${post.id}`}
-                publishedAt={post.publishedAt || ""}
-              />
-            ))
-          )}
-        </div>
+        <BlogPostsList posts={posts} teaCategories={teaCategories} />
       </section>
     );
   } catch (error) {
