@@ -1,16 +1,26 @@
-import ProductList from "@/components/ui/store/productList";
+import FilteredProductList from "@/components/ui/store/filteredProductList";
 import getAllProducts from "@/lib/actions/products/getAllProducts";
+import { getAllCategories } from "@/lib/actions/categories";
+import getAllTeaCategories from "@/lib/actions/tea/getAllTeaCategories";
 
 // Force this page to be dynamically rendered
 export const dynamic = "force-dynamic";
 
 export default async function StorePage() {
-  // Fetch all products using the server action
-  const products = await getAllProducts({});
+  // Fetch all products and categories
+  const [products, categories, teaCategories] = await Promise.all([
+    getAllProducts({}),
+    getAllCategories(),
+    getAllTeaCategories(),
+  ]);
 
   return (
-    <div className="space-y-8">
-      <ProductList title="All Products" data={products} />
+    <div>
+      <FilteredProductList
+        products={products}
+        categories={categories}
+        teaCategories={teaCategories}
+      />
     </div>
   );
 }

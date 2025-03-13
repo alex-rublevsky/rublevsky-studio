@@ -1,33 +1,43 @@
-import { Product, ProductVariation, VariationAttribute } from "@/types";
+"use client";
+
+import { Product } from "@/types";
+import { motion, AnimatePresence } from "framer-motion";
 import ProductCard from "./productCard";
 
-// Extended product interface with variations
-interface ProductWithVariations extends Product {
-  variations?: ProductVariationWithAttributes[];
+interface ProductListProps {
+  data: Product[];
 }
 
-interface ProductVariationWithAttributes extends ProductVariation {
-  attributes: VariationAttribute[];
-}
-
-function ProductList({
-  title,
-  data,
-}: {
-  title: string;
-  data: ProductWithVariations[];
-}) {
+export default function ProductList({ data }: ProductListProps) {
   return (
-    <section className="w-full">
-      <h2 className="mb-8">{title}</h2>
-
-      {/* Product grid - responsive layout matching the Laravel example */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mx-auto items-start">
-        {data.map((product: ProductWithVariations) => (
-          <ProductCard key={product.slug} product={product} />
-        ))}
-      </div>
-    </section>
+    <div>
+      <AnimatePresence mode="popLayout">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {data.length === 0 ? (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="text-center text-lg col-span-full"
+            >
+              No products found.
+            </motion.p>
+          ) : (
+            data.map((product) => (
+              <motion.div
+                key={product.id}
+                layout
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <ProductCard product={product} />
+              </motion.div>
+            ))
+          )}
+        </div>
+      </AnimatePresence>
+    </div>
   );
 }
-export default ProductList;
