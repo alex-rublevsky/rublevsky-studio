@@ -101,7 +101,7 @@ export default function ProductsPage() {
     null
   );
   const [isDeleting, setIsDeleting] = useState(false);
-  const [showCreateForm, setShowCreateForm] = useState(true);
+  const [showCreateForm, setShowCreateForm] = useState(false);
   const [teaCategories, setTeaCategories] = useState<TeaCategory[]>([]);
 
   useEffect(() => {

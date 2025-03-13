@@ -31,6 +31,7 @@ import {
 
 export default function BlogPage() {
   const router = useRouter();
+  const [showCreateForm, setShowCreateForm] = useState(false);
 
   // Form data states
   const [createFormData, setCreateFormData] = useState<BlogPostFormData>({
@@ -332,159 +333,68 @@ export default function BlogPage() {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Blog Posts</h1>
-
-      {/* Create Form */}
-      <div className="bg-card p-4 rounded-lg shadow mb-8">
-        <h2 className="text-xl font-semibold mb-4">Create New Blog Post</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="title" className="block text-sm font-medium mb-1">
-              Title
-            </label>
-            <Input
-              id="title"
-              name="title"
-              value={createFormData.title}
-              onChange={handleCreateChange}
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="slug" className="block text-sm font-medium mb-1">
-              Slug
-            </label>
-            <Input
-              id="slug"
-              name="slug"
-              value={createFormData.slug}
-              onChange={handleCreateChange}
-              required
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="teaCategory"
-              className="block text-sm font-medium mb-1"
-            >
-              Tea Category
-            </label>
-            <Select
-              value={createFormData.teaCategorySlug || "none"}
-              onValueChange={(value) =>
-                handleCategoryChange(value === "none" ? "" : value)
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a tea category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">None</SelectItem>
-                {teaCategories.map((category) => (
-                  <SelectItem key={category.slug} value={category.slug}>
-                    {category.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <label htmlFor="product" className="block text-sm font-medium mb-1">
-              Related Product
-            </label>
-            <ProductSelector
-              selectedProductSlug={createFormData.productSlug || ""}
-              onProductSelect={(value: string) =>
-                setCreateFormData((prev) => ({ ...prev, productSlug: value }))
-              }
-            />
-          </div>
-
-          <div>
-            <label htmlFor="body" className="block text-sm font-medium mb-1">
-              Content
-            </label>
-            <Textarea
-              id="body"
-              name="body"
-              value={createFormData.body}
-              onChange={handleCreateChange}
-              required
-              rows={10}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="images" className="block text-sm font-medium mb-1">
-              Images (comma-separated URLs)
-            </label>
-            <Input
-              id="images"
-              name="images"
-              value={createFormData.images}
-              onChange={handleCreateChange}
-            />
-          </div>
-
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Creating..." : "Create Post"}
+    <div className="space-y-8">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Blog Posts</h1>
+        <div className="flex space-x-2">
+          <Button
+            variant="inverted"
+            onClick={() => setShowCreateForm(!showCreateForm)}
+          >
+            {showCreateForm ? "Hide Form" : "Add New Blog Post"}
           </Button>
-        </form>
+        </div>
       </div>
 
-      {/* Edit Modal */}
-      {showEditModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-background p-6 rounded-lg shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-semibold mb-4">Edit Blog Post</h2>
-            <form onSubmit={handleUpdate} className="space-y-4">
+      {/* Create Form */}
+      {showCreateForm && (
+        <div className="bg-card rounded-lg shadow border border-border">
+          <div className="p-6">
+            <h2 className="text-xl font-semibold mb-4">Create New Blog Post</h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label
-                  htmlFor="editTitle"
+                  htmlFor="title"
                   className="block text-sm font-medium mb-1"
                 >
                   Title
                 </label>
                 <Input
-                  id="editTitle"
+                  id="title"
                   name="title"
-                  value={editFormData.title}
-                  onChange={handleEditChange}
+                  value={createFormData.title}
+                  onChange={handleCreateChange}
                   required
                 />
               </div>
 
               <div>
                 <label
-                  htmlFor="editSlug"
+                  htmlFor="slug"
                   className="block text-sm font-medium mb-1"
                 >
                   Slug
                 </label>
                 <Input
-                  id="editSlug"
+                  id="slug"
                   name="slug"
-                  value={editFormData.slug}
-                  onChange={handleEditChange}
+                  value={createFormData.slug}
+                  onChange={handleCreateChange}
                   required
                 />
               </div>
 
               <div>
                 <label
-                  htmlFor="editTeaCategory"
+                  htmlFor="teaCategory"
                   className="block text-sm font-medium mb-1"
                 >
                   Tea Category
                 </label>
                 <Select
-                  value={editFormData.teaCategorySlug || "none"}
+                  value={createFormData.teaCategorySlug || "none"}
                   onValueChange={(value) =>
-                    handleEditCategoryChange(value === "none" ? "" : value)
+                    handleCategoryChange(value === "none" ? "" : value)
                   }
                 >
                   <SelectTrigger>
@@ -503,31 +413,34 @@ export default function BlogPage() {
 
               <div>
                 <label
-                  htmlFor="editProduct"
+                  htmlFor="product"
                   className="block text-sm font-medium mb-1"
                 >
                   Related Product
                 </label>
                 <ProductSelector
-                  selectedProductSlug={editFormData.productSlug || ""}
+                  selectedProductSlug={createFormData.productSlug || ""}
                   onProductSelect={(value: string) =>
-                    setEditFormData((prev) => ({ ...prev, productSlug: value }))
+                    setCreateFormData((prev) => ({
+                      ...prev,
+                      productSlug: value,
+                    }))
                   }
                 />
               </div>
 
               <div>
                 <label
-                  htmlFor="editBody"
+                  htmlFor="body"
                   className="block text-sm font-medium mb-1"
                 >
                   Content
                 </label>
                 <Textarea
-                  id="editBody"
+                  id="body"
                   name="body"
-                  value={editFormData.body}
-                  onChange={handleEditChange}
+                  value={createFormData.body}
+                  onChange={handleCreateChange}
                   required
                   rows={10}
                 />
@@ -535,100 +448,217 @@ export default function BlogPage() {
 
               <div>
                 <label
-                  htmlFor="editImages"
+                  htmlFor="images"
                   className="block text-sm font-medium mb-1"
                 >
                   Images (comma-separated URLs)
                 </label>
                 <Input
-                  id="editImages"
+                  id="images"
                   name="images"
-                  value={editFormData.images}
-                  onChange={handleEditChange}
+                  value={createFormData.images}
+                  onChange={handleCreateChange}
                 />
               </div>
 
-              <div className="flex justify-end gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setShowEditModal(false);
-                    setEditingPostId(null);
-                    setEditFormData({
-                      title: "",
-                      slug: "",
-                      body: "",
-                      teaCategorySlug: "",
-                      productSlug: "",
-                      images: "",
-                      publishedAt: "",
-                    });
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Updating..." : "Update Post"}
-                </Button>
-              </div>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Creating..." : "Create Post"}
+              </Button>
             </form>
           </div>
         </div>
       )}
 
-      {/* Blog Posts List */}
-      <div className="bg-card p-4 rounded-lg shadow">
-        <h2 className="text-xl font-semibold mb-4">Blog Posts</h2>
-        {isLoading ? (
-          <p>Loading blog posts...</p>
-        ) : blogPosts.length === 0 ? (
-          <p>No blog posts found.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full">
-              <thead>
-                <tr>
-                  <th className="px-4 py-2 text-left">Title</th>
-                  <th className="px-4 py-2 text-left">Tea Category</th>
-                  <th className="px-4 py-2 text-left">Related Product</th>
-                  <th className="px-4 py-2 text-left">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {blogPosts.map((post) => (
-                  <tr key={post.id}>
-                    <td className="px-4 py-2">{post.title}</td>
-                    <td className="px-4 py-2">
-                      {teaCategories.find(
-                        (c) => c.slug === post.teaCategorySlug
-                      )?.name || "None"}
-                    </td>
-                    <td className="px-4 py-2">{post.productSlug || "None"}</td>
-                    <td className="px-4 py-2">
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEdit(post)}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => handleDeleteClick(post)}
-                        >
-                          Delete
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {/* Edit Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-background rounded-lg shadow-lg border border-border max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Edit Blog Post</h2>
+              <form onSubmit={handleUpdate} className="space-y-4">
+                <div>
+                  <label
+                    htmlFor="editTitle"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    Title
+                  </label>
+                  <Input
+                    id="editTitle"
+                    name="title"
+                    value={editFormData.title}
+                    onChange={handleEditChange}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="editSlug"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    Slug
+                  </label>
+                  <Input
+                    id="editSlug"
+                    name="slug"
+                    value={editFormData.slug}
+                    onChange={handleEditChange}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="editTeaCategory"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    Tea Category
+                  </label>
+                  <Select
+                    value={editFormData.teaCategorySlug || "none"}
+                    onValueChange={(value) =>
+                      handleEditCategoryChange(value === "none" ? "" : value)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a tea category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      {teaCategories.map((category) => (
+                        <SelectItem key={category.slug} value={category.slug}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="editProduct"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    Related Product
+                  </label>
+                  <ProductSelector
+                    selectedProductSlug={editFormData.productSlug || ""}
+                    onProductSelect={(value: string) =>
+                      setEditFormData((prev) => ({
+                        ...prev,
+                        productSlug: value,
+                      }))
+                    }
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="editBody"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    Content
+                  </label>
+                  <Textarea
+                    id="editBody"
+                    name="body"
+                    value={editFormData.body}
+                    onChange={handleEditChange}
+                    required
+                    rows={10}
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="editImages"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    Images (comma-separated URLs)
+                  </label>
+                  <Input
+                    id="editImages"
+                    name="images"
+                    value={editFormData.images}
+                    onChange={handleEditChange}
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={closeEditModal}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? "Updating..." : "Update Post"}
+                  </Button>
+                </div>
+              </form>
+            </div>
           </div>
-        )}
+        </div>
+      )}
+
+      {/* Blog Posts List */}
+      <div className="bg-card rounded-lg shadow border border-border">
+        <div className="p-6">
+          <h2 className="text-xl font-semibold mb-4">Blog Posts</h2>
+          {isLoading ? (
+            <p>Loading blog posts...</p>
+          ) : blogPosts.length === 0 ? (
+            <p>No blog posts found.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+                <thead>
+                  <tr>
+                    <th className="px-4 py-2 text-left">Title</th>
+                    <th className="px-4 py-2 text-left">Tea Category</th>
+                    <th className="px-4 py-2 text-left">Related Product</th>
+                    <th className="px-4 py-2 text-left">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {blogPosts.map((post) => (
+                    <tr key={post.id}>
+                      <td className="px-4 py-2">{post.title}</td>
+                      <td className="px-4 py-2">
+                        {teaCategories.find(
+                          (c) => c.slug === post.teaCategorySlug
+                        )?.name || "None"}
+                      </td>
+                      <td className="px-4 py-2">
+                        {post.productSlug || "None"}
+                      </td>
+                      <td className="px-4 py-2">
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEdit(post)}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDeleteClick(post)}
+                          >
+                            Delete
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Delete Confirmation Dialog */}
