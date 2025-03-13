@@ -7,33 +7,36 @@ import { orders, orderItems, addresses, products, productVariations } from "@/se
 
 export interface OrderWithDetails {
   id: number;
-  subtotal: number | null;
-  totalDiscount: number | null;
-  grandTotal: number | null;
-  paymentMethod: string | null;
-  paymentStatus: string | null;
   status: string;
-  currency: string | null;
-  shippingAmount: number | null;
+  subtotalAmount: number;
+  discountAmount: number;
+  shippingAmount: number;
+  totalAmount: number;
+  currency: string;
+  paymentMethod: string | null;
+  paymentStatus: string;
   shippingMethod: string | null;
   notes: string | null;
-  createdAt: string | null;
-  address: {
-    firstName: string | null;
-    lastName: string | null;
-    email: string | null;
-    phone: string | null;
-    streetAddress: string | null;
-    city: string | null;
+  createdAt: string;
+  completedAt: string | null;
+  addresses: Array<{
+    addressType: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    streetAddress: string;
+    city: string;
     state: string | null;
-    zipCode: string | null;
-    country: string | null;
-  };
+    zipCode: string;
+    country: string;
+  }>;
   items: Array<{
     id: number;
     quantity: number;
-    unitAmount: number | null;
-    discount: number | null;
+    unitAmount: number;
+    discountPercentage: number | null;
+    finalAmount: number;
     attributes: Record<string, any>;
     product: {
       name: string;
@@ -75,31 +78,55 @@ async function fetchOrders(): Promise<OrderWithDetails[]> {
       variation: typeof productVariations.$inferSelect | null;
     }) => {
       if (!orderMap.has(row.order.id)) {
+        // Initialize new order
         orderMap.set(row.order.id, {
-          ...row.order,
-          address: {
-            firstName: row.address?.firstName ?? null,
-            lastName: row.address?.lastName ?? null,
-            email: row.address?.email ?? null,
-            phone: row.address?.phone ?? null,
-            streetAddress: row.address?.streetAddress ?? null,
-            city: row.address?.city ?? null,
-            state: row.address?.state ?? null,
-            zipCode: row.address?.zipCode ?? null,
-            country: row.address?.country ?? null,
-          },
+          id: row.order.id,
+          status: row.order.status,
+          subtotalAmount: row.order.subtotalAmount,
+          discountAmount: row.order.discountAmount,
+          shippingAmount: row.order.shippingAmount,
+          totalAmount: row.order.totalAmount,
+          currency: row.order.currency,
+          paymentMethod: row.order.paymentMethod,
+          paymentStatus: row.order.paymentStatus,
+          shippingMethod: row.order.shippingMethod,
+          notes: row.order.notes,
+          createdAt: row.order.createdAt,
+          completedAt: row.order.completedAt,
+          addresses: [],
           items: [],
         });
       }
 
       const order = orderMap.get(row.order.id)!;
 
+      // Add address if not already added
+      if (row.address && !order.addresses.find(addr => 
+        addr.addressType === row.address!.addressType && 
+        addr.email === row.address!.email
+      )) {
+        order.addresses.push({
+          addressType: row.address.addressType,
+          firstName: row.address.firstName,
+          lastName: row.address.lastName,
+          email: row.address.email,
+          phone: row.address.phone,
+          streetAddress: row.address.streetAddress,
+          city: row.address.city,
+          state: row.address.state,
+          zipCode: row.address.zipCode,
+          country: row.address.country,
+        });
+      }
+
+      // Add item if not already added
       if (row.item && row.product && !order.items.find(item => item.id === row.item!.id)) {
         order.items.push({
           id: row.item.id,
           quantity: row.item.quantity,
           unitAmount: row.item.unitAmount,
-          discount: row.item.discount,
+          discountPercentage: row.item.discountPercentage,
+          finalAmount: row.item.finalAmount,
           attributes: row.item.attributes ? JSON.parse(row.item.attributes) : {},
           product: {
             name: row.product.name,

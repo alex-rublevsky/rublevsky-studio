@@ -7,7 +7,7 @@ import { eq } from "drizzle-orm";
 import { validateStock, type StockValidationResult } from "@/lib/utils/validateStock";
 import getAllProducts from "../products/getAllProducts";
 
-interface CustomerInfo {
+interface Address {
   firstName: string;
   lastName: string;
   email: string;
@@ -17,6 +17,13 @@ interface CustomerInfo {
   state: string;
   country: string;
   zipCode: string;
+}
+
+interface CustomerInfo {
+  shippingAddress: Address;
+  billingAddress?: Address;
+  notes?: string;
+  shippingMethod?: string;
 }
 
 interface CreateOrderResult {
@@ -34,63 +41,93 @@ export async function createOrder(customerInfo: CustomerInfo, cartItems: CartIte
     for (const item of cartItems) {
       const result = validateStock(
         products,
-        cartItems,
+        [item], // Only pass the current item instead of all cart items
         item.productId,
         item.quantity,
         item.variationId
       );
 
       if (!result.isAvailable && !result.unlimitedStock) {
-        throw new Error(`Insufficient stock for product: ${item.productName}`);
+        const product = products.find(p => p.id === item.productId);
+        throw new Error(`Insufficient stock for product: ${item.productName}. Available: ${result.availableStock}, Requested: ${item.quantity}`);
       }
     }
+
+    // Calculate order amounts
+    const subtotalAmount = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const discountAmount = cartItems.reduce((sum, item) => {
+      if (item.discount) {
+        return sum + (item.price * item.quantity * (item.discount / 100));
+      }
+      return sum;
+    }, 0);
+    const shippingAmount = 0; // Will be determined later
+    const totalAmount = subtotalAmount - discountAmount + shippingAmount;
 
     // Create order
     const order = await db.insert(orders).values({
       status: "pending",
-      subtotal: cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
-      total_discount: cartItems.reduce((sum, item) => {
-        if (item.discount) {
-          return sum + (item.price * item.quantity * (item.discount / 100));
-        }
-        return sum;
-      }, 0),
-      grand_total: cartItems.reduce((sum, item) => {
-        const itemPrice = item.discount 
-          ? item.price * (1 - item.discount / 100)
-          : item.price;
-        return sum + itemPrice * item.quantity;
-      }, 0),
+      subtotalAmount: subtotalAmount,
+      discountAmount: discountAmount,
+      shippingAmount: shippingAmount,
+      totalAmount: totalAmount,
       currency: "CAD",
-      created_at: new Date().toISOString(),
+      paymentStatus: "pending",
+      paymentMethod: null,
+      shippingMethod: customerInfo.shippingMethod,
+      notes: customerInfo.notes,
+      createdAt: new Date().toISOString(),
+      completedAt: null,
     }).returning();
 
-    // Create address record
+    // Create shipping address
     await db.insert(addresses).values({
-      order_id: order[0].id,
-      first_name: customerInfo.firstName,
-      last_name: customerInfo.lastName,
-      email: customerInfo.email,
-      phone: customerInfo.phone,
-      street_address: customerInfo.streetAddress,
-      city: customerInfo.city,
-      state: customerInfo.state,
-      country: customerInfo.country,
-      zip_code: customerInfo.zipCode,
-      created_at: new Date().toISOString(),
+      orderId: order[0].id,
+      addressType: customerInfo.billingAddress ? 'shipping' : 'both',
+      firstName: customerInfo.shippingAddress.firstName,
+      lastName: customerInfo.shippingAddress.lastName,
+      email: customerInfo.shippingAddress.email,
+      phone: customerInfo.shippingAddress.phone,
+      streetAddress: customerInfo.shippingAddress.streetAddress,
+      city: customerInfo.shippingAddress.city,
+      state: customerInfo.shippingAddress.state,
+      zipCode: customerInfo.shippingAddress.zipCode,
+      country: customerInfo.shippingAddress.country,
+      createdAt: new Date().toISOString(),
     });
+
+    // Create billing address if different from shipping
+    if (customerInfo.billingAddress) {
+      await db.insert(addresses).values({
+        orderId: order[0].id,
+        addressType: 'billing',
+        firstName: customerInfo.billingAddress.firstName,
+        lastName: customerInfo.billingAddress.lastName,
+        email: customerInfo.billingAddress.email,
+        phone: customerInfo.billingAddress.phone,
+        streetAddress: customerInfo.billingAddress.streetAddress,
+        city: customerInfo.billingAddress.city,
+        state: customerInfo.billingAddress.state,
+        zipCode: customerInfo.billingAddress.zipCode,
+        country: customerInfo.billingAddress.country,
+        createdAt: new Date().toISOString(),
+      });
+    }
 
     // Create order items
     await db.insert(orderItems).values(
       cartItems.map(item => ({
-        order_id: order[0].id,
-        product_id: item.productId,
-        product_variation_id: item.variationId,
+        orderId: order[0].id,
+        productId: item.productId,
+        productVariationId: item.variationId,
         quantity: item.quantity,
-        unit_amount: item.price,
-        discount: item.discount,
+        unitAmount: item.price,
+        discountPercentage: item.discount,
+        finalAmount: item.discount 
+          ? item.price * (1 - item.discount / 100) * item.quantity
+          : item.price * item.quantity,
         attributes: JSON.stringify(item.attributes || {}),
-        created_at: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
       }))
     );
 

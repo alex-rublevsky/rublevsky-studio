@@ -40,8 +40,8 @@ export function validateStock(
     const weightAttr = variation.attributes.find(attr => attr.attributeId === "WEIGHT_G");
     if (!weightAttr) return { isAvailable: false, availableStock: 0, unlimitedStock: false };
 
-    const totalWeight = parseInt(product.weight);
-    const variationWeight = parseInt(weightAttr.value);
+    const totalWeight = parseInt(product.weight);      // Total weight available
+    const variationWeight = parseInt(weightAttr.value); // Weight per package
 
     // Calculate total weight used by all variations in cart
     const weightUsedInCart = cartItems
@@ -59,12 +59,13 @@ export function validateStock(
         return total;
       }, 0);
 
-    // Add the weight that would be used by the requested quantity
+    // Calculate how much weight this order would use
     const requestedWeight = variationWeight * requestedQuantity;
     const totalRequestedWeight = weightUsedInCart + requestedWeight;
 
-    // Check if the total requested weight exceeds the available weight
+    // Check if we have enough weight available
     if (totalRequestedWeight > totalWeight) {
+      // If not enough weight, calculate how many packages we can still make
       const remainingWeight = Math.max(0, totalWeight - weightUsedInCart);
       const availableStock = Math.floor(remainingWeight / variationWeight);
       return {
@@ -74,7 +75,7 @@ export function validateStock(
       };
     }
 
-    // Calculate how many more packages can be made after this request
+    // If we have enough weight, calculate how many more packages we can make
     const remainingWeight = totalWeight - totalRequestedWeight;
     const additionalAvailableStock = Math.floor(remainingWeight / variationWeight);
 

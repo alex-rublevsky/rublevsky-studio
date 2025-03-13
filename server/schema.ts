@@ -59,44 +59,47 @@ export const brands = sqliteTable('brands', {
 
 export const orders = sqliteTable('orders', {
   id: integer('id').primaryKey({ autoIncrement: true }),
-  subtotal: real('subtotal'), // Original total before discounts
-  totalDiscount: real('total_discount'), // Total amount saved from discounts
-  grandTotal: real('grand_total'), // Using real for decimal in SQLite
-  paymentMethod: text('payment_method'),
-  paymentStatus: text('payment_status'),
-  status: text('status').notNull().default('new'),
-  currency: text('currency'),
-  shippingAmount: real('shipping_amount'), // Using real for decimal in SQLite
-  shippingMethod: text('shipping_method'),
+  status: text('status').notNull().default('pending'),
+  subtotalAmount: real('subtotalAmount').notNull(), // Base price before discounts
+  discountAmount: real('discountAmount').notNull().default(0), // Total discounts applied
+  shippingAmount: real('shippingAmount').notNull().default(0),
+  totalAmount: real('totalAmount').notNull(), // Final total (subtotal - discount + shipping)
+  currency: text('currency').notNull().default('CAD'),
+  paymentMethod: text('paymentMethod'),
+  paymentStatus: text('paymentStatus').notNull().default('pending'),
+  shippingMethod: text('shippingMethod'),
   notes: text('notes'),
-  createdAt: text('created_at'),
+  createdAt: text('createdAt').notNull(),
+  completedAt: text('completedAt'),
 });
 
 export const orderItems = sqliteTable('order_items', {
   id: integer('id').primaryKey({ autoIncrement: true }),
-  orderId: integer('order_id').references(() => orders.id, { onDelete: 'cascade' }),
-  productId: integer('product_id').references(() => products.id, { onDelete: 'cascade' }),
-  productVariationId: integer('product_variation_id').references(() => productVariations.id, { onDelete: 'set null' }),
-  quantity: integer('quantity').notNull().default(1),
-  unitAmount: real('unit_amount'), 
+  orderId: integer('orderId').references(() => orders.id, { onDelete: 'cascade' }).notNull(),
+  productId: integer('productId').references(() => products.id, { onDelete: 'cascade' }).notNull(),
+  productVariationId: integer('productVariationId').references(() => productVariations.id, { onDelete: 'set null' }),
+  quantity: integer('quantity').notNull(),
+  unitAmount: real('unitAmount').notNull(),
+  discountPercentage: integer('discountPercentage'),
+  finalAmount: real('finalAmount').notNull(), // Unit amount after discount × quantity
   attributes: text('attributes'), // JSON stored as text
-  discount: integer('discount'), // Percentage discount at time of order
-  createdAt: text('created_at'),
+  createdAt: text('createdAt').notNull(),
 });
 
 export const addresses = sqliteTable('addresses', {
   id: integer('id').primaryKey({ autoIncrement: true }),
-  orderId: integer('order_id').references(() => orders.id, { onDelete: 'cascade' }),
-  firstName: text('first_name'),
-  lastName: text('last_name'),
-  email: text('email'),
-  phone: text('phone'),
-  streetAddress: text('street_address'),
-  city: text('city'),
+  orderId: integer('orderId').references(() => orders.id, { onDelete: 'cascade' }).notNull(),
+  addressType: text('addressType').notNull(), // Can be 'shipping', 'billing', or 'both'
+  firstName: text('firstName').notNull(),
+  lastName: text('lastName').notNull(),
+  email: text('email').notNull(),
+  phone: text('phone').notNull(),
+  streetAddress: text('streetAddress').notNull(),
+  city: text('city').notNull(),
   state: text('state'),
-  zipCode: text('zip_code'),
-  country: text('country'),
-  createdAt: text('created_at'),
+  zipCode: text('zipCode').notNull(),
+  country: text('country').notNull(),
+  createdAt: text('createdAt').notNull(),
 });
 
 // Blog Related Tables

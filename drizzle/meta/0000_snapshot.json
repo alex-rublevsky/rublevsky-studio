@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "586420a8-0fcf-4256-b1c4-23d809aaa15e",
+  "id": "9771de86-59c1-4711-976a-c1c8471d55bd",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "addresses": {
@@ -14,53 +14,60 @@
           "notNull": true,
           "autoincrement": true
         },
-        "order_id": {
-          "name": "order_id",
+        "orderId": {
+          "name": "orderId",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
-        "first_name": {
-          "name": "first_name",
+        "addressType": {
+          "name": "addressType",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
-        "last_name": {
-          "name": "last_name",
+        "firstName": {
+          "name": "firstName",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "lastName": {
+          "name": "lastName",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
           "autoincrement": false
         },
         "email": {
           "name": "email",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "phone": {
           "name": "phone",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
-        "street_address": {
-          "name": "street_address",
+        "streetAddress": {
+          "name": "streetAddress",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "city": {
           "name": "city",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "state": {
@@ -70,36 +77,36 @@
           "notNull": false,
           "autoincrement": false
         },
-        "zip_code": {
-          "name": "zip_code",
+        "zipCode": {
+          "name": "zipCode",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "country": {
           "name": "country",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
-        "created_at": {
-          "name": "created_at",
+        "createdAt": {
+          "name": "createdAt",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         }
       },
       "indexes": {},
       "foreignKeys": {
-        "addresses_order_id_orders_id_fk": {
-          "name": "addresses_order_id_orders_id_fk",
+        "addresses_orderId_orders_id_fk": {
+          "name": "addresses_orderId_orders_id_fk",
           "tableFrom": "addresses",
           "tableTo": "orders",
           "columnsFrom": [
-            "order_id"
+            "orderId"
           ],
           "columnsTo": [
             "id"
@@ -397,22 +404,22 @@
           "notNull": true,
           "autoincrement": true
         },
-        "order_id": {
-          "name": "order_id",
+        "orderId": {
+          "name": "orderId",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
-        "product_id": {
-          "name": "product_id",
+        "productId": {
+          "name": "productId",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
-        "product_variation_id": {
-          "name": "product_variation_id",
+        "productVariationId": {
+          "name": "productVariationId",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
@@ -423,14 +430,27 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": 1
+          "autoincrement": false
         },
-        "unit_amount": {
-          "name": "unit_amount",
+        "unitAmount": {
+          "name": "unitAmount",
           "type": "real",
           "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "discountPercentage": {
+          "name": "discountPercentage",
+          "type": "integer",
+          "primaryKey": false,
           "notNull": false,
+          "autoincrement": false
+        },
+        "finalAmount": {
+          "name": "finalAmount",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
           "autoincrement": false
         },
         "attributes": {
@@ -440,29 +460,22 @@
           "notNull": false,
           "autoincrement": false
         },
-        "discount": {
-          "name": "discount",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
+        "createdAt": {
+          "name": "createdAt",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         }
       },
       "indexes": {},
       "foreignKeys": {
-        "order_items_order_id_orders_id_fk": {
-          "name": "order_items_order_id_orders_id_fk",
+        "order_items_orderId_orders_id_fk": {
+          "name": "order_items_orderId_orders_id_fk",
           "tableFrom": "order_items",
           "tableTo": "orders",
           "columnsFrom": [
-            "order_id"
+            "orderId"
           ],
           "columnsTo": [
             "id"
@@ -470,12 +483,12 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "order_items_product_id_products_id_fk": {
-          "name": "order_items_product_id_products_id_fk",
+        "order_items_productId_products_id_fk": {
+          "name": "order_items_productId_products_id_fk",
           "tableFrom": "order_items",
           "tableTo": "products",
           "columnsFrom": [
-            "product_id"
+            "productId"
           ],
           "columnsTo": [
             "id"
@@ -483,12 +496,12 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "order_items_product_variation_id_product_variations_id_fk": {
-          "name": "order_items_product_variation_id_product_variations_id_fk",
+        "order_items_productVariationId_product_variations_id_fk": {
+          "name": "order_items_productVariationId_product_variations_id_fk",
           "tableFrom": "order_items",
           "tableTo": "product_variations",
           "columnsFrom": [
-            "product_variation_id"
+            "productVariationId"
           ],
           "columnsTo": [
             "id"
@@ -511,65 +524,69 @@
           "notNull": true,
           "autoincrement": true
         },
-        "subtotal": {
-          "name": "subtotal",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "total_discount": {
-          "name": "total_discount",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "grand_total": {
-          "name": "grand_total",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "payment_method": {
-          "name": "payment_method",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "payment_status": {
-          "name": "payment_status",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
         "status": {
           "name": "status",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "'new'"
+          "default": "'pending'"
+        },
+        "subtotalAmount": {
+          "name": "subtotalAmount",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "discountAmount": {
+          "name": "discountAmount",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "shippingAmount": {
+          "name": "shippingAmount",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "totalAmount": {
+          "name": "totalAmount",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
         },
         "currency": {
           "name": "currency",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'CAD'"
         },
-        "shipping_amount": {
-          "name": "shipping_amount",
-          "type": "real",
+        "paymentMethod": {
+          "name": "paymentMethod",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "shipping_method": {
-          "name": "shipping_method",
+        "paymentStatus": {
+          "name": "paymentStatus",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'pending'"
+        },
+        "shippingMethod": {
+          "name": "shippingMethod",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -582,8 +599,15 @@
           "notNull": false,
           "autoincrement": false
         },
-        "created_at": {
-          "name": "created_at",
+        "createdAt": {
+          "name": "createdAt",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "completedAt": {
+          "name": "completedAt",
           "type": "text",
           "primaryKey": false,
           "notNull": false,

@@ -2,19 +2,11 @@
 
 import { useState } from "react";
 import type { OrderWithDetails } from "@/lib/actions/orders/getAllOrders";
-import toggleOrderStatus from "@/lib/actions/orders/toggleOrderStatus";
-import { OrangeToggle } from "@/components/ui/toggle";
-import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
-
-// Format price as Canadian dollars
-const formatPrice = (price: number | null): string => {
-  if (price === null) return "CAD $0.00";
-  return new Intl.NumberFormat("en-CA", {
-    style: "currency",
-    currency: "CAD",
-  }).format(price);
-};
+import Image from "next/image";
+import { OrangeToggle } from "@/components/ui/toggle";
+import toggleOrderStatus from "@/lib/actions/orders/toggleOrderStatus";
+import { toast } from "sonner";
 
 interface OrderListProps {
   initialOrders: OrderWithDetails[];
@@ -26,18 +18,16 @@ export function OrderList({ initialOrders }: OrderListProps) {
   const handleToggleStatus = async (orderId: number, currentStatus: string) => {
     try {
       const result = await toggleOrderStatus(orderId);
-
       if (result.success) {
         setOrders(
-          orders.map((order) => {
-            if (order.id === orderId) {
-              return {
-                ...order,
-                status: order.status === "pending" ? "processed" : "pending",
-              };
-            }
-            return order;
-          })
+          orders.map((order) =>
+            order.id === orderId
+              ? {
+                  ...order,
+                  status: currentStatus === "pending" ? "processed" : "pending",
+                }
+              : order
+          )
         );
         toast.success(result.message);
       } else {
@@ -49,90 +39,232 @@ export function OrderList({ initialOrders }: OrderListProps) {
   };
 
   return (
-    <div className="rounded-md border">
-      <div className="relative w-full overflow-auto">
-        <table className="w-full caption-bottom text-sm">
-          <thead className="[&_tr]:border-b">
-            <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-              <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
-                Order ID
-              </th>
-              <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
-                Customer
-              </th>
-              <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
-                Items
-              </th>
-              <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
-                Total
-              </th>
-              <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
-                Status
-              </th>
-              <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
-                Date
-              </th>
-              <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
-                Processed
-              </th>
-            </tr>
-          </thead>
-          <tbody className="[&_tr:last-child]:border-0">
-            {orders.map((order) => (
-              <tr
-                key={order.id}
-                className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
-              >
-                <td className="p-4 align-middle font-medium">#{order.id}</td>
-                <td className="p-4 align-middle">
-                  <div>
-                    {order.address.firstName} {order.address.lastName}
-                    <div className="text-sm text-muted-foreground">
-                      {order.address.email}
-                    </div>
-                  </div>
-                </td>
-                <td className="p-4 align-middle">
-                  <ul className="space-y-1">
-                    {order.items.map((item) => (
-                      <li key={item.id} className="flex items-center gap-2">
-                        <span>{item.quantity}x</span>
-                        <span className="font-medium">{item.product.name}</span>
-                        {item.variation && (
-                          <Badge variant="outline" className="text-xs">
-                            {item.variation.sku}
-                          </Badge>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </td>
-                <td className="p-4 align-middle">
-                  {formatPrice(order.grandTotal)}
-                </td>
-                <td className="p-4 align-middle">
-                  <Badge
-                    variant={
-                      order.status === "processed" ? "default" : "secondary"
-                    }
-                  >
-                    {order.status}
-                  </Badge>
-                </td>
-                <td className="p-4 align-middle">
-                  {new Date(order.createdAt || "").toLocaleDateString()}
-                </td>
-                <td className="p-4 align-middle">
+    <div className="space-y-6">
+      {orders.map((order) => {
+        const shippingAddress = order.addresses?.find(
+          (addr) =>
+            addr.addressType === "shipping" || addr.addressType === "both"
+        );
+        const billingAddress =
+          order.addresses?.find((addr) => addr.addressType === "billing") ||
+          shippingAddress;
+
+        return (
+          <div key={order.id} className="border rounded-lg p-6 space-y-6">
+            {/* Order Header */}
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="text-lg font-semibold">Order #{order.id}</h3>
+                <p className="text-sm text-gray-500">
+                  {new Date(order.createdAt).toLocaleString()}
+                </p>
+              </div>
+              <div className="flex items-center gap-4">
+                <Badge
+                  variant={
+                    order.status === "processed"
+                      ? "default"
+                      : order.status === "pending"
+                        ? "secondary"
+                        : "outline"
+                  }
+                >
+                  {order.status}
+                </Badge>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-500">
+                    Mark as processed
+                  </span>
                   <OrangeToggle
                     checked={order.status === "processed"}
                     onChange={() => handleToggleStatus(order.id, order.status)}
                   />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Customer Info */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* Order Details */}
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-medium mb-2">Order Details</h4>
+                  <div className="text-sm space-y-1">
+                    <p>
+                      <span className="text-gray-500">Payment Status:</span>{" "}
+                      <span className="capitalize">{order.paymentStatus}</span>
+                    </p>
+                    <p>
+                      <span className="text-gray-500">Payment Method:</span>{" "}
+                      <span className="capitalize">
+                        {order.paymentMethod || "Not specified"}
+                      </span>
+                    </p>
+                    <p>
+                      <span className="text-gray-500">Shipping Method:</span>{" "}
+                      <span className="capitalize">
+                        {order.shippingMethod || "Not specified"}
+                      </span>
+                    </p>
+                    {order.notes && (
+                      <p>
+                        <span className="text-gray-500">Notes:</span>{" "}
+                        {order.notes}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Price Details */}
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-medium mb-2">Price Details</h4>
+                  <div className="text-sm space-y-1">
+                    <p>
+                      <span className="text-gray-500">Subtotal:</span> $
+                      {(order.subtotalAmount || 0).toFixed(2)}
+                    </p>
+                    {(order.discountAmount || 0) > 0 && (
+                      <p>
+                        <span className="text-gray-500">Discount:</span>{" "}
+                        <span className="text-red-500">
+                          -${(order.discountAmount || 0).toFixed(2)}
+                        </span>
+                      </p>
+                    )}
+                    <p>
+                      <span className="text-gray-500">Shipping:</span> $
+                      {(order.shippingAmount || 0).toFixed(2)}
+                    </p>
+                    <p className="font-medium">
+                      <span className="text-gray-500">Total:</span>{" "}
+                      {order.currency || "CAD"} $
+                      {(order.totalAmount || 0).toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Shipping Address */}
+              {shippingAddress && (
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-medium mb-2">Shipping Address</h4>
+                    <div className="text-sm space-y-1">
+                      <p className="font-medium">
+                        {shippingAddress.firstName} {shippingAddress.lastName}
+                      </p>
+                      <p>{shippingAddress.email}</p>
+                      <p>{shippingAddress.phone}</p>
+                      <p>{shippingAddress.streetAddress}</p>
+                      <p>
+                        {shippingAddress.city}
+                        {shippingAddress.state && `, ${shippingAddress.state}`}
+                      </p>
+                      <p>{shippingAddress.zipCode}</p>
+                      <p>{shippingAddress.country}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Billing Address - Only show if different from shipping */}
+              {order.addresses?.length > 1 && billingAddress && (
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-medium mb-2">Billing Address</h4>
+                    <div className="text-sm space-y-1">
+                      <p className="font-medium">
+                        {billingAddress.firstName} {billingAddress.lastName}
+                      </p>
+                      <p>{billingAddress.email}</p>
+                      <p>{billingAddress.phone}</p>
+                      <p>{billingAddress.streetAddress}</p>
+                      <p>
+                        {billingAddress.city}
+                        {billingAddress.state && `, ${billingAddress.state}`}
+                      </p>
+                      <p>{billingAddress.zipCode}</p>
+                      <p>{billingAddress.country}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Order Items */}
+            <div>
+              <h4 className="font-medium mb-3">
+                Items ({order.items?.length || 0})
+              </h4>
+              <div className="space-y-3">
+                {order.items?.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-start gap-4 p-4 bg-background border rounded-lg hover:border-primary/50 transition-colors"
+                  >
+                    <div className="relative w-20 h-20 flex-shrink-0 bg-gray-100 rounded-md overflow-hidden">
+                      {item.product.images ? (
+                        <Image
+                          src={`/${item.product.images.split(",").map((img) => img.trim())[0]}`}
+                          alt={item.product.name}
+                          fill
+                          className="object-cover"
+                          sizes="5rem"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                          No image
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-grow min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                        <div>
+                          <div className="font-medium truncate">
+                            {item.product.name}
+                          </div>
+                          {item.variation && (
+                            <div className="text-sm text-gray-500">
+                              SKU: {item.variation.sku}
+                            </div>
+                          )}
+                          {Object.keys(item.attributes || {}).length > 0 && (
+                            <div className="text-sm text-gray-500">
+                              {Object.entries(item.attributes)
+                                .map(([key, value]) => `${key}: ${value}`)
+                                .join(", ")}
+                            </div>
+                          )}
+                          <div className="text-sm text-gray-500 mt-1">
+                            Quantity: {item.quantity}
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end gap-1">
+                          <div className="font-medium">
+                            ${(item.finalAmount || 0).toFixed(2)}
+                          </div>
+                          {item.discountPercentage && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm line-through text-gray-500">
+                                ${(item.unitAmount * item.quantity).toFixed(2)}
+                              </span>
+                              <span className="text-xs px-2 py-0.5 bg-red-100 text-red-700 rounded-full">
+                                {item.discountPercentage}% OFF
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

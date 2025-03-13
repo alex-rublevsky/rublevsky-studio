@@ -1,17 +1,18 @@
 CREATE TABLE `addresses` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`order_id` integer,
-	`first_name` text,
-	`last_name` text,
-	`email` text,
-	`phone` text,
-	`street_address` text,
-	`city` text,
+	`orderId` integer NOT NULL,
+	`addressType` text NOT NULL,
+	`firstName` text NOT NULL,
+	`lastName` text NOT NULL,
+	`email` text NOT NULL,
+	`phone` text NOT NULL,
+	`streetAddress` text NOT NULL,
+	`city` text NOT NULL,
 	`state` text,
-	`zip_code` text,
-	`country` text,
-	`created_at` text,
-	FOREIGN KEY (`order_id`) REFERENCES `orders`(`id`) ON UPDATE no action ON DELETE cascade
+	`zipCode` text NOT NULL,
+	`country` text NOT NULL,
+	`createdAt` text NOT NULL,
+	FOREIGN KEY (`orderId`) REFERENCES `orders`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `blog_posts` (
@@ -59,32 +60,34 @@ CREATE TABLE `inquiries` (
 --> statement-breakpoint
 CREATE TABLE `order_items` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`order_id` integer,
-	`product_id` integer,
-	`product_variation_id` integer,
-	`quantity` integer DEFAULT 1 NOT NULL,
-	`unit_amount` real,
+	`orderId` integer NOT NULL,
+	`productId` integer NOT NULL,
+	`productVariationId` integer,
+	`quantity` integer NOT NULL,
+	`unitAmount` real NOT NULL,
+	`discountPercentage` integer,
+	`finalAmount` real NOT NULL,
 	`attributes` text,
-	`discount` integer,
-	`created_at` text,
-	FOREIGN KEY (`order_id`) REFERENCES `orders`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`product_variation_id`) REFERENCES `product_variations`(`id`) ON UPDATE no action ON DELETE set null
+	`createdAt` text NOT NULL,
+	FOREIGN KEY (`orderId`) REFERENCES `orders`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`productId`) REFERENCES `products`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`productVariationId`) REFERENCES `product_variations`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
 CREATE TABLE `orders` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`subtotal` real,
-	`total_discount` real,
-	`grand_total` real,
-	`payment_method` text,
-	`payment_status` text,
-	`status` text DEFAULT 'new' NOT NULL,
-	`currency` text,
-	`shipping_amount` real,
-	`shipping_method` text,
+	`status` text DEFAULT 'pending' NOT NULL,
+	`subtotalAmount` real NOT NULL,
+	`discountAmount` real DEFAULT 0 NOT NULL,
+	`shippingAmount` real DEFAULT 0 NOT NULL,
+	`totalAmount` real NOT NULL,
+	`currency` text DEFAULT 'CAD' NOT NULL,
+	`paymentMethod` text,
+	`paymentStatus` text DEFAULT 'pending' NOT NULL,
+	`shippingMethod` text,
 	`notes` text,
-	`created_at` text
+	`createdAt` text NOT NULL,
+	`completedAt` text
 );
 --> statement-breakpoint
 CREATE TABLE `product_variations` (

@@ -13,8 +13,10 @@ import { toast } from "sonner";
 import { createOrder } from "@/lib/actions/cart/createOrder";
 import Image from "next/image";
 import { getAttributeDisplayName } from "@/lib/utils/productAttributes";
+import { AddressFields } from "@/components/ui/checkout/AddressFields";
+import { cn } from "@/lib/utils";
 
-interface CustomerInfo {
+interface Address {
   firstName: string;
   lastName: string;
   email: string;
@@ -26,21 +28,33 @@ interface CustomerInfo {
   zipCode: string;
 }
 
+interface CustomerInfo {
+  shippingAddress: Address;
+  billingAddress?: Address;
+  notes?: string;
+  shippingMethod?: string;
+}
+
 export default function CheckoutPage() {
   const { cart, clearCart } = useCart();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [isCartLoaded, setIsCartLoaded] = useState(false);
+  const [useSeparateBilling, setUseSeparateBilling] = useState(false);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    streetAddress: "",
-    city: "",
-    state: "",
-    country: "",
-    zipCode: "",
+    shippingAddress: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      streetAddress: "",
+      city: "",
+      state: "",
+      country: "",
+      zipCode: "",
+    },
+    notes: "",
+    shippingMethod: "standard",
   });
 
   // Wait for cart to be loaded from cookies before checking if it's empty
@@ -60,7 +74,24 @@ export default function CheckoutPage() {
     }
   }, [cart.items.length, router, isCartLoaded]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAddressChange =
+    (addressType: "shipping" | "billing") => (name: string, value: string) => {
+      setCustomerInfo((prev) => ({
+        ...prev,
+        [addressType === "shipping" ? "shippingAddress" : "billingAddress"]: {
+          ...(addressType === "shipping"
+            ? prev.shippingAddress
+            : prev.billingAddress || prev.shippingAddress),
+          [name]: value,
+        },
+      }));
+    };
+
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
     setCustomerInfo((prev) => ({
       ...prev,
@@ -84,7 +115,7 @@ export default function CheckoutPage() {
     ];
 
     const missingFields = requiredFields.filter(
-      (field) => !customerInfo[field as keyof CustomerInfo]
+      (field) => !customerInfo.shippingAddress[field as keyof Address]
     );
 
     if (missingFields.length > 0) {
@@ -102,53 +133,58 @@ export default function CheckoutPage() {
     setIsLoading(true);
 
     try {
-      await fetch("/api/emails", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          firstName: customerInfo.firstName,
-          lastName: customerInfo.lastName,
-          email: customerInfo.email,
-          orderItems: cart.items.map((item) => ({
-            name: item.productName,
-            quantity: item.quantity,
-            price: item.discount
-              ? (item.price * (1 - item.discount / 100)).toFixed(2)
-              : item.price.toFixed(2),
-            originalPrice: item.price.toFixed(2),
-            discount: item.discount,
-            image: item.image
-              ? `https://assets.rublevsky.studio/${item.image}`
-              : undefined,
-          })),
-          subtotal: subtotal.toFixed(2),
-          totalDiscount: totalDiscount.toFixed(2),
-          orderTotal: total.toFixed(2),
-        }),
-      });
-    } catch (error) {
-      toast.error("Failed to send email. Please try again.");
-      console.error("Checkout error:", error);
-    }
-
-    try {
-      // Pass customer info to createOrder
-
+      // First create the order
       const result = await createOrder(customerInfo, cart.items);
 
-      if (result.success) {
-        toast.success("Order placed successfully!");
-        clearCart();
-
-        // Redirect to order confirmation page
-        router.push(`/orders/confirmation?orderId=${result.orderId}`);
-      } else {
-        toast.error(result.message);
+      if (!result.success) {
+        throw new Error(result.message);
       }
+
+      // If order was created successfully, send the email
+      try {
+        await fetch("/api/emails", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            firstName: customerInfo.shippingAddress.firstName,
+            lastName: customerInfo.shippingAddress.lastName,
+            email: customerInfo.shippingAddress.email,
+            orderItems: cart.items.map((item) => ({
+              name: item.productName,
+              quantity: item.quantity,
+              price: item.discount
+                ? (item.price * (1 - item.discount / 100)).toFixed(2)
+                : item.price.toFixed(2),
+              originalPrice: item.price.toFixed(2),
+              discount: item.discount,
+              image: item.image
+                ? `https://assets.rublevsky.studio/${item.image}`
+                : undefined,
+            })),
+            subtotal: subtotal.toFixed(2),
+            totalDiscount: totalDiscount.toFixed(2),
+            orderTotal: total.toFixed(2),
+          }),
+        });
+      } catch (emailError) {
+        console.error("Failed to send email:", emailError);
+        // Don't throw here - we still want to proceed with redirect even if email fails
+      }
+
+      // Clear the cart and show success message
+      toast.success("Order placed successfully!");
+      clearCart();
+
+      // Redirect to order confirmation page
+      router.push(`/orders/confirmation?orderId=${result.orderId}`);
     } catch (error) {
-      toast.error("Failed to place order. Please try again.");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to place order. Please try again."
+      );
       console.error("Checkout error:", error);
     } finally {
       setIsLoading(false);
@@ -190,97 +226,112 @@ export default function CheckoutPage() {
               </div>
 
               <div className="mb-8">
-                <h2 className="text-xl font-bold mb-4">Delivery details</h2>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  <Input
-                    label="First Name"
-                    id="firstName"
-                    name="firstName"
-                    value={customerInfo.firstName}
-                    onChange={handleInputChange}
-                    required
-                  />
-
-                  <Input
-                    label="Last Name"
-                    id="lastName"
-                    name="lastName"
-                    value={customerInfo.lastName}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  <Input
-                    label="Email"
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={customerInfo.email}
-                    onChange={handleInputChange}
-                    required
-                  />
-
-                  <Input
-                    label="Phone"
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    value={customerInfo.phone}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-
-                <Input
-                  className="mb-6"
-                  label="Address"
-                  id="streetAddress"
-                  name="streetAddress"
-                  value={customerInfo.streetAddress}
-                  onChange={handleInputChange}
-                  required
+                <h2 className="text-xl font-bold mb-4">Shipping Address</h2>
+                <AddressFields
+                  values={customerInfo.shippingAddress}
+                  onChange={handleAddressChange("shipping")}
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  <Input
-                    label="State"
-                    id="state"
-                    name="state"
-                    value={customerInfo.state}
-                    onChange={handleInputChange}
-                  />
-
-                  <Input
-                    label="City"
-                    id="city"
-                    name="city"
-                    value={customerInfo.city}
-                    onChange={handleInputChange}
-                    required
-                  />
+                <div className="mb-6">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={useSeparateBilling}
+                      onChange={(e) => {
+                        setUseSeparateBilling(e.target.checked);
+                        if (e.target.checked && !customerInfo.billingAddress) {
+                          setCustomerInfo((prev) => ({
+                            ...prev,
+                            billingAddress: { ...prev.shippingAddress },
+                          }));
+                        }
+                      }}
+                      className="form-checkbox"
+                    />
+                    <span>Use different billing address</span>
+                  </label>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Input
-                    label="Country"
-                    id="country"
-                    name="country"
-                    value={customerInfo.country}
-                    onChange={handleInputChange}
-                    required
-                  />
+                {useSeparateBilling && (
+                  <div className="mt-6 p-4 border rounded-lg">
+                    <h3 className="text-lg font-semibold mb-4">
+                      Billing Address
+                    </h3>
+                    <AddressFields
+                      values={
+                        customerInfo.billingAddress ||
+                        customerInfo.shippingAddress
+                      }
+                      onChange={handleAddressChange("billing")}
+                      required={useSeparateBilling}
+                    />
+                  </div>
+                )}
 
-                  <Input
-                    label="ZIP code"
-                    id="zipCode"
-                    name="zipCode"
-                    value={customerInfo.zipCode}
-                    onChange={handleInputChange}
-                    required
-                  />
+                <div className="mt-6">
+                  <h3 className="text-lg font-semibold mb-4">
+                    Additional Information
+                  </h3>
+
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium mb-2">
+                      Shipping Method
+                    </label>
+                    <div className="flex gap-4">
+                      <Button
+                        type="button"
+                        onClick={() =>
+                          setCustomerInfo((prev) => ({
+                            ...prev,
+                            shippingMethod: "standard",
+                          }))
+                        }
+                        className={cn(
+                          "flex-1",
+                          customerInfo.shippingMethod === "standard"
+                            ? "bg-primary"
+                            : "bg-secondary hover:bg-secondary/80"
+                        )}
+                      >
+                        Standard Shipping
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={() =>
+                          setCustomerInfo((prev) => ({
+                            ...prev,
+                            shippingMethod: "pickup",
+                          }))
+                        }
+                        className={cn(
+                          "flex-1",
+                          customerInfo.shippingMethod === "pickup"
+                            ? "bg-primary"
+                            : "bg-secondary hover:bg-secondary/80"
+                        )}
+                      >
+                        Local Pickup
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="mb-6">
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      htmlFor="notes"
+                    >
+                      Order Notes
+                    </label>
+                    <textarea
+                      id="notes"
+                      name="notes"
+                      value={customerInfo.notes}
+                      onChange={handleInputChange}
+                      rows={4}
+                      className="w-full p-2 border rounded-md"
+                      placeholder="Any special instructions for your order?"
+                    />
+                  </div>
                 </div>
               </div>
             </form>
