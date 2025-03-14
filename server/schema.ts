@@ -133,13 +133,13 @@ export const blogPosts = sqliteTable('blog_posts', {
 });
 
 // Inquiries
-export const inquiries = sqliteTable('inquiries', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  name: text('name').notNull(),
-  email: text('email').notNull(),
-  companyName: text('company_name'),
-  role: text('role'),
-  budget: real('budget'), // Using real for decimal in SQLite
-  message: text('message').notNull(),
-  createdAt: text('created_at'),
-});
+// export const inquiries = sqliteTable('inquiries', {
+//   id: integer('id').primaryKey({ autoIncrement: true }),
+//   name: text('name').notNull(),
+//   email: text('email').notNull(),
+//   companyName: text('company_name'),
+//   role: text('role'),
+//   budget: real('budget'), // Using real for decimal in SQLite
+//   message: text('message').notNull(),
+//   createdAt: text('created_at'),
+// });

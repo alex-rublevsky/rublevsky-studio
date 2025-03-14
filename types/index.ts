@@ -8,7 +8,6 @@ import {
   orderItems,
   addresses,
   blogPosts,
-  inquiries,
   teaCategories
 } from "@/server/schema";
 import { InferSelectModel, InferInsertModel } from "drizzle-orm";
@@ -78,10 +77,6 @@ export type BlogPost = InferSelectModel<typeof blogPosts> & {
   teaCategories?: string[];
 };
 export type NewBlogPost = InferInsertModel<typeof blogPosts>;
-
-// Inquiries
-export type Inquiry = InferSelectModel<typeof inquiries>;
-export type NewInquiry = InferInsertModel<typeof inquiries>;
 
 // Form data types for frontend components
 export interface ProductFormData {
