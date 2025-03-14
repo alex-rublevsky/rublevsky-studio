@@ -74,7 +74,9 @@ export type TeaCategory = InferSelectModel<typeof teaCategories>;
 export type NewTeaCategory = InferInsertModel<typeof teaCategories>;
 
 // Blog Posts
-export type BlogPost = InferSelectModel<typeof blogPosts>;
+export type BlogPost = InferSelectModel<typeof blogPosts> & {
+  teaCategories?: string[];
+};
 export type NewBlogPost = InferInsertModel<typeof blogPosts>;
 
 // Inquiries
@@ -132,7 +134,7 @@ export interface BlogPostFormData {
   title: string;
   slug: string;
   body: string;
-  teaCategorySlug?: string;
+  teaCategories?: string[];
   productSlug?: string;
   images?: string;
   publishedAt?: string;

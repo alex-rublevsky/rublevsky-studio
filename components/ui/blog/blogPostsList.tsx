@@ -17,12 +17,23 @@ export default function BlogPostsList({
 }: BlogPostsListProps) {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
+  // Filter tea categories to only show those that are used in blog posts
+  const usedTeaCategories = useMemo(() => {
+    const usedCategories = new Set(
+      posts.flatMap((post) => post.teaCategories || [])
+    );
+    return teaCategories.filter((category) =>
+      usedCategories.has(category.slug)
+    );
+  }, [posts, teaCategories]);
+
+  // Filter posts based on selected categories
   const filteredPosts = useMemo(() => {
     if (selectedCategories.length === 0) return posts;
-    return posts.filter(
-      (post) =>
-        post.teaCategorySlug &&
-        selectedCategories.includes(post.teaCategorySlug)
+    return posts.filter((post) =>
+      post.teaCategories?.some((category) =>
+        selectedCategories.includes(category)
+      )
     );
   }, [posts, selectedCategories]);
 
@@ -38,7 +49,7 @@ export default function BlogPostsList({
   return (
     <div>
       <TeaCategoryFilters
-        teaCategories={teaCategories}
+        teaCategories={usedTeaCategories}
         selectedCategories={selectedCategories}
         onCategoryToggle={handleCategoryToggle}
       />
