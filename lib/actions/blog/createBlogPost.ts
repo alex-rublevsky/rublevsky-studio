@@ -2,15 +2,16 @@
 
 import { eq } from "drizzle-orm";
 import db from "@/server/db";
-import { blogPosts } from "@/server/schema";
+import { blogPosts, blogTeaCategories } from "@/server/schema";
 import { BlogPost, BlogPostFormData } from "@/types";
+import { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 
 /**
  * Server action to create a new blog post
  * @param data - The blog post data to create
  * @returns The created blog post object
  */
-export default async function createBlogPost(data: BlogPostFormData): Promise<BlogPost> {
+export async function createBlogPost(data: BlogPostFormData): Promise<BlogPost> {
   try {
     // Validate required fields
     if (!data.title || !data.slug || !data.body) {
@@ -28,25 +29,38 @@ export default async function createBlogPost(data: BlogPostFormData): Promise<Bl
       throw new Error("A blog post with this slug already exists");
     }
 
-    // Format data for insertion
-    const blogPostData = {
-      title: data.title,
-      slug: data.slug,
-      body: data.body,
-      teaCategorySlug: data.teaCategorySlug || null,
-      productSlug: data.productSlug || null,
-      images: data.images || null,
-      publishedAt: data.publishedAt || new Date().toISOString(),
-    };
+    return await db.transaction(async (tx: BetterSQLite3Database) => {
+      // Insert blog post
+      const blogPostData = {
+        title: data.title,
+        slug: data.slug,
+        body: data.body,
+        productSlug: data.productSlug || null,
+        images: data.images || null,
+        publishedAt: data.publishedAt || new Date().toISOString(),
+      };
 
-    // Insert blog post into database
-    const result = await db
-      .insert(blogPosts)
-      .values(blogPostData)
-      .returning()
-      .get();
+      const result = await tx
+        .insert(blogPosts)
+        .values(blogPostData)
+        .returning()
+        .get();
 
-    return result;
+      // Insert tea categories
+      if (data.teaCategories && data.teaCategories.length > 0) {
+        await tx.insert(blogTeaCategories).values(
+          data.teaCategories.map((teaCategorySlug) => ({
+            blogPostId: result.id,
+            teaCategorySlug,
+          }))
+        );
+      }
+
+      return {
+        ...result,
+        teaCategories: data.teaCategories || [],
+      };
+    });
   } catch (error) {
     console.error("Error creating blog post:", error);
     throw new Error(`Failed to create blog post: ${(error as Error).message}`);

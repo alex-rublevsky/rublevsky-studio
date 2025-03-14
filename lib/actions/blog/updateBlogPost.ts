@@ -1,9 +1,10 @@
 'use server';
 
-import { eq, and, ne } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import db from "@/server/db";
-import { blogPosts } from "@/server/schema";
+import { blogPosts, blogTeaCategories } from "@/server/schema";
 import { BlogPost, BlogPostFormData } from "@/types";
+import { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 
 /**
  * Server action to update a blog post
@@ -11,7 +12,7 @@ import { BlogPost, BlogPostFormData } from "@/types";
  * @param data - The blog post data to update
  * @returns The updated blog post object
  */
-export default async function updateBlogPost(id: number, data: BlogPostFormData): Promise<BlogPost> {
+export async function updateBlogPost(id: number, data: BlogPostFormData): Promise<BlogPost> {
   try {
     if (!id) {
       throw new Error("Blog post ID is required");
@@ -33,37 +34,55 @@ export default async function updateBlogPost(id: number, data: BlogPostFormData)
       throw new Error("Blog post not found");
     }
     
-    // Check if slug already exists for another blog post
+    // Check if slug already exists for a different post
     const existingSlug = await db
       .select()
       .from(blogPosts)
-      .where(and(eq(blogPosts.slug, data.slug), ne(blogPosts.id, id)))
+      .where(eq(blogPosts.slug, data.slug))
       .get();
     
-    if (existingSlug) {
-      throw new Error("Another blog post with this slug already exists");
+    if (existingSlug && existingSlug.id !== id) {
+      throw new Error("A blog post with this slug already exists");
     }
     
-    // Format data for update
-    const blogPostData = {
-      title: data.title,
-      slug: data.slug,
-      body: data.body,
-      teaCategorySlug: data.teaCategorySlug || null,
-      productSlug: data.productSlug || null,
-      images: data.images || null,
-      publishedAt: data.publishedAt || existingPost.publishedAt,
-    };
-    
-    // Update blog post in database
-    const result = await db
-      .update(blogPosts)
-      .set(blogPostData)
-      .where(eq(blogPosts.id, id))
-      .returning()
-      .get();
-    
-    return result;
+    return await db.transaction(async (tx: BetterSQLite3Database) => {
+      // Update blog post
+      const blogPostData = {
+        title: data.title,
+        slug: data.slug,
+        body: data.body,
+        productSlug: data.productSlug || null,
+        images: data.images || null,
+        publishedAt: data.publishedAt || null,
+      };
+
+      const result = await tx
+        .update(blogPosts)
+        .set(blogPostData)
+        .where(eq(blogPosts.id, id))
+        .returning()
+        .get();
+
+      // Delete existing tea categories
+      await tx
+        .delete(blogTeaCategories)
+        .where(eq(blogTeaCategories.blogPostId, id));
+
+      // Insert new tea categories
+      if (data.teaCategories && data.teaCategories.length > 0) {
+        await tx.insert(blogTeaCategories).values(
+          data.teaCategories.map((teaCategorySlug) => ({
+            blogPostId: id,
+            teaCategorySlug,
+          }))
+        );
+      }
+
+      return {
+        ...result,
+        teaCategories: data.teaCategories || [],
+      };
+    });
   } catch (error) {
     console.error("Error updating blog post:", error);
     throw new Error(`Failed to update blog post: ${(error as Error).message}`);

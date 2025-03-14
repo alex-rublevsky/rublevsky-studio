@@ -19,7 +19,7 @@ interface QueryResult {
   discount: number | null;
   hasVariations: boolean;
   weight: string | null;
-  images: string;
+  images: string | null;
   teaCategorySlug: string | null;
   variationId: number | null;
   sku: string | null;
@@ -90,12 +90,25 @@ export default async function getProductById(id: number): Promise<ProductWithVar
       discount: firstRow.discount,
       hasVariations: firstRow.hasVariations,
       weight: firstRow.weight,
-      images: firstRow.images ? JSON.parse(firstRow.images) : [],
+      images: firstRow.images || '[]',
       teaCategories: [],
       variations: [],
       unlimitedStock: false,
       createdAt: new Date().toISOString()
     };
+
+    // Validate that images is a valid JSON array
+    if (product.images) {
+      try {
+        const parsedImages = JSON.parse(product.images);
+        if (!Array.isArray(parsedImages)) {
+          product.images = '[]';
+        }
+      } catch (e) {
+        console.error("Error validating product images JSON:", e);
+        product.images = '[]';
+      }
+    }
 
     // Extract unique tea categories
     const teaCategories = new Set<string>();

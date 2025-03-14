@@ -38,7 +38,7 @@ export default function BlogPage() {
     title: "",
     slug: "",
     body: "",
-    teaCategorySlug: "",
+    teaCategories: [],
     productSlug: "",
     images: "",
     publishedAt: new Date().toISOString(),
@@ -48,7 +48,7 @@ export default function BlogPage() {
     title: "",
     slug: "",
     body: "",
-    teaCategorySlug: "",
+    teaCategories: [],
     productSlug: "",
     images: "",
     publishedAt: "",
@@ -148,17 +148,17 @@ export default function BlogPage() {
     });
   };
 
-  const handleCategoryChange = (value: string) => {
+  const handleCategoryChange = (value: string[]) => {
     setCreateFormData({
       ...createFormData,
-      teaCategorySlug: value,
+      teaCategories: value,
     });
   };
 
-  const handleEditCategoryChange = (value: string) => {
+  const handleEditCategoryChange = (value: string[]) => {
     setEditFormData({
       ...editFormData,
-      teaCategorySlug: value,
+      teaCategories: value,
     });
   };
 
@@ -208,7 +208,7 @@ export default function BlogPage() {
         title: "",
         slug: "",
         body: "",
-        teaCategorySlug: "",
+        teaCategories: [],
         productSlug: "",
         images: "",
         publishedAt: new Date().toISOString(),
@@ -237,7 +237,7 @@ export default function BlogPage() {
           title: postData.title,
           slug: postData.slug,
           body: postData.body || "",
-          teaCategorySlug: postData.teaCategorySlug || "",
+          teaCategories: postData.teaCategories || [],
           productSlug: postData.productSlug || "",
           images: postData.images || "",
           publishedAt: postData.publishedAt || "",
@@ -267,7 +267,7 @@ export default function BlogPage() {
         title: "",
         slug: "",
         body: "",
-        teaCategorySlug: "",
+        teaCategories: [],
         productSlug: "",
         images: "",
         publishedAt: "",
@@ -323,7 +323,7 @@ export default function BlogPage() {
       title: "",
       slug: "",
       body: "",
-      teaCategorySlug: "",
+      teaCategories: [],
       productSlug: "",
       images: "",
       publishedAt: "",
@@ -385,30 +385,42 @@ export default function BlogPage() {
               </div>
 
               <div>
-                <label
-                  htmlFor="teaCategory"
-                  className="block text-sm font-medium mb-1"
-                >
-                  Tea Category
+                <label className="block text-sm font-medium mb-2">
+                  Tea Categories
                 </label>
-                <Select
-                  value={createFormData.teaCategorySlug || "none"}
-                  onValueChange={(value) =>
-                    handleCategoryChange(value === "none" ? "" : value)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a tea category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    {teaCategories.map((category) => (
-                      <SelectItem key={category.slug} value={category.slug}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="space-y-2">
+                  {teaCategories.map((category) => (
+                    <label
+                      key={category.slug}
+                      className="flex items-center space-x-2"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={
+                          createFormData.teaCategories?.includes(
+                            category.slug
+                          ) ?? false
+                        }
+                        onChange={(e) => {
+                          const newCategories = e.target.checked
+                            ? [
+                                ...(createFormData.teaCategories || []),
+                                category.slug,
+                              ]
+                            : (createFormData.teaCategories || []).filter(
+                                (slug) => slug !== category.slug
+                              );
+                          setCreateFormData((prev) => ({
+                            ...prev,
+                            teaCategories: newCategories,
+                          }));
+                        }}
+                        className="h-4 w-4 rounded border-gray-300"
+                      />
+                      <span>{category.name}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
 
               <div>
@@ -509,30 +521,42 @@ export default function BlogPage() {
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="editTeaCategory"
-                    className="block text-sm font-medium mb-1"
-                  >
-                    Tea Category
+                  <label className="block text-sm font-medium mb-2">
+                    Tea Categories
                   </label>
-                  <Select
-                    value={editFormData.teaCategorySlug || "none"}
-                    onValueChange={(value) =>
-                      handleEditCategoryChange(value === "none" ? "" : value)
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a tea category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">None</SelectItem>
-                      {teaCategories.map((category) => (
-                        <SelectItem key={category.slug} value={category.slug}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="space-y-2">
+                    {teaCategories.map((category) => (
+                      <label
+                        key={category.slug}
+                        className="flex items-center space-x-2"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={
+                            editFormData.teaCategories?.includes(
+                              category.slug
+                            ) ?? false
+                          }
+                          onChange={(e) => {
+                            const newCategories = e.target.checked
+                              ? [
+                                  ...(editFormData.teaCategories || []),
+                                  category.slug,
+                                ]
+                              : (editFormData.teaCategories || []).filter(
+                                  (slug) => slug !== category.slug
+                                );
+                            setEditFormData((prev) => ({
+                              ...prev,
+                              teaCategories: newCategories,
+                            }));
+                          }}
+                          className="h-4 w-4 rounded border-gray-300"
+                        />
+                        <span>{category.name}</span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
 
                 <div>
@@ -627,9 +651,13 @@ export default function BlogPage() {
                     <tr key={post.id}>
                       <td className="px-4 py-2">{post.title}</td>
                       <td className="px-4 py-2">
-                        {teaCategories.find(
-                          (c) => c.slug === post.teaCategorySlug
-                        )?.name || "None"}
+                        {post.teaCategories
+                          ?.map(
+                            (slug) =>
+                              teaCategories.find((c) => c.slug === slug)?.name
+                          )
+                          .filter(Boolean)
+                          .join(", ") || "None"}
                       </td>
                       <td className="px-4 py-2">
                         {post.productSlug || "None"}
