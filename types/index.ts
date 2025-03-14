@@ -91,7 +91,7 @@ export interface ProductFormData {
   price: string;
   categorySlug: string;
   brandSlug: string;
-  teaCategorySlug?: string;
+  teaCategories?: string[];
   stock: string;
   isActive: boolean;
   isFeatured: boolean;

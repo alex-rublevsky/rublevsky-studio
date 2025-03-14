@@ -2,56 +2,143 @@
 
 import { eq } from "drizzle-orm";
 import db from "@/server/db";
-import { products, productVariations, variationAttributes } from "@/server/schema";
-import { Product } from "@/types";
+import { products, productTeaCategories, productVariations, variationAttributes } from "@/server/schema";
+import { ProductWithVariations } from "@/types";
+
+interface QueryResult {
+  id: number;
+  name: string;
+  slug: string;
+  description: string | null;
+  price: number;
+  categorySlug: string;
+  brandSlug: string;
+  stock: number;
+  isActive: boolean;
+  isFeatured: boolean;
+  discount: number | null;
+  hasVariations: boolean;
+  weight: string | null;
+  images: string;
+  teaCategorySlug: string | null;
+  variationId: number | null;
+  sku: string | null;
+  variationPrice: number | null;
+  variationStock: number | null;
+  sort: number | null;
+  attributeId: number | null;
+  attributeValue: string | null;
+}
 
 /**
- * Server action to fetch a product by ID with variations
- * @param id - The ID of the product to fetch
- * @returns The product object with variations or null if not found
+ * Get a product by ID with all its related data
+ * @param id - The product ID to fetch
+ * @returns The product with all its variations and attributes
  */
-export default async function getProductById(id: number): Promise<Product | null> {
+export default async function getProductById(id: number): Promise<ProductWithVariations | null> {
   try {
-    if (!id) {
-      throw new Error("Product ID is required");
-    }
-    
-    // Get product by ID
-    const product = await db
-      .select()
+    // Fetch product with all related data in a single query using joins
+    const results = await db
+      .select({
+        id: products.id,
+        name: products.name,
+        slug: products.slug,
+        description: products.description,
+        price: products.price,
+        categorySlug: products.categorySlug,
+        brandSlug: products.brandSlug,
+        stock: products.stock,
+        isActive: products.isActive,
+        isFeatured: products.isFeatured,
+        discount: products.discount,
+        hasVariations: products.hasVariations,
+        weight: products.weight,
+        images: products.images,
+        teaCategorySlug: productTeaCategories.teaCategorySlug,
+        variationId: productVariations.id,
+        sku: productVariations.sku,
+        variationPrice: productVariations.price,
+        variationStock: productVariations.stock,
+        sort: productVariations.sort,
+        attributeId: variationAttributes.attributeId,
+        attributeValue: variationAttributes.value,
+      })
       .from(products)
+      .leftJoin(productTeaCategories, eq(productTeaCategories.productId, products.id))
+      .leftJoin(productVariations, eq(productVariations.productId, products.id))
+      .leftJoin(variationAttributes, eq(variationAttributes.productVariationId, productVariations.id))
       .where(eq(products.id, id))
-      .get();
-    
-    if (!product) {
+      .all() as QueryResult[];
+
+    if (!results.length) {
       return null;
     }
-    
-    // Get product variations if hasVariations is true
-    if (product.hasVariations) {
-      const variations = await db
-        .select()
-        .from(productVariations)
-        .where(eq(productVariations.productId, id))
-        .all();
-      
-      // Get attributes for each variation
-      for (const variation of variations) {
-        const attributes = await db
-          .select()
-          .from(variationAttributes)
-          .where(eq(variationAttributes.productVariationId, variation.id))
-          .all();
-        
-        variation.attributes = attributes;
+
+    // Process results to construct the product object
+    const firstRow = results[0];
+    const product: ProductWithVariations = {
+      id: firstRow.id,
+      name: firstRow.name,
+      slug: firstRow.slug,
+      description: firstRow.description,
+      price: firstRow.price,
+      categorySlug: firstRow.categorySlug,
+      brandSlug: firstRow.brandSlug,
+      stock: firstRow.stock,
+      isActive: firstRow.isActive,
+      isFeatured: firstRow.isFeatured,
+      discount: firstRow.discount,
+      hasVariations: firstRow.hasVariations,
+      weight: firstRow.weight,
+      images: firstRow.images ? JSON.parse(firstRow.images) : [],
+      teaCategories: [],
+      variations: [],
+      unlimitedStock: false,
+      createdAt: new Date().toISOString()
+    };
+
+    // Extract unique tea categories
+    const teaCategories = new Set<string>();
+    results.forEach(row => {
+      if (row.teaCategorySlug) {
+        teaCategories.add(row.teaCategorySlug);
       }
-      
-      product.variations = variations;
+    });
+    product.teaCategories = Array.from(teaCategories);
+
+    // Process variations and their attributes
+    if (firstRow.hasVariations) {
+      const variationsMap = new Map();
+
+      results.forEach(row => {
+        if (row.variationId) {
+          if (!variationsMap.has(row.variationId)) {
+            variationsMap.set(row.variationId, {
+              id: row.variationId,
+              sku: row.sku,
+              price: row.variationPrice,
+              stock: row.variationStock,
+              sort: row.sort,
+              attributes: []
+            });
+          }
+
+          if (row.attributeId && row.attributeValue) {
+            const variation = variationsMap.get(row.variationId);
+            variation.attributes.push({
+              attributeId: row.attributeId,
+              value: row.attributeValue
+            });
+          }
+        }
+      });
+
+      product.variations = Array.from(variationsMap.values());
     }
-    
+
     return product;
   } catch (error) {
-    console.error("Error fetching product:", error);
+    console.error("Error fetching product by ID:", error);
     throw new Error(`Failed to fetch product: ${(error as Error).message}`);
   }
 } 

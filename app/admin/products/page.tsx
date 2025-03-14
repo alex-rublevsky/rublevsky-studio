@@ -69,7 +69,7 @@ export default function ProductsPage() {
     price: "",
     categorySlug: "",
     brandSlug: "",
-    teaCategorySlug: "",
+    teaCategories: [],
     stock: "0",
     isActive: true,
     isFeatured: false,
@@ -199,6 +199,22 @@ export default function ProductsPage() {
       setIsAutoSlug(false);
     }
 
+    // Handle tea categories checkbox
+    if (name.startsWith("teaCategory-")) {
+      const teaCategorySlug = name.replace("teaCategory-", "");
+      const updatedTeaCategories = checked
+        ? [...(formData.teaCategories || []), teaCategorySlug]
+        : (formData.teaCategories || []).filter(
+            (slug) => slug !== teaCategorySlug
+          );
+
+      setFormData({
+        ...formData,
+        teaCategories: updatedTeaCategories,
+      });
+      return;
+    }
+
     // If hasVariations is checked and there are no variations, create a default one
     if (name === "hasVariations" && checked && variations.length === 0) {
       const defaultVariation: Variation = {
@@ -228,6 +244,22 @@ export default function ProductsPage() {
 
     if (name === "slug") {
       setIsEditAutoSlug(false);
+    }
+
+    // Handle tea categories checkbox
+    if (name.startsWith("teaCategory-")) {
+      const teaCategorySlug = name.replace("teaCategory-", "");
+      const updatedTeaCategories = checked
+        ? [...(editFormData.teaCategories || []), teaCategorySlug]
+        : (editFormData.teaCategories || []).filter(
+            (slug) => slug !== teaCategorySlug
+          );
+
+      setEditFormData({
+        ...editFormData,
+        teaCategories: updatedTeaCategories,
+      });
+      return;
     }
 
     // If hasVariations is checked and there are no variations, create a default one
@@ -270,7 +302,7 @@ export default function ProductsPage() {
     const submissionData = {
       ...formData,
       variations: formattedVariations,
-      teaCategorySlug: formData.teaCategorySlug || undefined,
+      teaCategories: formData.teaCategories || undefined,
     };
 
     try {
@@ -291,6 +323,12 @@ export default function ProductsPage() {
   };
 
   const handleEdit = async (product: Product) => {
+    const productDetails = await getProductById(product.id);
+    if (!productDetails) {
+      toast.error("Failed to fetch product details");
+      return;
+    }
+
     setEditingProductId(product.id);
     setShowEditModal(true);
     setIsEditMode(true);
@@ -298,58 +336,42 @@ export default function ProductsPage() {
 
     // Update to use slugs
     setEditFormData({
-      name: product.name,
-      slug: product.slug,
-      description: product.description || "",
-      price: product.price.toString(),
-      categorySlug: product.categorySlug || "",
-      brandSlug: product.brandSlug || "",
-      stock: product.stock.toString(),
-      isActive: product.isActive,
-      isFeatured: product.isFeatured,
-      discount: product.discount,
-      hasVariations: product.hasVariations,
-      weight: product.weight || "",
-      images: product.images || "",
+      name: productDetails.name,
+      slug: productDetails.slug,
+      description: productDetails.description || "",
+      price: productDetails.price.toString(),
+      categorySlug: productDetails.categorySlug || "",
+      brandSlug: productDetails.brandSlug || "",
+      teaCategories: productDetails.teaCategories || [],
+      stock: productDetails.stock.toString(),
+      isActive: productDetails.isActive,
+      isFeatured: productDetails.isFeatured,
+      discount: productDetails.discount,
+      hasVariations: productDetails.hasVariations,
+      weight: productDetails.weight || "",
+      images: productDetails.images || "",
       variations: [],
     });
 
     // Fetch product variations if the product has variations
-    let productVariations: Variation[] = [];
-    if (product.hasVariations) {
-      try {
-        // Use the server action instead of the API
-        const productData = await getProductById(product.id);
-        if (productData && productData.hasVariations) {
-          // The Product type might not have variations property in the type definition
-          // but the server action adds it to the returned object
-          const productWithVariations = productData as any;
-          if (productWithVariations.variations) {
-            // Map the database variations to the form data structure
-            productVariations = productWithVariations.variations.map(
-              (variation: any) => ({
-                id: variation.id.toString(),
-                sku: variation.sku,
-                price: parseFloat(variation.price),
-                stock: parseInt(variation.stock),
-                sort: variation.sort || 0,
-                attributes: variation.attributes
-                  ? variation.attributes.map((attr: any) => ({
-                      attributeId: attr.attributeId,
-                      value: attr.value,
-                    }))
-                  : [],
-              })
-            );
-          }
-        }
-      } catch (e) {
-        console.error("Failed to fetch product variations:", e);
-      }
+    if (productDetails.hasVariations) {
+      const variations = (productDetails as any).variations || [];
+      setEditVariations(
+        variations.map((variation: any) => ({
+          id: variation.id.toString(),
+          sku: variation.sku,
+          price: parseFloat(variation.price),
+          stock: parseInt(variation.stock),
+          sort: variation.sort || 0,
+          attributes: variation.attributes
+            ? variation.attributes.map((attr: any) => ({
+                attributeId: attr.attributeId,
+                value: attr.value,
+              }))
+            : [],
+        }))
+      );
     }
-
-    // Update the edit variations instead of the main variations
-    setEditVariations(productVariations);
   };
 
   const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -532,11 +554,14 @@ export default function ProductsPage() {
     return brand?.name || null;
   };
 
-  const getTeaCategoryName = (slug: string | null): string | null => {
-    if (!slug) return null;
-    return (
-      teaCategories.find((category) => category.slug === slug)?.name || null
-    );
+  const getTeaCategoryNames = (slugs: string[] | undefined): string => {
+    if (!slugs || slugs.length === 0) return "N/A";
+    return slugs
+      .map(
+        (slug) => teaCategories.find((category) => category.slug === slug)?.name
+      )
+      .filter(Boolean)
+      .join(", ");
   };
 
   return (
@@ -723,33 +748,28 @@ export default function ProductsPage() {
               </div>
 
               <div>
-                <label
-                  htmlFor="teaCategory"
-                  className="block text-sm font-medium mb-1"
-                >
-                  Tea Category
+                <label className="block text-sm font-medium mb-1">
+                  Tea Categories
                 </label>
-                <Select
-                  value={formData.teaCategorySlug || "none"}
-                  onValueChange={(value) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      teaCategorySlug: value === "none" ? "" : value,
-                    }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a tea category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    {teaCategories.map((category) => (
-                      <SelectItem key={category.slug} value={category.slug}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="space-y-2 border border-input rounded-md p-3">
+                  {teaCategories.map((category) => (
+                    <label
+                      key={category.slug}
+                      className="flex items-center space-x-2"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={
+                          formData.teaCategories?.includes(category.slug) ||
+                          false
+                        }
+                        onChange={handleChange}
+                        className="h-4 w-4 border-input"
+                      />
+                      <span className="text-sm">{category.name}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
 
               <div className="md:col-span-2">
@@ -823,6 +843,35 @@ export default function ProductsPage() {
               />
             </div>
 
+            {/* Tea Categories */}
+            <div className="mt-6">
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Tea Categories
+              </label>
+              <div className="grid grid-cols-2 gap-4">
+                {teaCategories.map((category) => (
+                  <div key={category.slug} className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id={`teaCategory-${category.slug}`}
+                      name={`teaCategory-${category.slug}`}
+                      checked={
+                        formData.teaCategories?.includes(category.slug) || false
+                      }
+                      onChange={handleChange}
+                      className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                    />
+                    <label
+                      htmlFor={`teaCategory-${category.slug}`}
+                      className="ml-2 block text-sm text-foreground"
+                    >
+                      {category.name}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {/* Add the variations form when hasVariations is checked */}
             {formData.hasVariations && (
               <div className="mt-6 md:col-span-2">
@@ -877,7 +926,7 @@ export default function ProductsPage() {
                     Brand
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    Tea Category
+                    Tea Categories
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Status
@@ -918,13 +967,13 @@ export default function ProductsPage() {
                       {product.stock}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {getCategoryName(product.categorySlug) || "None"}
+                      {getCategoryName(product.categorySlug) || "N/A"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {getBrandName(product.brandSlug) || "None"}
+                      {getBrandName(product.brandSlug) || "N/A"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {getTeaCategoryName(product.teaCategorySlug) || "None"}
+                      {getTeaCategoryNames(product.teaCategories)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <Badge
@@ -1087,33 +1136,29 @@ export default function ProductsPage() {
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="editTeaCategory"
-                    className="block text-sm font-medium mb-1"
-                  >
-                    Tea Category
+                  <label className="block text-sm font-medium mb-1">
+                    Tea Categories
                   </label>
-                  <Select
-                    value={editFormData.teaCategorySlug || "none"}
-                    onValueChange={(value) =>
-                      setEditFormData((prev) => ({
-                        ...prev,
-                        teaCategorySlug: value === "none" ? "" : value,
-                      }))
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a tea category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">None</SelectItem>
-                      {teaCategories.map((category) => (
-                        <SelectItem key={category.slug} value={category.slug}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="space-y-2 border border-input rounded-md p-3">
+                    {teaCategories.map((category) => (
+                      <label
+                        key={category.slug}
+                        className="flex items-center space-x-2"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={
+                            editFormData.teaCategories?.includes(
+                              category.slug
+                            ) || false
+                          }
+                          onChange={handleEditChange}
+                          className="h-4 w-4 border-input"
+                        />
+                        <span className="text-sm">{category.name}</span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="md:col-span-2">
@@ -1184,6 +1229,37 @@ export default function ProductsPage() {
                   />
                 </div>
               </div>
+
+              {/* Tea Categories */}
+              <div className="mt-6">
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Tea Categories
+                </label>
+                <div className="grid grid-cols-2 gap-4">
+                  {teaCategories.map((category) => (
+                    <div key={category.slug} className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id={`edit-teaCategory-${category.slug}`}
+                        name={`teaCategory-${category.slug}`}
+                        checked={
+                          editFormData.teaCategories?.includes(category.slug) ||
+                          false
+                        }
+                        onChange={handleEditChange}
+                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                      />
+                      <label
+                        htmlFor={`edit-teaCategory-${category.slug}`}
+                        className="ml-2 block text-sm text-foreground"
+                      >
+                        {category.name}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               {/* Add the variations form when hasVariations is checked */}
               {editFormData.hasVariations && (
                 <div className="mt-6">
