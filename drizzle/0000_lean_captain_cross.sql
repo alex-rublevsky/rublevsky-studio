@@ -18,17 +18,23 @@ CREATE TABLE `addresses` (
 CREATE TABLE `blog_posts` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`product_slug` text,
-	`tea_category_slug` text,
 	`title` text NOT NULL,
 	`slug` text NOT NULL,
 	`body` text NOT NULL,
 	`images` text,
 	`published_at` text,
-	FOREIGN KEY (`product_slug`) REFERENCES `products`(`slug`) ON UPDATE no action ON DELETE set null,
-	FOREIGN KEY (`tea_category_slug`) REFERENCES `tea_categories`(`slug`) ON UPDATE no action ON DELETE set null
+	FOREIGN KEY (`product_slug`) REFERENCES `products`(`slug`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `blog_posts_slug_unique` ON `blog_posts` (`slug`);--> statement-breakpoint
+CREATE TABLE `blog_tea_categories` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`blog_post_id` integer NOT NULL,
+	`tea_category_slug` text NOT NULL,
+	FOREIGN KEY (`blog_post_id`) REFERENCES `blog_posts`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`tea_category_slug`) REFERENCES `tea_categories`(`slug`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
 CREATE TABLE `brands` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`name` text NOT NULL,
@@ -90,6 +96,14 @@ CREATE TABLE `orders` (
 	`completedAt` text
 );
 --> statement-breakpoint
+CREATE TABLE `product_tea_categories` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`product_id` integer NOT NULL,
+	`tea_category_slug` text NOT NULL,
+	FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`tea_category_slug`) REFERENCES `tea_categories`(`slug`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
 CREATE TABLE `product_variations` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`product_id` integer,
@@ -106,7 +120,6 @@ CREATE TABLE `products` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`category_slug` text,
 	`brand_slug` text,
-	`tea_category_slug` text,
 	`name` text NOT NULL,
 	`slug` text NOT NULL,
 	`images` text,
@@ -121,8 +134,7 @@ CREATE TABLE `products` (
 	`unlimited_stock` integer DEFAULT false NOT NULL,
 	`created_at` text,
 	FOREIGN KEY (`category_slug`) REFERENCES `categories`(`slug`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`brand_slug`) REFERENCES `brands`(`slug`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`tea_category_slug`) REFERENCES `tea_categories`(`slug`) ON UPDATE no action ON DELETE set null
+	FOREIGN KEY (`brand_slug`) REFERENCES `brands`(`slug`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `products_slug_unique` ON `products` (`slug`);--> statement-breakpoint

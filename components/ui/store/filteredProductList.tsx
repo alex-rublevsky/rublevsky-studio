@@ -12,14 +12,24 @@ interface FilteredProductListProps {
 }
 
 export default function FilteredProductList({
-  products,
-  categories,
-  teaCategories,
+  products = [],
+  categories = [],
+  teaCategories = [],
 }: FilteredProductListProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedTeaCategory, setSelectedTeaCategory] = useState<string | null>(
     null
   );
+
+  // Filter tea categories to only show those that are used in products
+  const filteredTeaCategories = useMemo(() => {
+    const usedCategories = new Set(
+      products.flatMap((product) => product.teaCategories || [])
+    );
+    return teaCategories.filter((category) =>
+      usedCategories.has(category.slug)
+    );
+  }, [products, teaCategories]);
 
   // Filter products based on selected categories
   const filteredProducts = useMemo(() => {
@@ -34,8 +44,8 @@ export default function FilteredProductList({
 
     // Apply tea category filter (only when tea category is selected)
     if (selectedCategory === "tea" && selectedTeaCategory) {
-      filtered = filtered.filter(
-        (product) => product.teaCategorySlug === selectedTeaCategory
+      filtered = filtered.filter((product) =>
+        product.teaCategories?.includes(selectedTeaCategory)
       );
     }
 
@@ -46,7 +56,7 @@ export default function FilteredProductList({
     <div className="space-y-8">
       <ProductFilters
         categories={categories}
-        teaCategories={teaCategories}
+        teaCategories={filteredTeaCategories}
         selectedCategory={selectedCategory}
         selectedTeaCategory={selectedTeaCategory}
         onCategoryChange={setSelectedCategory}

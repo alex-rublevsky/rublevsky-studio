@@ -7,7 +7,6 @@ export const products = sqliteTable('products', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   categorySlug: text('category_slug').references(() => categories.slug, { onDelete: 'cascade' }),
   brandSlug: text('brand_slug').references(() => brands.slug, { onDelete: 'cascade' }),
-  teaCategorySlug: text('tea_category_slug').references(() => teaCategories.slug, { onDelete: 'set null' }),
   name: text('name').notNull(),
   slug: text('slug').notNull().unique(),
   images: text('images'), // JSON stored as text
@@ -109,10 +108,23 @@ export const teaCategories = sqliteTable('tea_categories', {
   isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
 });
 
+// New join table for products and tea categories
+export const productTeaCategories = sqliteTable('product_tea_categories', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  productId: integer('product_id').references(() => products.id, { onDelete: 'cascade' }).notNull(),
+  teaCategorySlug: text('tea_category_slug').references(() => teaCategories.slug, { onDelete: 'cascade' }).notNull(),
+});
+
+// New join table for blog posts and tea categories
+export const blogTeaCategories = sqliteTable('blog_tea_categories', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  blogPostId: integer('blog_post_id').references(() => blogPosts.id, { onDelete: 'cascade' }).notNull(),
+  teaCategorySlug: text('tea_category_slug').references(() => teaCategories.slug, { onDelete: 'cascade' }).notNull(),
+});
+
 export const blogPosts = sqliteTable('blog_posts', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   productSlug: text('product_slug').references(() => products.slug, { onDelete: 'set null' }),
-  teaCategorySlug: text('tea_category_slug').references(() => teaCategories.slug, { onDelete: 'set null' }),
   title: text('title').notNull(),
   slug: text('slug').notNull().unique(),
   body: text('body').notNull(),

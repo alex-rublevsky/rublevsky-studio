@@ -7,7 +7,7 @@
 import { eq, desc, and, SQL } from "drizzle-orm";
 import { unstable_cache } from 'next/cache';
 import db from "@/server/db";
-import { products, categories, brands, productVariations, variationAttributes, blogPosts } from "@/server/schema";
+import { products, categories, brands, productVariations, variationAttributes, blogPosts, productTeaCategories, teaCategories } from "@/server/schema";
 import { Product, ProductWithVariations, ProductVariationWithAttributes } from "@/types";
 
 interface GetAllProductsOptions {
@@ -19,6 +19,7 @@ interface GetAllProductsOptions {
 interface EnrichedProductWithVariations extends ProductWithVariations {
   _categoryOrder: number;
   variations: ProductVariationWithAttributes[];
+  teaCategories: string[];
 }
 
 // Function to fetch products from database
@@ -36,7 +37,8 @@ async function fetchProducts({
           body: blogPosts.body
         },
         variations: productVariations,
-        attributes: variationAttributes
+        attributes: variationAttributes,
+        teaCategorySlug: teaCategories.slug
       })
       .from(products)
       .leftJoin(blogPosts, eq(blogPosts.productSlug, products.slug))
@@ -46,6 +48,14 @@ async function fetchProducts({
         productVariations.id
           ? eq(variationAttributes.productVariationId, productVariations.id)
           : undefined
+      )
+      .leftJoin(
+        productTeaCategories,
+        eq(productTeaCategories.productId, products.id)
+      )
+      .leftJoin(
+        teaCategories,
+        eq(teaCategories.slug, productTeaCategories.teaCategorySlug)
       )
       .where(eq(products.isActive, true))
       .where(categorySlug ? eq(products.categorySlug, categorySlug) : undefined)
@@ -73,11 +83,17 @@ async function fetchProducts({
           images: row.product.images,
           description: row.blogPost?.body || row.product.description,
           variations: [],
+          teaCategories: [],
           _categoryOrder: categoryOrder[row.product.categorySlug as keyof typeof categoryOrder] || 999
         });
       }
 
       const product = productMap.get(row.product.id)!;
+
+      // Add tea category if it exists and isn't already in the array
+      if (row.teaCategorySlug && !product.teaCategories.includes(row.teaCategorySlug)) {
+        product.teaCategories.push(row.teaCategorySlug);
+      }
 
       if (row.variations && !product.variations.find(v => v.id === row.variations.id)) {
         const variation: ProductVariationWithAttributes = {
@@ -103,15 +119,14 @@ async function fetchProducts({
       if (a._categoryOrder !== b._categoryOrder) {
         return a._categoryOrder - b._categoryOrder;
       }
-      // Remove timestamp-based sorting or replace with another sorting criteria
-      return 0; // Or use another field for secondary sorting
+      return 0;
     });
 
     // Remove the temporary _categoryOrder property and return the products
     return sortedProducts.map(({ _categoryOrder, ...product }) => product);
   } catch (error) {
-    console.error("Error fetching products:", error);
-    throw new Error(`Failed to fetch products: ${(error as Error).message}`);
+    console.error('Error fetching products:', error);
+    return [];
   }
 }
 

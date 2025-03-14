@@ -14,7 +14,7 @@ export default function WebProjectsSection({
     <section id="web" className="w-full">
       <div>
         <h1
-          className="text-center work-page-section-title-holder"
+          className="text-center work_page_section_title_holder"
           data-heading-reveal
         >
           Web

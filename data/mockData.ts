@@ -1,5 +1,9 @@
 //TODO add relevant brands for tea
 
+//TODO tea name to include sheng/shou
+// tea category to inclue raw/ripe/white/green/oolong/gaba
+
+
 // Mock Categories
 export const mockCategories = [
   {
@@ -41,23 +45,33 @@ export const mockTeaCategories = [
     isActive: true,
   },
   {
-    name: "White Tea",
-    slug: "white-tea",
+    name: "White",
+    slug: "white",
     isActive: true,
   },
   {
-    name: "Green Tea",
-    slug: "green-tea",
+    name: "Green",
+    slug: "green",
     isActive: true,
   },
   {
-    name: "Oolong Tea",
-    slug: "oolong-tea",
+    name: "Oolong",
+    slug: "oolong",
     isActive: true,
   },
   {
-    name: "Gaba Tea",
-    slug: "gaba-tea",
+    name: "Purple",
+    slug: "purple",
+    isActive: true,
+  },
+  {
+    name: "Gaba",
+    slug: "gaba",
+    isActive: true,
+  },
+  {
+    name: "Ancient Trees",
+    slug: "ancient-trees",
     isActive: true,
   },
 ];
@@ -910,8 +924,9 @@ export const mockProducts = [
     ])
   },
   {
-    name: `Ripe Pu'er Ku Zhu Shan “Guardian 2.0”`,
-    slug: "ripe-puer-ku-zhu-shan-guardian-20",
+    name: `Ku Zhu Shan “Guardian 2.0” Ripe Pu'er`,
+    slug: "ku-zhu-shan-guardian-20-ripe-puer",
+    teaCategories: ["ripe-pu-er",],
     description: "Linked to blog post with the same slug",
     images: "products/ripe-puer-ku-zhu-shan-guardian-20-1.jpg, products/ripe-puer-ku-zhu-shan-guardian-20-2.jpg, products/ripe-puer-ku-zhu-shan-guardian-20-3.jpg, products/ripe-puer-ku-zhu-shan-guardian-20-4.jpg, products/ripe-puer-ku-zhu-shan-guardian-20-5.jpg, products/ripe-puer-ku-zhu-shan-guardian-20-6.jpg",
     price: 0,
@@ -926,7 +941,7 @@ export const mockProducts = [
     brandSlug: "yunnan-sourcing",
     variations: JSON.stringify([
       {
-        sku: "guardian-2-25g",
+        sku: "ku-zhu-shan-guardian-20-ripe-puer-25g",
         price: 12,
         stock: 0,
         sort: 0,
@@ -938,7 +953,7 @@ export const mockProducts = [
         ]
       },
       {
-        sku: "guardian-2-50g",
+        sku: "ku-zhu-shan-guardian-20-ripe-puer-50g",
         price: 23,
         stock: 0,
         sort: 1,
@@ -950,7 +965,7 @@ export const mockProducts = [
         ]
       },
       {
-        sku: "guardian-2-75g",
+        sku: "ku-zhu-shan-guardian-20-ripe-puer-75g",
         price: 32,
         stock: 0,
         sort: 2,
@@ -962,10 +977,10 @@ export const mockProducts = [
         ]
       },
       {
-        sku: "guardian-2-100g",
+        sku: "ku-zhu-shan-guardian-20-ripe-puer-100g",
         price: 42,
         stock: 0,
-        sort: 2,
+        sort: 3,
         attributes: [
           {
             attributeId: "WEIGHT_G",
@@ -974,10 +989,10 @@ export const mockProducts = [
         ]
       },
       {
-        sku: "guardian-2-125g",
+        sku: "ku-zhu-shan-guardian-20-ripe-puer-125g",
         price: 53,
         stock: 0,
-        sort: 3,
+        sort: 4,
         attributes: [
           {
             attributeId: "WEIGHT_G",
@@ -986,10 +1001,10 @@ export const mockProducts = [
         ]
       },
       {
-        sku: "guardian-2-150g",
+        sku: "ku-zhu-shan-guardian-20-ripe-puer-150g",
         price: 63,
         stock: 0,
-        sort: 3,
+        sort: 5,
         attributes: [
           {
             attributeId: "WEIGHT_G",
@@ -1000,8 +1015,9 @@ export const mockProducts = [
     ])
   },
   {
-    name: "Purple Yue Guang Bai 2023",
-    slug: "purple-yue-guang-bai-2023",
+    name: "2023 Purple Yue Guang Bai",
+    slug: "2023-purple-yue-guang-bai",
+    teaCategories: ["white", "purple"],
     description: "Linked to blog post with the same slug",
     images: "products/purple-yue-guan-bai-2023-1.jpg, products/purple-yue-guan-bai-2023-2.jpg, products/purple-yue-guan-bai-2023-3.jpg, products/purple-yue-guan-bai-2023-4.jpg, products/purple-yue-guan-bai-2023-5.jpg",
     price: 129.99,
@@ -1016,7 +1032,7 @@ export const mockProducts = [
     brandSlug: "yunnan-sourcing",
     variations: JSON.stringify([
       {
-        sku: "purple-yue-guang-bai-2023-25g",
+        sku: "2023-purple-yue-guang-bai-25g",
         price: 11,
         stock: 0,
         sort: 0,
@@ -1028,7 +1044,7 @@ export const mockProducts = [
         ]
       },
       {
-        sku: "purple-yue-guang-bai-2023-50g",
+        sku: "2023-purple-yue-guang-bai-50g",
         price: 21,
         stock: 0,
         sort: 1,
@@ -1040,7 +1056,7 @@ export const mockProducts = [
         ]
       },
       {
-        sku: "purple-yue-guang-bai-2023-75g",
+        sku: "2023-purple-yue-guang-bai-75g",
         price: 29,
         stock: 0,
         sort: 1,
@@ -1052,7 +1068,7 @@ export const mockProducts = [
         ]
       },
       {
-        sku: "purple-yue-guang-bai-2023-100g",
+        sku: "2023-purple-yue-guang-bai-100g",
         price: 38,
         stock: 0,
         sort: 2,
@@ -1064,7 +1080,7 @@ export const mockProducts = [
         ]
       },
       {
-        sku: "purple-yue-guang-bai-2023-115g",
+        sku: "2023-purple-yue-guang-bai-115g",
         price: 44,
         stock: 0,
         sort: 3,
@@ -1233,8 +1249,9 @@ export const mockProducts = [
   },
  
   {
-    name: "Lincang Arbor Gong Ting Ripe Pu'er 2009 Spring",
-    slug: "lincang-arbor-gong-ting-ripe-puer-2009-spring",
+    name: "Spring 2009 Lincang Arbor Gong Ting Ripe Pu'er",
+    slug: "2009-spring-lincang-arbor-gong-ting-ripe-puer",
+    teaCategories: ["ripe-pu-er",],
     description: "Linked to blog post with the same slug",
     images:   "products/lincang-arbor-gong-ting-ripe-puer-2009-spring-1.jpg, products/lincang-arbor-gong-ting-ripe-puer-2009-spring-2.jpg, products/lincang-arbor-gong-ting-ripe-puer-2009-spring-3.jpg, products/lincang-arbor-gong-ting-ripe-puer-2009-spring-4.jpg, products/lincang-arbor-gong-ting-ripe-puer-2009-spring-5.jpg, products/lincang-arbor-gong-ting-ripe-puer-2009-spring-6.jpg",
     price: 0,
@@ -1249,7 +1266,7 @@ export const mockProducts = [
     brandSlug: "yunnan-sourcing",
     variations: JSON.stringify([
       {
-        sku: "lincang-arbor-gong-ting-ripe-puer-2009-spring-25g",
+        sku: "2009-spring-lincang-arbor-gong-ting-ripe-puer-25g",
         price: 17.00,
         stock: 0,
         sort: 1,
@@ -1261,7 +1278,7 @@ export const mockProducts = [
         ]
       },
       {
-        sku: "lincang-arbor-gong-ting-ripe-puer-2009-spring-50g",
+        sku: "2009-spring-lincang-arbor-gong-ting-ripe-puer-50g",
         price: 31.00,
         stock: 0,
         sort: 2,
@@ -1273,7 +1290,7 @@ export const mockProducts = [
         ]
       },
       {
-        sku: "lincang-arbor-gong-ting-ripe-puer-2009-spring-75g",
+        sku: "2009-spring-lincang-arbor-gong-ting-ripe-puer-75g",
         price: 43.00,
         stock: 0,
         sort: 3,
@@ -1285,7 +1302,7 @@ export const mockProducts = [
         ]
       },
       {
-        sku: "lincang-arbor-gong-ting-ripe-puer-2009-spring-100g",
+        sku: "2009-spring-lincang-arbor-gong-ting-ripe-puer-100g",
         price: 57.00,
         stock: 0,
         sort: 4,
@@ -1297,7 +1314,7 @@ export const mockProducts = [
         ]
       },
       {
-        sku: "lincang-arbor-gong-ting-ripe-puer-2009-spring-150g",
+        sku: "2009-spring-lincang-arbor-gong-ting-ripe-puer-150g",
         price: 86.00,
         stock: 0,
         sort: 5,
@@ -1311,8 +1328,9 @@ export const mockProducts = [
     ])
   },
   {
-    name: "Mengku x Menghai Ripe Pu'er 2024",
-    slug: "mengku-x-menghai-ripe-puer-2024",
+    name: "2024 Mengku x Menghai Ripe Pu'er",
+    slug: "2024-mengku-x-menghai-ripe-puer",
+    teaCategories: ["ripe-pu-er",],
     description: "Linked to blog post with the same slug",
     images:   "products/mengku-x-menghai-ripe-puer-2024-1.jpg, products/mengku-x-menghai-ripe-puer-2024-2.jpg, products/mengku-x-menghai-ripe-puer-2024-3.jpg, products/mengku-x-menghai-ripe-puer-2024-4.jpg, products/mengku-x-menghai-ripe-puer-2024-5.jpg",
     price: 0,
@@ -1327,7 +1345,7 @@ export const mockProducts = [
     brandSlug: "yunnan-sourcing",
     variations: JSON.stringify([
       {
-        sku: "mengku-x-menghai-ripe-puer-2024-25g",
+        sku: "2024-mengku-x-menghai-ripe-puer-25g",
         price: 5.00,
         stock: 0,
         sort: 1,
@@ -1339,7 +1357,7 @@ export const mockProducts = [
         ]
       },
       {
-        sku: "mengku-x-menghai-ripe-puer-2024-50g",
+        sku: "2024-mengku-x-menghai-ripe-puer-50g",
         price: 9.00,
         stock: 0,
         sort: 2,
@@ -1351,7 +1369,7 @@ export const mockProducts = [
         ]
       },
       {
-        sku: "mengku-x-menghai-ripe-puer-2024-75g",
+        sku: "2024-mengku-x-menghai-ripe-puer-75g",
         price: 13.00,
         stock: 0,
         sort: 3,
@@ -1363,7 +1381,7 @@ export const mockProducts = [
         ]
       },
       {
-        sku: "mengku-x-menghai-ripe-puer-2024-100g",
+        sku: "2024-mengku-x-menghai-ripe-puer-100g",
         price: 17.00,
         stock: 0,
         sort: 4,
@@ -1375,7 +1393,7 @@ export const mockProducts = [
         ]
       },
       {
-        sku: "mengku-x-menghai-ripe-puer-2024-145g",
+        sku: "2024-mengku-x-menghai-ripe-puer-145g",
         price: 25.00,
         stock: 0,
         sort: 5,
@@ -1389,8 +1407,9 @@ export const mockProducts = [
     ])
   },
   {
-    name: "Ma Wei Shan Gong Ting Ripe Pu'er 2018",
-    slug: "ma-wei-shan-gong-ting-ripe-puer-2018",
+    name: "2018 Ma Wei Shan Gong Ting Ripe Pu'er",
+    slug: "2018-ma-wei-shan-gong-ting-ripe-puer",
+    teaCategories: ["ripe-pu-er",],
     description: "Linked to blog post with the same slug",
     images: "products/ma-wei-shan-gong-ting-ripe-puer-2018-1.jpg, products/ma-wei-shan-gong-ting-ripe-puer-2018-2.jpg, products/ma-wei-shan-gong-ting-ripe-puer-2018-3.jpg, products/ma-wei-shan-gong-ting-ripe-puer-2018-4.jpg",
     price: 0,
@@ -1405,7 +1424,7 @@ export const mockProducts = [
     brandSlug: "yunnan-sourcing",
     variations: JSON.stringify([
       {
-        sku: "ma-wei-shan-gong-ting-ripe-puer-2018-30g",
+        sku: "2018-ma-wei-shan-gong-ting-ripe-puer-30g",
         price: 17.00,
         stock: 0,
         sort: 1,
@@ -1421,8 +1440,9 @@ export const mockProducts = [
   },
   
   {
-    name: `Sheng Pu'er Ku Zhu Shan x Kun Lu Shan "Aurora Borealis"`,
-    slug: "sheng-puer-ku-zhu-shan-x-kun-lu-shan-aurora-borealis",
+    name: `Ku Zhu Shan x Kun Lu Shan "Aurora Borealis" Raw Pu'er`,
+    slug: "ku-zhu-shan-x-kun-lu-shan-aurora-borealis-raw-puer",
+    teaCategories: ["raw-pu-er",],
     description: "Linked to blog post with the same slug",
     images: "products/sheng-puer-ku-zhu-shan-x-kun-lu-shan-aurora-borealis-1.jpg, products/sheng-puer-ku-zhu-shan-x-kun-lu-shan-aurora-borealis-2.jpg, products/sheng-puer-ku-zhu-shan-x-kun-lu-shan-aurora-borealis-3.jpg, products/sheng-puer-ku-zhu-shan-x-kun-lu-shan-aurora-borealis-4.jpg, products/sheng-puer-ku-zhu-shan-x-kun-lu-shan-aurora-borealis-5.jpg, products/sheng-puer-ku-zhu-shan-x-kun-lu-shan-aurora-borealis-6.jpg, products/sheng-puer-ku-zhu-shan-x-kun-lu-shan-aurora-borealis-7.jpg",
     price: 0,
@@ -1437,10 +1457,10 @@ export const mockProducts = [
     brandSlug: "yunnan-sourcing",
     variations: JSON.stringify([
       {
-        sku: "sheng-puer-ku-zhu-shan-x-kun-lu-shan-aurora-borealis-25g",
+        sku: "ku-zhu-shan-x-kun-lu-shan-aurora-borealis-raw-puer-25g",
         price: 15.00,
         stock: 0,
-        sort: 1,
+        sort: 0,
         attributes: [
           {
             attributeId: "WEIGHT_G",
@@ -1449,10 +1469,10 @@ export const mockProducts = [
         ]
       },
       {
-        sku: "sheng-puer-ku-zhu-shan-x-kun-lu-shan-aurora-borealis-50g",
+        sku: "ku-zhu-shan-x-kun-lu-shan-aurora-borealis-raw-puer-50g",
         price: 27.00,
         stock: 0,
-        sort: 2,
+        sort: 1,
         attributes: [
           {
             attributeId: "WEIGHT_G",
@@ -1461,10 +1481,10 @@ export const mockProducts = [
         ]
       },
       {
-        sku: "sheng-puer-ku-zhu-shan-x-kun-lu-shan-aurora-borealis-75g",
+        sku: "ku-zhu-shan-x-kun-lu-shan-aurora-borealis-raw-puer-75g",
         price: 37.00,
         stock: 0,
-        sort: 3,
+        sort: 2,
         attributes: [
           {
             attributeId: "WEIGHT_G",
@@ -1473,10 +1493,10 @@ export const mockProducts = [
         ]
       },
       {
-        sku: "sheng-puer-ku-zhu-shan-x-kun-lu-shan-aurora-borealis-100g",
+        sku: "ku-zhu-shan-x-kun-lu-shan-aurora-borealis-raw-puer-100g",
         price: 49.00,
         stock: 0,
-        sort: 4,
+        sort: 3,
         attributes: [
           {
             attributeId: "WEIGHT_G",
@@ -1485,10 +1505,10 @@ export const mockProducts = [
         ]
       },
       {
-        sku: "sheng-puer-ku-zhu-shan-x-kun-lu-shan-aurora-borealis-125g",
+        sku: "ku-zhu-shan-x-kun-lu-shan-aurora-borealis-raw-puer-125g",
         price: 62.00,
         stock: 0,
-        sort: 5,
+        sort: 4,
         attributes: [
           {
             attributeId: "WEIGHT_G",
@@ -1497,7 +1517,7 @@ export const mockProducts = [
         ]
       },
       {
-        sku: "sheng-puer-ku-zhu-shan-x-kun-lu-shan-aurora-borealis-150g",
+        sku: "ku-zhu-shan-x-kun-lu-shan-aurora-borealis-raw-puer-150g",
         price: 74.00,
         stock: 0,
         sort: 5,
@@ -1511,8 +1531,9 @@ export const mockProducts = [
     ])
   },
   {
-    name: `Ripe Pu'er "Shugar" Menghai 2019`,
-    slug: "ripe-puer-shugar-menghai-2019",
+    name: `2019 Menghai "Shugar" Ripe Pu'er`,
+    slug: "2019-menghai-shugar-ripe-puer",
+    teaCategories: ["ripe-pu-er",],
     description: "Linked to blog post with the same slug",
     images: "products/ripe-puer-shugar-menghai-2019-1.jpg, products/ripe-puer-shugar-menghai-2019-2.jpg, products/ripe-puer-shugar-menghai-2019-3.jpg, products/ripe-puer-shugar-menghai-2019-4.jpg, products/ripe-puer-shugar-menghai-2019-5.jpg",
     price: 0,
@@ -1527,7 +1548,7 @@ export const mockProducts = [
     brandSlug: "yunnan-sourcing",
     variations: JSON.stringify([
       {
-        sku: "ripe-puer-sugar-menghai-2019-72g",
+        sku: "2019-menghai-shugar-ripe-puer-72g",
         price: 13.00,
         stock: 0,
         sort: 1,
@@ -1541,8 +1562,9 @@ export const mockProducts = [
     ])
   },
   {
-    name: `Ripe Pu'er "Clean Flavor" 2019 Menghai`,
-    slug: "ripe-puer-clean-flavor-2019-menghai",
+    name: `2019 Menghai "Clean Flavor" Ripe Pu'er`,
+    slug: "2019-menghai-clean-flavor-ripe-puer",
+    teaCategories: ["ripe-pu-er",],
     description: "Linked to blog post with the same slug",
     images: "products/ripe-puer-clean-flavor-2019-menghai-1.jpg, products/ripe-puer-clean-flavor-2019-menghai-2.jpg, products/ripe-puer-clean-flavor-2019-menghai-3.jpg",
     price: 0,
@@ -1557,7 +1579,7 @@ export const mockProducts = [
     brandSlug: "yunnan-sourcing",
     variations: JSON.stringify([
       {
-        sku: "ripe-puer-sugar-menghai-2019-8g",
+        sku: "2019-menghai-clean-flavor-ripe-puer-8g",
         price: 3.00,
         stock: 0,
         sort: 1,
@@ -1571,9 +1593,9 @@ export const mockProducts = [
     ])
   },
   {
-    name: `Shu Pu'er “Dao Shi”, Mengku, Kun Lu Shan, Old Trees`,
-    slug: "shu-puer-dao-shi-mengku-kun-lu-shan-old-trees",
-    teaCategorySlug: "ripe-pu-er",
+    name: `Kun Lu Shan, Mengku, Lincang, Old Trees “Dao Shi” Ripe Pu'er`,
+    slug: "kun-lu-shan-mengku-lincang-old-trees-dao-shi-ripe-puer",
+    teaCategories: ["ripe-pu-er",],
     description: "Linked to blog post with the same slug",
     images: "products/shu-puer-dao-shi-mengku-kun-lu-shan-old-trees-1.jpg, products/shu-puer-dao-shi-mengku-kun-lu-shan-old-trees-2.jpg, products/shu-puer-dao-shi-mengku-kun-lu-shan-old-trees-3.jpg, products/shu-puer-dao-shi-mengku-kun-lu-shan-old-trees-4.jpg, products/shu-puer-dao-shi-mengku-kun-lu-shan-old-trees-5.jpg, products/shu-puer-dao-shi-mengku-kun-lu-shan-old-trees-6.jpg, products/shu-puer-dao-shi-mengku-kun-lu-shan-old-trees-7.jpg",
     price: 0,
@@ -1588,10 +1610,10 @@ export const mockProducts = [
     brandSlug: "yunnan-sourcing",
     variations: JSON.stringify([
       {
-        sku: "shu-puer-dao-shi-mengku-kun-lu-shan-old-trees-25g",
+        sku: "kun-lu-shan-mengku-lincang-old-trees-dao-shi-ripe-puer-25g",
         price: 24.00,
         stock: 0,
-        sort: 1,
+        sort: 0,
         attributes: [
           {
             attributeId: "WEIGHT_G",
@@ -1600,7 +1622,7 @@ export const mockProducts = [
         ]
       },
       {
-        sku: "shu-puer-dao-shi-mengku-kun-lu-shan-old-trees-50g",
+        sku: "kun-lu-shan-mengku-lincang-old-trees-dao-shi-ripe-puer-50g",
         price: 46.00,
         stock: 0,
         sort: 1,
@@ -1612,10 +1634,10 @@ export const mockProducts = [
         ]
       },
       {
-        sku: "shu-puer-dao-shi-mengku-kun-lu-shan-old-trees-75g",
+        sku: "kun-lu-shan-mengku-lincang-old-trees-dao-shi-ripe-puer-75g",
         price: 64.00,
         stock: 0,
-        sort: 1,
+        sort: 2,
         attributes: [
           {
             attributeId: "WEIGHT_G",
@@ -1624,10 +1646,10 @@ export const mockProducts = [
         ]
       },
       {
-        sku: "shu-puer-dao-shi-mengku-kun-lu-shan-old-trees-100g",
+        sku: "kun-lu-shan-mengku-lincang-old-trees-dao-shi-ripe-puer-100g",
         price: 84.00,
         stock: 0,
-        sort: 1,
+        sort: 3,
         attributes: [
           {
             attributeId: "WEIGHT_G",
@@ -1638,8 +1660,8 @@ export const mockProducts = [
     ])
   },
   {
-    name: `Ripe Pu'er "Black Cat", Ailao Shan, 70 year old trees, 2022`,
-    slug: "ripe-puer-black-cat-ailao-shan-70-year-old-trees-2022",
+    name: `2022 Ailao Shan, Menghai, Xishuangbanna, 70 year old trees, "Black Cat", Ripe Pu'er`,
+    slug: "2022-ailao-shan-menghai-xishuangbanna-70-year-old-trees-black-cat-ripe-puer",
     description: "Linked to blog post with the same slug",
     images: "products/ripe-puer-black-cat-ailao-shan-70-year-old-trees-2022-1.jpg, products/ripe-puer-black-cat-ailao-shan-70-year-old-trees-2022-2.jpg, products/ripe-puer-black-cat-ailao-shan-70-year-old-trees-2022-3.jpg, products/ripe-puer-black-cat-ailao-shan-70-year-old-trees-2022-4.jpg, products/ripe-puer-black-cat-ailao-shan-70-year-old-trees-2022-5.jpg, products/ripe-puer-black-cat-ailao-shan-70-year-old-trees-2022-6.jpg, products/ripe-puer-black-cat-ailao-shan-70-year-old-trees-2022-7.jpg",
     price: 0,
@@ -1654,10 +1676,10 @@ export const mockProducts = [
     brandSlug: "yunnan-sourcing",
     variations: JSON.stringify([
       {
-        sku: "ripe-puer-black-cat-ailao-shan-70-year-old-trees-2022-25g",
+        sku: "2022-ailao-shan-menghai-xishuangbanna-70-year-old-trees-black-cat-ripe-puer-25g",
         price: 8.50,
         stock: 0,
-        sort: 1,
+        sort: 0,
         attributes: [
           {
             attributeId: "WEIGHT_G",
@@ -1666,7 +1688,7 @@ export const mockProducts = [
         ]
       },
       {
-        sku: "ripe-puer-black-cat-ailao-shan-70-year-old-trees-2022-50g",
+        sku: "2022-ailao-shan-menghai-xishuangbanna-70-year-old-trees-black-cat-ripe-puer-50g",
         price: 17.00,
         stock: 0,
         sort: 1,
@@ -1678,10 +1700,10 @@ export const mockProducts = [
         ]
       },
       {
-        sku: "ripe-puer-black-cat-ailao-shan-70-year-old-trees-2022-75g",
+        sku: "2022-ailao-shan-menghai-xishuangbanna-70-year-old-trees-black-cat-ripe-puer-75g",
         price: 23.00,
         stock: 0,
-        sort: 1,
+        sort: 2,
         attributes: [
           {
             attributeId: "WEIGHT_G",
@@ -1690,10 +1712,10 @@ export const mockProducts = [
         ]
       },
       {
-        sku: "ripe-puer-black-cat-ailao-shan-70-year-old-trees-2022-100g",
+        sku: "2022-ailao-shan-menghai-xishuangbanna-70-year-old-trees-black-cat-ripe-puer-100g",
         price: 30.00,
         stock: 0,
-        sort: 1,
+        sort: 3,
         attributes: [
           {
             attributeId: "WEIGHT_G",
@@ -1710,7 +1732,7 @@ export const mockBlogPosts = [
   {
     title: `Ripe Pu-erh “Black Cat” 🐈‍⬛`,
     slug: "ripe-pu-erh-black-cat",
-    teaCategorySlug: "ripe-pu-er",
+    teaCategories: ["ripe-pu-er",],
     body: `
 🌿 Harvested in 2022 from 70-year-old trees on Ai Lao Mountain, Pu’er Prefecture, Menghai County, Xishuangbanna. After a year of aging, it was pressed in September 2023.
 
@@ -1730,12 +1752,12 @@ A cat in a cup—this tea is all about a grin from ear to ear with the first sip
 Musical pairing — Falling in Love with the cat . 💃`,
     images: null,
     publishedAt: "2025-02-25",
-    productSlug: 'ripe-puer-black-cat-ailao-shan-70-year-old-trees-2022',
+    productSlug: '2022-ailao-shan-menghai-xishuangbanna-70-year-old-trees-black-cat-ripe-puer',
   },
   {
-    title: `Sheng Puer Impression 2021`,
-    slug: "sheng-puer-impression-2021",
-    teaCategorySlug: "raw-pu-er",
+    title: `Raw Puer Impression 2021`,
+    slug: "raw-puer-impression-2021",
+    teaCategories: ["raw-pu-er",],
     body: `
 How many cups have been drunk, how many moments filled with sweetness… Today, we finished a favorite—if not a legend—a deep, multi-layered sheng pu-erh that fully lives up to its name: “Impression.”
 
@@ -1763,7 +1785,8 @@ For all tea-related inquiries ➡️ @alexrublevsky`,
   },
   {
     title: `“Dao Shi” for the Soul — Confectionery Shu Pu'er 🧁`,
-    slug: "dao-shi-for-the-soul-confectionery-shu-puer",
+    slug: "kun-lu-shan-mengku-lincang-old-trees-dao-shi-ripe-puer",
+    teaCategories: ["ripe-pu-er",],
     body: `
 📍 A blend of tea leaves harvested from ancient trees in the imperial tea garden, located on Kun Lu Shan Mountain in the Mengku region, Lincang Prefecture.
 
@@ -1779,10 +1802,11 @@ Effect
 Cha Qi gently energizes and sharpens focus, carefully restoring a productive balance 🪨`,
     images: null,
     publishedAt: "2025-02-16",
-    productSlug: 'shu-puer-dao-shi-mengku-kun-lu-shan-old-trees',
+    productSlug: 'ripe-puer-dao-shi-mengku-kun-lu-shan-old-trees',
   },
   {
     title: `Purple Tea — What Is This Mystery?`,
+    teaCategories: ["purple",],
     slug: "purple-tea-what-is-this-mystery",
     body: `
 In previous posts, I’ve mentioned purple teas (Zi Cha, 紫茶)—now it’s time to dive deeper.
@@ -1815,6 +1839,7 @@ After compression, purple tea material darkens to an almost black shade, while i
   {
     title: `Wild Purple White Tea “Ye Sheng Ya Bao”`,
     slug: "wild-purple-white-tea-ye-sheng-ya-bao",
+    teaCategories: ["purple", "white",],
     body: `
 📍 Jinggu Dai and Yi Autonomous County, Pu’er City (formerly Simao), Yunnan Province
 
@@ -1910,7 +1935,7 @@ Sign up for the ceremony 🔜 @alexrublevsky`,
   {
     title: `Ripe Pu'er "Clean Flavor" 2019 Menghai`,
     slug: "ripe-puer-clean-flavor-2019-menghai",
-    teaCategorySlug: "ripe-pu-er",
+    teaCategories: ["ripe-pu-er",],
     body: `
 📍 Tea Plantations in Menghai County.
 
@@ -1927,7 +1952,7 @@ A soft, dense infusion.
 Music for good vibes 🎵`,
 images:"",
 publishedAt: "2025-01-28",
-    productSlug: "ripe-puer-clean-flavor-2019-menghai",
+    productSlug: "2019-menghai-clean-flavor-ripe-puer",
   },
   {
     title: "Key Characteristics of High-Quality Tea 🌳",
@@ -1982,11 +2007,12 @@ Dark chocolate, caramelized sugar, woody notes, airy whipped cream, pine cones, 
 Energizes and sharpens focus 👁`,
 images:"",
 publishedAt: "2025-01-17",
-    productSlug: "ripe-puer-shugar-menghai-2019",
+    productSlug: "2019-menghai-shugar-ripe-puer",
   },
   {
-    title: `Sheng Pu'er Ku Zhu Shan x Kun Lu Shan "Aurora Borealis"`,
-    slug: "sheng-puer-ku-zhu-shan-x-kun-lu-shan-aurora-borealis",
+    title: `Raw Pu'er Ku Zhu Shan x Kun Lu Shan "Aurora Borealis"`,
+    slug: "raw-puer-ku-zhu-shan-x-kun-lu-shan-aurora-borealis",
+    teaCategories: ["raw-pu-er",],
     body: `After yesterday’s cozy eight-hour tea gathering, I’m easing back into the daily rhythm with the soft, nuanced, and colorful sheng pu-erh, “Northern Lights” 🧿
 
 📍This blend is crafted from the iconic mountains of Ku Zhu Shan and Kun Lu Shan, located in Jinggu County. Ku Zhu Shan is renowned for its ancient rattan trees, named after their unique shoots that transform into long, winding tendrils. This is linked to the harvesting method, where the entire leaf is picked except for the final ones on the branch.
@@ -1998,7 +2024,7 @@ The first sip unfolds flavors of Granny Smith apple, green gooseberry, and lemon
 As expected of top-shelf shengs, the later infusions bloom with a deep vanilla sweetness, a reminder that the best flavors await at the very end.`,
 images:"",
 publishedAt: "2025-01-13",
-    productSlug: "sheng-puer-ku-zhu-shan-x-kun-lu-shan-aurora-borealis",
+    productSlug: "ku-zhu-shan-x-kun-lu-shan-aurora-borealis-raw-puer",
   },
   {
     title: "Classification of Chinese Tea",
@@ -2072,7 +2098,7 @@ The liquor is thick, oily, and smooth, coating every part of the mouth with its 
 A tea with a very powerful energy (cha qi)! It focuses, energizes, and sends you into action!`,
     images: null,
     publishedAt: "2025-01-08",
-    productSlug: "ma-wei-shan-gong-ting-ripe-puer-2018",
+    productSlug: "2018-ma-wei-shan-gong-ting-ripe-puer",
   },
   {
     title: "What is Gong Fu Cha?",
@@ -2157,11 +2183,12 @@ The taste carries all the above descriptors, with rye bread and a generous amoun
 ♨️ An ideal companion for snug winter days at home — a delightful antidote to the winter blues!`,
 images:"",
 publishedAt: "2024-12-29",
-    productSlug: "mengku-x-menghai-ripe-puer-2024",
+    productSlug: "2024-mengku-x-menghai-ripe-puer",
   },
   {
     title: "Wild Tree Purple Moonlight White Tea from Jinggu",
     slug: "wild-tree-purple-moonlight-white-tea-from-jinggu",
+    teaCategories: ["purple", "white",],
     body: `
 Another tea we tried recently with was Yue Guang Bai ('White Moonlight’), made from wild purple tea trees (ye sheng cha) of the Camellia assamica dehongensis subspecies.
 
@@ -2189,6 +2216,7 @@ A perfect choice for sweet tooths! 🍬`,
   {
     title: "White Bunny, the Hopper! 🐇",
     slug: "white-bunny-the-hopper",
+    teaCategories: ["purple", "white",],
     body: `This white tea is crafted from material harvested in a 1:1 ratio (leaf and bud) from wild purple tea trees (ye sheng cha) growing in the Mangshi County, Dehong Prefecture. The harvest took place in April 2023.
 
 The leaves are processed using the ye guang bai method: the raw material is slightly wilted and then placed in a long tunnel with air circulation, where the oxidation process gradually halts.
@@ -2204,7 +2232,7 @@ Tea effect (cha qi):
 The experience is meditative yet energizing, inspiring movement and creativity.`,
     images: null,
     publishedAt: "2024-12-21",
-    productSlug: "purple-yue-guang-bai-2023",
+    productSlug: "2023-purple-yue-guang-bai",
   },
   {
     title: "Lincang Arbor Gong Ting Ripe Pu'er 2009 Spring",
@@ -2218,7 +2246,7 @@ On the palate, oak bark and a slight bitterness of apple pith come to the fore, 
 Gunthinchik classically gives off an ultra-fast leaf extraction, but this copy surprises with its armor-piercing resistance to spills! 🦣`,
     images: null,
     publishedAt: "2024-12-19",
-    productSlug: "lincang-arbor-gong-ting-ripe-puer-2009-spring",
+    productSlug: "2009-spring-lincang-arbor-gong-ting-ripe-puer",
   },
   
   {
@@ -2238,7 +2266,7 @@ Hui Gan (returning sweetness, 回甘) is pronounced — the tea starts fresh and
 Effect Focuses attention, gathers the mind, and energizes the body — a perfect balance! Some deeply immersive ambient for an attentive and meditative tea ritual 🎶`,
     images: "",
     publishedAt: "2025-01-21",
-    productSlug: "ripe-puer-ku-zhu-shan-guardian-20",
+    productSlug: "ku-zhu-shan-guardian-20-ripe-puer",
   },
   
   {

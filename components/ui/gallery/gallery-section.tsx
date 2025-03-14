@@ -47,7 +47,7 @@ export default function GallerySection({ type, items }: GallerySectionProps) {
   return (
     <section id={type}>
       <h1
-        className={`text-center ${styles.work_page_section_title_holder}`}
+        className={`text-center work_page_section_title_holder`}
         data-heading-reveal
       >
         {type.charAt(0).toUpperCase() + type.slice(1)}

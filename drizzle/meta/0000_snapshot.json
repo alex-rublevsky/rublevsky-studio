@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "9771de86-59c1-4711-976a-c1c8471d55bd",
+  "id": "06248984-e1c7-4f18-ba00-f0e4be00b545",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "addresses": {
@@ -136,13 +136,6 @@
           "notNull": false,
           "autoincrement": false
         },
-        "tea_category_slug": {
-          "name": "tea_category_slug",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
         "title": {
           "name": "title",
           "type": "text",
@@ -201,10 +194,55 @@
           ],
           "onDelete": "set null",
           "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "blog_tea_categories": {
+      "name": "blog_tea_categories",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
         },
-        "blog_posts_tea_category_slug_tea_categories_slug_fk": {
-          "name": "blog_posts_tea_category_slug_tea_categories_slug_fk",
-          "tableFrom": "blog_posts",
+        "blog_post_id": {
+          "name": "blog_post_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tea_category_slug": {
+          "name": "tea_category_slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "blog_tea_categories_blog_post_id_blog_posts_id_fk": {
+          "name": "blog_tea_categories_blog_post_id_blog_posts_id_fk",
+          "tableFrom": "blog_tea_categories",
+          "tableTo": "blog_posts",
+          "columnsFrom": [
+            "blog_post_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "blog_tea_categories_tea_category_slug_tea_categories_slug_fk": {
+          "name": "blog_tea_categories_tea_category_slug_tea_categories_slug_fk",
+          "tableFrom": "blog_tea_categories",
           "tableTo": "tea_categories",
           "columnsFrom": [
             "tea_category_slug"
@@ -212,7 +250,7 @@
           "columnsTo": [
             "slug"
           ],
-          "onDelete": "set null",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -620,6 +658,64 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
+    "product_tea_categories": {
+      "name": "product_tea_categories",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "product_id": {
+          "name": "product_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tea_category_slug": {
+          "name": "tea_category_slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "product_tea_categories_product_id_products_id_fk": {
+          "name": "product_tea_categories_product_id_products_id_fk",
+          "tableFrom": "product_tea_categories",
+          "tableTo": "products",
+          "columnsFrom": [
+            "product_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "product_tea_categories_tea_category_slug_tea_categories_slug_fk": {
+          "name": "product_tea_categories_tea_category_slug_tea_categories_slug_fk",
+          "tableFrom": "product_tea_categories",
+          "tableTo": "tea_categories",
+          "columnsFrom": [
+            "tea_category_slug"
+          ],
+          "columnsTo": [
+            "slug"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
     "product_variations": {
       "name": "product_variations",
       "columns": {
@@ -721,13 +817,6 @@
         },
         "brand_slug": {
           "name": "brand_slug",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "tea_category_slug": {
-          "name": "tea_category_slug",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -865,19 +954,6 @@
             "slug"
           ],
           "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "products_tea_category_slug_tea_categories_slug_fk": {
-          "name": "products_tea_category_slug_tea_categories_slug_fk",
-          "tableFrom": "products",
-          "tableTo": "tea_categories",
-          "columnsFrom": [
-            "tea_category_slug"
-          ],
-          "columnsTo": [
-            "slug"
-          ],
-          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },

@@ -140,3 +140,7 @@ body.dark {
   background-color: hsl(var(--background)) !important;
 }
 
+.work_page_section_title_holder {
+  padding-top: 6rem;
+  padding-bottom: 7rem;
+}
