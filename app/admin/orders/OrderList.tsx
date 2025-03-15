@@ -56,7 +56,7 @@ export function OrderList({ initialOrders }: OrderListProps) {
               <div>
                 <h3 className="text-lg font-semibold">Order #{order.id}</h3>
                 <p className="text-sm text-gray-500">
-                  {new Date(order.createdAt).toLocaleString()}
+                  {new Date(order.createdAt * 1000).toLocaleString()}
                 </p>
               </div>
               <div className="flex items-center gap-4">
@@ -106,6 +106,12 @@ export function OrderList({ initialOrders }: OrderListProps) {
                         {order.shippingMethod || "Not specified"}
                       </span>
                     </p>
+                    {order.completedAt && (
+                      <p>
+                        <span className="text-gray-500">Completed:</span>{" "}
+                        {new Date(order.completedAt * 1000).toLocaleString()}
+                      </p>
+                    )}
                     {order.notes && (
                       <p>
                         <span className="text-gray-500">Notes:</span>{" "}

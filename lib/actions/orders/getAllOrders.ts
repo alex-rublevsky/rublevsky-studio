@@ -17,8 +17,8 @@ export interface OrderWithDetails {
   paymentStatus: string;
   shippingMethod: string | null;
   notes: string | null;
-  createdAt: string;
-  completedAt: string | null;
+  createdAt: number;
+  completedAt: number | null;
   addresses: Array<{
     addressType: string;
     firstName: string;
@@ -91,8 +91,14 @@ async function fetchOrders(): Promise<OrderWithDetails[]> {
           paymentStatus: row.order.paymentStatus,
           shippingMethod: row.order.shippingMethod,
           notes: row.order.notes,
-          createdAt: row.order.createdAt,
-          completedAt: row.order.completedAt,
+          createdAt: row.order.createdAt instanceof Date 
+            ? Math.floor(row.order.createdAt.getTime() / 1000)
+            : row.order.createdAt,
+          completedAt: row.order.completedAt 
+            ? (row.order.completedAt instanceof Date 
+                ? Math.floor(row.order.completedAt.getTime() / 1000)
+                : row.order.completedAt)
+            : null,
           addresses: [],
           items: [],
         });

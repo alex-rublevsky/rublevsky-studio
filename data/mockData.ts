@@ -1751,7 +1751,7 @@ A cat in a cup—this tea is all about a grin from ear to ear with the first sip
 
 Musical pairing — Falling in Love with the cat . 💃`,
     images: null,
-    publishedAt: "2025-02-25",
+    publishedAt: 1740432000,
     productSlug: '2022-ailao-shan-menghai-xishuangbanna-70-year-old-trees-black-cat-ripe-puer',
   },
   {
@@ -1780,7 +1780,7 @@ With a tea like this, you want to listen to experimental ambient music, watch sq
 
 For all tea-related inquiries ➡️ @alexrublevsky`,
     images: 'blog-images/sheng-puer-impression-2021-1.jpg, blog-images/sheng-puer-impression-2021-2.jpg, blog-images/sheng-puer-impression-2021-3.jpg, blog-images/sheng-puer-impression-2021-4.jpg, blog-images/sheng-puer-impression-2021-5.jpg',
-    publishedAt: "2025-02-20",
+    publishedAt: 1740000000,
     productSlug: null,
   },
   {
@@ -1801,8 +1801,8 @@ The flavor continues with a rich poppy seed bun, complemented by creaminess and 
 Effect
 Cha Qi gently energizes and sharpens focus, carefully restoring a productive balance 🪨`,
     images: null,
-    publishedAt: "2025-02-16",
-    productSlug: 'ripe-puer-dao-shi-mengku-kun-lu-shan-old-trees',
+    publishedAt: 1739654400,
+    productSlug: 'kun-lu-shan-mengku-lincang-old-trees-dao-shi-ripe-puer',
   },
   {
     title: `Purple Tea — What Is This Mystery?`,
@@ -1833,7 +1833,7 @@ Three Types of Purple Tea Material
 How Does Purple Tea Look and Taste?
 After compression, purple tea material darkens to an almost black shade, while its infusion takes on a golden-yellow hue. The flavor profile features less of the typical pu-erh astringency, replaced by a distinct sweetness reminiscent of pomegranate peel or mangosteen. However, the sensory experience of purple tea is highly nuanced—it’s something that truly must be tasted firsthand!`,
     images: 'blog-images/purple-tea-what-is-this-mystery.jpg',
-    publishedAt: "2025-02-12",
+    publishedAt: 1739376000, // 2025-02-12
     productSlug: null,
   },
   {
@@ -1863,7 +1863,7 @@ Green grapes, watermelon juice, juniper needles, blackcurrant leaf, thyme, a hin
 
 Been wanting to try this tea or learn something interesting about it? 🔜 @alexrublevsky`,
     images: 'blog-images/wild-purple-white-tea-ye-sheng-ya-bao-1.jpg, blog-images/wild-purple-white-tea-ye-sheng-ya-bao-2.jpg, blog-images/wild-purple-white-tea-ye-sheng-ya-bao-3.jpg, blog-images/wild-purple-white-tea-ye-sheng-ya-bao-4.jpg, blog-images/wild-purple-white-tea-ye-sheng-ya-bao-5.jpg',
-    publishedAt: "2025-02-08",
+    publishedAt: 1738944000, // 2025-02-08
     productSlug: null,
   },
   {
@@ -1895,7 +1895,7 @@ In traditional medicine, blue tea has been used for infertility, menstrual disor
 
 That’s the fascinating world of blue tea!`,
     images: 'blog-images/blue-tea-anchan-1.jpg, blog-images/blue-tea-anchan-2.jpg, blog-images/blue-tea-anchan-3.jpg, blog-images/blue-tea-anchan-4.jpg',
-    publishedAt: "2025-02-05",
+    publishedAt: 1738684800, // 2025-02-05
     productSlug: null,
   },
   {
@@ -1929,7 +1929,7 @@ Have a full meal at least an hour before the gathering and refrain from smoking.
 
 Sign up for the ceremony 🔜 @alexrublevsky`,
     images: 'blog-images/ceremony-introduction-to-chinese-tea.jpg',
-    publishedAt: "2025-01-29",
+    publishedAt: 1738080000, // 2025-01-29
     productSlug: null,
   },
   {
@@ -1951,7 +1951,7 @@ A soft, dense infusion.
 
 Music for good vibes 🎵`,
 images:"",
-publishedAt: "2025-01-28",
+publishedAt: 1737993600, // 2025-01-28
     productSlug: "2019-menghai-clean-flavor-ripe-puer",
   },
   {
@@ -1985,7 +1985,7 @@ This strength can be described as the tea’s ability to alter the drinker’s p
 
 This phenomenon is more familiar to seasoned tea enthusiasts and is directly related to the number of mindful tea practices one has engaged in, as well as one’s exposure to “good teas.”`,
     images: null,
-    publishedAt: "2025-01-27",
+    publishedAt: 1737907200, // 2025-01-27
     productSlug: null,
   },
   {
@@ -2006,7 +2006,7 @@ Dark chocolate, caramelized sugar, woody notes, airy whipped cream, pine cones, 
 
 Energizes and sharpens focus 👁`,
 images:"",
-publishedAt: "2025-01-17",
+publishedAt: 1737129600, // 2025-01-17
     productSlug: "2019-menghai-shugar-ripe-puer",
   },
   {
@@ -2023,7 +2023,7 @@ The first sip unfolds flavors of Granny Smith apple, green gooseberry, and lemon
 
 As expected of top-shelf shengs, the later infusions bloom with a deep vanilla sweetness, a reminder that the best flavors await at the very end.`,
 images:"",
-publishedAt: "2025-01-13",
+publishedAt: 1736784000, // 2025-01-13
     productSlug: "ku-zhu-shan-x-kun-lu-shan-aurora-borealis-raw-puer",
   },
   {
@@ -2072,7 +2072,7 @@ This process produces raw material known as *mao cha*, which can be pressed into
 
 Thanks to gentle thermal processing and the rich composition of large-leaf tea trees, Pu’er creates a unique environment for microorganisms, making it one of the most dynamic and evolving post-fermented teas. This is particularly evident in *Sheng Pu’er*, where aging continues for decades, revealing new layers of flavor and aroma over time.`,
     images: null,
-    publishedAt: "2025-01-11",
+    publishedAt: 1736649600,
     productSlug: null,
   },
   {
@@ -2097,7 +2097,7 @@ The liquor is thick, oily, and smooth, coating every part of the mouth with its 
 
 A tea with a very powerful energy (cha qi)! It focuses, energizes, and sends you into action!`,
     images: null,
-    publishedAt: "2025-01-08",
+    publishedAt: 1736390400,
     productSlug: "2018-ma-wei-shan-gong-ting-ripe-puer",
   },
   {
@@ -2127,7 +2127,7 @@ Every type of tea is unique, requiring a specific approach for optimal enjoyment
 
 While Cha Dao is rich in nuances, there’s no need to grasp everything at once. Simply focus on one cup at a time. 🍵`,
     images: null,
-    publishedAt: "2025-01-04",
+    publishedAt: 1736044800,
     productSlug: null,
   },
   {
@@ -2138,7 +2138,7 @@ While Cha Dao is rich in nuances, there’s no need to grasp everything at once.
 
 🎄 May this season bring you joy in the restoration of cosmic harmony in the present moment, and in the revival of the primordial ‘pure’ time, the sacred essence that existed at the dawn of creation.`,
     images: null,
-    publishedAt: "2025-01-01",
+    publishedAt: 1735776000,
     productSlug: null,
   },
   {
@@ -2166,7 +2166,7 @@ The dry leaves mesmerize with a bright aroma of coffee beans and the pastry "swe
 
 The taste carries all the above descriptors, with rye bread and a generous amount of raisins standing out the most.`,
     images: "blog-images/sweet-potato-zheng-shan-xiao-zhong-black-tea-spring-2024-1.jpg, blog-images/sweet-potato-zheng-shan-xiao-zhong-black-tea-spring-2024-2.jpg",
-    publishedAt: "2024-12-24",
+    publishedAt: 1735084800,
     productSlug: null,
   },
   {
@@ -2182,7 +2182,7 @@ The taste carries all the above descriptors, with rye bread and a generous amoun
 
 ♨️ An ideal companion for snug winter days at home — a delightful antidote to the winter blues!`,
 images:"",
-publishedAt: "2024-12-29",
+publishedAt: 1735516800,
     productSlug: "2024-mengku-x-menghai-ripe-puer",
   },
   {
@@ -2210,7 +2210,7 @@ From the first sip, the tea stimulates the salivary glands: chrysanthemum, dark 
 
 A perfect choice for sweet tooths! 🍬`,
     images: "blog-images/wild-tree-purple-moonlight-white-tea-from-jinggu-1.jpg, blog-images/wild-tree-purple-moonlight-white-tea-from-jinggu-2.jpg",
-    publishedAt: "2024-12-24T12:00:00",
+    publishedAt: 1703419200, // 2024-12-24
     productSlug: null,
   },
   {
@@ -2231,7 +2231,7 @@ Tea effect (cha qi):
 
 The experience is meditative yet energizing, inspiring movement and creativity.`,
     images: null,
-    publishedAt: "2024-12-21",
+    publishedAt: 1734825600,
     productSlug: "2023-purple-yue-guang-bai",
   },
   {
@@ -2245,7 +2245,7 @@ On the palate, oak bark and a slight bitterness of apple pith come to the fore, 
 
 Gunthinchik classically gives off an ultra-fast leaf extraction, but this copy surprises with its armor-piercing resistance to spills! 🦣`,
     images: null,
-    publishedAt: "2024-12-19",
+    publishedAt: 1734652800,
     productSlug: "2009-spring-lincang-arbor-gong-ting-ripe-puer",
   },
   
@@ -2265,7 +2265,7 @@ Hui Gan (returning sweetness, 回甘) is pronounced — the tea starts fresh and
     
 Effect Focuses attention, gathers the mind, and energizes the body — a perfect balance! Some deeply immersive ambient for an attentive and meditative tea ritual 🎶`,
     images: "",
-    publishedAt: "2025-01-21",
+    publishedAt: 1737513600,
     productSlug: "ku-zhu-shan-guardian-20-ripe-puer",
   },
   
@@ -2280,7 +2280,7 @@ I discovered the tea world in 2021, and began conducting ceremonies this year.
 
 I was hooked by the phenomenon's limitless spectrum of flavors and aromas, where the final product is shaped by a myriad of variables. Among them: the location and altitude of the Camellia sinensis (tea tree), its age, cultivar, season, year and batch of harvest, as well as the choice of the part of the plant: leaf, bud or cuttings. Equally important is the processing of the raw material: every tiny detail, from the roasting temperature to the type of fermentation, forms the unique categories of Chinese tea, each of which would take more than a lifetime to study....`,
     images: "me.jpg",
-    publishedAt: "2024-12-18",
+    publishedAt: 1702857600, // 2024-12-18
     productSlug: null,
   },
 ]; 

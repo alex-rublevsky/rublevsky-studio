@@ -17,7 +17,7 @@ interface BlogPostProps {
   images: string | null;
   productSlug?: string | null;
   slug: string;
-  publishedAt: string;
+  publishedAt: number;
 }
 
 function BlogPost({
@@ -49,14 +49,12 @@ function BlogPost({
                 </Link>
               )}
               <time className="whitespace-nowrap">
-                {publishedAt
-                  ? new Date(publishedAt).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                      timeZone: "UTC",
-                    })
-                  : ""}
+                {new Date(publishedAt * 1000).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                  timeZone: "UTC",
+                })}
               </time>
             </div>
             <CopyLinkButton sectionId={slug} />

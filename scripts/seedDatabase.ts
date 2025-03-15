@@ -1,3 +1,6 @@
+//TODO separate seeding into chunks to be able to seed particular tables only
+//
+
 import { mockBlogPosts, mockProducts, mockCategories, mockBrands, mockTeaCategories } from '../data/mockData';
 import Database from 'better-sqlite3';
 import { resolve } from 'path';
@@ -24,6 +27,35 @@ type Product = {
   weight?: string;
 };
 
+// Define available tables for seeding
+type TableName = 
+  | 'tea_categories'
+  | 'categories'
+  | 'brands'
+  | 'products'
+  | 'blog_posts'
+  | 'all';
+
+// Define table dependencies
+const tableDependencies: Record<TableName, TableName[]> = {
+  tea_categories: [],
+  categories: [],
+  brands: [],
+  products: ['categories', 'brands', 'tea_categories'],
+  blog_posts: ['tea_categories'],
+  all: []
+};
+
+// Define dependent tables that need to be cleared when clearing a specific table
+const tableDependentClearMap: Record<TableName, string[]> = {
+  products: ['variation_attributes', 'product_variations', 'product_tea_categories'],
+  blog_posts: ['blog_tea_categories'],
+  tea_categories: ['product_tea_categories', 'blog_tea_categories'],
+  categories: [],
+  brands: [],
+  all: []
+};
+
 // Colors for console output
 const colors = {
   reset: '\x1b[0m',
@@ -38,6 +70,191 @@ const colors = {
 // Check if we're targeting the remote database
 const isRemote = process.argv.includes('--remote');
 const DB_NAME = 'rublevsky-studio-storage';
+
+// Get tables to seed from command line arguments
+const tablesToSeed = process.argv
+  .filter(arg => arg.startsWith('--table='))
+  .map(arg => arg.replace('--table=', '')) as TableName[];
+
+// If no specific tables are specified, seed all tables
+const shouldSeedAll = tablesToSeed.length === 0 || tablesToSeed.includes('all');
+
+// Function to get all required tables including dependencies
+function getRequiredTables(tables: TableName[]): TableName[] {
+  const required = new Set<TableName>();
+  
+  function addDependencies(table: TableName) {
+    if (!required.has(table)) {
+      required.add(table);
+      tableDependencies[table]?.forEach(dep => addDependencies(dep));
+    }
+  }
+  
+  tables.forEach(table => addDependencies(table));
+  return Array.from(required);
+}
+
+// Get the final list of tables to seed
+const finalTablesToSeed = shouldSeedAll 
+  ? ['tea_categories', 'categories', 'brands', 'products', 'blog_posts'] 
+  : getRequiredTables(tablesToSeed);
+
+// Function to clear specific tables
+async function clearTables(tables: string[], db?: any) {
+  console.log('\n🗑️ Clearing existing data...');
+  
+  // Get all tables that need to be cleared based on dependencies
+  const tablesToClear = new Set<string>();
+  
+  tables.forEach(table => {
+    // Add the table itself
+    tablesToClear.add(table);
+    // Add its dependent tables that need to be cleared
+    if (tableDependentClearMap[table as TableName]) {
+      tableDependentClearMap[table as TableName].forEach(depTable => 
+        tablesToClear.add(depTable)
+      );
+    }
+  });
+  
+  const sortedTablesToDelete = Array.from(tablesToClear).sort((a, b) => {
+    // Clear dependent tables first (e.g., clear product_tea_categories before products)
+    const aIsDep = a.includes('_');
+    const bIsDep = b.includes('_');
+    if (aIsDep && !bIsDep) return -1;
+    if (!aIsDep && bIsDep) return 1;
+    return 0;
+  });
+  
+  if (isRemote) {
+    for (const table of sortedTablesToDelete) {
+      await executeRemoteSQL(`DELETE FROM ${table};`, `Clearing ${table}`);
+      console.log(`✅ Cleared ${table}`);
+    }
+  } else if (db) {
+    for (const table of sortedTablesToDelete) {
+      db.prepare(`DELETE FROM ${table}`).run();
+      console.log(`✅ Cleared ${table}`);
+    }
+  }
+}
+
+// Seeding functions for each table type
+async function seedTeaCategories(db?: any) {
+  if (!finalTablesToSeed.includes('tea_categories')) return;
+  
+  console.log('\n🍵 Seeding tea categories...');
+  if (isRemote) {
+    for (const teaCategory of mockTeaCategories) {
+      await executeRemoteSQL(`
+        INSERT INTO tea_categories (name, slug, is_active)
+        VALUES (
+          '${teaCategory.name.replace(/'/g, "''")}',
+          '${teaCategory.slug.replace(/'/g, "''")}',
+          ${teaCategory.isActive ? 1 : 0}
+        );
+      `, `Adding tea category: ${teaCategory.name}`);
+    }
+    console.log(`✅ Added ${mockTeaCategories.length} tea categories`);
+  } else if (db) {
+    const insertTeaCategory = db.prepare(`
+      INSERT INTO tea_categories (name, slug, is_active)
+      VALUES (?, ?, ?)
+    `);
+    
+    try {
+      for (const category of mockTeaCategories) {
+        insertTeaCategory.run(
+          category.name,
+          category.slug,
+          category.isActive ? 1 : 0
+        );
+        console.log(`✅ Added tea category: ${category.name}`);
+      }
+    } catch (error) {
+      console.error('❌ Error seeding tea categories:', error);
+      throw error;
+    }
+  }
+}
+
+async function seedCategories(db?: any) {
+  if (!finalTablesToSeed.includes('categories')) return;
+  
+  console.log('\n🏷️ Seeding categories...');
+  if (isRemote) {
+    for (const category of mockCategories) {
+      await executeRemoteSQL(`
+        INSERT INTO categories (name, slug, is_active)
+        VALUES (
+          '${category.name.replace(/'/g, "''")}',
+          '${category.slug.replace(/'/g, "''")}',
+          ${category.isActive ? 1 : 0}
+        );
+      `, `Adding category: ${category.name}`);
+    }
+    console.log(`✅ Added ${mockCategories.length} categories`);
+  } else if (db) {
+    const insertCategory = db.prepare(`
+      INSERT INTO categories (name, slug, is_active)
+      VALUES (?, ?, ?)
+      RETURNING id
+    `);
+    
+    try {
+      for (const category of mockCategories) {
+        insertCategory.run(
+          category.name,
+          category.slug,
+          category.isActive ? 1 : 0
+        );
+        console.log(`✅ Added category: ${category.name} (${category.slug})`);
+      }
+    } catch (error) {
+      console.error('❌ Error seeding categories:', error);
+      throw error;
+    }
+  }
+}
+
+async function seedBrands(db?: any) {
+  if (!finalTablesToSeed.includes('brands')) return;
+  
+  console.log('\n🏢 Seeding brands...');
+  if (isRemote) {
+    for (const brand of mockBrands) {
+      await executeRemoteSQL(`
+        INSERT INTO brands (name, slug, is_active)
+        VALUES (
+          '${brand.name.replace(/'/g, "''")}',
+          '${brand.slug.replace(/'/g, "''")}',
+          ${brand.isActive ? 1 : 0}
+        );
+      `, `Adding brand: ${brand.name}`);
+    }
+    console.log(`✅ Added ${mockBrands.length} brands`);
+  } else if (db) {
+    const insertBrand = db.prepare(`
+      INSERT INTO brands (name, slug, is_active)
+      VALUES (?, ?, ?)
+      RETURNING id
+    `);
+    
+    try {
+      for (const brand of mockBrands) {
+        insertBrand.run(
+          brand.name,
+          brand.slug,
+          brand.isActive ? 1 : 0
+        );
+        console.log(`✅ Added brand: ${brand.name} (${brand.slug})`);
+      }
+    } catch (error) {
+      console.error('❌ Error seeding brands:', error);
+      throw error;
+    }
+  }
+}
 
 // Dynamically find the SQLite database file
 function findLocalDbPath() {
@@ -100,6 +317,7 @@ function createBatchInsert(tableName: string, columns: string[], values: any[][]
 
 async function seedDatabase() {
   console.log(`🌱 Seeding ${isRemote ? 'remote' : 'local'} database...`);
+  console.log(`📊 Tables to seed: ${finalTablesToSeed.join(', ')}`);
   
   try {
     let db: any;
@@ -107,186 +325,156 @@ async function seedDatabase() {
     if (isRemote) {
       console.log('📡 Connecting to remote database...');
       
-      // Clear all existing data without using transactions
-      console.log('\n🗑️ Clearing existing data...');
-      const tablesToClear = [
-        'variation_attributes',
-        'product_variations',
-        'blog_tea_categories',
-        'product_tea_categories',
-        'blog_posts',
-        'products',
-        'tea_categories',
-        'categories',
-        'brands'
-      ];
-      for (const table of tablesToClear) {
-        await executeRemoteSQL(`DELETE FROM ${table};`, `Clearing ${table}`);
-        console.log(`✅ Cleared ${table}`);
-      }
+      // Clear and seed tables in order
+      await clearTables(finalTablesToSeed);
+      await seedTeaCategories();
+      await seedCategories();
+      await seedBrands();
       
-      // Seed tea categories first
-      console.log('\n🍵 Seeding tea categories...');
-      for (const teaCategory of mockTeaCategories) {
-        await executeRemoteSQL(`
-          INSERT INTO tea_categories (name, slug, is_active)
-          VALUES (
-            '${teaCategory.name.replace(/'/g, "''")}',
-            '${teaCategory.slug.replace(/'/g, "''")}',
-            ${teaCategory.isActive ? 1 : 0}
-          );
-        `, `Adding tea category: ${teaCategory.name}`);
-      }
-      console.log(`✅ Added ${mockTeaCategories.length} tea categories`);
-      
-      // Seed categories
-      console.log('\n🏷️ Seeding categories...');
-      for (const category of mockCategories) {
-        await executeRemoteSQL(`
-          INSERT INTO categories (name, slug, is_active)
-          VALUES (
-            '${category.name.replace(/'/g, "''")}',
-            '${category.slug.replace(/'/g, "''")}',
-            ${category.isActive ? 1 : 0}
-          );
-        `, `Adding category: ${category.name}`);
-      }
-      console.log(`✅ Added ${mockCategories.length} categories`);
-      
-      // Seed brands
-      console.log('\n🏢 Seeding brands...');
-      for (const brand of mockBrands) {
-        await executeRemoteSQL(`
-          INSERT INTO brands (name, slug, is_active)
-          VALUES (
-            '${brand.name.replace(/'/g, "''")}',
-            '${brand.slug.replace(/'/g, "''")}',
-            ${brand.isActive ? 1 : 0}
-          );
-        `, `Adding brand: ${brand.name}`);
-      }
-      console.log(`✅ Added ${mockBrands.length} brands`);
-      
-      // Seed products
-      console.log('\n🛍️ Seeding products...');
-      for (const product of mockProducts) {
-        // Insert the product first
-        const result = await executeRemoteSQL(`
-          INSERT INTO products (
-            category_slug, brand_slug, name, slug, description, images, 
-            price, is_active, is_featured, discount, has_variations, 
-            weight, stock, unlimited_stock, created_at
-          )
-          VALUES (
-            '${product.categorySlug.replace(/'/g, "''")}',
-            '${product.brandSlug.replace(/'/g, "''")}',
-            '${product.name.replace(/'/g, "''")}',
-            '${product.slug.replace(/'/g, "''")}',
-            '${product.description.replace(/'/g, "''")}',
-            '${product.images.replace(/'/g, "''")}',
-            ${product.price},
-            ${product.isActive ? 1 : 0},
-            ${product.isFeatured ? 1 : 0},
-            ${product.discount === null ? 'NULL' : product.discount},
-            ${product.hasVariations ? 1 : 0},
-            ${product.weight ? `'${product.weight.replace(/'/g, "''")}'` : 'NULL'},
-            ${product.stock},
-            ${product.unlimitedStock ? 1 : 0},
-            '${new Date().toISOString()}'
-          ) RETURNING id;
-        `, `Adding product: ${product.name}`);
+      if (finalTablesToSeed.includes('products')) {
+        // Seed products
+        console.log('\n🛍️ Seeding products...');
+        for (const product of mockProducts) {
+          // Insert the product first
+          const result = await executeRemoteSQL(`
+            INSERT INTO products (
+              category_slug, brand_slug, name, slug, description, images, 
+              price, is_active, is_featured, discount, has_variations, 
+              weight, stock, unlimited_stock, created_at
+            )
+            VALUES (
+              '${product.categorySlug.replace(/'/g, "''")}',
+              '${product.brandSlug.replace(/'/g, "''")}',
+              '${product.name.replace(/'/g, "''")}',
+              '${product.slug.replace(/'/g, "''")}',
+              '${product.description.replace(/'/g, "''")}',
+              '${product.images.replace(/'/g, "''")}',
+              ${product.price},
+              ${product.isActive ? 1 : 0},
+              ${product.isFeatured ? 1 : 0},
+              ${product.discount === null ? 'NULL' : product.discount},
+              ${product.hasVariations ? 1 : 0},
+              ${product.weight ? `'${product.weight.replace(/'/g, "''")}'` : 'NULL'},
+              ${product.stock},
+              ${product.unlimitedStock ? 1 : 0},
+              ${Math.floor(Date.now() / 1000)}
+            ) RETURNING id;
+          `, `Adding product: ${product.name}`);
 
-        // Insert tea categories if they exist
-        if (product.teaCategories && Array.isArray(product.teaCategories)) {
-          for (const teaCategorySlug of product.teaCategories) {
-            await executeRemoteSQL(`
-              INSERT INTO product_tea_categories (product_id, tea_category_slug)
-              VALUES (${result.id}, '${teaCategorySlug.replace(/'/g, "''")}');
-            `, `Adding tea category ${teaCategorySlug} to product: ${product.name}`);
-          }
-        }
+          // Insert tea categories if they exist and we have a valid product ID
+          if (product.teaCategories && Array.isArray(product.teaCategories) && result && result.id) {
+            for (const teaCategorySlug of product.teaCategories) {
+              // Verify tea category exists before inserting
+              const teaCategoryExists = await executeRemoteSQL(`
+                SELECT slug FROM tea_categories WHERE slug = '${teaCategorySlug.replace(/'/g, "''")}';
+              `, `Verifying tea category: ${teaCategorySlug}`);
 
-        // Insert variations if they exist
-        if (product.hasVariations && product.variations) {
-          const variations = JSON.parse(product.variations);
-          for (const variation of variations) {
-            // Generate a SKU if not provided
-            const sku = `${product.slug}-${variation.name.toLowerCase().replace(/\s+/g, '-')}`;
-            
-            // Insert variation
-            await executeRemoteSQL(`
-              WITH product_id AS (
-                SELECT id FROM products WHERE slug = '${product.slug.replace(/'/g, "''")}'
-              )
-              INSERT INTO product_variations (
-                product_id, sku, price, stock, sort,
-                created_at
-              )
-              SELECT 
-                product_id.id,
-                '${sku.replace(/'/g, "''")}',
-                ${variation.price},
-                ${variation.stock},
-                ${variation.sort || 0},
-                '${new Date().toISOString()}'
-              FROM product_id;
-            `, `Adding variation: ${variation.name} for product: ${product.name}`);
-
-            // Insert variation attributes
-            if (variation.attributes && Array.isArray(variation.attributes)) {
-              for (const attr of variation.attributes) {
-                await executeRemoteSQL(`
-                  WITH variation_id AS (
-                    SELECT pv.id 
-                    FROM product_variations pv
-                    JOIN products p ON p.id = pv.product_id
-                    WHERE p.slug = '${product.slug.replace(/'/g, "''")}' 
-                    AND pv.sku = '${sku.replace(/'/g, "''")}'
-                  )
-                  INSERT INTO variation_attributes (
-                    product_variation_id, attributeId, value,
-                    created_at
-                  )
-                  SELECT 
-                    variation_id.id,
-                    '${attr.attributeId}',
-                    '${attr.value}',
-                    '${new Date().toISOString()}'
-                  FROM variation_id;
-                `, `Adding attribute: ${attr.attributeId} for variation: ${variation.name}`);
+              if (!teaCategoryExists) {
+                console.warn(`⚠️ Skipping invalid tea category "${teaCategorySlug}" for product: ${product.name}`);
+                continue;
               }
+
+              await executeRemoteSQL(`
+                INSERT INTO product_tea_categories (product_id, tea_category_slug)
+                VALUES (${result.id}, '${teaCategorySlug.replace(/'/g, "''")}');
+              `, `Adding tea category ${teaCategorySlug} to product: ${product.name}`);
             }
           }
-          console.log(`✅ Added product: ${product.name} with ${variations.length} variations`);
+
+          // Insert variations if they exist
+          if (product.hasVariations && product.variations) {
+            const variations = JSON.parse(product.variations);
+            for (const variation of variations) {
+              // Generate a SKU using variation attributes or a fallback
+              const sku = variation.sku || `${product.slug}-${variation.attributes?.map((attr: { value: string }) => attr.value.toLowerCase()).join('-') || Date.now()}`;
+              
+              // Insert variation
+              await executeRemoteSQL(`
+                WITH product_id AS (
+                  SELECT id FROM products WHERE slug = '${product.slug.replace(/'/g, "''")}'
+                )
+                INSERT INTO product_variations (
+                  product_id, sku, price, stock, sort,
+                  created_at
+                )
+                SELECT 
+                  product_id.id,
+                  '${sku.replace(/'/g, "''")}',
+                  ${variation.price},
+                  ${variation.stock},
+                  ${variation.sort || 0},
+                  ${Math.floor(Date.now() / 1000)}
+                FROM product_id;
+              `, `Adding variation: ${variation.name} for product: ${product.name}`);
+
+              // Insert variation attributes
+              if (variation.attributes && Array.isArray(variation.attributes)) {
+                for (const attr of variation.attributes) {
+                  await executeRemoteSQL(`
+                    WITH variation_id AS (
+                      SELECT pv.id 
+                      FROM product_variations pv
+                      JOIN products p ON p.id = pv.product_id
+                      WHERE p.slug = '${product.slug.replace(/'/g, "''")}' 
+                      AND pv.sku = '${sku.replace(/'/g, "''")}'
+                    )
+                    INSERT INTO variation_attributes (
+                      product_variation_id, attributeId, value,
+                      created_at
+                    )
+                    SELECT 
+                      variation_id.id,
+                      '${attr.attributeId}',
+                      '${attr.value}',
+                      ${Math.floor(Date.now() / 1000)}
+                    FROM variation_id;
+                  `, `Adding attribute: ${attr.attributeId} for variation: ${variation.name}`);
+                }
+              }
+            }
+            console.log(`✅ Added product: ${product.name} with ${variations.length} variations`);
+          }
         }
       }
       
-      // Seed blog posts
-      console.log('\n📝 Seeding blog posts...');
-      for (const post of mockBlogPosts) {
-        // Insert the blog post first
-        const result = await executeRemoteSQL(`
-          INSERT INTO blog_posts (
-            title, slug, body, images, product_slug,
-            published_at
-          )
-          VALUES (
-            '${post.title.replace(/'/g, "''")}',
-            '${post.slug.replace(/'/g, "''")}',
-            '${post.body.replace(/'/g, "''")}',
-            ${post.images ? `'${post.images.replace(/'/g, "''")}'` : 'NULL'},
-            ${post.productSlug ? `'${post.productSlug.replace(/'/g, "''")}'` : 'NULL'},
-            '${post.publishedAt}'
-          ) RETURNING id;
-        `, `Adding blog post: ${post.title}`);
+      if (finalTablesToSeed.includes('blog_posts')) {
+        // Seed blog posts
+        console.log('\n📝 Seeding blog posts...');
+        for (const post of mockBlogPosts) {
+          // Insert the blog post first
+          const result = await executeRemoteSQL(`
+            INSERT INTO blog_posts (
+              title, slug, body, images, product_slug,
+              published_at
+            )
+            VALUES (
+              '${post.title.replace(/'/g, "''")}',
+              '${post.slug.replace(/'/g, "''")}',
+              '${post.body.replace(/'/g, "''")}',
+              ${post.images ? `'${post.images.replace(/'/g, "''")}'` : 'NULL'},
+              ${post.productSlug ? `'${post.productSlug.replace(/'/g, "''")}'` : 'NULL'},
+              ${post.publishedAt}
+            ) RETURNING id;
+          `, `Adding blog post: ${post.title}`);
 
-        // Insert tea categories if they exist
-        if (post.teaCategories && Array.isArray(post.teaCategories)) {
-          for (const teaCategorySlug of post.teaCategories) {
-            await executeRemoteSQL(`
-              INSERT INTO blog_tea_categories (blog_post_id, tea_category_slug)
-              VALUES (${result.id}, '${teaCategorySlug.replace(/'/g, "''")}');
-            `, `Adding tea category ${teaCategorySlug} to blog post: ${post.title}`);
+          // Insert tea categories if they exist and we have a valid blog post ID
+          if (post.teaCategories && Array.isArray(post.teaCategories) && result && result.id) {
+            for (const teaCategorySlug of post.teaCategories) {
+              // Verify tea category exists before inserting
+              const teaCategoryExists = await executeRemoteSQL(`
+                SELECT slug FROM tea_categories WHERE slug = '${teaCategorySlug.replace(/'/g, "''")}';
+              `, `Verifying tea category: ${teaCategorySlug}`);
+
+              if (!teaCategoryExists) {
+                console.warn(`⚠️ Skipping invalid tea category "${teaCategorySlug}" for blog post: ${post.title}`);
+                continue;
+              }
+
+              await executeRemoteSQL(`
+                INSERT INTO blog_tea_categories (blog_post_id, tea_category_slug)
+                VALUES (${result.id}, '${teaCategorySlug.replace(/'/g, "''")}');
+              `, `Adding tea category ${teaCategorySlug} to blog post: ${post.title}`);
+            }
           }
         }
       }
@@ -302,203 +490,113 @@ async function seedDatabase() {
       }
       
       console.log(`📂 Using database at: ${dbPath}`);
-      
-      // Connect directly to the SQLite database
       db = new Database(dbPath);
       
       try {
         // Begin transaction
         db.prepare('BEGIN').run();
         
-        // Clear tables in reverse dependency order
-        console.log('🗑️ Clearing existing data...');
-        const tablesToClear = [
-          'variation_attributes',
-          'product_variations',
-          'blog_tea_categories',
-          'product_tea_categories',
-          'blog_posts',
-          'products',
-          'tea_categories',
-          'categories',
-          'brands'
-        ];
+        // Clear and seed tables in order
+        await clearTables(finalTablesToSeed, db);
+        await seedTeaCategories(db);
+        await seedCategories(db);
+        await seedBrands(db);
         
-        for (const table of tablesToClear) {
-          db.prepare(`DELETE FROM ${table}`).run();
-          console.log(`✅ Cleared ${table}`);
-        }
-        
-        // Seed tea categories first
-        console.log('\n🍵 Seeding tea categories...');
-        const insertTeaCategory = db.prepare(`
-          INSERT INTO tea_categories (name, slug, is_active)
-          VALUES (?, ?, ?)
-        `);
-        
-        try {
-          for (const category of mockTeaCategories) {
-            insertTeaCategory.run(
-              category.name,
-              category.slug,
-              category.isActive ? 1 : 0
-            );
-            console.log(`✅ Added tea category: ${category.name}`);
-          }
-        } catch (error) {
-          console.error('❌ Error seeding tea categories:', error);
-          throw error;
-        }
-        
-        // Seed categories first (no dependencies)
-        console.log('\n🏷️ Seeding categories...');
-        const insertCategory = db.prepare(`
-          INSERT INTO categories (name, slug, is_active)
-          VALUES (?, ?, ?)
-          RETURNING id
-        `);
-        
-        try {
-          for (const category of mockCategories) {
-            const result = insertCategory.run(
-              category.name,
-              category.slug,
-              category.isActive ? 1 : 0
-            );
-            console.log(`✅ Added category: ${category.name} (${category.slug})`);
-          }
-        } catch (error) {
-          console.error('❌ Error seeding categories:', error);
-          throw error;
-        }
-        
-        // Seed brands next (no dependencies)
-        console.log('\n🏢 Seeding brands...');
-        const insertBrand = db.prepare(`
-          INSERT INTO brands (name, slug, is_active)
-          VALUES (?, ?, ?)
-          RETURNING id
-        `);
-        
-        try {
-          for (const brand of mockBrands) {
-            const result = insertBrand.run(
-              brand.name,
-              brand.slug,
-              brand.isActive ? 1 : 0
-            );
-            console.log(`✅ Added brand: ${brand.name} (${brand.slug})`);
-          }
-        } catch (error) {
-          console.error('❌ Error seeding brands:', error);
-          throw error;
-        }
-        
-        // Prepare all statements for products and variations
-        const insertProduct = db.prepare(`
-          INSERT INTO products (
-            category_slug,
-            brand_slug,
-            name,
-            slug,
-            description,
-            images,
-            price,
-            is_active,
-            is_featured,
-            discount,
-            has_variations,
-            weight,
-            stock,
-            unlimited_stock,
-            created_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-          RETURNING id
-        `);
+        if (finalTablesToSeed.includes('products')) {
+          // Seed products
+          console.log('\n🛍️ Seeding products...');
+          for (const product of mockProducts) {
+            // Insert the product first
+            const result = await executeRemoteSQL(`
+              INSERT INTO products (
+                category_slug, brand_slug, name, slug, description, images, 
+                price, is_active, is_featured, discount, has_variations, 
+                weight, stock, unlimited_stock, created_at
+              )
+              VALUES (
+                '${product.categorySlug.replace(/'/g, "''")}',
+                '${product.brandSlug.replace(/'/g, "''")}',
+                '${product.name.replace(/'/g, "''")}',
+                '${product.slug.replace(/'/g, "''")}',
+                '${product.description.replace(/'/g, "''")}',
+                '${product.images.replace(/'/g, "''")}',
+                ${product.price},
+                ${product.isActive ? 1 : 0},
+                ${product.isFeatured ? 1 : 0},
+                ${product.discount === null ? 'NULL' : product.discount},
+                ${product.hasVariations ? 1 : 0},
+                ${product.weight ? `'${product.weight.replace(/'/g, "''")}'` : 'NULL'},
+                ${product.stock},
+                ${product.unlimitedStock ? 1 : 0},
+                ${Math.floor(Date.now() / 1000)}
+              ) RETURNING id;
+            `, `Adding product: ${product.name}`);
 
-        const insertProductTeaCategory = db.prepare(`
-          INSERT INTO product_tea_categories (product_id, tea_category_slug)
-          VALUES (?, ?)
-        `);
-
-        const insertVariation = db.prepare(`
-          INSERT INTO product_variations (
-            product_id, sku, price, stock, sort,
-            created_at
-          )
-          VALUES (?, ?, ?, ?, ?, ?)
-          RETURNING id
-        `);
-
-        const insertVariationAttribute = db.prepare(`
-          INSERT INTO variation_attributes (
-            product_variation_id, attributeId, value,
-            created_at
-          )
-          VALUES (?, ?, ?, ?)
-        `);
-        
-        // Create a compound operation for inserting a product with its variations and tea categories
-        const insertProductWithVariations = db.transaction((product: Product) => {
-          // Verify category and brand exist
-          const categoryExists = db.prepare('SELECT slug FROM categories WHERE slug = ?').get(product.categorySlug);
-          const brandExists = db.prepare('SELECT slug FROM brands WHERE slug = ?').get(product.brandSlug);
-          
-          if (!categoryExists || !brandExists) {
-            console.warn(`⚠️ Skipping product ${product.name} due to missing category (${product.categorySlug}) or brand (${product.brandSlug})`);
-            return;
-          }
-          
-          try {
-            // Insert the product
-            const { id: productId } = insertProduct.get(
-              product.categorySlug,
-              product.brandSlug,
-              product.name,
-              product.slug,
-              product.description,
-              product.images,
-              product.price,
-              product.isActive ? 1 : 0,
-              product.isFeatured ? 1 : 0,
-              product.discount === null ? null : product.discount,
-              product.hasVariations ? 1 : 0,
-              product.weight || null,
-              product.stock,
-              product.unlimitedStock ? 1 : 0,
-              new Date().toISOString()
-            );
-
-            // Insert tea categories
-            if (product.teaCategories && Array.isArray(product.teaCategories)) {
+            // Insert tea categories if they exist and we have a valid product ID
+            if (product.teaCategories && Array.isArray(product.teaCategories) && result && result.id) {
               for (const teaCategorySlug of product.teaCategories) {
-                insertProductTeaCategory.run(productId, teaCategorySlug);
+                // Verify tea category exists before inserting
+                const teaCategoryExists = await executeRemoteSQL(`
+                  SELECT slug FROM tea_categories WHERE slug = '${teaCategorySlug.replace(/'/g, "''")}';
+                `, `Verifying tea category: ${teaCategorySlug}`);
+
+                if (!teaCategoryExists) {
+                  console.warn(`⚠️ Skipping invalid tea category "${teaCategorySlug}" for product: ${product.name}`);
+                  continue;
+                }
+
+                await executeRemoteSQL(`
+                  INSERT INTO product_tea_categories (product_id, tea_category_slug)
+                  VALUES (${result.id}, '${teaCategorySlug.replace(/'/g, "''")}');
+                `, `Adding tea category ${teaCategorySlug} to product: ${product.name}`);
               }
             }
-            
+
             // Insert variations if they exist
             if (product.hasVariations && product.variations) {
               const variations = JSON.parse(product.variations);
               for (const variation of variations) {
                 // Insert variation
-                const { id: variationId } = insertVariation.get(
-                  productId,
-                  variation.sku,
-                  variation.price,
-                  variation.stock,
-                  variation.sort || 0,
-                  new Date().toISOString()
-                );
+                const { id: variationId } = await executeRemoteSQL(`
+                  WITH product_id AS (
+                    SELECT id FROM products WHERE slug = '${product.slug.replace(/'/g, "''")}'
+                  )
+                  INSERT INTO product_variations (
+                    product_id, sku, price, stock, sort,
+                    created_at
+                  )
+                  SELECT 
+                    product_id.id,
+                    '${variation.sku || `${product.slug}-${variation.attributes?.map((attr: { value: string }) => attr.value.toLowerCase()).join('-') || Date.now()}`}',
+                    ${variation.price},
+                    ${variation.stock},
+                    ${variation.sort || 0},
+                    ${Math.floor(Date.now() / 1000)}
+                  FROM product_id;
+                `, `Adding variation: ${variation.name} for product: ${product.name}`);
 
                 // Insert variation attributes
                 if (variation.attributes && Array.isArray(variation.attributes)) {
                   for (const attr of variation.attributes) {
-                    insertVariationAttribute.run(
-                      variationId,
-                      attr.attributeId,
-                      attr.value,
-                      new Date().toISOString()
-                    );
+                    await executeRemoteSQL(`
+                      WITH variation_id AS (
+                        SELECT pv.id 
+                        FROM product_variations pv
+                        JOIN products p ON p.id = pv.product_id
+                        WHERE p.slug = '${product.slug.replace(/'/g, "''")}' 
+                        AND pv.sku = '${variation.sku || `${product.slug}-${variation.attributes?.map((attr: { value: string }) => attr.value.toLowerCase()).join('-') || Date.now()}`}'
+                      )
+                      INSERT INTO variation_attributes (
+                        product_variation_id, attributeId, value,
+                        created_at
+                      )
+                      SELECT 
+                        variation_id.id,
+                        '${attr.attributeId}',
+                        '${attr.value}',
+                        ${Math.floor(Date.now() / 1000)}
+                      FROM variation_id;
+                    `, `Adding attribute: ${attr.attributeId} for variation: ${variation.name}`);
                   }
                 }
               }
@@ -506,78 +604,49 @@ async function seedDatabase() {
             } else {
               console.log(`✅ Added product: ${product.name}`);
             }
-          } catch (error) {
-            console.error(`❌ Error adding product ${product.name}:`, error);
-            throw error; // Re-throw to trigger transaction rollback
           }
-        });
-        
-        // Seed products and their variations in a single transaction per product
-        console.log('\n🛍️ Seeding products...');
-        for (const product of mockProducts) {
-          insertProductWithVariations(product);
         }
         
-        // Seed blog posts last (they reference products)
-        console.log('\n📝 Seeding blog posts...');
-        const insertBlogPost = db.prepare(`
-          INSERT INTO blog_posts (
-            title, slug, body, images, product_slug,
-            published_at
-          )
-          VALUES (?, ?, ?, ?, ?, ?)
-          RETURNING id
-        `);
-
-        const insertBlogTeaCategory = db.prepare(`
-          INSERT INTO blog_tea_categories (blog_post_id, tea_category_slug)
-          VALUES (?, ?)
-        `);
-
-        const checkProductExists = db.prepare('SELECT slug FROM products WHERE slug = ?');
-
-        try {
+        if (finalTablesToSeed.includes('blog_posts')) {
+          // Seed blog posts
+          console.log('\n📝 Seeding blog posts...');
           for (const post of mockBlogPosts) {
-            const images = post.productSlug ? null : post.images;
-            
-            // Verify product exists if productSlug is provided
-            let finalProductSlug: string | null = post.productSlug;
-            if (finalProductSlug) {
-              const productExists = checkProductExists.get(finalProductSlug);
-              if (!productExists) {
-                console.warn(`⚠️ Blog post "${post.title}" references non-existent product "${finalProductSlug}". Setting productSlug to null.`);
-                finalProductSlug = null;
-              }
-            }
-            
-            // Insert blog post and get the ID from the result
-            const result = insertBlogPost.run(
-              post.title,
-              post.slug,
-              post.body,
-              images,
-              finalProductSlug,
-              post.publishedAt
-            );
+            // Insert the blog post first
+            const result = await executeRemoteSQL(`
+              INSERT INTO blog_posts (
+                title, slug, body, images, product_slug,
+                published_at
+              )
+              VALUES (
+                '${post.title.replace(/'/g, "''")}',
+                '${post.slug.replace(/'/g, "''")}',
+                '${post.body.replace(/'/g, "''")}',
+                ${post.images ? `'${post.images.replace(/'/g, "''")}'` : 'NULL'},
+                ${post.productSlug ? `'${post.productSlug.replace(/'/g, "''")}'` : 'NULL'},
+                ${post.publishedAt}
+              ) RETURNING id;
+            `, `Adding blog post: ${post.title}`);
 
-            if (!result || !result.lastInsertRowid) {
-              throw new Error(`Failed to get ID for blog post: ${post.title}`);
-            }
-
-            const blogPostId = result.lastInsertRowid;
-
-            // Insert tea categories
-            if (post.teaCategories && Array.isArray(post.teaCategories)) {
+            // Insert tea categories if they exist and we have a valid blog post ID
+            if (post.teaCategories && Array.isArray(post.teaCategories) && result && result.id) {
               for (const teaCategorySlug of post.teaCategories) {
-                insertBlogTeaCategory.run(blogPostId, teaCategorySlug);
+                // Verify tea category exists before inserting
+                const teaCategoryExists = await executeRemoteSQL(`
+                  SELECT slug FROM tea_categories WHERE slug = '${teaCategorySlug.replace(/'/g, "''")}';
+                `, `Verifying tea category: ${teaCategorySlug}`);
+
+                if (!teaCategoryExists) {
+                  console.warn(`⚠️ Skipping invalid tea category "${teaCategorySlug}" for blog post: ${post.title}`);
+                  continue;
+                }
+
+                await executeRemoteSQL(`
+                  INSERT INTO blog_tea_categories (blog_post_id, tea_category_slug)
+                  VALUES (${result.id}, '${teaCategorySlug.replace(/'/g, "''")}');
+                `, `Adding tea category ${teaCategorySlug} to blog post: ${post.title}`);
               }
             }
-            
-            console.log(`✅ Added blog post: ${post.title}`);
           }
-        } catch (error) {
-          console.error('❌ Error seeding blog posts:', error);
-          throw error;
         }
 
         // Commit the transaction

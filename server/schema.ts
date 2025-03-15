@@ -19,7 +19,7 @@ export const products = sqliteTable('products', {
   weight: text('weight'),
   stock: integer('stock').notNull().default(0),
   unlimitedStock: integer('unlimited_stock', { mode: 'boolean' }).notNull().default(false),
-  createdAt: text('created_at'),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
 });
 
 export const productVariations = sqliteTable('product_variations', {
@@ -29,7 +29,8 @@ export const productVariations = sqliteTable('product_variations', {
   price: real('price').notNull(), // Using real for decimal in SQLite
   stock: integer('stock').notNull().default(0),
   sort: integer('sort'),
-  createdAt: text('created_at'),
+  createdAt: integer('createdAt', { mode: 'timestamp' }).notNull(),
+
 });
 
 export const variationAttributes = sqliteTable('variation_attributes', {
@@ -37,7 +38,8 @@ export const variationAttributes = sqliteTable('variation_attributes', {
   productVariationId: integer('product_variation_id').references(() => productVariations.id, { onDelete: 'cascade' }),
   attributeId: text('attributeId').notNull(),
   value: text('value').notNull(),
-  createdAt: text('created_at')
+  createdAt: integer('createdAt', { mode: 'timestamp' }).notNull(),
+
 });
 
 export const categories = sqliteTable('categories', {
@@ -68,8 +70,8 @@ export const orders = sqliteTable('orders', {
   paymentStatus: text('paymentStatus').notNull().default('pending'),
   shippingMethod: text('shippingMethod'),
   notes: text('notes'),
-  createdAt: text('createdAt').notNull(),
-  completedAt: text('completedAt'),
+  createdAt: integer('createdAt', { mode: 'timestamp' }).notNull(),
+  completedAt: integer('completedAt', { mode: 'timestamp' }),
 });
 
 export const orderItems = sqliteTable('order_items', {
@@ -82,7 +84,8 @@ export const orderItems = sqliteTable('order_items', {
   discountPercentage: integer('discountPercentage'),
   finalAmount: real('finalAmount').notNull(), // Unit amount after discount × quantity
   attributes: text('attributes'), // JSON stored as text
-  createdAt: text('createdAt').notNull(),
+  createdAt: integer('createdAt', { mode: 'timestamp' }).notNull(),
+
 });
 
 export const addresses = sqliteTable('addresses', {
@@ -98,7 +101,7 @@ export const addresses = sqliteTable('addresses', {
   state: text('state'),
   zipCode: text('zipCode').notNull(),
   country: text('country').notNull(),
-  createdAt: text('createdAt').notNull(),
+  createdAt: integer('createdAt', { mode: 'timestamp' }).notNull(),
 });
 
 // Blog Related Tables
@@ -129,7 +132,7 @@ export const blogPosts = sqliteTable('blog_posts', {
   slug: text('slug').notNull().unique(),
   body: text('body').notNull(),
   images: text('images'),
-  publishedAt: text('published_at'),
+  publishedAt: integer('published_at', { mode: 'timestamp' }),
 });
 
 // Inquiries

@@ -2,6 +2,8 @@
 
 //TODO: update input to include label
 
+export const dynamic = "force-dynamic";
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { BlogPost, BlogPostFormData, TeaCategory } from "@/types";
@@ -17,7 +19,6 @@ import DeleteConfirmationDialog from "@/components/ui/admin/DeleteConfirmationDi
 import { toast } from "sonner";
 import ProductSelector from "@/components/ui/admin/ProductSelector";
 import Link from "next/link";
-import BlogCategoryManager from "@/components/ui/admin/BlogCategoryManager";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -41,7 +42,7 @@ export default function BlogPage() {
     teaCategories: [],
     productSlug: "",
     images: "",
-    publishedAt: new Date().toISOString(),
+    publishedAt: Math.floor(Date.now() / 1000), // Convert to Unix timestamp
   });
 
   const [editFormData, setEditFormData] = useState<BlogPostFormData>({
@@ -51,7 +52,7 @@ export default function BlogPage() {
     teaCategories: [],
     productSlug: "",
     images: "",
-    publishedAt: "",
+    publishedAt: Math.floor(Date.now() / 1000),
   });
 
   // UI states
@@ -211,7 +212,7 @@ export default function BlogPage() {
         teaCategories: [],
         productSlug: "",
         images: "",
-        publishedAt: new Date().toISOString(),
+        publishedAt: Math.floor(Date.now() / 1000),
       });
       setIsCreateAutoSlug(true);
       router.refresh();
@@ -240,7 +241,10 @@ export default function BlogPage() {
           teaCategories: postData.teaCategories || [],
           productSlug: postData.productSlug || "",
           images: postData.images || "",
-          publishedAt: postData.publishedAt || "",
+          publishedAt:
+            typeof postData.publishedAt === "number"
+              ? postData.publishedAt
+              : Math.floor(Date.now() / 1000),
         });
       }
     } catch (err) {
@@ -270,7 +274,7 @@ export default function BlogPage() {
         teaCategories: [],
         productSlug: "",
         images: "",
-        publishedAt: "",
+        publishedAt: Math.floor(Date.now() / 1000),
       });
       setIsEditAutoSlug(false);
       router.refresh();
@@ -326,7 +330,7 @@ export default function BlogPage() {
       teaCategories: [],
       productSlug: "",
       images: "",
-      publishedAt: "",
+      publishedAt: Math.floor(Date.now() / 1000),
     });
     setIsEditAutoSlug(false);
     setError("");

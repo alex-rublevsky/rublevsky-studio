@@ -21,10 +21,13 @@ export default async function toggleOrderStatus(orderId: number): Promise<{ succ
     // Toggle status between 'pending' and 'processed'
     const newStatus = currentOrder.status === 'pending' ? 'processed' : 'pending';
 
-    // Update order status
+    // Update order status and completedAt
     await db
       .update(orders)
-      .set({ status: newStatus })
+      .set({ 
+        status: newStatus,
+        completedAt: newStatus === 'processed' ? Math.floor(Date.now() / 1000) : null 
+      })
       .where(eq(orders.id, orderId));
 
     // Revalidate cache

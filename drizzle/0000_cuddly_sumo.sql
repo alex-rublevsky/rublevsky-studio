@@ -53,17 +53,6 @@ CREATE TABLE `categories` (
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `categories_slug_unique` ON `categories` (`slug`);--> statement-breakpoint
-CREATE TABLE `inquiries` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`name` text NOT NULL,
-	`email` text NOT NULL,
-	`company_name` text,
-	`role` text,
-	`budget` real,
-	`message` text NOT NULL,
-	`created_at` text
-);
---> statement-breakpoint
 CREATE TABLE `order_items` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`orderId` integer NOT NULL,

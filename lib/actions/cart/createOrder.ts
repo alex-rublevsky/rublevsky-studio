@@ -76,7 +76,7 @@ export async function createOrder(customerInfo: CustomerInfo, cartItems: CartIte
       paymentMethod: null,
       shippingMethod: customerInfo.shippingMethod,
       notes: customerInfo.notes,
-      createdAt: new Date().toISOString(),
+      createdAt: Math.floor(Date.now() / 1000),
       completedAt: null,
     }).returning();
 
@@ -93,7 +93,7 @@ export async function createOrder(customerInfo: CustomerInfo, cartItems: CartIte
       state: customerInfo.shippingAddress.state,
       zipCode: customerInfo.shippingAddress.zipCode,
       country: customerInfo.shippingAddress.country,
-      createdAt: new Date().toISOString(),
+      createdAt: Math.floor(Date.now() / 1000),
     });
 
     // Create billing address if different from shipping
@@ -110,7 +110,7 @@ export async function createOrder(customerInfo: CustomerInfo, cartItems: CartIte
         state: customerInfo.billingAddress.state,
         zipCode: customerInfo.billingAddress.zipCode,
         country: customerInfo.billingAddress.country,
-        createdAt: new Date().toISOString(),
+        createdAt: Math.floor(Date.now() / 1000),
       });
     }
 
@@ -127,7 +127,7 @@ export async function createOrder(customerInfo: CustomerInfo, cartItems: CartIte
           ? item.price * (1 - item.discount / 100) * item.quantity
           : item.price * item.quantity,
         attributes: JSON.stringify(item.attributes || {}),
-        createdAt: new Date().toISOString(),
+        createdAt: Math.floor(Date.now() / 1000),
       }))
     );
 

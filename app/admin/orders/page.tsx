@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { Suspense } from "react";
 import getAllOrders from "@/lib/actions/orders/getAllOrders";
 import { OrderList } from "@/app/admin/orders/OrderList";

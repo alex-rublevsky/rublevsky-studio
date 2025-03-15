@@ -132,7 +132,7 @@ export interface BlogPostFormData {
   teaCategories?: string[];
   productSlug?: string;
   images?: string;
-  publishedAt?: string;
+  publishedAt?: number;
 }
 
 // API Response Types

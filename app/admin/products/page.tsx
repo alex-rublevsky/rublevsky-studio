@@ -1,4 +1,6 @@
 "use client";
+
+export const dynamic = "force-dynamic";
 //TODO: update input to include label
 
 import { useState, useEffect } from "react";
