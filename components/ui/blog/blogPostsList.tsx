@@ -81,7 +81,7 @@ export default function BlogPostsList({
                   images={post.images}
                   productSlug={post.productSlug}
                   slug={post.slug || `post-${post.id}`}
-                  publishedAt={post.publishedAt || ""}
+                  publishedAt={post.publishedAt}
                 />
               </motion.div>
             ))

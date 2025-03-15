@@ -73,8 +73,9 @@ export type TeaCategory = InferSelectModel<typeof teaCategories>;
 export type NewTeaCategory = InferInsertModel<typeof teaCategories>;
 
 // Blog Posts
-export type BlogPost = InferSelectModel<typeof blogPosts> & {
+export type BlogPost = Omit<InferSelectModel<typeof blogPosts>, 'publishedAt'> & {
   teaCategories?: string[];
+  publishedAt: number;
 };
 export type NewBlogPost = InferInsertModel<typeof blogPosts>;
 
@@ -132,7 +133,7 @@ export interface BlogPostFormData {
   teaCategories?: string[];
   productSlug?: string;
   images?: string;
-  publishedAt?: number;
+  publishedAt: number;
 }
 
 // API Response Types

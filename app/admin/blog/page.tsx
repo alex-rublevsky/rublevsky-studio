@@ -477,6 +477,31 @@ export default function BlogPage() {
                 />
               </div>
 
+              <div>
+                <label
+                  htmlFor="publishedAt"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Published At
+                </label>
+                <Input
+                  id="publishedAt"
+                  name="publishedAt"
+                  type="datetime-local"
+                  value={new Date(createFormData.publishedAt * 1000)
+                    .toISOString()
+                    .slice(0, 16)}
+                  onChange={(e) => {
+                    const date = new Date(e.target.value);
+                    setCreateFormData((prev) => ({
+                      ...prev,
+                      publishedAt: Math.floor(date.getTime() / 1000),
+                    }));
+                  }}
+                  required
+                />
+              </div>
+
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? "Creating..." : "Create Post"}
               </Button>
@@ -610,6 +635,31 @@ export default function BlogPage() {
                     name="images"
                     value={editFormData.images}
                     onChange={handleEditChange}
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="editPublishedAt"
+                    className="block text-sm font-medium mb-1"
+                  >
+                    Published At
+                  </label>
+                  <Input
+                    id="editPublishedAt"
+                    name="publishedAt"
+                    type="datetime-local"
+                    value={new Date(editFormData.publishedAt * 1000)
+                      .toISOString()
+                      .slice(0, 16)}
+                    onChange={(e) => {
+                      const date = new Date(e.target.value);
+                      setEditFormData((prev) => ({
+                        ...prev,
+                        publishedAt: Math.floor(date.getTime() / 1000),
+                      }));
+                    }}
+                    required
                   />
                 </div>
 

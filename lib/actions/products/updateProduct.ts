@@ -66,7 +66,7 @@ export default async function updateProduct(id: number, data: ProductFormData): 
           data.teaCategories.map(teaCategorySlug => ({
             productId: id,
             teaCategorySlug,
-            createdAt: new Date().toISOString()
+            createdAt: new Date()
           }))
         ).run();
       }
@@ -98,7 +98,7 @@ export default async function updateProduct(id: number, data: ProductFormData): 
             price: parseFloat(variation.price.toString()),
             stock: parseInt(variation.stock.toString()),
             sort: variation.sort,
-            createdAt: new Date().toISOString(),
+            createdAt: new Date(),
           }))
         ).returning().all();
 
@@ -109,7 +109,7 @@ export default async function updateProduct(id: number, data: ProductFormData): 
             productVariationId: variation.id,
             attributeId: attr.attributeId,
             value: attr.value,
-            createdAt: new Date().toISOString(),
+            createdAt: new Date(),
           }));
         });
 

@@ -46,7 +46,7 @@ export default async function createProduct(data: ProductFormData): Promise<Prod
         hasVariations: data.hasVariations,
         weight: data.weight || null,
         images: data.images,
-        createdAt: new Date().toISOString()
+        createdAt: new Date()
       }).returning().get();
 
       // Batch insert tea categories if provided
@@ -55,7 +55,7 @@ export default async function createProduct(data: ProductFormData): Promise<Prod
           data.teaCategories.map(teaCategorySlug => ({
             productId: product.id,
             teaCategorySlug,
-            createdAt: new Date().toISOString()
+            createdAt: new Date()
           }))
         ).run();
       }
@@ -70,7 +70,7 @@ export default async function createProduct(data: ProductFormData): Promise<Prod
             price: parseFloat(variation.price.toString()),
             stock: parseInt(variation.stock.toString()),
             sort: variation.sort,
-            createdAt: new Date().toISOString(),
+            createdAt: new Date(),
           }))
         ).returning().all();
 
@@ -81,7 +81,7 @@ export default async function createProduct(data: ProductFormData): Promise<Prod
             productVariationId: variation.id,
             attributeId: attr.attributeId,
             value: attr.value,
-            createdAt: new Date().toISOString(),
+            createdAt: new Date(),
           }));
         });
 

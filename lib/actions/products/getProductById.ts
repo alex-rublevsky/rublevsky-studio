@@ -94,7 +94,7 @@ export default async function getProductById(id: number): Promise<ProductWithVar
       teaCategories: [],
       variations: [],
       unlimitedStock: false,
-      createdAt: new Date().toISOString()
+      createdAt: new Date()
     };
 
     // Validate that images is a valid JSON array

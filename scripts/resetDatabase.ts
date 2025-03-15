@@ -94,17 +94,20 @@ async function resetDatabase() {
     
     // Order matters! Drop tables in reverse order of dependencies
     const tablesToDrop = [
-      // First, drop tables with foreign keys
+      // First, drop tables with foreign keys (relationship tables first)
       'variation_attributes',
       'product_variations',
       'order_items',
       'addresses',
+      'blog_tea_categories',
+      'product_tea_categories',
       'blog_posts',
       'products',
       // Then drop tables that are referenced by others
       'orders',
       'users',
       'blog_categories',
+      'tea_categories',
       'brands',
       'categories',
       'inquiries',

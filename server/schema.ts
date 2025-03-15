@@ -132,7 +132,7 @@ export const blogPosts = sqliteTable('blog_posts', {
   slug: text('slug').notNull().unique(),
   body: text('body').notNull(),
   images: text('images'),
-  publishedAt: integer('published_at', { mode: 'timestamp' }),
+  publishedAt: integer('published_at', { mode: 'timestamp' }).notNull(),
 });
 
 // Inquiries

@@ -11,7 +11,7 @@ CREATE TABLE `addresses` (
 	`state` text,
 	`zipCode` text NOT NULL,
 	`country` text NOT NULL,
-	`createdAt` text NOT NULL,
+	`createdAt` integer NOT NULL,
 	FOREIGN KEY (`orderId`) REFERENCES `orders`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
@@ -22,7 +22,7 @@ CREATE TABLE `blog_posts` (
 	`slug` text NOT NULL,
 	`body` text NOT NULL,
 	`images` text,
-	`published_at` text,
+	`published_at` integer NOT NULL,
 	FOREIGN KEY (`product_slug`) REFERENCES `products`(`slug`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
@@ -63,7 +63,7 @@ CREATE TABLE `order_items` (
 	`discountPercentage` integer,
 	`finalAmount` real NOT NULL,
 	`attributes` text,
-	`createdAt` text NOT NULL,
+	`createdAt` integer NOT NULL,
 	FOREIGN KEY (`orderId`) REFERENCES `orders`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`productId`) REFERENCES `products`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`productVariationId`) REFERENCES `product_variations`(`id`) ON UPDATE no action ON DELETE set null
@@ -81,8 +81,8 @@ CREATE TABLE `orders` (
 	`paymentStatus` text DEFAULT 'pending' NOT NULL,
 	`shippingMethod` text,
 	`notes` text,
-	`createdAt` text NOT NULL,
-	`completedAt` text
+	`createdAt` integer NOT NULL,
+	`completedAt` integer
 );
 --> statement-breakpoint
 CREATE TABLE `product_tea_categories` (
@@ -100,7 +100,7 @@ CREATE TABLE `product_variations` (
 	`price` real NOT NULL,
 	`stock` integer DEFAULT 0 NOT NULL,
 	`sort` integer,
-	`created_at` text,
+	`createdAt` integer NOT NULL,
 	FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
@@ -121,7 +121,7 @@ CREATE TABLE `products` (
 	`weight` text,
 	`stock` integer DEFAULT 0 NOT NULL,
 	`unlimited_stock` integer DEFAULT false NOT NULL,
-	`created_at` text,
+	`created_at` integer NOT NULL,
 	FOREIGN KEY (`category_slug`) REFERENCES `categories`(`slug`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`brand_slug`) REFERENCES `brands`(`slug`) ON UPDATE no action ON DELETE cascade
 );
@@ -138,6 +138,6 @@ CREATE TABLE `variation_attributes` (
 	`product_variation_id` integer,
 	`attributeId` text NOT NULL,
 	`value` text NOT NULL,
-	`created_at` text,
+	`createdAt` integer NOT NULL,
 	FOREIGN KEY (`product_variation_id`) REFERENCES `product_variations`(`id`) ON UPDATE no action ON DELETE cascade
 );

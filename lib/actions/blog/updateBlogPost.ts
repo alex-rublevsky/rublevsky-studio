@@ -53,7 +53,7 @@ export async function updateBlogPost(id: number, data: BlogPostFormData): Promis
         body: data.body,
         productSlug: data.productSlug || null,
         images: data.images || null,
-        publishedAt: data.publishedAt || null,
+        publishedAt: new Date(data.publishedAt * 1000),
       };
 
       const result = await tx

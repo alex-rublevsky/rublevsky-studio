@@ -12,7 +12,7 @@ interface QueryResult {
   body: string | null;
   images: string | null;
   productSlug: string | null;
-  publishedAt: string | null;
+  publishedAt: Date;
   teaCategorySlug: string | null;
 }
 
@@ -45,7 +45,7 @@ export async function getAdminBlogPosts(): Promise<BlogPost[]> {
         body: row.body ?? "",
         images: row.images ?? "",
         productSlug: row.productSlug ?? "",
-        publishedAt: row.publishedAt ?? "",
+        publishedAt: Math.floor(row.publishedAt.getTime() / 1000),
         teaCategories: [] as string[],
       });
     }

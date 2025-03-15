@@ -12,7 +12,7 @@ interface QueryResult {
   body: string | null;
   images: string | null;
   productSlug: string | null;
-  publishedAt: string | null;
+  publishedAt: Date;
   teaCategorySlug: string | null;
 }
 
@@ -59,7 +59,7 @@ export default async function getBlogPostById(id: number): Promise<BlogPost | nu
       body: firstRow.body ?? "",
       images: firstRow.images ?? "",
       productSlug: firstRow.productSlug ?? "",
-      publishedAt: firstRow.publishedAt ?? "",
+      publishedAt: Math.floor(firstRow.publishedAt.getTime() / 1000),
       teaCategories: [] as string[],
     };
 
