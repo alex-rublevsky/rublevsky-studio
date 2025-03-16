@@ -1,60 +1,12 @@
-//TODO separate seeding into chunks to be able to seed particular tables only
-//
-
 import { mockBlogPosts, mockProducts, mockCategories, mockBrands, mockTeaCategories } from '../data/mockData';
 import Database from 'better-sqlite3';
 import { resolve } from 'path';
 import { readdirSync, existsSync } from 'fs';
+import { drizzle } from 'drizzle-orm/d1';
+import { drizzle as drizzleSQLite } from 'drizzle-orm/better-sqlite3';
+import * as schema from '../server/schema';
+import { eq } from 'drizzle-orm';
 import { execSync } from 'child_process';
-
-// Define types for our data structures
-type Product = {
-  name: string;
-  slug: string;
-  description: string;
-  images: string;
-  price: number;
-  isActive: boolean;
-  isFeatured: boolean;
-  discount: number | null;
-  hasVariations: boolean;
-  stock: number;
-  unlimitedStock: boolean;
-  categorySlug: string;
-  brandSlug: string;
-  teaCategories?: string[];
-  variations?: string;
-  weight?: string;
-};
-
-// Define available tables for seeding
-type TableName = 
-  | 'tea_categories'
-  | 'categories'
-  | 'brands'
-  | 'products'
-  | 'blog_posts'
-  | 'all';
-
-// Define table dependencies
-const tableDependencies: Record<TableName, TableName[]> = {
-  tea_categories: [],
-  categories: [],
-  brands: [],
-  products: ['categories', 'brands', 'tea_categories'],
-  blog_posts: ['tea_categories'],
-  all: []
-};
-
-// Define dependent tables that need to be cleared when clearing a specific table
-const tableDependentClearMap: Record<TableName, string[]> = {
-  products: ['variation_attributes', 'product_variations', 'product_tea_categories'],
-  blog_posts: ['blog_tea_categories'],
-  tea_categories: ['product_tea_categories', 'blog_tea_categories'],
-  categories: [],
-  brands: [],
-  all: []
-};
 
 // Colors for console output
 const colors = {
@@ -71,6 +23,35 @@ const colors = {
 const isRemote = process.argv.includes('--remote');
 const DB_NAME = 'rublevsky-studio-storage';
 
+// Define available tables for seeding
+type TableName = 
+  | 'tea_categories'
+  | 'categories'
+  | 'brands'
+  | 'products'
+  | 'blog_posts'
+  | 'all';
+
+// Define table dependencies
+const tableDependencies: Record<TableName, TableName[]> = {
+  tea_categories: [],
+  categories: [],
+  brands: [],
+  products: ['categories', 'brands'],
+  blog_posts: [],
+  all: []
+};
+
+// Define dependent tables that need to be cleared when clearing a specific table
+const tableDependentClearMap: Record<TableName, string[]> = {
+  products: ['variation_attributes', 'product_variations', 'product_tea_categories'],
+  blog_posts: ['blog_tea_categories'],
+  tea_categories: [],
+  categories: [],
+  brands: [],
+  all: []
+};
+
 // Get tables to seed from command line arguments
 const tablesToSeed = process.argv
   .filter(arg => arg.startsWith('--table='))
@@ -78,6 +59,11 @@ const tablesToSeed = process.argv
 
 // If no specific tables are specified, seed all tables
 const shouldSeedAll = tablesToSeed.length === 0 || tablesToSeed.includes('all');
+
+// Get the final list of tables to seed
+const finalTablesToSeed = shouldSeedAll 
+  ? ['tea_categories', 'categories', 'brands', 'products', 'blog_posts'] 
+  : getRequiredTables(tablesToSeed);
 
 // Function to get all required tables including dependencies
 function getRequiredTables(tables: TableName[]): TableName[] {
@@ -94,169 +80,7 @@ function getRequiredTables(tables: TableName[]): TableName[] {
   return Array.from(required);
 }
 
-// Get the final list of tables to seed
-const finalTablesToSeed = shouldSeedAll 
-  ? ['tea_categories', 'categories', 'brands', 'products', 'blog_posts'] 
-  : getRequiredTables(tablesToSeed);
-
-// Function to clear specific tables
-async function clearTables(tables: string[], db?: any) {
-  console.log('\n🗑️ Clearing existing data...');
-  
-  // Get all tables that need to be cleared based on dependencies
-  const tablesToClear = new Set<string>();
-  
-  tables.forEach(table => {
-    // Add the table itself
-    tablesToClear.add(table);
-    // Add its dependent tables that need to be cleared
-    if (tableDependentClearMap[table as TableName]) {
-      tableDependentClearMap[table as TableName].forEach(depTable => 
-        tablesToClear.add(depTable)
-      );
-    }
-  });
-  
-  const sortedTablesToDelete = Array.from(tablesToClear).sort((a, b) => {
-    // Clear dependent tables first (e.g., clear product_tea_categories before products)
-    const aIsDep = a.includes('_');
-    const bIsDep = b.includes('_');
-    if (aIsDep && !bIsDep) return -1;
-    if (!aIsDep && bIsDep) return 1;
-    return 0;
-  });
-  
-  if (isRemote) {
-    for (const table of sortedTablesToDelete) {
-      await executeRemoteSQL(`DELETE FROM ${table};`, `Clearing ${table}`);
-      console.log(`✅ Cleared ${table}`);
-    }
-  } else if (db) {
-    for (const table of sortedTablesToDelete) {
-      db.prepare(`DELETE FROM ${table}`).run();
-      console.log(`✅ Cleared ${table}`);
-    }
-  }
-}
-
-// Seeding functions for each table type
-async function seedTeaCategories(db?: any) {
-  if (!finalTablesToSeed.includes('tea_categories')) return;
-  
-  console.log('\n🍵 Seeding tea categories...');
-  if (isRemote) {
-    for (const teaCategory of mockTeaCategories) {
-      await executeRemoteSQL(`
-        INSERT INTO tea_categories (name, slug, is_active)
-        VALUES (
-          '${teaCategory.name.replace(/'/g, "''")}',
-          '${teaCategory.slug.replace(/'/g, "''")}',
-          ${teaCategory.isActive ? 1 : 0}
-        );
-      `, `Adding tea category: ${teaCategory.name}`);
-    }
-    console.log(`✅ Added ${mockTeaCategories.length} tea categories`);
-  } else if (db) {
-    const insertTeaCategory = db.prepare(`
-      INSERT INTO tea_categories (name, slug, is_active)
-      VALUES (?, ?, ?)
-    `);
-    
-    try {
-      for (const category of mockTeaCategories) {
-        insertTeaCategory.run(
-          category.name,
-          category.slug,
-          category.isActive ? 1 : 0
-        );
-        console.log(`✅ Added tea category: ${category.name}`);
-      }
-    } catch (error) {
-      console.error('❌ Error seeding tea categories:', error);
-      throw error;
-    }
-  }
-}
-
-async function seedCategories(db?: any) {
-  if (!finalTablesToSeed.includes('categories')) return;
-  
-  console.log('\n🏷️ Seeding categories...');
-  if (isRemote) {
-    for (const category of mockCategories) {
-      await executeRemoteSQL(`
-        INSERT INTO categories (name, slug, is_active)
-        VALUES (
-          '${category.name.replace(/'/g, "''")}',
-          '${category.slug.replace(/'/g, "''")}',
-          ${category.isActive ? 1 : 0}
-        );
-      `, `Adding category: ${category.name}`);
-    }
-    console.log(`✅ Added ${mockCategories.length} categories`);
-  } else if (db) {
-    const insertCategory = db.prepare(`
-      INSERT INTO categories (name, slug, is_active)
-      VALUES (?, ?, ?)
-      RETURNING id
-    `);
-    
-    try {
-      for (const category of mockCategories) {
-        insertCategory.run(
-          category.name,
-          category.slug,
-          category.isActive ? 1 : 0
-        );
-        console.log(`✅ Added category: ${category.name} (${category.slug})`);
-      }
-    } catch (error) {
-      console.error('❌ Error seeding categories:', error);
-      throw error;
-    }
-  }
-}
-
-async function seedBrands(db?: any) {
-  if (!finalTablesToSeed.includes('brands')) return;
-  
-  console.log('\n🏢 Seeding brands...');
-  if (isRemote) {
-    for (const brand of mockBrands) {
-      await executeRemoteSQL(`
-        INSERT INTO brands (name, slug, is_active)
-        VALUES (
-          '${brand.name.replace(/'/g, "''")}',
-          '${brand.slug.replace(/'/g, "''")}',
-          ${brand.isActive ? 1 : 0}
-        );
-      `, `Adding brand: ${brand.name}`);
-    }
-    console.log(`✅ Added ${mockBrands.length} brands`);
-  } else if (db) {
-    const insertBrand = db.prepare(`
-      INSERT INTO brands (name, slug, is_active)
-      VALUES (?, ?, ?)
-      RETURNING id
-    `);
-    
-    try {
-      for (const brand of mockBrands) {
-        insertBrand.run(
-          brand.name,
-          brand.slug,
-          brand.isActive ? 1 : 0
-        );
-        console.log(`✅ Added brand: ${brand.name} (${brand.slug})`);
-      }
-    } catch (error) {
-      console.error('❌ Error seeding brands:', error);
-      throw error;
-    }
-  }
-}
-
-// Dynamically find the SQLite database file
+// Function to find the local SQLite database file
 function findLocalDbPath() {
   const basePath = resolve('./.wrangler/state/v3/d1/miniflare-D1DatabaseObject');
   
@@ -269,449 +93,522 @@ function findLocalDbPath() {
   return files.length > 0 ? resolve(basePath, files[0]) : null;
 }
 
-// Function to execute remote SQL commands
-function executeRemoteSQL(command: string, description?: string) {
+// Initialize database connection
+async function initializeDb() {
+  if (isRemote) {
+    return { isRemote: true };
+  } else {
+    const dbPath = findLocalDbPath();
+    if (!dbPath) {
+      console.error('❌ Could not find local SQLite database file.');
+      process.exit(1);
+    }
+    console.log(`📂 Using database at: ${dbPath}`);
+    return { db: drizzleSQLite(new Database(dbPath), { schema }), isRemote: false };
+  }
+}
+
+// Function to execute remote SQL commands through Wrangler
+async function executeRemoteSQL(command: string, description?: string) {
   try {
     if (description) {
       console.log(`${colors.blue}Executing: ${description}${colors.reset}`);
     }
+    
     const output = execSync(`npx wrangler d1 execute ${DB_NAME} --remote --command="${command.replace(/"/g, '\\"')}"`, {
       encoding: 'utf-8',
       maxBuffer: 1024 * 1024 * 10 // 10MB buffer
     });
 
+    // Parse the JSON response from the output
+    const jsonMatch = output.match(/\[\s*\{[\s\S]*\}\s*\]/);
+    if (!jsonMatch) {
+      throw new Error(`Invalid response format: ${output}`);
+    }
+
+    const response = JSON.parse(jsonMatch[0])[0];
+    
+    if (!response.success) {
+      throw new Error(`Command failed: ${output}`);
+    }
+
     if (description) {
       console.log(`${colors.green}✅ Successfully executed: ${description}${colors.reset}`);
     }
 
-    // Try to parse the output as JSON
-    try {
-      // Find all JSON objects in the output
-      const matches = output.match(/\{[^{}]*\}/g);
-      if (matches) {
-        // Try each JSON object, starting from the last one
-        for (let i = matches.length - 1; i >= 0; i--) {
-          try {
-            const jsonPart = matches[i];
-            const response = JSON.parse(jsonPart);
-
-            // For COUNT queries, look for count in the response
-            if (response.count !== undefined) {
-              return { count: parseInt(response.count) };
-            }
-
-            // For INSERT...RETURNING queries, look for id in the response
-            if (response.id !== undefined) {
-              return { id: parseInt(response.id) };
-            }
-
-            // For other queries, check if we have a results array
-            if (response.results && Array.isArray(response.results)) {
-              return response.results[0];
-            }
-
-            // Check for success indicator
-            if (response.success || response.changes !== undefined) {
-              return { success: true, changes: response.changes };
-            }
-          } catch (innerError) {
-            // Continue to next match if this one fails
-            continue;
-          }
-        }
-      }
-
-      // If we couldn't find any valid JSON objects but the command succeeded
-      return { success: true };
-    } catch (parseError) {
-      console.log('Could not parse any JSON from output:', parseError);
-      // Return a default success value if parsing fails but command succeeded
+    // Return appropriate data based on the command type
+    if (response.results && response.results.length > 0) {
+      return response.results[0];
+    } else if (response.meta && response.meta.changes !== undefined) {
+      return { changes: response.meta.changes };
+    } else {
       return { success: true };
     }
   } catch (error) {
     console.error(`${colors.red}❌ Error executing remote SQL:${colors.reset}`, error);
+    console.error(`${colors.red}Command was:${colors.reset}`, command);
     throw error;
   }
 }
 
-// Function to create a batched insert command
-function createBatchInsert(tableName: string, columns: string[], values: any[][]) {
-  const placeholders = values.map(() => 
-    `(${columns.map(() => '?').join(', ')})`
-  ).join(',\n');
+// Function to clear tables
+async function clearTables(dbConnection: any, tables: string[]) {
+  console.log('\n🗑️ Clearing existing data...');
   
-  return `
-    INSERT INTO ${tableName} (${columns.join(', ')})
-    VALUES ${placeholders};
-  `;
+  const tablesToClear = new Set<string>();
+  tables.forEach(table => {
+    tablesToClear.add(table);
+    if (tableDependentClearMap[table as TableName]) {
+      tableDependentClearMap[table as TableName].forEach(depTable => 
+        tablesToClear.add(depTable)
+      );
+    }
+  });
+  
+  const sortedTablesToDelete = Array.from(tablesToClear).sort((a, b) => {
+    const aIsDep = a.includes('_');
+    const bIsDep = b.includes('_');
+    if (aIsDep && !bIsDep) return -1;
+    if (!aIsDep && bIsDep) return 1;
+    return 0;
+  });
+  
+  for (const table of sortedTablesToDelete) {
+    if (dbConnection.isRemote) {
+      try {
+        // First verify the table exists
+        const tableExists = await executeRemoteSQL(
+          `SELECT name FROM sqlite_master WHERE type='table' AND name='${table}';`,
+          `Checking if table ${table} exists`
+        );
+        
+        if (!tableExists || !tableExists.name) {
+          console.warn(`⚠️ Table ${table} does not exist, skipping...`);
+          continue;
+        }
+
+        // Then delete from it
+        await executeRemoteSQL(
+          `DELETE FROM ${table};`,
+          `Clearing ${table}`
+        );
+        console.log(`✅ Cleared ${table}`);
+      } catch (error) {
+        console.error(`❌ Failed to clear table ${table}:`, error);
+        throw error;
+      }
+    } else {
+      const schemaTable = (schema as any)[table.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())];
+      if (!schemaTable) {
+        console.warn(`⚠️ No schema found for table: ${table}`);
+        continue;
+      }
+      await dbConnection.db.delete(schemaTable);
+      console.log(`✅ Cleared ${table}`);
+    }
+  }
 }
 
+// Helper function to convert a value to SQL string
+function toSqlValue(value: any): string {
+  if (value === null || value === undefined) return 'NULL';
+  if (typeof value === 'boolean') return value ? '1' : '0';
+  if (typeof value === 'number') return value.toString();
+  if (value instanceof Date) return Math.floor(value.getTime() / 1000).toString();
+  return `'${value.toString().replace(/'/g, "''")}'`;
+}
+
+// Helper function to verify remote table exists
+async function verifyRemoteTable(tableName: string): Promise<boolean> {
+  try {
+    const result = await executeRemoteSQL(
+      `SELECT name FROM sqlite_master WHERE type='table' AND name='${tableName}';`,
+      `Verifying table ${tableName} exists`
+    );
+    return !!result && !!result.name;
+  } catch (error) {
+    console.error(`❌ Error verifying table ${tableName}:`, error);
+    return false;
+  }
+}
+
+// Seeding functions
+async function seedTeaCategories(dbConnection: any) {
+  if (!finalTablesToSeed.includes('tea_categories')) return;
+  console.log('\n🍵 Seeding tea categories...');
+  
+  for (const item of mockTeaCategories) {
+    try {
+      if (dbConnection.isRemote) {
+        await executeRemoteSQL(`
+          INSERT INTO tea_categories (name, slug, is_active)
+          VALUES (${toSqlValue(item.name)}, ${toSqlValue(item.slug)}, ${toSqlValue(item.isActive)});
+        `, `Adding tea category: ${item.name}`);
+      } else {
+        await dbConnection.db.insert(schema.teaCategories).values(item)
+          .onConflictDoUpdate({
+            target: schema.teaCategories.slug,
+            set: { name: item.name, isActive: item.isActive }
+          });
+      }
+      console.log(`✅ Added tea category: ${item.name}`);
+    } catch (error) {
+      console.error(`❌ Error processing tea category ${item.name}:`, error);
+      throw error;
+    }
+  }
+}
+
+async function seedCategories(dbConnection: any) {
+  if (!finalTablesToSeed.includes('categories')) return;
+  console.log('\n🏷️ Seeding categories...');
+  
+  for (const item of mockCategories) {
+    try {
+      if (dbConnection.isRemote) {
+        await executeRemoteSQL(`
+          INSERT INTO categories (name, slug, is_active)
+          VALUES (${toSqlValue(item.name)}, ${toSqlValue(item.slug)}, ${toSqlValue(item.isActive)});
+        `, `Adding category: ${item.name}`);
+      } else {
+        await dbConnection.db.insert(schema.categories).values(item)
+          .onConflictDoUpdate({
+            target: schema.categories.slug,
+            set: { name: item.name, isActive: item.isActive }
+          });
+      }
+      console.log(`✅ Added category: ${item.name}`);
+    } catch (error) {
+      console.error(`❌ Error processing category ${item.name}:`, error);
+      throw error;
+    }
+  }
+}
+
+async function seedBrands(dbConnection: any) {
+  if (!finalTablesToSeed.includes('brands')) return;
+  console.log('\n🏢 Seeding brands...');
+  
+  for (const item of mockBrands) {
+    try {
+      if (dbConnection.isRemote) {
+        await executeRemoteSQL(`
+          INSERT INTO brands (name, slug, is_active)
+          VALUES (${toSqlValue(item.name)}, ${toSqlValue(item.slug)}, ${toSqlValue(item.isActive)});
+        `, `Adding brand: ${item.name}`);
+      } else {
+        await dbConnection.db.insert(schema.brands).values(item)
+          .onConflictDoUpdate({
+            target: schema.brands.slug,
+            set: { name: item.name, isActive: item.isActive }
+          });
+      }
+      console.log(`✅ Added brand: ${item.name}`);
+    } catch (error) {
+      console.error(`❌ Error processing brand ${item.name}:`, error);
+      throw error;
+    }
+  }
+}
+
+async function seedProducts(dbConnection: any) {
+  if (!finalTablesToSeed.includes('products')) return;
+  console.log('\n🛍️ Seeding products...');
+  
+  // First, ensure tea categories exist without recreating them
+  if (dbConnection.isRemote) {
+    const teaCategoriesExist = await verifyRemoteTable('tea_categories');
+    if (!teaCategoriesExist) {
+      await seedTeaCategories(dbConnection);
+    }
+  }
+
+  for (const product of mockProducts) {
+    try {
+      const {
+        categorySlug,
+        brandSlug,
+        name,
+        slug,
+        description,
+        images,
+        price,
+        isActive,
+        isFeatured,
+        discount,
+        hasVariations,
+        weight,
+        stock,
+        teaCategories,
+        variations
+      } = product;
+
+      if (dbConnection.isRemote) {
+        // Insert product
+        await executeRemoteSQL(`
+          INSERT INTO products (
+            category_slug, brand_slug, name, slug, description, images,
+            price, is_active, is_featured, discount, has_variations, weight, stock
+          )
+          VALUES (
+            ${toSqlValue(categorySlug)}, ${toSqlValue(brandSlug)},
+            ${toSqlValue(name)}, ${toSqlValue(slug)}, ${toSqlValue(description)},
+            ${toSqlValue(images)}, ${toSqlValue(price)}, ${toSqlValue(isActive)},
+            ${toSqlValue(isFeatured)}, ${toSqlValue(discount)},
+            ${toSqlValue(hasVariations)}, ${toSqlValue(weight)}, ${toSqlValue(stock)}
+          );
+        `, `Adding product: ${name}`);
+
+        // Get the inserted product's ID
+        const result = await executeRemoteSQL(
+          `SELECT id FROM products WHERE slug = ${toSqlValue(slug)};`,
+          `Getting ID for product: ${name}`
+        );
+        const productId = result.id;
+
+        // Insert tea categories relationships without recreating categories
+        if (teaCategories && teaCategories.length > 0) {
+          const values = teaCategories
+            .map(slug => `(${productId}, ${toSqlValue(slug)})`)
+            .join(', ');
+
+          await executeRemoteSQL(`
+            INSERT INTO product_tea_categories (product_id, tea_category_slug)
+            VALUES ${values};
+          `, `Adding tea categories for product: ${name}`);
+        }
+
+        // Add variations
+        if (hasVariations && variations) {
+          const variationsArray = JSON.parse(variations);
+          for (const variation of variationsArray) {
+            const sku = variation.sku || `${slug}-${variation.attributes?.map((attr: { value: string }) => attr.value.toLowerCase()).join('-')}`;
+            
+            const variationResult = await executeRemoteSQL(`
+              INSERT INTO product_variations (product_id, sku, price, stock, sort, created_at)
+              VALUES (
+                ${productId},
+                ${toSqlValue(sku)},
+                ${toSqlValue(variation.price)},
+                ${toSqlValue(variation.stock)},
+                ${toSqlValue(variation.sort || 0)},
+                ${toSqlValue(new Date())}
+              ) RETURNING id;
+            `, `Adding variation for product: ${name}`);
+
+            if (variation.attributes?.length) {
+              for (const attr of variation.attributes) {
+                await executeRemoteSQL(`
+                  INSERT INTO variation_attributes (
+                    product_variation_id, attribute_id, value, created_at
+                  ) VALUES (
+                    ${variationResult.id},
+                    ${toSqlValue(attr.attributeId)},
+                    ${toSqlValue(attr.value)},
+                    ${toSqlValue(new Date())}
+                  );
+                `, `Adding attribute for variation`);
+              }
+            }
+          }
+        }
+      } else {
+        // First check if product exists
+        const existing = await dbConnection.db.select({ id: schema.products.id })
+          .from(schema.products)
+          .where(eq(schema.products.slug, slug));
+
+        let productId: number;
+
+        if (existing.length > 0) {
+          productId = existing[0].id;
+          // Update existing product
+          await dbConnection.db.update(schema.products)
+            .set({
+              ...product,
+              createdAt: new Date()
+            })
+            .where(eq(schema.products.slug, slug));
+          console.log(`✅ Updated product: ${name}`);
+
+          // Delete existing relations
+          await dbConnection.db.delete(schema.productTeaCategories)
+            .where(eq(schema.productTeaCategories.productId, productId));
+          await dbConnection.db.delete(schema.productVariations)
+            .where(eq(schema.productVariations.productId, productId));
+        } else {
+          // Insert new product
+          const result = await dbConnection.db.insert(schema.products)
+            .values({
+              ...product,
+              createdAt: new Date()
+            })
+            .returning({ id: schema.products.id });
+          productId = result[0].id;
+          console.log(`✅ Added product: ${name}`);
+        }
+
+        // Insert tea categories relationships
+        if (teaCategories && teaCategories.length > 0) {
+          await dbConnection.db.insert(schema.productTeaCategories)
+            .values(
+              teaCategories.map(teaCategorySlug => ({
+                productId,
+                teaCategorySlug,
+              }))
+            )
+            .run();
+        }
+
+        // Add variations
+        if (hasVariations && variations) {
+          const variationsArray = JSON.parse(variations);
+          for (const variation of variationsArray) {
+            const sku = variation.sku || `${slug}-${variation.attributes?.map((attr: { value: string }) => attr.value.toLowerCase()).join('-')}`;
+            
+            const variationResult = await dbConnection.db.insert(schema.productVariations)
+              .values({
+                productId,
+                sku,
+                price: variation.price,
+                stock: variation.stock,
+                sort: variation.sort || 0,
+                createdAt: new Date()
+              })
+              .returning({ id: schema.productVariations.id });
+
+            // Add variation attributes
+            if (variation.attributes?.length) {
+              for (const attr of variation.attributes) {
+                await dbConnection.db.insert(schema.variationAttributes)
+                  .values({
+                    productVariationId: variationResult[0].id,
+                    attributeId: attr.attributeId,
+                    value: attr.value,
+                    createdAt: new Date()
+                  });
+              }
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error(`❌ Error processing product ${name}:`, error);
+      throw error;
+    }
+  }
+}
+
+async function seedBlogPosts(dbConnection: any) {
+  if (!finalTablesToSeed.includes('blog_posts')) return;
+  console.log('\n📝 Seeding blog posts...');
+  
+  // First, ensure tea categories exist without recreating them
+  if (dbConnection.isRemote) {
+    const teaCategoriesExist = await verifyRemoteTable('tea_categories');
+    if (!teaCategoriesExist) {
+      await seedTeaCategories(dbConnection);
+    }
+  }
+
+  for (const post of mockBlogPosts) {
+    try {
+      if (dbConnection.isRemote) {
+        // Insert blog post
+        const result = await executeRemoteSQL(`
+          INSERT INTO blog_posts (title, slug, body, images, product_slug, published_at)
+          VALUES (
+            ${toSqlValue(post.title)},
+            ${toSqlValue(post.slug)},
+            ${toSqlValue(post.body)},
+            ${toSqlValue(post.images)},
+            ${toSqlValue(post.productSlug)},
+            ${toSqlValue(new Date(post.publishedAt * 1000))}
+          ) RETURNING id;
+        `, `Adding blog post: ${post.title}`);
+
+        // Add tea categories
+        if (post.teaCategories?.length) {
+          for (const slug of post.teaCategories) {
+            await executeRemoteSQL(`
+              INSERT INTO blog_tea_categories (blog_post_id, tea_category_slug)
+              VALUES (${result.id}, ${toSqlValue(slug)});
+            `, `Adding tea category ${slug} to blog post: ${post.title}`);
+          }
+        }
+      } else {
+        // Check if post exists
+        const existing = await dbConnection.db.select({ id: schema.blogPosts.id })
+          .from(schema.blogPosts)
+          .where(eq(schema.blogPosts.slug, post.slug));
+
+        let postId: number;
+
+        if (existing.length > 0) {
+          postId = existing[0].id;
+          // Update existing post
+          await dbConnection.db.update(schema.blogPosts)
+            .set({
+              title: post.title,
+              body: post.body,
+              images: post.images || null,
+              productSlug: post.productSlug || null,
+              publishedAt: new Date(post.publishedAt * 1000)
+            })
+            .where(eq(schema.blogPosts.slug, post.slug));
+          console.log(`✅ Updated blog post: ${post.title}`);
+
+          // Delete existing categories
+          await dbConnection.db.delete(schema.blogTeaCategories)
+            .where(eq(schema.blogTeaCategories.blogPostId, postId));
+        } else {
+          // Insert new post
+          const result = await dbConnection.db.insert(schema.blogPosts)
+            .values({
+              ...post,
+              publishedAt: new Date(post.publishedAt * 1000)
+            })
+            .returning({ id: schema.blogPosts.id });
+          postId = result[0].id;
+          console.log(`✅ Added blog post: ${post.title}`);
+        }
+
+        // Add tea categories
+        if (post.teaCategories?.length) {
+          for (const slug of post.teaCategories) {
+            await dbConnection.db.insert(schema.blogTeaCategories)
+              .values({ blogPostId: postId, teaCategorySlug: slug });
+          }
+        }
+      }
+    } catch (error) {
+      console.error(`❌ Error processing blog post ${post.title}:`, error);
+      throw error;
+    }
+  }
+}
+
+// Main seeding function
 async function seedDatabase() {
   console.log(`🌱 Seeding ${isRemote ? 'remote' : 'local'} database...`);
   console.log(`📊 Tables to seed: ${finalTablesToSeed.join(', ')}`);
   
   try {
-    let db: any;
+    const dbConnection = await initializeDb();
     
-    if (isRemote) {
-      console.log('📡 Connecting to remote database...');
-      
-      // Clear and seed tables in order
-      await clearTables(finalTablesToSeed);
-      await seedTeaCategories();
-      await seedCategories();
-      await seedBrands();
-      
-      if (finalTablesToSeed.includes('products')) {
-        // Seed products
-        console.log('\n🛍️ Seeding products...');
-        for (const product of mockProducts) {
-          try {
-            // Insert the product first
-            const result = await executeRemoteSQL(`
-              INSERT INTO products (
-                category_slug, brand_slug, name, slug, description, images, 
-                price, is_active, is_featured, discount, has_variations, 
-                weight, stock, unlimited_stock, created_at
-              )
-              VALUES (
-                '${product.categorySlug.replace(/'/g, "''")}',
-                '${product.brandSlug.replace(/'/g, "''")}',
-                '${product.name.replace(/'/g, "''")}',
-                '${product.slug.replace(/'/g, "''")}',
-                '${product.description.replace(/'/g, "''")}',
-                '${product.images.replace(/'/g, "''")}',
-                ${product.price},
-                ${product.isActive ? 1 : 0},
-                ${product.isFeatured ? 1 : 0},
-                ${product.discount === null ? 'NULL' : product.discount},
-                ${product.hasVariations ? 1 : 0},
-                ${product.weight ? `'${product.weight.replace(/'/g, "''")}'` : 'NULL'},
-                ${product.stock},
-                ${product.unlimitedStock ? 1 : 0},
-                ${Math.floor(Date.now() / 1000)}
-              ) RETURNING id;
-            `, `Adding product: ${product.name}`);
-
-            console.log(`Product result:`, result);
-
-            // Insert tea categories if they exist and we have a valid product ID
-            if (product.teaCategories && Array.isArray(product.teaCategories) && result && result.id) {
-              console.log(`Adding tea categories for product ${product.name} (ID: ${result.id}):`, product.teaCategories);
-              
-              for (const teaCategorySlug of product.teaCategories) {
-                // Verify tea category exists before inserting
-                const teaCategoryExists = await executeRemoteSQL(`
-                  SELECT COUNT(*) as count FROM tea_categories WHERE slug = '${teaCategorySlug.replace(/'/g, "''")}';
-                `, `Verifying tea category: ${teaCategorySlug}`);
-
-                if (!teaCategoryExists || teaCategoryExists.count === 0) {
-                  console.warn(`⚠️ Tea category "${teaCategorySlug}" not found for product: ${product.name}`);
-                  continue;
-                }
-
-                try {
-                  const insertResult = await executeRemoteSQL(`
-                    INSERT INTO product_tea_categories (product_id, tea_category_slug)
-                    VALUES (${result.id}, '${teaCategorySlug.replace(/'/g, "''")}')
-                    RETURNING id;
-                  `, `Adding tea category ${teaCategorySlug} to product: ${product.name}`);
-
-                  if (insertResult && insertResult.id) {
-                    console.log(`✅ Successfully added tea category ${teaCategorySlug} to product: ${product.name} (association ID: ${insertResult.id})`);
-                  } else {
-                    console.warn(`⚠️ Failed to add tea category ${teaCategorySlug} to product: ${product.name} - No ID returned`);
-                  }
-                } catch (error) {
-                  console.error(`❌ Error adding tea category ${teaCategorySlug} to product ${product.name}:`, error);
-                }
-              }
-            } else {
-              console.log(`No tea categories to add for product: ${product.name}`);
-            }
-
-            // Insert variations if they exist
-            if (product.hasVariations && product.variations) {
-              const variations = JSON.parse(product.variations);
-              for (const variation of variations) {
-                // Generate a SKU using variation attributes or a fallback
-                const sku = variation.sku || `${product.slug}-${variation.attributes?.map((attr: { value: string }) => attr.value.toLowerCase()).join('-') || Date.now()}`;
-                
-                // Insert variation
-                await executeRemoteSQL(`
-                  WITH product_id AS (
-                    SELECT id FROM products WHERE slug = '${product.slug.replace(/'/g, "''")}'
-                  )
-                  INSERT INTO product_variations (
-                    product_id, sku, price, stock, sort,
-                    "createdAt"
-                  )
-                  SELECT 
-                    product_id.id,
-                    '${sku.replace(/'/g, "''")}',
-                    ${variation.price},
-                    ${variation.stock},
-                    ${variation.sort || 0},
-                    ${Math.floor(Date.now() / 1000)}
-                  FROM product_id;
-                `, `Adding variation: ${variation.name} for product: ${product.name}`);
-
-                // Insert variation attributes
-                if (variation.attributes && Array.isArray(variation.attributes)) {
-                  for (const attr of variation.attributes) {
-                    await executeRemoteSQL(`
-                      WITH variation_id AS (
-                        SELECT pv.id 
-                        FROM product_variations pv
-                        JOIN products p ON p.id = pv.product_id
-                        WHERE p.slug = '${product.slug.replace(/'/g, "''")}' 
-                        AND pv.sku = '${sku.replace(/'/g, "''")}'
-                      )
-                      INSERT INTO variation_attributes (
-                        product_variation_id, "attributeId", value,
-                        "createdAt"
-                      )
-                      SELECT 
-                        variation_id.id,
-                        '${attr.attributeId}',
-                        '${attr.value}',
-                        ${Math.floor(Date.now() / 1000)}
-                      FROM variation_id;
-                    `, `Adding attribute: ${attr.attributeId} for variation: ${variation.name}`);
-                  }
-                }
-              }
-              console.log(`✅ Added product: ${product.name} with ${variations.length} variations`);
-            }
-          } catch (error) {
-            console.error(`❌ Error adding product ${product.name}:`, error);
-            throw error;
-          }
-        }
-      }
-      
-      if (finalTablesToSeed.includes('blog_posts')) {
-        // Seed blog posts
-        console.log('\n📝 Seeding blog posts...');
-        for (const post of mockBlogPosts) {
-          try {
-            // Prepare the content by escaping only single quotes, preserving markdown formatting
-            const escapedTitle = post.title.replace(/'/g, "''");
-            const escapedSlug = post.slug.replace(/'/g, "''");
-            const escapedBody = post.body.replace(/'/g, "''"); // Remove .replace(/\n/g, '\\n') to preserve markdown
-            const escapedImages = post.images ? post.images.replace(/'/g, "''") : null;
-            const escapedProductSlug = post.productSlug ? post.productSlug.replace(/'/g, "''") : null;
-
-            // Split the command into smaller parts for better readability and reliability
-            const insertCommand = `
-              INSERT INTO blog_posts (
-                title, slug, body, images, product_slug,
-                published_at
-              )
-              VALUES (
-                '${escapedTitle}',
-                '${escapedSlug}',
-                '${escapedBody}',
-                ${escapedImages ? `'${escapedImages}'` : 'NULL'},
-                ${escapedProductSlug ? `'${escapedProductSlug}'` : 'NULL'},
-                ${post.publishedAt}
-              ) RETURNING id;
-            `.trim();
-
-            // Insert the blog post
-            const result = await executeRemoteSQL(insertCommand, `Adding blog post: ${post.title}`);
-
-            console.log(`Blog post result:`, result);
-
-            // Insert tea categories if they exist and we have a valid blog post ID
-            if (post.teaCategories && Array.isArray(post.teaCategories) && result && result.id) {
-              console.log(`Adding tea categories for blog post ${post.title} (ID: ${result.id}):`, post.teaCategories);
-              
-              for (const teaCategorySlug of post.teaCategories) {
-                // Verify tea category exists before inserting
-                const teaCategoryExists = await executeRemoteSQL(`
-                  SELECT COUNT(*) as count FROM tea_categories WHERE slug = '${teaCategorySlug.replace(/'/g, "''")}';
-                `, `Verifying tea category: ${teaCategorySlug}`);
-
-                if (!teaCategoryExists || teaCategoryExists.count === 0) {
-                  console.warn(`⚠️ Tea category "${teaCategorySlug}" not found for blog post: ${post.title}`);
-                  continue;
-                }
-
-                try {
-                  const insertResult = await executeRemoteSQL(`
-                    INSERT INTO blog_tea_categories (blog_post_id, tea_category_slug)
-                    VALUES (${result.id}, '${teaCategorySlug.replace(/'/g, "''")}')
-                    RETURNING id;
-                  `, `Adding tea category ${teaCategorySlug} to blog post: ${post.title}`);
-
-                  if (insertResult && insertResult.id) {
-                    console.log(`✅ Successfully added tea category ${teaCategorySlug} to blog post: ${post.title} (association ID: ${insertResult.id})`);
-                  } else {
-                    console.warn(`⚠️ Failed to add tea category ${teaCategorySlug} to blog post: ${post.title} - No ID returned`);
-                  }
-                } catch (error) {
-                  console.error(`❌ Error adding tea category ${teaCategorySlug} to blog post ${post.title}:`, error);
-                }
-              }
-            } else {
-              console.log(`No tea categories to add for blog post: ${post.title}`);
-            }
-
-            console.log(`✅ Added blog post: ${post.title}`);
-          } catch (error) {
-            console.error(`❌ Error adding blog post ${post.title}:`, error);
-            throw error;
-          }
-        }
-      }
-      
-      console.log(`\n🎉 Remote database seeded successfully!`);
-      
-    } else {
-      // Local database seeding
-      const dbPath = findLocalDbPath();
-      if (!dbPath) {
-        console.error('❌ Could not find local SQLite database file.');
-        process.exit(1);
-      }
-      
-      console.log(`📂 Using database at: ${dbPath}`);
-      db = new Database(dbPath);
-      
-      try {
-        // Begin transaction
-        db.prepare('BEGIN').run();
-        
-        // Clear and seed tables in order
-        await clearTables(finalTablesToSeed, db);
-        await seedTeaCategories(db);
-        await seedCategories(db);
-        await seedBrands(db);
-        
-        if (finalTablesToSeed.includes('products')) {
-          // Seed products first since they're referenced by blog posts
-          console.log('\n🛍️ Seeding products...');
-          const insertProduct = db.prepare(`
-            INSERT INTO products (
-              category_slug, brand_slug, name, slug, description, images,
-              price, is_active, is_featured, discount, has_variations,
-              weight, stock, unlimited_stock, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-          `);
-
-          const insertProductTeaCategory = db.prepare(`
-            INSERT INTO product_tea_categories (product_id, tea_category_slug)
-            VALUES (?, ?)
-          `);
-
-          for (const product of mockProducts) {
-            try {
-              const result = insertProduct.run(
-                product.categorySlug,
-                product.brandSlug,
-                product.name,
-                product.slug,
-                product.description,
-                product.images,
-                product.price,
-                product.isActive ? 1 : 0,
-                product.isFeatured ? 1 : 0,
-                product.discount,
-                product.hasVariations ? 1 : 0,
-                product.weight || null,
-                product.stock,
-                product.unlimitedStock ? 1 : 0,
-                Math.floor(Date.now() / 1000)
-              );
-
-              if (product.teaCategories && Array.isArray(product.teaCategories) && result.lastInsertRowid) {
-                for (const teaCategorySlug of product.teaCategories) {
-                  insertProductTeaCategory.run(result.lastInsertRowid, teaCategorySlug);
-                }
-              }
-
-              console.log(`✅ Added product: ${product.name}`);
-            } catch (error) {
-              console.error(`❌ Error adding product ${product.name}:`, error);
-              throw error;
-            }
-          }
-        }
-        
-        if (finalTablesToSeed.includes('blog_posts')) {
-          // Seed blog posts
-          console.log('\n📝 Seeding blog posts...');
-          const insertBlogPost = db.prepare(`
-            INSERT INTO blog_posts (
-              title, slug, body, images, product_slug, published_at
-            ) VALUES (?, ?, ?, ?, ?, ?)
-          `);
-
-          const insertBlogTeaCategory = db.prepare(`
-            INSERT INTO blog_tea_categories (blog_post_id, tea_category_slug)
-            VALUES (?, ?)
-          `);
-
-          const verifyTeaCategory = db.prepare(`
-            SELECT COUNT(*) as count FROM tea_categories WHERE slug = ?
-          `);
-
-          for (const post of mockBlogPosts) {
-            try {
-              // Insert blog post
-              const result = insertBlogPost.run(
-                post.title,
-                post.slug,
-                post.body,
-                post.images || null,
-                post.productSlug || null,
-                post.publishedAt
-              );
-
-              // Insert tea categories if they exist
-              if (post.teaCategories && Array.isArray(post.teaCategories) && result.lastInsertRowid) {
-                for (const teaCategorySlug of post.teaCategories) {
-                  const exists = verifyTeaCategory.get(teaCategorySlug);
-                  
-                  if (!exists || exists.count === 0) {
-                    console.warn(`⚠️ Tea category "${teaCategorySlug}" not found for blog post: ${post.title}`);
-                    continue;
-                  }
-
-                  insertBlogTeaCategory.run(result.lastInsertRowid, teaCategorySlug);
-                  console.log(`✅ Added tea category ${teaCategorySlug} to blog post: ${post.title}`);
-                }
-              }
-
-              console.log(`✅ Added blog post: ${post.title}`);
-            } catch (error) {
-              console.error(`❌ Error adding blog post ${post.title}:`, error);
-              throw error;
-            }
-          }
-        }
-
-        // Commit the transaction
-        db.prepare('COMMIT').run();
-        console.log('\n✅ All data seeded successfully!');
-
-      } catch (error) {
-        // Rollback on error
-        db.prepare('ROLLBACK').run();
-        throw error;
-      } finally {
-        // Close the database connection
-        db.close();
-      }
-    }
-
+    await clearTables(dbConnection, finalTablesToSeed);
+    await seedTeaCategories(dbConnection);
+    await seedCategories(dbConnection);
+    await seedBrands(dbConnection);
+    await seedProducts(dbConnection);
+    await seedBlogPosts(dbConnection);
+    
     console.log(`\n🎉 ${isRemote ? 'Remote' : 'Local'} database seeded successfully!`);
-
   } catch (error) {
     console.error(`❌ Error seeding ${isRemote ? 'remote' : 'local'} database:`, error);
     process.exit(1);
   }
 }
 
+// Run the seeding process
 seedDatabase();

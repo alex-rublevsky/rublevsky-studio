@@ -57,6 +57,7 @@
     "vaul": "^1.1.2"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250313.0",
     "@eslint/eslintrc": "^3",
     "@opennextjs/cloudflare": "^0.5.3",
     "@tailwindcss/typography": "^0.5.16",

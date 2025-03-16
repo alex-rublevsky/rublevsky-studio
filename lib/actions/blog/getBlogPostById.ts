@@ -59,7 +59,9 @@ export default async function getBlogPostById(id: number): Promise<BlogPost | nu
       body: firstRow.body ?? "",
       images: firstRow.images ?? "",
       productSlug: firstRow.productSlug ?? "",
-      publishedAt: Math.floor(firstRow.publishedAt.getTime() / 1000),
+      publishedAt: firstRow.publishedAt instanceof Date 
+        ? firstRow.publishedAt.getTime() 
+        : firstRow.publishedAt * 1000, // Convert seconds to milliseconds
       teaCategories: [] as string[],
     };
 

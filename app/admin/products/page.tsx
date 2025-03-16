@@ -1141,7 +1141,7 @@ export default function ProductsPage() {
                   <label className="block text-sm font-medium mb-1">
                     Tea Categories
                   </label>
-                  <div className="space-y-2 border border-input rounded-md p-3">
+                  <div className="space-y-2 border border-input rounded-md p-3 max-h-48 overflow-y-auto">
                     {teaCategories.map((category) => (
                       <label
                         key={category.slug}
@@ -1149,6 +1149,7 @@ export default function ProductsPage() {
                       >
                         <input
                           type="checkbox"
+                          name={`teaCategory-${category.slug}`}
                           checked={
                             editFormData.teaCategories?.includes(
                               category.slug
@@ -1163,15 +1164,16 @@ export default function ProductsPage() {
                   </div>
                 </div>
 
-                <div className="md:col-span-2">
+                <div>
                   <label className="block text-sm font-medium mb-1">
-                    Images (URLs, comma-separated)
+                    Images (comma-separated)
                   </label>
                   <Input
                     type="text"
                     name="images"
                     value={editFormData.images}
                     onChange={handleEditChange}
+                    placeholder="image1.jpg, image2.jpg, image3.jpg"
                   />
                 </div>
 
@@ -1229,36 +1231,6 @@ export default function ProductsPage() {
                     onChange={handleEditChange}
                     placeholder="Enter weight in grams"
                   />
-                </div>
-              </div>
-
-              {/* Tea Categories */}
-              <div className="mt-6">
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Tea Categories
-                </label>
-                <div className="grid grid-cols-2 gap-4">
-                  {teaCategories.map((category) => (
-                    <div key={category.slug} className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id={`edit-teaCategory-${category.slug}`}
-                        name={`teaCategory-${category.slug}`}
-                        checked={
-                          editFormData.teaCategories?.includes(category.slug) ||
-                          false
-                        }
-                        onChange={handleEditChange}
-                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                      />
-                      <label
-                        htmlFor={`edit-teaCategory-${category.slug}`}
-                        className="ml-2 block text-sm text-foreground"
-                      >
-                        {category.name}
-                      </label>
-                    </div>
-                  ))}
                 </div>
               </div>
 

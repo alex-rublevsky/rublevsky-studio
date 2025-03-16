@@ -42,7 +42,7 @@ export default function BlogPage() {
     teaCategories: [],
     productSlug: "",
     images: "",
-    publishedAt: Math.floor(Date.now() / 1000), // Convert to Unix timestamp
+    publishedAt: Date.now(), // Current timestamp in milliseconds
   });
 
   const [editFormData, setEditFormData] = useState<BlogPostFormData>({
@@ -52,7 +52,7 @@ export default function BlogPage() {
     teaCategories: [],
     productSlug: "",
     images: "",
-    publishedAt: Math.floor(Date.now() / 1000),
+    publishedAt: Date.now(), // Current timestamp in milliseconds
   });
 
   // UI states
@@ -212,7 +212,7 @@ export default function BlogPage() {
         teaCategories: [],
         productSlug: "",
         images: "",
-        publishedAt: Math.floor(Date.now() / 1000),
+        publishedAt: Date.now(), // Current timestamp in milliseconds
       });
       setIsCreateAutoSlug(true);
       router.refresh();
@@ -241,10 +241,7 @@ export default function BlogPage() {
           teaCategories: postData.teaCategories || [],
           productSlug: postData.productSlug || "",
           images: postData.images || "",
-          publishedAt:
-            typeof postData.publishedAt === "number"
-              ? postData.publishedAt
-              : Math.floor(Date.now() / 1000),
+          publishedAt: postData.publishedAt,
         });
       }
     } catch (err) {
@@ -274,7 +271,7 @@ export default function BlogPage() {
         teaCategories: [],
         productSlug: "",
         images: "",
-        publishedAt: Math.floor(Date.now() / 1000),
+        publishedAt: Date.now(), // Current timestamp in milliseconds
       });
       setIsEditAutoSlug(false);
       router.refresh();
@@ -330,7 +327,7 @@ export default function BlogPage() {
       teaCategories: [],
       productSlug: "",
       images: "",
-      publishedAt: Math.floor(Date.now() / 1000),
+      publishedAt: Date.now(), // Current timestamp in milliseconds
     });
     setIsEditAutoSlug(false);
     setError("");
@@ -488,14 +485,14 @@ export default function BlogPage() {
                   id="publishedAt"
                   name="publishedAt"
                   type="datetime-local"
-                  value={new Date(createFormData.publishedAt * 1000)
+                  value={new Date(createFormData.publishedAt)
                     .toISOString()
                     .slice(0, 16)}
                   onChange={(e) => {
                     const date = new Date(e.target.value);
                     setCreateFormData((prev) => ({
                       ...prev,
-                      publishedAt: Math.floor(date.getTime() / 1000),
+                      publishedAt: date.getTime(),
                     }));
                   }}
                   required
@@ -649,14 +646,14 @@ export default function BlogPage() {
                     id="editPublishedAt"
                     name="publishedAt"
                     type="datetime-local"
-                    value={new Date(editFormData.publishedAt * 1000)
+                    value={new Date(editFormData.publishedAt)
                       .toISOString()
                       .slice(0, 16)}
                     onChange={(e) => {
                       const date = new Date(e.target.value);
                       setEditFormData((prev) => ({
                         ...prev,
-                        publishedAt: Math.floor(date.getTime() / 1000),
+                        publishedAt: date.getTime(),
                       }));
                     }}
                     required

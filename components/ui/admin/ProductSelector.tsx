@@ -102,19 +102,12 @@ export default function ProductSelector({
   // Parse images for the selected product
   const getProductImage = (product: Product): string => {
     try {
-      // Handle case where images might be a string (JSON) or already an array
-      let imageArray: string[] = [];
+      if (!product.images) return "/placeholder.jpg";
 
-      if (typeof product.images === "string") {
-        try {
-          imageArray = JSON.parse(product.images);
-        } catch (e) {
-          // If parsing fails, use empty array
-          imageArray = [];
-        }
-      } else if (Array.isArray(product.images)) {
-        imageArray = product.images;
-      }
+      // Split comma-separated string into array and add leading slash
+      const imageArray = product.images
+        .split(",")
+        .map((img) => `/${img.trim()}`);
 
       // Return the first image or a placeholder
       return imageArray.length > 0 ? imageArray[0] : "/placeholder.jpg";

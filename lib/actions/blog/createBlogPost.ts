@@ -37,7 +37,7 @@ export async function createBlogPost(data: BlogPostFormData): Promise<BlogPost> 
         body: data.body,
         productSlug: data.productSlug || null,
         images: data.images || null,
-        publishedAt: new Date(data.publishedAt * 1000),
+        publishedAt: new Date(data.publishedAt),
       };
 
       const result = await tx

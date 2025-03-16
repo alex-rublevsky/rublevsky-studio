@@ -45,7 +45,7 @@ export async function getAdminBlogPosts(): Promise<BlogPost[]> {
         body: row.body ?? "",
         images: row.images ?? "",
         productSlug: row.productSlug ?? "",
-        publishedAt: Math.floor(row.publishedAt.getTime() / 1000),
+        publishedAt: row.publishedAt.getTime(),
         teaCategories: [] as string[],
       });
     }

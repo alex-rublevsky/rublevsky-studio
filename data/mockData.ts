@@ -924,7 +924,7 @@ export const mockProducts = [
     ])
   },
   {
-    name: `Ku Zhu Shan “Guardian 2.0” Ripe Pu'er`,
+    name: `Ku Zhu Shan "Guardian 2.0" Ripe Pu'er`,
     slug: "ku-zhu-shan-guardian-20-ripe-puer",
     teaCategories: ["ripe-pu-er",],
     description: "Linked to blog post with the same slug",
@@ -1593,7 +1593,7 @@ export const mockProducts = [
     ])
   },
   {
-    name: `Kun Lu Shan, Mengku, Lincang, Old Trees “Dao Shi” Ripe Pu'er`,
+    name: `Kun Lu Shan, Mengku, Lincang, Old Trees "Dao Shi" Ripe Pu'er`,
     slug: "kun-lu-shan-mengku-lincang-old-trees-dao-shi-ripe-puer",
     teaCategories: ["ripe-pu-er",],
     description: "Linked to blog post with the same slug",

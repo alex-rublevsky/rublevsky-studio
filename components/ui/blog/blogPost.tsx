@@ -49,7 +49,7 @@ function BlogPost({
                 </Link>
               )}
               <time className="whitespace-nowrap">
-                {new Date(publishedAt * 1000).toLocaleDateString("en-US", {
+                {new Date(publishedAt).toLocaleDateString("en-US", {
                   year: "numeric",
                   month: "short",
                   day: "numeric",
