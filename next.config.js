@@ -1,4 +1,4 @@
-const MillionLint = require('@million/lint');
+//const MillionLint = require('@million/lint');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -14,6 +14,7 @@ const nextConfig = {
   },
 };
 
-module.exports = MillionLint.next({
-  rsc: true, // Required for app directory structure
-})(nextConfig);
+// module.exports = MillionLint.next({
+//   rsc: true, // Required for app directory structure
+// })(nextConfig);
+export default nextConfig;

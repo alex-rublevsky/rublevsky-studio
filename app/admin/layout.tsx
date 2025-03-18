@@ -1,7 +1,8 @@
 "use client";
 
+import { authClient } from "@/lib/auth-client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function AdminLayout({
@@ -10,6 +11,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
 
   // Add dark class to body for admin pages
   useEffect(() => {
@@ -57,8 +59,17 @@ export default function AdminLayout({
               <Link
                 href="/"
                 className="text-muted-foreground hover:text-foreground px-3 py-2 rounded-md text-sm font-medium"
+                onClick={() => {
+                  authClient.signOut({
+                    fetchOptions: {
+                      onSuccess: () => {
+                        router.push("/sign-in"); // redirect to login page
+                      },
+                    },
+                  });
+                }}
               >
-                Back to Site
+                Log Out
               </Link>
             </div>
           </div>
