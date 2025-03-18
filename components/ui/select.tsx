@@ -6,7 +6,32 @@ import { Check, ChevronDown, ChevronUp } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-const Select = SelectPrimitive.Root;
+interface SelectTriggerProps
+  extends React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> {
+  variant?: "default" | "inverted";
+}
+
+type SelectProps = React.ComponentPropsWithoutRef<
+  typeof SelectPrimitive.Root
+> & {
+  label?: string;
+  required?: boolean;
+};
+
+const Select = ({ children, label, required, ...props }: SelectProps) => {
+  return (
+    <div>
+      {label && (
+        <label className="block text-sm font-medium mb-1">
+          {label}
+          {required && " *"}
+        </label>
+      )}
+      <SelectPrimitive.Root {...props}>{children}</SelectPrimitive.Root>
+    </div>
+  );
+};
+Select.displayName = SelectPrimitive.Root.displayName;
 
 const SelectGroup = SelectPrimitive.Group;
 
@@ -14,9 +39,7 @@ const SelectValue = SelectPrimitive.Value;
 
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> & {
-    variant?: "default" | "inverted";
-  }
+  SelectTriggerProps
 >(({ className, children, variant = "default", ...props }, ref) => (
   <SelectPrimitive.Trigger
     ref={ref}

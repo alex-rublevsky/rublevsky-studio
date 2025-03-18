@@ -5,13 +5,19 @@ import { cn } from "@/lib/utils";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
+  required?: boolean;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, label, ...props }, ref) => {
+  ({ className, type, label, required, ...props }, ref) => {
     return (
       <div>
-        <label className="block text-sm font-medium mb-1">{label}</label>
+        {label && (
+          <label className="block text-sm font-medium mb-1">
+            {label}
+            {required && " *"}
+          </label>
+        )}
 
         <input
           type={type}

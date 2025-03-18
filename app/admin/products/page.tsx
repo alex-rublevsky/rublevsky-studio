@@ -46,6 +46,7 @@ import {
   DrawerFooter,
   DrawerBody,
 } from "@/components/ui/drawer";
+import { cn } from "@/lib/utils";
 
 // Define the Variation interface to match the one in ProductVariationForm
 interface Variation {
@@ -105,6 +106,7 @@ export default function ProductsPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [teaCategories, setTeaCategories] = useState<TeaCategory[]>([]);
+  const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
 
   useEffect(() => {
     fetchProducts();
@@ -285,6 +287,20 @@ export default function ProductsPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setHasAttemptedSubmit(true);
+
+    // Collect validation errors
+    const errors: string[] = [];
+    if (!formData.name) errors.push("Product Name");
+    if (!formData.slug) errors.push("Slug");
+    if (!formData.price) errors.push("Price");
+    if (!formData.categorySlug) errors.push("Category");
+
+    if (errors.length > 0) {
+      toast.error(`Please fill in all required fields: ${errors.join(", ")}`);
+      return;
+    }
+
     setIsSubmitting(true);
     setError("");
 
@@ -314,6 +330,7 @@ export default function ProductsPage() {
       setFormData(defaultFormData);
       setVariations([]);
       setIsAutoSlug(true);
+      setHasAttemptedSubmit(false); // Reset the submission attempt state
       router.refresh();
       fetchProducts();
     } catch (err) {
@@ -593,66 +610,59 @@ export default function ProductsPage() {
 
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Product Name *
-                </label>
+              <Input
+                label="Product Name"
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                className={
+                  hasAttemptedSubmit && !formData.name ? "border-red-500" : ""
+                }
+              />
+
+              <div className="flex items-end">
                 <Input
+                  label="Slug (Auto-generated from name)"
                   type="text"
-                  name="name"
-                  value={formData.name}
+                  name="slug"
+                  value={formData.slug}
                   onChange={handleChange}
                   required
+                  className={
+                    hasAttemptedSubmit && !formData.slug ? "border-red-500" : ""
+                  }
                 />
-              </div>
+                <Button
+                  variant="inverted"
+                  type="button"
+                  size="sm"
+                  onClick={() => {
+                    setIsAutoSlug(true);
+                    if (formData.name) {
+                      const slug = formData.name
+                        .toLowerCase()
+                        .replace(/[^\w\s-]/g, "")
+                        .replace(/\s+/g, "-")
+                        .replace(/-+/g, "-")
+                        .trim();
 
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Slug *{" "}
-                  <span className="text-xs text-muted-foreground">
-                    (Auto-generated from name)
-                  </span>
-                </label>
-                <div className="flex">
-                  <Input
-                    type="text"
-                    name="slug"
-                    value={formData.slug}
-                    onChange={handleChange}
-                    required
-                  />
-                  <Button
-                    variant="inverted"
-                    type="button"
-                    size="sm"
-                    onClick={() => {
-                      setIsAutoSlug(true);
-                      if (formData.name) {
-                        const slug = formData.name
-                          .toLowerCase()
-                          .replace(/[^\w\s-]/g, "")
-                          .replace(/\s+/g, "-")
-                          .replace(/-+/g, "-")
-                          .trim();
-
-                        setFormData((prev) => ({
-                          ...prev,
-                          slug,
-                        }));
-                      }
-                    }}
-                    className="ml-2"
-                  >
-                    Reset
-                  </Button>
-                </div>
+                      setFormData((prev) => ({
+                        ...prev,
+                        slug,
+                      }));
+                    }
+                  }}
+                  className="ml-2 mt-2"
+                >
+                  Reset
+                </Button>
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium mb-1">
-                  Description
-                </label>
                 <Textarea
+                  label="Description"
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
@@ -660,94 +670,92 @@ export default function ProductsPage() {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Price (CAD) *
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span className="text-muted-foreground">$</span>
-                  </div>
-                  <Input
-                    type="number"
-                    name="price"
-                    value={formData.price}
-                    onChange={handleChange}
-                    required
-                    step="0.01"
-                    min="0"
-                  />
+              <div className="relative">
+                <Input
+                  label="Price (CAD)"
+                  type="number"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleChange}
+                  required
+                  step="0.01"
+                  min="0"
+                  className={cn(
+                    "pl-7",
+                    hasAttemptedSubmit && !formData.price
+                      ? "border-red-500"
+                      : ""
+                  )}
+                />
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none mt-7">
+                  <span className="text-muted-foreground">$</span>
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium mb-1">Stock</label>
-                <Input
-                  type="number"
-                  name="stock"
-                  value={formData.stock}
-                  onChange={handleChange}
-                  min="0"
-                />
-              </div>
+              <Input
+                label="Stock"
+                type="number"
+                name="stock"
+                value={formData.stock}
+                onChange={handleChange}
+                min="0"
+              />
 
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Category
-                </label>
-                <Select
-                  value={formData.categorySlug}
-                  onValueChange={(value) => {
-                    setFormData({
-                      ...formData,
-                      categorySlug: value,
-                    });
-                  }}
+              <Select
+                label="Category"
+                value={formData.categorySlug}
+                onValueChange={(value) => {
+                  setFormData({
+                    ...formData,
+                    categorySlug: value,
+                  });
+                }}
+                required
+              >
+                <SelectTrigger
+                  variant="inverted"
+                  className={
+                    hasAttemptedSubmit && !formData.categorySlug
+                      ? "border-red-500"
+                      : ""
+                  }
                 >
-                  <SelectTrigger variant="inverted">
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-                  <SelectContent variant="inverted">
-                    {categories.map((category: Category) => (
-                      <SelectItem
-                        key={category.slug}
-                        value={category.slug}
-                        variant="inverted"
-                      >
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent variant="inverted">
+                  {categories.map((category: Category) => (
+                    <SelectItem
+                      key={category.slug}
+                      value={category.slug}
+                      variant="inverted"
+                    >
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-              <div>
-                <label className="block text-sm font-medium mb-1">Brand</label>
-                <Select
-                  value={formData.brandSlug}
-                  onValueChange={(value) => {
-                    setFormData({
-                      ...formData,
-                      brandSlug: value,
-                    });
-                  }}
-                >
-                  <SelectTrigger variant="inverted">
-                    <SelectValue placeholder="Select a brand" />
-                  </SelectTrigger>
-                  <SelectContent variant="inverted">
-                    {brands.map((brand: Brand) => (
-                      <SelectItem
-                        key={brand.slug}
-                        value={brand.slug}
-                        variant="inverted"
-                      >
-                        {brand.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <Select
+                label="Brand (optional)"
+                value={formData.brandSlug || undefined}
+                onValueChange={(value) => {
+                  setFormData({
+                    ...formData,
+                    brandSlug: value || null,
+                  });
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a brand (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {brands.map((brand: Brand) => (
+                    <SelectItem key={brand.slug} value={brand.slug}>
+                      {brand.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
               <div>
                 <label className="block text-sm font-medium mb-1">
@@ -761,6 +769,7 @@ export default function ProductsPage() {
                     >
                       <input
                         type="checkbox"
+                        name={`teaCategory-${category.slug}`}
                         checked={
                           formData.teaCategories?.includes(category.slug) ||
                           false
@@ -775,10 +784,8 @@ export default function ProductsPage() {
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium mb-1">
-                  Image Identifiers
-                </label>
                 <Input
+                  label="Image Identifiers"
                   type="text"
                   name="images"
                   value={formData.images}
@@ -836,42 +843,12 @@ export default function ProductsPage() {
 
               <Input
                 label="Weight (in grams)"
-                id="weight"
-                name="weight"
                 type="text"
+                name="weight"
                 value={formData.weight}
                 onChange={handleChange}
                 placeholder="Enter weight in grams"
               />
-            </div>
-
-            {/* Tea Categories */}
-            <div className="mt-6">
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Tea Categories
-              </label>
-              <div className="grid grid-cols-2 gap-4">
-                {teaCategories.map((category) => (
-                  <div key={category.slug} className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id={`teaCategory-${category.slug}`}
-                      name={`teaCategory-${category.slug}`}
-                      checked={
-                        formData.teaCategories?.includes(category.slug) || false
-                      }
-                      onChange={handleChange}
-                      className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                    />
-                    <label
-                      htmlFor={`teaCategory-${category.slug}`}
-                      className="ml-2 block text-sm text-foreground"
-                    >
-                      {category.name}
-                    </label>
-                  </div>
-                ))}
-              </div>
             </div>
 
             {/* Add the variations form when hasVariations is checked */}
@@ -1047,10 +1024,8 @@ export default function ProductsPage() {
                   required
                 />
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium mb-1">
-                    Description
-                  </label>
                   <Textarea
+                    label="Description"
                     name="description"
                     value={editFormData.description}
                     onChange={handleEditChange}
@@ -1087,7 +1062,7 @@ export default function ProductsPage() {
 
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Category
+                    Category *
                   </label>
                   <Select
                     name="categorySlug"
@@ -1097,6 +1072,7 @@ export default function ProductsPage() {
                         target: { name: "categorySlug", value },
                       } as any)
                     }
+                    required
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select a category" />
@@ -1113,19 +1089,22 @@ export default function ProductsPage() {
 
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Brand
+                    Brand (optional)
                   </label>
                   <Select
                     name="brandSlug"
-                    value={editFormData.brandSlug}
+                    value={editFormData.brandSlug || undefined}
                     onValueChange={(value) =>
                       handleEditChange({
-                        target: { name: "brandSlug", value },
+                        target: {
+                          name: "brandSlug",
+                          value: value || null,
+                        },
                       } as any)
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a brand" />
+                      <SelectValue placeholder="Select a brand (optional)" />
                     </SelectTrigger>
                     <SelectContent>
                       {brands.map((brand) => (

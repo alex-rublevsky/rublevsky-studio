@@ -1,17 +1,28 @@
 'use server';
 
 import { desc } from "drizzle-orm";
+import { unstable_cache } from 'next/cache';
 import db from "@/server/db";
 import { products } from "@/server/schema";
 
+interface ProductForSelection {
+  id: number;
+  name: string;
+  slug: string;
+  images: string | null;
+}
+
 /**
  * Server action to fetch products for selection in forms
+ * Used in ProductSelector component for admin interfaces
+ * Implements caching with short revalidation time since it's used in admin
  * @returns Array of simplified product objects with id, name, and slug
  */
-export default async function getProductsForSelection() {
+async function fetchProductsForSelection(): Promise<ProductForSelection[]> {
   try {
-    // Get all active products with only the needed fields
-    const productsList = await db
+    // Get all products (both active and inactive) with only the needed fields
+    // We include inactive products because this is used in admin interfaces
+    return await db
       .select({
         id: products.id,
         name: products.name,
@@ -19,13 +30,22 @@ export default async function getProductsForSelection() {
         images: products.images
       })
       .from(products)
-      .where(products.isActive)
       .orderBy(desc(products.createdAt))
       .all();
-    
-    return productsList;
   } catch (error) {
     console.error("Error fetching products for selection:", error);
     throw new Error(`Failed to fetch products: ${(error as Error).message}`);
   }
+}
+
+// Export cached version
+export default async function getProductsForSelection(): Promise<ProductForSelection[]> {
+  return unstable_cache(
+    async () => fetchProductsForSelection(),
+    ['products-for-selection'],
+    {
+      revalidate: 60, // Cache for 1 minute since it's used in admin
+      tags: ['products'] // Invalidate when products change
+    }
+  )();
 } 

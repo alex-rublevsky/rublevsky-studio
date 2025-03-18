@@ -1,9 +1,11 @@
 'use server';
 
 import { eq } from "drizzle-orm";
+import type { D1Database } from '@cloudflare/workers-types';
+import { drizzle } from "drizzle-orm/d1";
 import { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 import db from "@/server/db";
-import { products, productVariations, variationAttributes, productTeaCategories } from "@/server/schema";
+import { products, productVariations, productTeaCategories } from "@/server/schema";
 import { Product, ProductFormData } from "@/types";
 
 /**
@@ -14,12 +16,24 @@ import { Product, ProductFormData } from "@/types";
 export default async function createProduct(data: ProductFormData): Promise<Product> {
   try {
     // Validate required fields
-    if (!data.name || !data.slug || !data.price) {
-      throw new Error("Name, slug, and price are required");
+    if (!data.name || !data.slug || !data.price || !data.categorySlug) {
+      throw new Error("Name, slug, price, and category are required");
     }
 
-    // Check if slug already exists (this needs to be a separate query for data integrity)
-    const existingProduct = await db
+    // Check if we're in production/Workers environment
+    const isProduction = typeof process === 'undefined' || typeof globalThis.caches !== 'undefined';
+    
+    // Choose the appropriate database instance
+    const database = isProduction 
+      ? drizzle((globalThis as any)[Symbol.for("__cloudflare-context__")]?.env?.DB as D1Database)
+      : db;
+
+    if (isProduction && !(globalThis as any)[Symbol.for("__cloudflare-context__")]?.env?.DB) {
+      throw new Error('Database binding not found in Cloudflare context');
+    }
+
+    // Check if slug already exists
+    const existingProduct = await database
       .select()
       .from(products)
       .where(eq(products.slug, data.slug))
@@ -29,70 +43,124 @@ export default async function createProduct(data: ProductFormData): Promise<Prod
       throw new Error("A product with this slug already exists");
     }
 
-    // Use a transaction for all inserts
-    return await db.transaction(async (tx: BetterSQLite3Database) => {
-      // Insert the product
-      const product = await tx.insert(products).values({
-        name: data.name,
-        slug: data.slug,
-        description: data.description,
-        price: parseFloat(data.price),
-        categorySlug: data.categorySlug,
-        brandSlug: data.brandSlug,
-        stock: parseInt(data.stock),
-        isActive: data.isActive,
-        isFeatured: data.isFeatured,
-        discount: data.discount,
-        hasVariations: data.hasVariations,
-        weight: data.weight || null,
-        images: data.images,
-        createdAt: new Date()
-      }).returning().get();
+    // Format images string with proper type checking
+    let imageString = '';
+    if (typeof data.images === 'string') {
+      imageString = data.images.trim();
+    } else if (Array.isArray(data.images)) {
+      imageString = (data.images as string[]).join(',');
+    }
 
-      // Batch insert tea categories if provided
+    if (isProduction) {
+      const d1 = (globalThis as any)[Symbol.for("__cloudflare-context__")]?.env?.DB;
+
+      // Create the product first
+      const result = await d1.prepare(`
+        INSERT INTO products (
+          name, slug, description, price, category_slug, brand_slug,
+          stock, is_active, is_featured, discount, has_variations,
+          weight, images, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        RETURNING *
+      `).bind(
+        data.name,
+        data.slug,
+        data.description,
+        parseFloat(data.price),
+        data.categorySlug,
+        data.brandSlug || null,
+        parseInt(data.stock),
+        data.isActive ? 1 : 0,
+        data.isFeatured ? 1 : 0,
+        data.discount,
+        data.hasVariations ? 1 : 0,
+        data.weight || null,
+        imageString,
+        new Date().toISOString()
+      ).first();
+
+      if (!result) {
+        throw new Error("Failed to create product");
+      }
+
+      const productId = result.id;
+
+      // Insert tea categories if they exist
       if (data.teaCategories?.length) {
-        await tx.insert(productTeaCategories).values(
-          data.teaCategories.map(teaCategorySlug => ({
-            productId: product.id,
-            teaCategorySlug,
-            createdAt: new Date()
-          }))
+        await d1.prepare(`
+          INSERT INTO product_tea_categories (product_id, tea_category_slug)
+          VALUES ${data.teaCategories.map(() => '(?, ?)').join(', ')}
+        `).bind(
+          ...data.teaCategories.flatMap(slug => [productId, slug])
         ).run();
       }
 
-      // Batch insert variations and their attributes if they exist
+      // Insert variations if they exist
       if (data.hasVariations && data.variations?.length) {
-        // Insert all variations in a batch
-        const variations = await tx.insert(productVariations).values(
-          data.variations.map(variation => ({
-            productId: product.id,
-            sku: variation.sku,
-            price: parseFloat(variation.price.toString()),
-            stock: parseInt(variation.stock.toString()),
-            sort: variation.sort,
-            createdAt: new Date(),
-          }))
-        ).returning().all();
-
-        // Prepare all attributes for batch insert
-        const allAttributes = variations.flatMap((variation: typeof productVariations.$inferSelect, index: number) => {
-          const variationData = data.variations[index];
-          return (variationData.attributes || []).map(attr => ({
-            productVariationId: variation.id,
-            attributeId: attr.attributeId,
-            value: attr.value,
-            createdAt: new Date(),
-          }));
-        });
-
-        // Batch insert all attributes if there are any
-        if (allAttributes.length) {
-          await tx.insert(variationAttributes).values(allAttributes).run();
-        }
+        await d1.prepare(`
+          INSERT INTO product_variations (product_id, sku, price, stock, sort, created_at)
+          VALUES ${data.variations.map(() => '(?, ?, ?, ?, ?, ?)').join(', ')}
+        `).bind(
+          ...data.variations.flatMap(v => [
+            productId,
+            v.sku,
+            parseFloat(v.price.toString()),
+            parseInt(v.stock.toString()),
+            v.sort,
+            new Date().toISOString()
+          ])
+        ).run();
       }
 
-      return product;
-    });
+      return result as Product;
+    } else {
+      // Development: Use Drizzle's transaction API
+      return await database.transaction(async (tx: BetterSQLite3Database) => {
+        // Create the product first
+        const product = await tx.insert(products).values({
+          name: data.name,
+          slug: data.slug,
+          description: data.description,
+          price: parseFloat(data.price),
+          categorySlug: data.categorySlug,
+          brandSlug: data.brandSlug || null,
+          stock: parseInt(data.stock),
+          isActive: data.isActive,
+          isFeatured: data.isFeatured,
+          discount: data.discount,
+          hasVariations: data.hasVariations,
+          weight: data.weight || null,
+          images: imageString,
+          createdAt: new Date()
+        }).returning().get();
+
+        // Insert tea categories if they exist
+        if (data.teaCategories?.length) {
+          await tx.insert(productTeaCategories).values(
+            data.teaCategories.map(slug => ({
+              productId: product.id,
+              teaCategorySlug: slug
+            }))
+          );
+        }
+
+        // Insert variations if they exist
+        if (data.hasVariations && data.variations?.length) {
+          await tx.insert(productVariations).values(
+            data.variations.map(v => ({
+              productId: product.id,
+              sku: v.sku,
+              price: parseFloat(v.price.toString()),
+              stock: parseInt(v.stock.toString()),
+              sort: v.sort,
+              createdAt: new Date()
+            }))
+          );
+        }
+
+        return product;
+      });
+    }
   } catch (error) {
     console.error("Error creating product:", error);
     throw new Error(`Failed to create product: ${(error as Error).message}`);

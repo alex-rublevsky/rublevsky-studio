@@ -25,7 +25,7 @@ interface ProductWithDetails extends Product {
   } | null;
 }
 
-interface QueryResult {
+interface QueryRow {
   product: Product;
   category: {
     name: string;
@@ -41,8 +41,15 @@ interface QueryResult {
     slug: string;
     body: string;
   } | null;
-  variation: any;
-  attributes: any;
+  variation: {
+    id: number | null;
+    sku: string | null;
+    price: number | null;
+    stock: number | null;
+    sort: number | null;
+    attributeId: number | null;
+    attributeValue: string | null;
+  };
 }
 
 // Function to fetch product from database
@@ -52,10 +59,27 @@ async function fetchProduct(slug: string): Promise<ProductWithDetails | null> {
       throw new Error("Slug parameter is required");
     }
     
-    // Execute a single query to get all related data
+    // Execute a single efficient query to get all related data
     const result = await db
       .select({
-        product: products,
+        product: {
+          id: products.id,
+          name: products.name,
+          slug: products.slug,
+          description: products.description,
+          price: products.price,
+          categorySlug: products.categorySlug,
+          brandSlug: products.brandSlug,
+          stock: products.stock,
+          isActive: products.isActive,
+          isFeatured: products.isFeatured,
+          discount: products.discount,
+          hasVariations: products.hasVariations,
+          weight: products.weight,
+          images: products.images,
+          createdAt: products.createdAt,
+          unlimitedStock: products.unlimitedStock
+        },
         category: {
           name: categories.name,
           slug: categories.slug
@@ -70,8 +94,15 @@ async function fetchProduct(slug: string): Promise<ProductWithDetails | null> {
           slug: blogPosts.slug,
           body: blogPosts.body
         },
-        variation: productVariations,
-        attributes: variationAttributes
+        variation: {
+          id: productVariations.id,
+          sku: productVariations.sku,
+          price: productVariations.price,
+          stock: productVariations.stock,
+          sort: productVariations.sort,
+          attributeId: variationAttributes.attributeId,
+          attributeValue: variationAttributes.value
+        }
       })
       .from(products)
       .where(eq(products.slug, slug))
@@ -81,9 +112,7 @@ async function fetchProduct(slug: string): Promise<ProductWithDetails | null> {
       .leftJoin(productVariations, eq(productVariations.productId, products.id))
       .leftJoin(
         variationAttributes,
-        productVariations.id
-          ? eq(variationAttributes.productVariationId, productVariations.id)
-          : undefined
+        eq(variationAttributes.productVariationId, productVariations.id)
       )
       .all();
     
@@ -92,7 +121,7 @@ async function fetchProduct(slug: string): Promise<ProductWithDetails | null> {
     }
 
     // Get the first row for base product data
-    const firstRow = result[0] as QueryResult;
+    const firstRow = result[0];
     
     // Format the base product with category and brand
     const formattedProduct: ProductWithDetails = {
@@ -121,20 +150,25 @@ async function fetchProduct(slug: string): Promise<ProductWithDetails | null> {
     if (formattedProduct.hasVariations) {
       const variationsMap = new Map();
 
-      (result as QueryResult[]).forEach(row => {
-        if (row.variation) {
+      result.forEach((row: QueryRow) => {
+        if (row.variation.id) {
           if (!variationsMap.has(row.variation.id)) {
             variationsMap.set(row.variation.id, {
-              ...row.variation,
+              id: row.variation.id,
+              sku: row.variation.sku,
+              price: row.variation.price,
+              stock: row.variation.stock,
+              sort: row.variation.sort,
               attributes: []
             });
           }
 
-          if (row.attributes) {
+          if (row.variation.attributeId && row.variation.attributeValue) {
             const variation = variationsMap.get(row.variation.id);
-            if (!variation.attributes.find((attr: any) => attr.id === row.attributes.id)) {
-              variation.attributes.push(row.attributes);
-            }
+            variation.attributes.push({
+              attributeId: row.variation.attributeId,
+              value: row.variation.attributeValue
+            });
           }
         }
       });
