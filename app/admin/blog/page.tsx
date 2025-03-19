@@ -365,7 +365,6 @@ export default function BlogPage() {
                   name="title"
                   value={createFormData.title}
                   onChange={handleCreateChange}
-                  required
                 />
               </div>
 
@@ -526,7 +525,6 @@ export default function BlogPage() {
                     name="title"
                     value={editFormData.title}
                     onChange={handleEditChange}
-                    required
                   />
                 </div>
 

@@ -127,7 +127,7 @@ export interface BrandFormData {
 }
 
 export interface BlogPostFormData {
-  title: string;
+  title?: string;
   slug: string;
   body: string;
   teaCategories?: string[];
