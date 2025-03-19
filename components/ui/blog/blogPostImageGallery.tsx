@@ -13,10 +13,15 @@ import "./blogPostImageGallery.css";
 
 interface BlogPostImageGalleryProps {
   images: string[];
-  title: string;
+  title?: string;
+  slug: string;
 }
 
-function BlogPostImageGallery({ images, title }: BlogPostImageGalleryProps) {
+function BlogPostImageGallery({
+  images,
+  title,
+  slug,
+}: BlogPostImageGalleryProps) {
   const swiperElRef = useRef<SwiperType | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -78,7 +83,7 @@ function BlogPostImageGallery({ images, title }: BlogPostImageGalleryProps) {
           <div className="relative w-auto max-w-[85%]">
             <Image
               src={`/${images[0]}`}
-              alt={`Photo of ${title}`}
+              alt={`Photo of ${title ? title : slug}`}
               width={1000}
               height={1000}
               className="h-auto max-h-[25rem] md:max-h-[30rem] w-auto block cursor-zoom-in rounded-lg object-contain"

@@ -518,14 +518,14 @@ async function seedBlogPosts(dbConnection: any) {
         const result = await executeRemoteSQL(`
           INSERT INTO blog_posts (title, slug, body, images, product_slug, published_at)
           VALUES (
-            ${toSqlValue(post.title)},
+            ${post.title ? toSqlValue(post.title) : 'NULL'},
             ${toSqlValue(post.slug)},
             ${toSqlValue(post.body)},
             ${toSqlValue(post.images)},
             ${toSqlValue(post.productSlug)},
             ${toSqlValue(new Date(post.publishedAt * 1000))}
           ) RETURNING id;
-        `, `Adding blog post: ${post.title}`);
+        `, `Adding blog post: ${post.title || post.slug}`);
 
         // Add tea categories
         if (post.teaCategories?.length) {
@@ -533,7 +533,7 @@ async function seedBlogPosts(dbConnection: any) {
             await executeRemoteSQL(`
               INSERT INTO blog_tea_categories (blog_post_id, tea_category_slug)
               VALUES (${result.id}, ${toSqlValue(slug)});
-            `, `Adding tea category ${slug} to blog post: ${post.title}`);
+            `, `Adding tea category ${slug} to blog post: ${post.title || post.slug}`);
           }
         }
       } else {
@@ -549,14 +549,14 @@ async function seedBlogPosts(dbConnection: any) {
           // Update existing post
           await dbConnection.db.update(schema.blogPosts)
             .set({
-              title: post.title,
+              title: post.title || null,
               body: post.body,
               images: post.images || null,
               productSlug: post.productSlug || null,
               publishedAt: new Date(post.publishedAt * 1000)
             })
             .where(eq(schema.blogPosts.slug, post.slug));
-          console.log(`✅ Updated blog post: ${post.title}`);
+          console.log(`✅ Updated blog post: ${post.title || post.slug}`);
 
           // Delete existing categories
           await dbConnection.db.delete(schema.blogTeaCategories)
@@ -566,11 +566,12 @@ async function seedBlogPosts(dbConnection: any) {
           const result = await dbConnection.db.insert(schema.blogPosts)
             .values({
               ...post,
+              title: post.title || null,
               publishedAt: new Date(post.publishedAt * 1000)
             })
             .returning({ id: schema.blogPosts.id });
           postId = result[0].id;
-          console.log(`✅ Added blog post: ${post.title}`);
+          console.log(`✅ Added blog post: ${post.title || post.slug}`);
         }
 
         // Add tea categories
@@ -582,7 +583,7 @@ async function seedBlogPosts(dbConnection: any) {
         }
       }
     } catch (error) {
-      console.error(`❌ Error processing blog post ${post.title}:`, error);
+      console.error(`❌ Error processing blog post ${post.title || post.slug}:`, error);
       throw error;
     }
   }

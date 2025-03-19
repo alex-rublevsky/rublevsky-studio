@@ -8,14 +8,15 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/keyboard";
 import "swiper/css/mousewheel";
-import dynamic from "next/dynamic";
+
 import Link from "next/link";
 import { CopyLinkButton } from "../shared/copyLinkButton";
+import type { Components } from "react-markdown";
 
 import BlogPostImageGallery from "./blogPostImageGallery";
 
 interface BlogPostProps {
-  title: string;
+  title: string | null;
   body: string;
   images: string | null;
   productSlug?: string | null;
@@ -34,10 +35,40 @@ function BlogPost({
   // Convert comma-separated string to array, or empty array if null
   const imageArray = images?.split(",").map((img) => img.trim()) ?? [];
 
+  // opening external/internal links in markdown
+  const components: Components = {
+    a: ({ href, children, ...props }) => {
+      if (href?.startsWith("/")) {
+        // Internal link
+        return (
+          <Link href={href} className="text-primary hover:underline" {...props}>
+            {children}
+          </Link>
+        );
+      }
+      // External link
+      return (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary hover:underline"
+          {...props}
+        >
+          {children}
+        </a>
+      );
+    },
+  };
+
   return (
     <article id={`${slug}`} className="max-w-2xl mx-auto">
       {imageArray.length > 0 && (
-        <BlogPostImageGallery images={imageArray} title={title} />
+        <BlogPostImageGallery
+          images={imageArray}
+          title={title || undefined}
+          slug={slug}
+        />
       )}
 
       <div className="sticky-header-container">
@@ -65,7 +96,7 @@ function BlogPost({
         </div>
       </div>
       <div className="prose prose-lg -mt-6">
-        <ReactMarkdown>{body}</ReactMarkdown>
+        <ReactMarkdown components={components}>{body}</ReactMarkdown>
       </div>
     </article>
   );

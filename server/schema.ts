@@ -128,7 +128,7 @@ export const blogTeaCategories = sqliteTable('blog_tea_categories', {
 export const blogPosts = sqliteTable('blog_posts', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   productSlug: text('product_slug').references(() => products.slug, { onDelete: 'set null' }),
-  title: text('title').notNull(),
+  title: text('title'),
   slug: text('slug').notNull().unique(),
   body: text('body').notNull(),
   images: text('images'),

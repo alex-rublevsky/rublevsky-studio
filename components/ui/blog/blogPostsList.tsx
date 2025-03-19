@@ -72,7 +72,7 @@ export default function BlogPostsList({
                 transition={{ duration: 0.3 }}
               >
                 <BlogPost
-                  title={post.title || "Untitled Post"}
+                  title={post.title}
                   body={post.body || ""}
                   images={post.images}
                   productSlug={post.productSlug}

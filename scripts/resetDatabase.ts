@@ -1,8 +1,7 @@
 #!/usr/bin/env tsx
 
-import * as fs from 'fs';
-import * as path from 'path';
 import { execSync } from 'child_process';
+import * as fs from 'fs';
 
 // Colors for console output
 const colors = {
@@ -18,158 +17,111 @@ const colors = {
 // Check if we're targeting the remote database
 const isRemote = process.argv.includes('--remote');
 const DB_NAME = 'rublevsky-studio-storage';
+const WRANGLER_CONFIG = 'wrangler.toml';
 
 console.log(`${colors.cyan}🧹 Starting ${isRemote ? 'remote' : 'local'} database reset process...${colors.reset}`);
 
-// Function to safely delete a directory using shell commands
-function safeDeleteDir(dirPath: string, description: string): boolean {
-  try {
-    if (fs.existsSync(dirPath)) {
-      console.log(`${colors.yellow}Deleting ${description} at: ${dirPath}${colors.reset}`);
-      
-      // Use shell command to force delete the directory
-      execSync(`rm -rf "${dirPath}"`, { stdio: 'inherit' });
-      
-      // Verify deletion was successful
-      if (!fs.existsSync(dirPath)) {
-        console.log(`${colors.green}✅ Successfully deleted ${description}${colors.reset}`);
-        return true;
-      } else {
-        console.error(`${colors.red}❌ Failed to delete ${description}${colors.reset}`);
-        return false;
-      }
-    } else {
-      console.log(`${colors.blue}ℹ️ ${description} not found at: ${dirPath}${colors.reset}`);
-      return true; // Not an error if directory doesn't exist
-    }
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error(`${colors.red}❌ Error deleting ${description}: ${error.message}${colors.reset}`);
-    } else {
-      console.error(`${colors.red}❌ Unknown error deleting ${description}${colors.reset}`);
-    }
-    return false;
-  }
+function updateWranglerConfig(databaseId: string) {
+  console.log(`${colors.blue}Updating wrangler.toml with database ID: ${databaseId}${colors.reset}`);
+  
+  // Read current wrangler.toml
+  let wranglerContent = fs.readFileSync(WRANGLER_CONFIG, 'utf-8');
+
+  // Replace the database_id in the wrangler.toml file
+  const updatedContent = wranglerContent.replace(
+    /database_id = "[^"]+"/,
+    `database_id = "${databaseId}"`
+  );
+
+  // Write the updated content back
+  fs.writeFileSync(WRANGLER_CONFIG, updatedContent);
+  console.log(`${colors.green}✅ Updated wrangler.toml${colors.reset}`);
 }
 
-// Function to execute remote SQL commands with retries
-async function executeRemoteSQL(command: string, description: string, maxRetries = 3): Promise<boolean> {
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      console.log(`${colors.blue}Executing: ${description}${colors.reset}`);
-      execSync(`npx wrangler d1 execute ${DB_NAME} --remote --command="${command.replace(/"/g, '\\"')}"`, {
-        stdio: 'inherit'
-      });
-      console.log(`${colors.green}✅ Successfully executed: ${description}${colors.reset}`);
-      return true;
-    } catch (error) {
-      if (attempt === maxRetries) {
-        console.error(`${colors.red}❌ Failed to execute ${description} after ${maxRetries} attempts${colors.reset}`);
-        return false;
-      }
-      console.log(`${colors.yellow}⚠️ Attempt ${attempt} failed, retrying...${colors.reset}`);
-      // Wait for a short time before retrying
-      await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
-    }
+function getDatabaseInfo() {
+  try {
+    console.log(`${colors.blue}Getting database info...${colors.reset}`);
+    const output = execSync(`npx wrangler d1 info ${DB_NAME}`, { encoding: 'utf-8' });
+    return output;
+  } catch (error) {
+    return null;
   }
-  return false;
 }
 
 async function resetDatabase() {
-  let success = true;
-
-  if (isRemote) {
-    console.log(`${colors.cyan}📡 Resetting remote database...${colors.reset}`);
-    
-    // First, check if the database exists and is accessible
-    try {
-      await executeRemoteSQL('SELECT 1;', 'Testing database connection');
-    } catch (error) {
-      console.error(`${colors.red}❌ Cannot connect to database${colors.reset}`);
-      process.exit(1);
-    }
-
-    // Disable foreign key checks first
-    success = await executeRemoteSQL('PRAGMA foreign_keys = OFF;', 'Disabling foreign key constraints');
-    
-    // Order matters! Drop tables in reverse order of dependencies
-    const tablesToDrop = [
-      // First, drop tables with foreign keys (relationship tables first)
-      'variation_attributes',
-      'product_variations',
-      'order_items',
-      'addresses',
-      'blog_tea_categories',
-      'product_tea_categories',
-      'blog_posts',
-      'products',
-      // Then drop tables that are referenced by others
-      'orders',
-      'users',
-      'blog_categories',
-      'tea_categories',
-      'brands',
-      'categories',
-      'inquiries',
-      // Finally, drop the migrations table
-      'd1_migrations'
-    ];
-
-    // Drop each table individually with proper error handling
-    for (const table of tablesToDrop) {
-      // First check if table exists
-      const tableExists = await executeRemoteSQL(
-        `SELECT name FROM sqlite_master WHERE type='table' AND name='${table}';`,
-        `Checking if table ${table} exists`
-      );
-
-      if (tableExists) {
-        // Drop the table
-        const dropSuccess = await executeRemoteSQL(
-          `DROP TABLE IF EXISTS ${table};`,
-          `Dropping table ${table}`
-        );
-        
-        if (!dropSuccess) {
-          console.error(`${colors.red}❌ Failed to drop table ${table}${colors.reset}`);
-          success = false;
-          break;
+  try {
+    if (isRemote) {
+      // Step 1: Check if database exists
+      const dbInfo = getDatabaseInfo();
+      
+      // Step 2: Delete the existing database if found
+      if (dbInfo) {
+        console.log(`${colors.yellow}Found existing database, deleting...${colors.reset}`);
+        try {
+          execSync(`npx wrangler d1 delete ${DB_NAME} --skip-confirmation`, { stdio: 'inherit' });
+          console.log(`${colors.green}✅ Database deleted${colors.reset}`);
+        } catch (error) {
+          // If delete fails, force delete by name
+          console.log(`${colors.yellow}Standard delete failed, trying force delete...${colors.reset}`);
+          execSync(`npx wrangler d1 delete ${DB_NAME} -f`, { stdio: 'inherit' });
+          console.log(`${colors.green}✅ Database force deleted${colors.reset}`);
+        }
+      } else {
+        console.log(`${colors.blue}No existing database found via info command${colors.reset}`);
+        // Try force delete anyway just to be sure
+        try {
+          console.log(`${colors.yellow}Attempting force delete to ensure clean slate...${colors.reset}`);
+          execSync(`npx wrangler d1 delete ${DB_NAME} -f`, { stdio: 'inherit' });
+        } catch (error) {
+          // Ignore errors here as the database might not exist
         }
       }
-    }
-
-    // Re-enable foreign key checks
-    success = await executeRemoteSQL('PRAGMA foreign_keys = ON;', 'Re-enabling foreign key constraints') && success;
-
-    if (success) {
-      console.log(`${colors.green}🎉 Remote database reset process completed!${colors.reset}`);
+      
+      // Step 3: Create a new database
+      console.log(`${colors.yellow}Creating new database...${colors.reset}`);
+      const createOutput = execSync(`npx wrangler d1 create ${DB_NAME}`, { encoding: 'utf-8' });
+      
+      // Step 4: Extract the new database ID
+      const idMatch = createOutput.match(/database_id = "([^"]+)"/);
+      if (!idMatch) {
+        throw new Error('Could not find database ID in creation output');
+      }
+      const newDatabaseId = idMatch[1];
+      console.log(`${colors.green}✅ Created new database with ID: ${newDatabaseId}${colors.reset}`);
+      
+      // Step 5: Update wrangler.toml with the new ID
+      updateWranglerConfig(newDatabaseId);
+      
+      console.log(`${colors.green}🎉 Remote database reset completed!${colors.reset}`);
       console.log(`${colors.magenta}ℹ️ Next steps:${colors.reset}`);
       console.log(`${colors.magenta}1. Generate migrations (pnpm db:generate)${colors.reset}`);
       console.log(`${colors.magenta}2. Apply migrations to remote database (pnpm db:migrate:prod)${colors.reset}`);
       console.log(`${colors.magenta}3. Seed the database if needed (pnpm db:seed:prod)${colors.reset}`);
     } else {
-      console.error(`${colors.red}❌ Database reset process failed${colors.reset}`);
-      process.exit(1);
+      // For local database, we'll delete the directories
+      const paths = [
+        './.wrangler/state/v3/d1',
+        './drizzle'
+      ];
+      
+      for (const path of paths) {
+        try {
+          console.log(`${colors.yellow}Deleting ${path}...${colors.reset}`);
+          execSync(`rm -rf "${path}"`, { stdio: 'inherit' });
+          console.log(`${colors.green}✅ Successfully deleted ${path}${colors.reset}`);
+        } catch (error) {
+          console.log(`${colors.blue}ℹ️ ${path} not found or already deleted${colors.reset}`);
+        }
+      }
+      
+      console.log(`${colors.green}🎉 Local database reset completed!${colors.reset}`);
     }
-  } else {
-    // Local database reset logic
-    const d1Path = path.resolve('./.wrangler/state/v3/d1');
-    const drizzlePath = path.resolve('./drizzle');
-
-    // Delete D1 directory
-    const d1Deleted = safeDeleteDir(d1Path, 'D1 database directory');
-
-    // Delete Drizzle directory
-    const drizzleDeleted = safeDeleteDir(drizzlePath, 'Drizzle directory');
-
-    success = d1Deleted && drizzleDeleted;
-
-    if (success) {
-      console.log(`${colors.green}🎉 Local database reset process completed!${colors.reset}`);
-    } else {
-      console.error(`${colors.red}❌ Local database reset process failed${colors.reset}`);
-      process.exit(1);
+  } catch (error) {
+    console.error(`${colors.red}❌ Database reset failed${colors.reset}`);
+    if (error instanceof Error) {
+      console.error(`${colors.red}Error: ${error.message}${colors.reset}`);
     }
+    process.exit(1);
   }
 }
 
