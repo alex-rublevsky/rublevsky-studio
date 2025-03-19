@@ -8,9 +8,12 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/keyboard";
 import "swiper/css/mousewheel";
-import BlogPostImageGallery from "./blogPostImageGallery";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { CopyLinkButton } from "../shared/copyLinkButton";
+
+import BlogPostImageGallery from "./blogPostImageGallery";
+
 interface BlogPostProps {
   title: string;
   body: string;

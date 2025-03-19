@@ -8,6 +8,10 @@ export const PRODUCT_ATTRIBUTES: { [key: string]: ProductAttribute } = {
     id: 'SIZE_CM',
     displayName: 'Size cm'
   },
+  SIZE: {
+    id: 'SIZE',
+    displayName: 'Size'
+  },
   COLOR: {
     id: 'COLOR',
     displayName: 'Color'

@@ -94,12 +94,20 @@ export const mockBrands = [
     isActive: true,
   },
   {
+    name: "Art of Tea",
+    slug: "art-of-tea",
+    isActive: true,
+  },
+  {
     name: "Abalych",
     slug: "abalych",
     isActive: true,
   },
-  
-  
+  {
+    name: "Rublevsky Studio & Abalych",
+    slug: "rublevsky-studio-abalych",
+    isActive: true,
+  },
 ];
 
 // Mock Products
@@ -194,7 +202,7 @@ export const mockProducts = [
     stock: 0,
     unlimitedStock: true,
     categorySlug: "stickers",
-    brandSlug: "rublevsky-studio",
+    brandSlug: "abalych",
     variations: JSON.stringify([
       {
         sku: "mushroom-girl-sticker-6x8-4",
@@ -271,7 +279,7 @@ export const mockProducts = [
     stock: 0,
     unlimitedStock: true,
     categorySlug: "stickers",
-    brandSlug: "rublevsky-studio",
+    brandSlug: "abalych",
     variations: JSON.stringify([
       {
         sku: "shroom-brain-sticker-6x8-4",
@@ -348,7 +356,7 @@ export const mockProducts = [
     stock: 0,
     unlimitedStock: true,
     categorySlug: "stickers",
-    brandSlug: "rublevsky-studio",
+    brandSlug: "abalych",
     variations: JSON.stringify([
       {
         sku: "swirl-sticker-6x6-1",
@@ -425,7 +433,7 @@ export const mockProducts = [
     stock: 0,
     unlimitedStock: true,
     categorySlug: "stickers",
-    brandSlug: "rublevsky-studio",
+    brandSlug: "abalych",
     variations: JSON.stringify([
       {
         sku: "leaf-sticker-6x6-6",
@@ -502,7 +510,7 @@ export const mockProducts = [
     stock: 0,
     unlimitedStock: true,
     categorySlug: "stickers",
-    brandSlug: "rublevsky-studio",
+    brandSlug: "abalych",
     variations: JSON.stringify([
       {
         sku: "shroom-sticker-6x8-4",
@@ -579,7 +587,7 @@ export const mockProducts = [
     stock: 0,
     unlimitedStock: true,
     categorySlug: "stickers",
-    brandSlug: "abalych",
+    brandSlug: "rublevsky-studio-abalych",
     variations: JSON.stringify([
       {
         sku: "graffiti-bark-sticker-2-6x6",
@@ -656,7 +664,7 @@ export const mockProducts = [
     stock: 0,
     unlimitedStock: true,
     categorySlug: "stickers",
-    brandSlug: "abalych",
+    brandSlug: "rublevsky-studio-abalych",
     variations: JSON.stringify([
       {
         sku: "graffiti-bark-sticker-1-6x6",
@@ -876,7 +884,7 @@ export const mockProducts = [
   },
   {
     name: "Yin Yang Graffiti Blue",
-    slug: "yin-yang-graffiti",
+    slug: "yin-yang-graffiti-blue",
     description: "Rublevsky studio x Abalych\n2024",
     images: "yin-yan-shirt-7.jpg, yin-yan-shirt-6.jpg, yin-yan-shirt-5.jpg, yin-yan-shirt-4.jpg, yin-yan-shirt-3.jpg, yin-yan-shirt-2.jpg, yin-yan-shirt-1.jpg",
     price: 49.99,
@@ -887,7 +895,7 @@ export const mockProducts = [
     stock: 0,
     unlimitedStock: false,
     categorySlug: "apparel",
-    brandSlug: "rublevsky-studio",
+    brandSlug: "rublevsky-studio-abalych",
     variations: JSON.stringify([
       {
         sku: "yin-yang-graffiti-blue-xl",
@@ -896,11 +904,60 @@ export const mockProducts = [
         sort: 0,
         attributes: [
           {
-            attributeId: "COLOR",
-            value: "Blue"
+            attributeId: "APPAREL_TYPE",
+            value: "Hoodie"
           },
           {
+            attributeId: "SIZE",
+            value: "XL"
+          }
+        ]
+      },
+      {
+        sku: "yin-yang-graffiti-blue-xxl",
+        price: 49.99,
+        stock: 1,
+        sort: 1,
+        attributes: [
+          {
             attributeId: "APPAREL_TYPE",
+            value: "Hoodie"
+          },
+          {
+            attributeId: "SIZE",
+            value: "XXL"
+          }
+        ]
+      }
+    ])
+  },
+  {
+    name: "Yin Yang Graffiti Red",
+    slug: "yin-yang-graffiti-red",
+    description: "Rublevsky studio x Abalych\n2025",
+    images: "red-graffiti-1.jpg, red-graffiti-2.jpg",
+    price: 49.99,
+    isActive: true,
+    isFeatured: true,
+    discount: null,
+    hasVariations: true,
+    stock: 0,
+    unlimitedStock: false,
+    categorySlug: "apparel",
+    brandSlug: "rublevsky-studio-abalych",
+    variations: JSON.stringify([
+      {
+        sku: "yin-yang-graffiti-red-xl",
+        price: 49.99,
+        stock: 2,
+        sort: 0,
+        attributes: [
+          {
+            attributeId: "APPAREL_TYPE",
+            value: "Hoodie"
+          },
+          {
+            attributeId: "SIZE",
             value: "XL"
           }
         ]
@@ -912,11 +969,11 @@ export const mockProducts = [
         sort: 1,
         attributes: [
           {
-            attributeId: "COLOR",
-            value: "Red"
+            attributeId: "APPAREL_TYPE",
+            value: "Hoodie"
           },
           {
-            attributeId: "APPAREL_TYPE",
+            attributeId: "SIZE",
             value: "XXL"
           }
         ]
@@ -938,7 +995,7 @@ export const mockProducts = [
     stock: 0,
     unlimitedStock: false,
     categorySlug: "tea",
-    brandSlug: "yunnan-sourcing",
+    brandSlug: "podarki-vostoka",
     variations: JSON.stringify([
       {
         sku: "ku-zhu-shan-guardian-20-ripe-puer-25g",
@@ -1183,7 +1240,7 @@ export const mockProducts = [
     stock: 0,
     unlimitedStock: true,
     categorySlug: "stickers",
-    brandSlug: "rublevsky-studio",
+    brandSlug: "abalych",
     variations: JSON.stringify([
       {
         sku: "birch-sticker-6x8",
@@ -1454,7 +1511,7 @@ export const mockProducts = [
     stock: 0,
     unlimitedStock: false,
     categorySlug: "tea",
-    brandSlug: "yunnan-sourcing",
+    brandSlug: "podarki-vostoka",
     variations: JSON.stringify([
       {
         sku: "ku-zhu-shan-x-kun-lu-shan-aurora-borealis-raw-puer-25g",
@@ -1545,7 +1602,7 @@ export const mockProducts = [
     stock: 0,
     unlimitedStock: false,
     categorySlug: "tea",
-    brandSlug: "yunnan-sourcing",
+    brandSlug: "art-of-tea",
     variations: JSON.stringify([
       {
         sku: "2019-menghai-shugar-ripe-puer-72g",
@@ -1576,7 +1633,7 @@ export const mockProducts = [
     stock: 0,
     unlimitedStock: false,
     categorySlug: "tea",
-    brandSlug: "yunnan-sourcing",
+    brandSlug: "podarki-vostoka",
     variations: JSON.stringify([
       {
         sku: "2019-menghai-clean-flavor-ripe-puer-8g",
@@ -1607,7 +1664,7 @@ export const mockProducts = [
     stock: 0,
     unlimitedStock: false,
     categorySlug: "tea",
-    brandSlug: "yunnan-sourcing",
+    brandSlug: "podarki-vostoka",
     variations: JSON.stringify([
       {
         sku: "kun-lu-shan-mengku-lincang-old-trees-dao-shi-ripe-puer-25g",
@@ -1673,7 +1730,7 @@ export const mockProducts = [
     stock: 0,
     unlimitedStock: false,
     categorySlug: "tea",
-    brandSlug: "yunnan-sourcing",
+    brandSlug: "podarki-vostoka",
     variations: JSON.stringify([
       {
         sku: "2022-ailao-shan-menghai-xishuangbanna-70-year-old-trees-black-cat-ripe-puer-25g",
@@ -2063,7 +2120,7 @@ Black tea originated in the late 1300s during the Ming dynasty and is still prod
 ##### ☝️ Beyond Six Types
 While there are six main types of tea, each category contains subtypes defined by factors such as region, cultivar, and processing methods. For instance, the majestic…
 
-######🐉 Pu’er (普洱)
+###### 🐉 Pu’er (普洱)
 Pu’er is a category of post-fermented tea characterized by the use of large-leaf tea tree varieties from Yunnan province and a unique processing method:
 
 Harvest → kill-green (*sha qing*, at moderate temperatures) → rolling → sun-drying
