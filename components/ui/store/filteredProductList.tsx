@@ -1,35 +1,27 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { Category, TeaCategory, ProductWithVariations } from "@/types";
+import { Category, TeaCategory, Product } from "@/types";
 import ProductList from "./productList";
 import ProductFilters from "./productFilters";
 
-interface FilteredProductListProps {
-  products: ProductWithVariations[];
+interface StoreFeedProps {
+  products: Product[];
   categories: Category[];
   teaCategories: TeaCategory[];
 }
 
-export default function FilteredProductList({
+export default function StoreFeed({
   products = [],
   categories = [],
   teaCategories = [],
-}: FilteredProductListProps) {
-  // Calculate min and max prices from products and their variations
+}: StoreFeedProps) {
+  // Calculate min and max prices from products
   const { minPrice, maxPrice } = useMemo(() => {
-    const allPrices = products.flatMap((product) => {
-      const prices = [product.price];
-      // Include variation prices if they exist
-      if (product.variations && product.variations.length > 0) {
-        prices.push(...product.variations.map((variation) => variation.price));
-      }
-      return prices;
-    });
-
+    const prices = products.map((product) => product.price);
     return {
-      minPrice: Math.floor(Math.min(...allPrices, 0)),
-      maxPrice: Math.ceil(Math.max(...allPrices, 0)),
+      minPrice: Math.floor(Math.min(...prices, 0)),
+      maxPrice: Math.ceil(Math.max(...prices, 0)),
     };
   }, [products]);
 
@@ -75,17 +67,11 @@ export default function FilteredProductList({
       );
     }
 
-    // Apply price range filter (check both base price and variation prices)
-    filtered = filtered.filter((product) => {
-      const basePrice = product.price;
-      const variationPrices = product.variations?.map((v) => v.price) || [];
-      const allPrices = [basePrice, ...variationPrices];
-
-      // Product matches if any of its prices fall within the range
-      return allPrices.some(
-        (price) => price >= priceRange[0] && price <= priceRange[1]
-      );
-    });
+    // Apply price range filter
+    filtered = filtered.filter(
+      (product) =>
+        product.price >= priceRange[0] && product.price <= priceRange[1]
+    );
 
     return filtered;
   }, [products, selectedCategory, selectedTeaCategory, priceRange]);

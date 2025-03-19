@@ -1,7 +1,7 @@
-import FilteredProductList from "@/components/ui/store/filteredProductList";
 import getAllProducts from "@/lib/actions/products/getAllProducts";
 import { getAllCategories } from "@/lib/actions/categories";
 import getAllTeaCategories from "@/lib/actions/tea/getAllTeaCategories";
+import StoreFeed from "@/components/ui/store/filteredProductList";
 
 // Force this page to be dynamically rendered
 export const dynamic = "force-dynamic";
@@ -16,7 +16,7 @@ export default async function StorePage() {
 
   return (
     <div>
-      <FilteredProductList
+      <StoreFeed
         products={products}
         categories={categories}
         teaCategories={teaCategories}
