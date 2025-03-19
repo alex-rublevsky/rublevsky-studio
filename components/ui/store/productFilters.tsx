@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { motion, useMotionValueEvent, useScroll } from "framer-motion";
 
 interface ProductFiltersProps {
   categories: Category[];
@@ -45,8 +46,30 @@ export default function ProductFilters({
     onPriceRangeChange?.(range);
   };
 
+  const [hidden, setHidden] = useState(false);
+  const { scrollY } = useScroll();
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    const previous = scrollY.getPrevious();
+    if (previous && latest > previous && latest > 200) {
+      setHidden(true);
+    } else {
+      setHidden(false);
+    }
+  });
+
   return (
-    <div className="flex flex-col flex-wrap  md:flex-row gap-6 md:gap-10 p-4">
+    <motion.div
+      variants={{
+        visible: { y: 0 },
+        hidden: { y: "-100%" },
+      }}
+      animate={hidden ? "hidden" : "visible"}
+      transition={{
+        duration: 0.35,
+        ease: "easeInOut",
+      }}
+      className="sticky top-0 z-10 backdrop-blur-sm bg-white/60 flex flex-col flex-wrap  md:flex-row gap-6 md:gap-10 p-4"
+    >
       {/* Main Categories */}
       <div className="space-y-2 min-w-[20rem]">
         <h3 className="text-sm font-medium">Categories</h3>
@@ -141,6 +164,6 @@ export default function ProductFilters({
           tooltipContent={(value) => `$${value}`}
         />
       </div>
-    </div>
+    </motion.div>
   );
 }
