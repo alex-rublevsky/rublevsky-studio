@@ -2,7 +2,7 @@
 
 import { BlogPost as BlogPostType, TeaCategory } from "@/types";
 import BlogPost from "@/components/ui/blog/blogPost";
-import TeaCategoryFilters from "../shared/teaCategoryFilters";
+import { FilterGroup } from "@/components/ui/shared/FilterGroup";
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -37,22 +37,18 @@ export default function BlogPostsList({
     );
   }, [posts, selectedCategories]);
 
-  const handleCategoryToggle = (categorySlug: string) => {
-    setSelectedCategories((prev) => {
-      if (prev.includes(categorySlug)) {
-        return prev.filter((slug) => slug !== categorySlug);
-      }
-      return [...prev, categorySlug];
-    });
-  };
-
   return (
     <div>
-      <TeaCategoryFilters
-        teaCategories={usedTeaCategories}
-        selectedCategories={selectedCategories}
-        onCategoryToggle={handleCategoryToggle}
-      />
+      <div className="flex justify-center mb-20">
+        <FilterGroup
+          options={usedTeaCategories}
+          selectedOptions={selectedCategories}
+          onOptionsChange={setSelectedCategories}
+          onOptionChange={() => {}}
+          multiSelect={true}
+          showAllOption={false}
+        />
+      </div>
 
       <AnimatePresence mode="popLayout">
         <div className="space-y-24 md:space-y-32">

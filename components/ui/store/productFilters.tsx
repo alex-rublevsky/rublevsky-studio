@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { motion, useMotionValueEvent, useScroll } from "framer-motion";
+import { FilterGroup } from "../shared/FilterGroup";
 
 interface ProductFiltersProps {
   categories: Category[];
@@ -57,6 +58,14 @@ export default function ProductFilters({
     }
   });
 
+  const handleMainCategoryChange = (category: string | null) => {
+    onCategoryChange(category);
+    // Clear tea category when switching to non-tea category
+    if (category !== "tea") {
+      onTeaCategoryChange(null);
+    }
+  };
+
   return (
     <motion.div
       variants={{
@@ -68,81 +77,25 @@ export default function ProductFilters({
         duration: 0.35,
         ease: "easeInOut",
       }}
-      className="sticky top-0 z-10 backdrop-blur-sm bg-white/60 flex flex-col flex-wrap  md:flex-row gap-6 md:gap-10 p-4"
+      className="sticky top-0 z-10 backdrop-blur-md bg-white/70 flex flex-col flex-wrap  md:flex-row gap-6 md:gap-10 p-4"
     >
       {/* Main Categories */}
-      <div className="space-y-2 min-w-[20rem]">
-        <h3 className="text-sm font-medium">Categories</h3>
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => {
-              onCategoryChange(null);
-              onTeaCategoryChange(null);
-            }}
-            className={cn(
-              "px-4 py-2 text-sm font-medium rounded-full transition-colors",
-              selectedCategory === null
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted hover:bg-muted/80"
-            )}
-          >
-            All
-          </button>
-          {categories.map((category) => (
-            <button
-              key={category.slug}
-              onClick={() => {
-                onCategoryChange(category.slug);
-                // Clear tea category when switching to non-tea category
-                if (category.slug !== "tea") {
-                  onTeaCategoryChange(null);
-                }
-              }}
-              className={cn(
-                "px-4 py-2 text-sm font-medium rounded-full transition-colors",
-                selectedCategory === category.slug
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted hover:bg-muted/80"
-              )}
-            >
-              {category.name}
-            </button>
-          ))}
-        </div>
-      </div>
+      <FilterGroup
+        title="Categories"
+        options={categories}
+        selectedOptions={selectedCategory}
+        onOptionChange={handleMainCategoryChange}
+      />
 
       {/* Tea Categories - Only show when Tea category is selected */}
       {selectedCategory === "tea" && (
-        <div className="space-y-2 min-w-[20rem]">
-          <h3 className="text-sm font-medium">Tea Types</h3>
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => onTeaCategoryChange(null)}
-              className={cn(
-                "px-4 py-2 text-sm font-medium rounded-full transition-colors",
-                selectedTeaCategory === null
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted hover:bg-muted/80"
-              )}
-            >
-              All Tea
-            </button>
-            {teaCategories.map((category) => (
-              <button
-                key={category.slug}
-                onClick={() => onTeaCategoryChange(category.slug)}
-                className={cn(
-                  "px-4 py-2 text-sm font-medium rounded-full transition-colors",
-                  selectedTeaCategory === category.slug
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted hover:bg-muted/80"
-                )}
-              >
-                {category.name}
-              </button>
-            ))}
-          </div>
-        </div>
+        <FilterGroup
+          title="Tea Types"
+          options={teaCategories}
+          selectedOptions={selectedTeaCategory}
+          onOptionChange={onTeaCategoryChange}
+          allOptionLabel="All Tea"
+        />
       )}
 
       {/* Price Range Filter */}
