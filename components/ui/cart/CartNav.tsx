@@ -8,12 +8,12 @@ export function CartNav() {
   const { cartOpen, setCartOpen, itemCount } = useCart();
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-2 right-2 z-50">
       <Drawer open={cartOpen} onOpenChange={setCartOpen}>
         <DrawerTrigger asChild>
           <button
             onClick={() => setCartOpen(true)}
-            className="relative flex items-center justify-center w-8 h-8 md:w-[3.2rem] md:h-[3.2rem] rounded-full border border-black bg-white hover:bg-black hover:text-white transition-all duration-500"
+            className="relative flex items-center justify-center w-[2.6rem] h-[2.6rem] md:w-[3.2rem] md:h-[3.2rem] rounded-full border border-black bg-white hover:bg-black hover:text-white transition-all duration-500"
           >
             {/* Cart SVG Icon */}
             <svg
