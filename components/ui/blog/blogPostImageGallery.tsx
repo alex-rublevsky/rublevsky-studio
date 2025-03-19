@@ -86,7 +86,7 @@ function BlogPostImageGallery({
               alt={`Photo of ${title ? title : slug}`}
               width={1000}
               height={1000}
-              className="h-auto max-h-[25rem] md:max-h-[30rem] w-auto block cursor-zoom-in rounded-lg object-contain"
+              className="h-auto max-h-[25rem] md:max-h-[55vh] w-auto block cursor-zoom-in rounded-lg object-contain"
               priority
               loading="eager"
             />
@@ -160,7 +160,7 @@ function BlogPostImageGallery({
                 alt={`Photo of ${title} number ${index + 1}`}
                 width={1000}
                 height={1000}
-                className="w-full h-auto max-h-[25rem] md:max-h-[30rem] max-w-full block cursor-zoom-in rounded-lg"
+                className="w-full h-auto max-h-[25rem] md:max-h-[55vh] max-w-full block cursor-zoom-in rounded-lg"
                 priority={index === 0}
                 loading="eager"
               />

@@ -18,17 +18,17 @@ import {
 import DeleteConfirmationDialog from "@/components/ui/admin/DeleteConfirmationDialog";
 import { toast } from "sonner";
 import ProductSelector from "@/components/ui/admin/ProductSelector";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerFooter,
+  DrawerBody,
+} from "@/components/ui/drawer";
 
 export default function BlogPage() {
   const router = useRouter();
@@ -353,36 +353,22 @@ export default function BlogPage() {
           <div className="p-6">
             <h2 className="text-xl font-semibold mb-4">Create New Blog Post</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label
-                  htmlFor="title"
-                  className="block text-sm font-medium mb-1"
-                >
-                  Title
-                </label>
-                <Input
-                  id="title"
-                  name="title"
-                  value={createFormData.title}
-                  onChange={handleCreateChange}
-                />
-              </div>
+              <Input
+                label="Title"
+                id="title"
+                name="title"
+                value={createFormData.title}
+                onChange={handleCreateChange}
+              />
 
-              <div>
-                <label
-                  htmlFor="slug"
-                  className="block text-sm font-medium mb-1"
-                >
-                  Slug
-                </label>
-                <Input
-                  id="slug"
-                  name="slug"
-                  value={createFormData.slug}
-                  onChange={handleCreateChange}
-                  required
-                />
-              </div>
+              <Input
+                label="Slug"
+                id="slug"
+                name="slug"
+                value={createFormData.slug}
+                onChange={handleCreateChange}
+                required
+              />
 
               <div>
                 <label className="block text-sm font-medium mb-2">
@@ -506,176 +492,6 @@ export default function BlogPage() {
         </div>
       )}
 
-      {/* Edit Modal */}
-      {showEditModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-background rounded-lg shadow-lg border border-border max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Edit Blog Post</h2>
-              <form onSubmit={handleUpdate} className="space-y-4">
-                <div>
-                  <label
-                    htmlFor="editTitle"
-                    className="block text-sm font-medium mb-1"
-                  >
-                    Title
-                  </label>
-                  <Input
-                    id="editTitle"
-                    name="title"
-                    value={editFormData.title}
-                    onChange={handleEditChange}
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="editSlug"
-                    className="block text-sm font-medium mb-1"
-                  >
-                    Slug
-                  </label>
-                  <Input
-                    id="editSlug"
-                    name="slug"
-                    value={editFormData.slug}
-                    onChange={handleEditChange}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Tea Categories
-                  </label>
-                  <div className="space-y-2">
-                    {teaCategories.map((category) => (
-                      <label
-                        key={category.slug}
-                        className="flex items-center space-x-2"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={
-                            editFormData.teaCategories?.includes(
-                              category.slug
-                            ) ?? false
-                          }
-                          onChange={(e) => {
-                            const newCategories = e.target.checked
-                              ? [
-                                  ...(editFormData.teaCategories || []),
-                                  category.slug,
-                                ]
-                              : (editFormData.teaCategories || []).filter(
-                                  (slug) => slug !== category.slug
-                                );
-                            setEditFormData((prev) => ({
-                              ...prev,
-                              teaCategories: newCategories,
-                            }));
-                          }}
-                          className="h-4 w-4 rounded border-gray-300"
-                        />
-                        <span>{category.name}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="editProduct"
-                    className="block text-sm font-medium mb-1"
-                  >
-                    Related Product
-                  </label>
-                  <ProductSelector
-                    selectedProductSlug={editFormData.productSlug || ""}
-                    onProductSelect={(value: string) =>
-                      setEditFormData((prev) => ({
-                        ...prev,
-                        productSlug: value,
-                      }))
-                    }
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="editBody"
-                    className="block text-sm font-medium mb-1"
-                  >
-                    Content
-                  </label>
-                  <Textarea
-                    id="editBody"
-                    name="body"
-                    value={editFormData.body}
-                    onChange={handleEditChange}
-                    required
-                    rows={10}
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="editImages"
-                    className="block text-sm font-medium mb-1"
-                  >
-                    Images (comma-separated URLs)
-                  </label>
-                  <Input
-                    id="editImages"
-                    name="images"
-                    value={editFormData.images}
-                    onChange={handleEditChange}
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="editPublishedAt"
-                    className="block text-sm font-medium mb-1"
-                  >
-                    Published At
-                  </label>
-                  <Input
-                    id="editPublishedAt"
-                    name="publishedAt"
-                    type="datetime-local"
-                    value={new Date(editFormData.publishedAt)
-                      .toISOString()
-                      .slice(0, 16)}
-                    onChange={(e) => {
-                      const date = new Date(e.target.value);
-                      setEditFormData((prev) => ({
-                        ...prev,
-                        publishedAt: date.getTime(),
-                      }));
-                    }}
-                    required
-                  />
-                </div>
-
-                <div className="flex justify-end gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={closeEditModal}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? "Updating..." : "Update Post"}
-                  </Button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Blog Posts List */}
       <div className="bg-card rounded-lg shadow border border-border">
         <div className="p-6">
@@ -738,6 +554,171 @@ export default function BlogPage() {
         </div>
       </div>
 
+      {/* Replace Edit Modal with Drawer */}
+      <Drawer open={showEditModal} onOpenChange={setShowEditModal}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Edit Blog Post</DrawerTitle>
+          </DrawerHeader>
+
+          <DrawerBody>
+            {error && (
+              <div className="bg-destructive/20 border border-destructive text-destructive-foreground px-4 py-3 rounded mb-4">
+                {error}
+              </div>
+            )}
+
+            <form
+              onSubmit={handleUpdate}
+              className="space-y-4"
+              id="editBlogForm"
+            >
+              <div>
+                <label
+                  htmlFor="editTitle"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Title
+                </label>
+                <Input
+                  id="editTitle"
+                  name="title"
+                  value={editFormData.title}
+                  onChange={handleEditChange}
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="editSlug"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Slug
+                </label>
+                <Input
+                  id="editSlug"
+                  name="slug"
+                  value={editFormData.slug}
+                  onChange={handleEditChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Tea Categories
+                </label>
+                <div className="space-y-2 border border-input rounded-md p-3 max-h-40 overflow-y-auto">
+                  {teaCategories.map((category) => (
+                    <label
+                      key={category.slug}
+                      className="flex items-center space-x-2"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={
+                          editFormData.teaCategories?.includes(category.slug) ??
+                          false
+                        }
+                        onChange={(e) => {
+                          const newCategories = e.target.checked
+                            ? [
+                                ...(editFormData.teaCategories || []),
+                                category.slug,
+                              ]
+                            : (editFormData.teaCategories || []).filter(
+                                (slug) => slug !== category.slug
+                              );
+                          setEditFormData((prev) => ({
+                            ...prev,
+                            teaCategories: newCategories,
+                          }));
+                        }}
+                        className="h-4 w-4 rounded border-gray-300"
+                      />
+                      <span>{category.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="editProduct"
+                  className="block text-sm font-medium mb-1"
+                >
+                  Related Product
+                </label>
+                <ProductSelector
+                  selectedProductSlug={editFormData.productSlug || ""}
+                  onProductSelect={(value: string) =>
+                    setEditFormData((prev) => ({
+                      ...prev,
+                      productSlug: value,
+                    }))
+                  }
+                />
+              </div>
+
+              <Textarea
+                label="Content"
+                id="editBody"
+                name="body"
+                value={editFormData.body}
+                onChange={handleEditChange}
+                required
+                rows={10}
+              />
+
+              <Input
+                label="Images (comma-separated URLs)"
+                id="editImages"
+                name="images"
+                value={editFormData.images}
+                onChange={handleEditChange}
+              />
+              <Input
+                id="editPublishedAt"
+                label="Publisehd at"
+                name="publishedAt"
+                type="datetime-local"
+                value={new Date(editFormData.publishedAt)
+                  .toISOString()
+                  .slice(0, 16)}
+                onChange={(e) => {
+                  const date = new Date(e.target.value);
+                  setEditFormData((prev) => ({
+                    ...prev,
+                    publishedAt: date.getTime(),
+                  }));
+                }}
+                required
+              />
+            </form>
+          </DrawerBody>
+
+          <DrawerFooter className="border-t border-border bg-background">
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="secondaryInverted"
+                type="button"
+                onClick={closeEditModal}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="greenInverted"
+                type="submit"
+                form="editBlogForm"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Updating..." : "Update Post"}
+              </Button>
+            </div>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+
       {/* Delete Confirmation Dialog */}
       {showDeleteDialog && (
         <DeleteConfirmationDialog
@@ -746,7 +727,7 @@ export default function BlogPage() {
           onConfirm={handleDeleteConfirm}
           title="Delete Blog Post"
           description="Are you sure you want to delete this blog post? This action cannot be undone."
-          isDeleting={false}
+          isDeleting={isDeleting}
         />
       )}
     </div>
