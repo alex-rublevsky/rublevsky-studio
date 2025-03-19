@@ -147,6 +147,7 @@ export const mockProducts = [
     slug: "bark-graffiti-abalych-20-poster",
     description: "Abalych calligraphy x Rublevsky studio photography\n2024",
     images: "bark-graffiti-abalych-print-poster-red.jpg, bark-graffiti-abalych-print-poster-blue.jpg",
+    stock: 0,
     price: 0,
     isActive: true,
     isFeatured: false,

@@ -235,7 +235,7 @@ export default function BlogPage() {
 
       if (postData) {
         setEditFormData({
-          title: postData.title,
+          title: postData.title || "",
           slug: postData.slug,
           body: postData.body || "",
           teaCategories: postData.teaCategories || [],

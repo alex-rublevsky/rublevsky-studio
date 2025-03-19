@@ -138,7 +138,7 @@ CREATE TABLE `products` (
 	`weight` text,
 	`stock` integer DEFAULT 0 NOT NULL,
 	`unlimited_stock` integer DEFAULT false NOT NULL,
-	`created_at` integer NOT NULL,
+	`created_at` integer,
 	FOREIGN KEY (`category_slug`) REFERENCES `categories`(`slug`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`brand_slug`) REFERENCES `brands`(`slug`) ON UPDATE no action ON DELETE cascade
 );

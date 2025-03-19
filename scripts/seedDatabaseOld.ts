@@ -496,6 +496,10 @@ async function seedDatabase() {
         for (const post of mockBlogPosts) {
           try {
             // Prepare the content by escaping only single quotes, preserving markdown formatting
+            if (!post.title || !post.slug || !post.body) {
+              console.error('Skipping post due to missing required fields:', post);
+              continue;
+            }
             const escapedTitle = post.title.replace(/'/g, "''");
             const escapedSlug = post.slug.replace(/'/g, "''");
             const escapedBody = post.body.replace(/'/g, "''"); // Remove .replace(/\n/g, '\\n') to preserve markdown

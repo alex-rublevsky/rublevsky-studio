@@ -7,6 +7,8 @@ import { drizzle as drizzleSQLite } from 'drizzle-orm/better-sqlite3';
 import * as schema from '../server/schema';
 import { eq } from 'drizzle-orm';
 import { execSync } from 'child_process';
+import * as fs from 'fs';
+import * as path from 'path';
 
 // Colors for console output
 const colors = {
@@ -37,7 +39,7 @@ const tableDependencies: Record<TableName, TableName[]> = {
   tea_categories: [],
   categories: [],
   brands: [],
-  products: ['categories', 'brands'],
+  products: [],
   blog_posts: [],
   all: []
 };
@@ -259,28 +261,45 @@ async function seedTeaCategories(dbConnection: any) {
   }
 }
 
+// In your seeding functions, process items in smaller batches
+const BATCH_SIZE = 5;
+
+// Example for categories
 async function seedCategories(dbConnection: any) {
   if (!finalTablesToSeed.includes('categories')) return;
   console.log('\n🏷️ Seeding categories...');
   
-  for (const item of mockCategories) {
-    try {
-      if (dbConnection.isRemote) {
-        await executeRemoteSQL(`
-          INSERT INTO categories (name, slug, is_active)
-          VALUES (${toSqlValue(item.name)}, ${toSqlValue(item.slug)}, ${toSqlValue(item.isActive)});
-        `, `Adding category: ${item.name}`);
-      } else {
-        await dbConnection.db.insert(schema.categories).values(item)
-          .onConflictDoUpdate({
-            target: schema.categories.slug,
-            set: { name: item.name, isActive: item.isActive }
-          });
+  // Process in smaller batches
+  for (let i = 0; i < mockCategories.length; i += BATCH_SIZE) {
+    const batch = mockCategories.slice(i, i + BATCH_SIZE);
+    console.log(`Processing batch ${i/BATCH_SIZE + 1} of ${Math.ceil(mockCategories.length/BATCH_SIZE)}`);
+    
+    for (const item of batch) {
+      try {
+        if (dbConnection.isRemote) {
+          await executeRemoteSQL(`
+            INSERT INTO categories (name, slug, is_active)
+            VALUES (${toSqlValue(item.name)}, ${toSqlValue(item.slug)}, ${toSqlValue(item.isActive)});
+          `, `Adding category: ${item.name}`);
+        } else {
+          await dbConnection.db.insert(schema.categories).values(item)
+            .onConflictDoUpdate({
+              target: schema.categories.slug,
+              set: { name: item.name, isActive: item.isActive }
+            });
+        }
+        console.log(`✅ Added category: ${item.name}`);
+      } catch (error) {
+        console.error(`❌ Error processing category ${item.name}:`, error);
+        // Continue with next item instead of throwing
+        continue;
       }
-      console.log(`✅ Added category: ${item.name}`);
-    } catch (error) {
-      console.error(`❌ Error processing category ${item.name}:`, error);
-      throw error;
+    }
+    
+    // Add a short delay between batches
+    if (i + BATCH_SIZE < mockCategories.length) {
+      console.log('Waiting 1 second before next batch...');
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
   }
 }
@@ -348,14 +367,15 @@ async function seedProducts(dbConnection: any) {
         await executeRemoteSQL(`
           INSERT INTO products (
             category_slug, brand_slug, name, slug, description, images,
-            price, is_active, is_featured, discount, has_variations, weight, stock
+            price, is_active, is_featured, discount, has_variations, weight, stock, unlimited_stock
           )
           VALUES (
             ${toSqlValue(categorySlug)}, ${toSqlValue(brandSlug)},
             ${toSqlValue(name)}, ${toSqlValue(slug)}, ${toSqlValue(description)},
             ${toSqlValue(images)}, ${toSqlValue(price)}, ${toSqlValue(isActive)},
             ${toSqlValue(isFeatured)}, ${toSqlValue(discount)},
-            ${toSqlValue(hasVariations)}, ${toSqlValue(weight)}, ${toSqlValue(stock)}
+            ${toSqlValue(hasVariations)}, ${toSqlValue(weight)}, ${toSqlValue(stock)},
+            ${toSqlValue(product.unlimitedStock)}
           );
         `, `Adding product: ${name}`);
 
@@ -385,7 +405,7 @@ async function seedProducts(dbConnection: any) {
             const sku = variation.sku || `${slug}-${variation.attributes?.map((attr: { value: string }) => attr.value.toLowerCase()).join('-')}`;
             
             const variationResult = await executeRemoteSQL(`
-              INSERT INTO product_variations (product_id, sku, price, stock, sort, created_at)
+              INSERT INTO product_variations (product_id, sku, price, stock, sort, createdAt)
               VALUES (
                 ${productId},
                 ${toSqlValue(sku)},
@@ -393,16 +413,25 @@ async function seedProducts(dbConnection: any) {
                 ${toSqlValue(variation.stock)},
                 ${toSqlValue(variation.sort || 0)},
                 ${toSqlValue(new Date())}
-              ) RETURNING id;
-            `, `Adding variation for product: ${name}`);
+              );
+            `, `Adding variation for product: ${product.name}`);
 
+            const variationIdResult = await executeRemoteSQL(`
+              SELECT id FROM product_variations 
+              WHERE product_id = ${productId} AND sku = ${toSqlValue(sku)}
+              ORDER BY id DESC LIMIT 1;
+            `, `Getting ID for variation`);
+
+            const variationId = variationIdResult.id;
+
+            // Now use variationId for attributes
             if (variation.attributes?.length) {
               for (const attr of variation.attributes) {
                 await executeRemoteSQL(`
                   INSERT INTO variation_attributes (
-                    product_variation_id, attribute_id, value, created_at
+                    product_variation_id, attributeId, value, createdAt
                   ) VALUES (
-                    ${variationResult.id},
+                    ${variationId},
                     ${toSqlValue(attr.attributeId)},
                     ${toSqlValue(attr.value)},
                     ${toSqlValue(new Date())}
@@ -493,7 +522,7 @@ async function seedProducts(dbConnection: any) {
         }
       }
     } catch (error) {
-      console.error(`❌ Error processing product ${name}:`, error);
+      console.error(`❌ Error processing product ${product.name}:`, error);
       throw error;
     }
   }
