@@ -4,11 +4,11 @@ import { Project } from "@/types/web-project";
 import Image from "next/image";
 import DevicePreview from "./webDevicePreview";
 
-type ProjectCardProps = {
+type WebProjectEntryProps = {
   project: Project;
 };
 
-export default function ProjectCard({ project }: ProjectCardProps) {
+export default function WebProjectEntry({ project }: WebProjectEntryProps) {
   // Pre-find devices to ensure consistent rendering
   const phoneDevice = project.devices.find((d) => d.type === "phone");
   const tabletDevice = project.devices.find((d) => d.type === "tablet");
@@ -180,7 +180,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           <h3>
             <a
               href={project.websiteUrl}
-              className="blur-link"
+              className="blurLink"
               target="_blank"
               rel="noopener noreferrer"
             >

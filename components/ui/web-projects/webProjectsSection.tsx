@@ -1,7 +1,7 @@
 "use client";
 
 import { Project } from "@/types/web-project";
-import ProjectCard from "./webProjectEntry";
+import WebProjectCard from "./webProjectEntry";
 
 type WebProjectsSectionProps = {
   projects: Project[];
@@ -21,7 +21,7 @@ export default function WebProjectsSection({
         </h1>
 
         {projects.map((project, index) => (
-          <ProjectCard key={index} project={project} />
+          <WebProjectCard key={index} project={project} />
         ))}
 
         {/* Personal website info */}
