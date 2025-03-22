@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
  
 type Session = typeof auth.$Infer.Session;
 
-const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 
 const adminRoutes = ["/admin", "/admin/products", "/admin/categories", "/admin/brands", "/admin/blog", "/admin/orders", "/admin/customers"];
 const authRoutes = ["/sign-in"]; 
@@ -31,11 +31,11 @@ export async function middleware(request: NextRequest) {
             },
         }
     );
-    // TODO: Uncomment this when deploying to main domain
+   
     // Protect admin routes - redirect to sign-in if not authenticated
-    // if (!session && isAdminRoute) {
-    //     return NextResponse.redirect(new URL("/sign-in", request.url));
-    // }
+    if (!session && isAdminRoute) {
+        return NextResponse.redirect(new URL("/sign-in", request.url));
+    }
  
     // Redirect admin users from sign-in page to admin panel
     if (session?.user?.email === ADMIN_EMAIL && isAuthRoute) {
