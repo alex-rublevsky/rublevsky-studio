@@ -5,20 +5,19 @@ export const dynamic = "force-dynamic";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Brand, BrandFormData, BrandsResponse } from "@/types";
+import { Category, CategoryFormData, CategoriesResponse } from "@/types";
 import {
-  getAllBrands,
-  createBrand,
-  updateBrand,
-  deleteBrand,
-} from "@/lib/actions/brands";
+  getAllCategories,
+  createCategory,
+  updateCategory,
+  deleteCategory,
+} from "@/lib/actions/categories";
 import DeleteConfirmationDialog from "@/components/ui/admin/DeleteConfirmationDialog";
 import { toast } from "sonner";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { OrangeToggle } from "@/components/ui/toggle";
+import { Switch } from "@/components/ui/switch";
 import {
   Drawer,
   DrawerContent,
@@ -27,39 +26,44 @@ import {
   DrawerBody,
   DrawerFooter,
 } from "@/components/ui/drawer";
+import { Badge } from "@/components/ui/badge";
 
-export default function BrandsPage() {
+export default function CategoriesPage() {
   const router = useRouter();
   // Separate form data for creating and editing
-  const [createFormData, setCreateFormData] = useState<BrandFormData>({
+  const [createFormData, setCreateFormData] = useState<CategoryFormData>({
     name: "",
     slug: "",
-    logo: "",
+    image: "",
     isActive: true,
   });
-  const [editFormData, setEditFormData] = useState<BrandFormData>({
+  const [editFormData, setEditFormData] = useState<CategoryFormData>({
     name: "",
     slug: "",
-    logo: "",
+    image: "",
     isActive: true,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [brands, setBrands] = useState<Brand[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreateAutoSlug, setIsCreateAutoSlug] = useState(true);
   const [isEditAutoSlug, setIsEditAutoSlug] = useState(false);
-  const [editingBrandId, setEditingBrandId] = useState<number | null>(null);
+  const [editingCategoryId, setEditingCategoryId] = useState<number | null>(
+    null
+  );
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [deletingBrandId, setDeletingBrandId] = useState<number | null>(null);
+  const [deletingCategoryId, setDeletingCategoryId] = useState<number | null>(
+    null
+  );
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    fetchBrands();
+    fetchCategories();
   }, []);
 
-  // Generate slug from brand name for create form
+  // Generate slug from category name for create form
   useEffect(() => {
     if (isCreateAutoSlug && createFormData.name) {
       const slug = createFormData.name
@@ -76,7 +80,7 @@ export default function BrandsPage() {
     }
   }, [createFormData.name, isCreateAutoSlug]);
 
-  // Generate slug from brand name for edit form
+  // Generate slug from category name for edit form
   useEffect(() => {
     if (isEditAutoSlug && editFormData.name) {
       const slug = editFormData.name
@@ -93,14 +97,14 @@ export default function BrandsPage() {
     }
   }, [editFormData.name, isEditAutoSlug]);
 
-  const fetchBrands = async () => {
+  const fetchCategories = async () => {
     setIsLoading(true);
     try {
       // Use the server action instead of the API
-      const brandsData = await getAllBrands();
-      setBrands(brandsData || []);
+      const categoriesData = await getAllCategories();
+      setCategories(categoriesData || []);
     } catch (err) {
-      console.error("Error fetching brands:", err);
+      console.error("Error fetching categories:", err);
     } finally {
       setIsLoading(false);
     }
@@ -146,24 +150,24 @@ export default function BrandsPage() {
 
     try {
       // Use the server action instead of the API
-      await createBrand({
+      await createCategory({
         name: createFormData.name,
         slug: createFormData.slug,
-        image: createFormData.logo || null,
+        image: createFormData.image || null,
         isActive: createFormData.isActive,
       });
 
-      toast.success("Brand added successfully!");
+      toast.success("Category added successfully!");
 
       setCreateFormData({
         name: "",
         slug: "",
-        logo: "",
+        image: "",
         isActive: true,
       });
       setIsCreateAutoSlug(true);
       router.refresh();
-      fetchBrands();
+      fetchCategories();
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
       toast.error(err instanceof Error ? err.message : "An error occurred");
@@ -172,13 +176,13 @@ export default function BrandsPage() {
     }
   };
 
-  const handleEdit = (brand: Brand) => {
-    setEditingBrandId(brand.id);
+  const handleEdit = (category: Category) => {
+    setEditingCategoryId(category.id);
     setEditFormData({
-      name: brand.name,
-      slug: brand.slug,
-      logo: brand.image || "",
-      isActive: brand.isActive,
+      name: category.name,
+      slug: category.slug,
+      image: category.image || "",
+      isActive: category.isActive,
     });
     // Enable auto-slug generation when editing
     setIsEditAutoSlug(true);
@@ -187,33 +191,33 @@ export default function BrandsPage() {
 
   const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!editingBrandId) return;
+    if (!editingCategoryId) return;
 
     setIsSubmitting(true);
     setError("");
 
     try {
       // Use the server action instead of the API
-      await updateBrand(editingBrandId, {
+      await updateCategory(editingCategoryId, {
         name: editFormData.name,
         slug: editFormData.slug,
-        image: editFormData.logo || null,
+        image: editFormData.image || null,
         isActive: editFormData.isActive,
       });
 
-      toast.success("Brand updated successfully!");
+      toast.success("Category updated successfully!");
 
       setShowEditModal(false);
-      setEditingBrandId(null);
+      setEditingCategoryId(null);
       setEditFormData({
         name: "",
         slug: "",
-        logo: "",
+        image: "",
         isActive: true,
       });
       setIsEditAutoSlug(false);
       router.refresh();
-      fetchBrands();
+      fetchCategories();
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
       toast.error(err instanceof Error ? err.message : "An error occurred");
@@ -224,37 +228,37 @@ export default function BrandsPage() {
 
   const closeEditModal = () => {
     setShowEditModal(false);
-    setEditingBrandId(null);
+    setEditingCategoryId(null);
     setEditFormData({
       name: "",
       slug: "",
-      logo: "",
+      image: "",
       isActive: true,
     });
     setIsEditAutoSlug(false);
     setError("");
   };
 
-  const handleDeleteClick = (brand: Brand) => {
-    setDeletingBrandId(brand.id);
+  const handleDeleteClick = (category: Category) => {
+    setDeletingCategoryId(category.id);
     setShowDeleteDialog(true);
   };
 
   const handleDeleteConfirm = async () => {
-    if (!deletingBrandId) return;
+    if (!deletingCategoryId) return;
 
     setIsDeleting(true);
     setError("");
 
     try {
-      await deleteBrand(deletingBrandId);
+      await deleteCategory(deletingCategoryId);
 
-      toast.success("Brand deleted successfully!");
+      toast.success("Category deleted successfully!");
 
       setShowDeleteDialog(false);
-      setDeletingBrandId(null);
+      setDeletingCategoryId(null);
       router.refresh();
-      fetchBrands();
+      fetchCategories();
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
       toast.error(err instanceof Error ? err.message : "An error occurred");
@@ -265,17 +269,13 @@ export default function BrandsPage() {
 
   const handleDeleteCancel = () => {
     setShowDeleteDialog(false);
-    setDeletingBrandId(null);
+    setDeletingCategoryId(null);
   };
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Brands</h1>
-      </div>
-
-      <div className="bg-card rounded-lg shadow border border-border p-6 mb-8">
-        <h2 className="text-xl font-semibold mb-4">Add New Brand</h2>
+      <div className="bg-card rounded-lg shadow-sm border border-border p-6 mb-8">
+        <h2 className="!text-xl font-semibold mb-4">Add New Category</h2>
 
         {error && !showEditModal && (
           <div className="bg-destructive/20 border border-destructive text-destructive-foreground px-4 py-3 rounded mb-4">
@@ -287,7 +287,7 @@ export default function BrandsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium mb-1">
-                Brand Name *
+                Category Name *
               </label>
               <Input
                 type="text"
@@ -316,6 +316,7 @@ export default function BrandsPage() {
                 <Button
                   variant="inverted"
                   type="button"
+                  className="ml-2"
                   size="sm"
                   onClick={() => {
                     setIsCreateAutoSlug(true);
@@ -333,7 +334,6 @@ export default function BrandsPage() {
                       }));
                     }
                   }}
-                  className="ml-2"
                 >
                   Reset
                 </Button>
@@ -341,19 +341,21 @@ export default function BrandsPage() {
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium mb-1">Logo URL</label>
+              <label className="block text-sm font-medium mb-1">
+                Image URL
+              </label>
               <Input
                 type="text"
-                name="logo"
-                value={createFormData.logo}
+                name="image"
+                value={createFormData.image}
                 onChange={handleCreateChange}
-                placeholder="https://example.com/logo.jpg"
+                placeholder="https://example.com/image.jpg"
               />
             </div>
 
             <div className="md:col-span-2">
               <div className="flex items-center">
-                <OrangeToggle
+                <Switch
                   name="isActive"
                   checked={createFormData.isActive}
                   onChange={handleCreateChange}
@@ -365,20 +367,18 @@ export default function BrandsPage() {
 
           <div className="mt-6">
             <Button variant="inverted" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Creating..." : "Create Brand"}
+              {isSubmitting ? "Creating..." : "Create Category"}
             </Button>
           </div>
         </form>
       </div>
 
-      <div className="bg-card rounded-lg shadow border border-border p-6">
-        <h2 className="text-xl font-semibold mb-4">Brands</h2>
-
+      <div className="bg-card rounded-lg shadow-sm border border-border p-6">
         {isLoading ? (
-          <div className="text-center py-4">Loading brands...</div>
-        ) : brands.length === 0 ? (
+          <div className="text-center py-4">Loading categories...</div>
+        ) : categories.length === 0 ? (
           <div className="text-center py-4 text-muted-foreground">
-            No brands found
+            No categories found
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -392,7 +392,7 @@ export default function BrandsPage() {
                     Slug
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    Logo
+                    Image
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Status
@@ -403,46 +403,48 @@ export default function BrandsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {brands.map((brand) => (
-                  <tr key={brand.id}>
+                {categories.map((category) => (
+                  <tr key={category.id}>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {brand.name}
+                      {category.name}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {brand.slug}
+                      {category.slug}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {brand.image ? (
+                      {category.image ? (
                         <div className="h-10 w-10 relative">
                           <Image
-                            src={brand.image}
-                            alt={brand.name}
+                            src={category.image}
+                            alt={category.name}
                             fill
                             className="object-cover rounded"
                           />
                         </div>
                       ) : (
-                        <span className="text-muted-foreground">No logo</span>
+                        <span className="text-muted-foreground">No image</span>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <Badge variant={brand.isActive ? "default" : "secondary"}>
-                        {brand.isActive ? "Active" : "Inactive"}
+                      <Badge
+                        variant={category.isActive ? "default" : "secondary"}
+                      >
+                        {category.isActive ? "Active" : "Inactive"}
                       </Badge>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <Button
                         variant="inverted"
+                        className="mr-2"
                         size="sm"
-                        onClick={() => handleEdit(brand)}
-                        className="mr-4"
+                        onClick={() => handleEdit(category)}
                       >
                         Edit
                       </Button>
                       <Button
                         variant="invertedDestructive"
                         size="sm"
-                        onClick={() => handleDeleteClick(brand)}
+                        onClick={() => handleDeleteClick(category)}
                       >
                         Delete
                       </Button>
@@ -458,7 +460,7 @@ export default function BrandsPage() {
       <Drawer open={showEditModal} onOpenChange={setShowEditModal}>
         <DrawerContent>
           <DrawerHeader>
-            <DrawerTitle>Edit Brand</DrawerTitle>
+            <DrawerTitle>Edit Category</DrawerTitle>
           </DrawerHeader>
 
           <DrawerBody>
@@ -468,11 +470,11 @@ export default function BrandsPage() {
               </div>
             )}
 
-            <form onSubmit={handleUpdate} id="editBrandForm">
+            <form onSubmit={handleUpdate} id="editCategoryForm">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Brand Name *
+                    Category Name *
                   </label>
                   <Input
                     type="text"
@@ -500,8 +502,8 @@ export default function BrandsPage() {
                     />
                     <Button
                       variant="inverted"
-                      type="button"
                       size="sm"
+                      type="button"
                       onClick={() => {
                         setIsEditAutoSlug(true);
                         if (editFormData.name) {
@@ -526,20 +528,20 @@ export default function BrandsPage() {
 
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium mb-1">
-                    Logo URL
+                    Image URL
                   </label>
                   <Input
                     type="text"
-                    name="logo"
-                    value={editFormData.logo}
+                    name="image"
+                    value={editFormData.image}
                     onChange={handleEditChange}
-                    placeholder="https://example.com/logo.jpg"
+                    placeholder="https://example.com/image.jpg"
                   />
                 </div>
 
                 <div className="md:col-span-2">
                   <div className="flex items-center">
-                    <OrangeToggle
+                    <Switch
                       name="isActive"
                       checked={editFormData.isActive}
                       onChange={handleEditChange}
@@ -563,24 +565,23 @@ export default function BrandsPage() {
               <Button
                 variant="greenInverted"
                 type="submit"
-                form="editBrandForm"
+                form="editCategoryForm"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? "Updating..." : "Update Brand"}
+                {isSubmitting ? "Updating..." : "Update Category"}
               </Button>
             </div>
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
 
-      {/* Delete Confirmation Dialog */}
       {showDeleteDialog && (
         <DeleteConfirmationDialog
           isOpen={showDeleteDialog}
           onClose={handleDeleteCancel}
           onConfirm={handleDeleteConfirm}
-          title="Delete Brand"
-          description="Are you sure you want to delete this brand? This action cannot be undone."
+          title="Delete Category"
+          description="Are you sure you want to delete this category? This action cannot be undone."
           isDeleting={isDeleting}
         />
       )}

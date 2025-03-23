@@ -25,13 +25,13 @@ h4 {
 h5 {
   font-size: 1.4rem;
   line-height: 1.2;
-  font-weight: 600;
+  font-weight: 300;
 }
 
 h6 {
   font-size: 1.2rem;
-  line-height: 1.05;
-  font-weight: 600;
+  line-height: 1.2;
+  font-weight: 300;
 }
 
 p {
@@ -64,17 +64,18 @@ p {
 } 
 
 .prose {
-  @apply max-w-none;
-  @apply px-0 !important;
+  max-width: none;
+  padding-left: 0;
+  padding-right: 0;
   overflow-x: visible;
   color: #000;
 }
 
 .prose h6 {
-  margin-top: 0rem !important;
-  margin-bottom: 0.3rem !important;
+  margin-top: 0;
+  margin-bottom: 0.3rem;
 } 
 
 .prose p {
-  margin-top: 0rem !important;
+  margin-top: 0;
 }

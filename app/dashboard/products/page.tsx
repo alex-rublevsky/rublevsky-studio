@@ -36,7 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { OrangeToggle } from "@/components/ui/toggle";
+import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import {
   Drawer,
@@ -585,13 +585,9 @@ export default function ProductsPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Products</h1>
+      <div className="flex justify-end items-center">
         <div className="flex space-x-2">
-          <Button
-            variant="inverted"
-            onClick={() => setShowCreateForm(!showCreateForm)}
-          >
+          <Button onClick={() => setShowCreateForm(!showCreateForm)}>
             {showCreateForm ? "Hide Form" : "Add New Product"}
           </Button>
         </div>
@@ -599,7 +595,7 @@ export default function ProductsPage() {
 
       {/* Create Product Form */}
       {showCreateForm && (
-        <div className="bg-card rounded-lg shadow border border-border p-6 mb-8">
+        <div className="bg-card rounded-lg shadow-sm border border-border p-6 mb-8">
           <h2 className="text-xl font-semibold mb-4">Add New Product</h2>
 
           {error && !isEditMode && (
@@ -713,7 +709,6 @@ export default function ProductsPage() {
                 required
               >
                 <SelectTrigger
-                  variant="inverted"
                   className={
                     hasAttemptedSubmit && !formData.categorySlug
                       ? "border-red-500"
@@ -722,13 +717,9 @@ export default function ProductsPage() {
                 >
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
-                <SelectContent variant="inverted">
+                <SelectContent>
                   {categories.map((category: Category) => (
-                    <SelectItem
-                      key={category.slug}
-                      value={category.slug}
-                      variant="inverted"
-                    >
+                    <SelectItem key={category.slug} value={category.slug}>
                       {category.name}
                     </SelectItem>
                   ))}
@@ -800,7 +791,7 @@ export default function ProductsPage() {
 
               <div className="md:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="flex items-center">
-                  <OrangeToggle
+                  <Switch
                     name="isActive"
                     checked={formData.isActive}
                     onChange={handleChange}
@@ -809,7 +800,7 @@ export default function ProductsPage() {
                 </div>
 
                 <div className="flex items-center">
-                  <OrangeToggle
+                  <Switch
                     name="isFeatured"
                     checked={formData.isFeatured}
                     onChange={handleChange}
@@ -832,7 +823,7 @@ export default function ProductsPage() {
                 </div>
 
                 <div className="flex items-center">
-                  <OrangeToggle
+                  <Switch
                     name="hasVariations"
                     checked={formData.hasVariations}
                     onChange={handleChange}
@@ -875,9 +866,7 @@ export default function ProductsPage() {
       )}
 
       {/* Products List */}
-      <div className="bg-card rounded-lg shadow border border-border p-6">
-        <h2 className="text-xl font-semibold mb-4">Products</h2>
-
+      <div className="bg-card rounded-lg shadow-sm border border-border p-6">
         {isLoading ? (
           <div className="text-center py-4">Loading products...</div>
         ) : products.length === 0 ? (
@@ -901,9 +890,7 @@ export default function ProductsPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Category
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    Brand
-                  </th>
+
                   <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Tea Categories
                   </th>
@@ -921,7 +908,7 @@ export default function ProductsPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center">
                         {product.images && (
-                          <div className="h-10 w-10 relative flex-shrink-0 mr-3">
+                          <div className="h-10 w-10 relative shrink-0 mr-3">
                             <Image
                               src={`/${product.images.split(",").map((img) => img.trim())[0]}`}
                               alt={product.name}
@@ -948,9 +935,7 @@ export default function ProductsPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       {getCategoryName(product.categorySlug) || "N/A"}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {getBrandName(product.brandSlug) || "N/A"}
-                    </td>
+
                     <td className="px-6 py-4 whitespace-nowrap">
                       {getTeaCategoryNames(product.teaCategories)}
                     </td>
@@ -1158,7 +1143,7 @@ export default function ProductsPage() {
 
                 <div className="md:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="flex items-center">
-                    <OrangeToggle
+                    <Switch
                       name="isActive"
                       checked={editFormData.isActive}
                       onChange={handleEditChange}
@@ -1167,7 +1152,7 @@ export default function ProductsPage() {
                   </div>
 
                   <div className="flex items-center">
-                    <OrangeToggle
+                    <Switch
                       name="isFeatured"
                       checked={editFormData.isFeatured}
                       onChange={handleEditChange}
@@ -1190,7 +1175,7 @@ export default function ProductsPage() {
                   </div>
 
                   <div className="flex items-center">
-                    <OrangeToggle
+                    <Switch
                       name="hasVariations"
                       checked={editFormData.hasVariations}
                       onChange={handleEditChange}

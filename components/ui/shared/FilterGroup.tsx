@@ -52,7 +52,7 @@ export function FilterGroup({
 
   return (
     <div className={cn("space-y-2 min-w-[20rem]", className)}>
-      {title && <h3 className="text-sm font-medium">{title}</h3>}
+      {title && <h6 className="text-sm font-medium">{title}</h6>}
       <div className="flex flex-wrap gap-2">
         {showAllOption && !multiSelect && (
           <button

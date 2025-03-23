@@ -162,7 +162,7 @@ function SortableVariationItem({
                 key={attr.attributeId}
                 className="flex items-center space-x-2"
               >
-                <div className="flex-grow grid grid-cols-2 gap-2">
+                <div className="grow grid grid-cols-2 gap-2">
                   <div className="text-sm font-medium text-foreground">
                     {getAttributeDisplayName(attr.attributeId)}:
                   </div>
@@ -201,7 +201,7 @@ function SortableVariationItem({
 
       {unusedAttributes.length > 0 && (
         <div className="flex items-end space-x-2">
-          <div className="flex-grow max-w-md">
+          <div className="grow max-w-md">
             <label className="block text-sm font-medium text-foreground mb-1">
               Add Attribute
             </label>

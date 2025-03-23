@@ -374,7 +374,7 @@ export default function ProductPage() {
         width={3000}
         height={3000}
         priority
-        className="max-w-full w-full lg:w-auto max-h-[calc(100vh-5rem)] object-contain rounded-none lg:rounded-lg relative z-[2]"
+        className="max-w-full w-full lg:w-auto max-h-[calc(100vh-5rem)] object-contain rounded-none lg:rounded-lg relative z-2"
       />
     );
   }, [selectedImage, product?.name]);
@@ -423,7 +423,7 @@ export default function ProductPage() {
 
   return (
     <main className="min-h-screen flex flex-col lg:h-screen lg:overflow-hidden">
-      <div className="flex-grow flex items-start justify-center">
+      <div className="grow flex items-start justify-center">
         <div className="w-full h-full flex flex-col lg:flex-row gap-0 lg:gap-10 items-start lg:p-4">
           {/* Image gallery */}
           <div className="w-full lg:w-3/5 xl:w-2/3 flex flex-col lg:flex-row gap-2 lg:h-full self-start">

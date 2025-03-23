@@ -57,7 +57,7 @@ export default function BrandingSection() {
                     size="compact"
                   />
                 ) : selectedProject.type === "video" && selectedProject.src ? (
-                  <div className="relative aspect-[4/3] w-full">
+                  <div className="relative aspect-4/3 w-full">
                     <video
                       src={`/${selectedProject.src}`}
                       className="w-full h-full rounded-lg"

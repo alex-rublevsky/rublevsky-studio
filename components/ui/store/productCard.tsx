@@ -418,7 +418,7 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
           {/* Desktop Add to Cart button */}
           <button
             onClick={handleAddToCart}
-            className={`absolute bottom-0 left-0 right-0 hidden md:flex items-center justify-center space-x-2 bg-gray-200/70 backdrop-blur-sm text-black hover:bg-black hover:text-white transition-all duration-500 py-2 opacity-0 group-hover:opacity-100 ${
+            className={`absolute bottom-0 left-0 right-0 hidden md:flex items-center justify-center space-x-2 bg-gray-200/70 backdrop-blur-xs text-black hover:bg-black hover:text-white transition-all duration-500 py-2 opacity-0 group-hover:opacity-100 ${
               !isAvailable
                 ? "cursor-not-allowed hover:bg-gray-200/70 hover:text-black opacity-50"
                 : ""
@@ -467,24 +467,24 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
                 <div className="flex items-baseline gap-1">
                   {product.discount ? (
                     <>
-                      <span className="text-lg font-light text-black line-through text-gray-500">
+                      <h5 className=" line-through text-gray-500">
                         ${currentPrice?.toFixed(2)}
-                      </span>
-                      <span className="text-lg font-light text-black whitespace-nowrap">
+                      </h5>
+                      <h5 className="whitespace-nowrap">
                         $
                         {(currentPrice * (1 - product.discount / 100)).toFixed(
                           2
                         )}{" "}
                         CAD
-                      </span>
-                      <span className="text-sm text-red-600">
+                      </h5>
+                      <p className="ml-1 text-red-600">
                         {product.discount}% OFF
-                      </span>
+                      </p>
                     </>
                   ) : (
-                    <span className="text-lg font-light text-black whitespace-nowrap">
+                    <h5 className="whitespace-nowrap">
                       ${currentPrice?.toFixed(2)} CAD
-                    </span>
+                    </h5>
                   )}
                 </div>
 
@@ -510,7 +510,7 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
             </div>
 
             {/* Product Name */}
-            <h3 className="text-sm mb-3">{product.name}</h3>
+            <p className=" mb-3">{product.name}</p>
 
             {/* Variations */}
             {product.hasVariations &&
@@ -570,7 +570,7 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
           <div className="md:hidden mt-auto">
             <button
               onClick={handleAddToCart}
-              className={`w-full flex items-center justify-center space-x-2 bg-gray-200/70 backdrop-blur-sm text-black hover:bg-black hover:text-white transition-all duration-500 py-2 px-4 ${
+              className={`w-full flex items-center justify-center space-x-2 bg-gray-200/70 backdrop-blur-xs text-black hover:bg-black hover:text-white transition-all duration-500 py-2 px-4 ${
                 !isAvailable
                   ? "opacity-50 cursor-not-allowed hover:bg-gray-200/70 hover:text-black"
                   : ""

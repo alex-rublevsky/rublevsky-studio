@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { OrderWithDetails } from "@/lib/actions/orders/getAllOrders";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
-import { OrangeToggle } from "@/components/ui/toggle";
+import { Switch } from "@/components/ui/switch";
 import toggleOrderStatus from "@/lib/actions/orders/toggleOrderStatus";
 import { toast } from "sonner";
 
@@ -38,7 +38,7 @@ export function OrderList({ initialOrders }: OrderListProps) {
     }
   };
 
-  return (
+  return orders.length > 0 ? (
     <div className="space-y-6">
       {orders.map((order) => {
         const shippingAddress = order.addresses?.find(
@@ -75,7 +75,7 @@ export function OrderList({ initialOrders }: OrderListProps) {
                   <span className="text-sm text-gray-500">
                     Mark as processed
                   </span>
-                  <OrangeToggle
+                  <Switch
                     checked={order.status === "processed"}
                     onChange={() => handleToggleStatus(order.id, order.status)}
                   />
@@ -210,7 +210,7 @@ export function OrderList({ initialOrders }: OrderListProps) {
                     key={item.id}
                     className="flex items-start gap-4 p-4 bg-background border rounded-lg hover:border-primary/50 transition-colors"
                   >
-                    <div className="relative w-20 h-20 flex-shrink-0 bg-gray-100 rounded-md overflow-hidden">
+                    <div className="relative w-20 h-20 shrink-0 bg-gray-100 rounded-md overflow-hidden">
                       {item.product.images ? (
                         <Image
                           src={`/${item.product.images.split(",").map((img) => img.trim())[0]}`}
@@ -225,7 +225,7 @@ export function OrderList({ initialOrders }: OrderListProps) {
                         </div>
                       )}
                     </div>
-                    <div className="flex-grow min-w-0">
+                    <div className="grow min-w-0">
                       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
                         <div>
                           <div className="font-medium truncate">
@@ -271,6 +271,10 @@ export function OrderList({ initialOrders }: OrderListProps) {
           </div>
         );
       })}
+    </div>
+  ) : (
+    <div className="h-full w-full flex justify-center items-center">
+      <p className="text-gray-500">No orders found</p>
     </div>
   );
 }

@@ -336,12 +336,8 @@ export default function BlogPage() {
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Blog Posts</h1>
         <div className="flex space-x-2">
-          <Button
-            variant="inverted"
-            onClick={() => setShowCreateForm(!showCreateForm)}
-          >
+          <Button onClick={() => setShowCreateForm(!showCreateForm)}>
             {showCreateForm ? "Hide Form" : "Add New Blog Post"}
           </Button>
         </div>
@@ -349,7 +345,7 @@ export default function BlogPage() {
 
       {/* Create Form */}
       {showCreateForm && (
-        <div className="bg-card rounded-lg shadow border border-border">
+        <div className="bg-card rounded-lg shadow-sm border border-border">
           <div className="p-6">
             <h2 className="text-xl font-semibold mb-4">Create New Blog Post</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -493,9 +489,8 @@ export default function BlogPage() {
       )}
 
       {/* Blog Posts List */}
-      <div className="bg-card rounded-lg shadow border border-border">
+      <div className="bg-card rounded-lg shadow-sm border border-border">
         <div className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Blog Posts</h2>
           {isLoading ? (
             <p>Loading blog posts...</p>
           ) : blogPosts.length === 0 ? (

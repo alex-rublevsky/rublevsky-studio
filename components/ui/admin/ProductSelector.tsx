@@ -122,7 +122,7 @@ export default function ProductSelector({
       {selectedProduct ? (
         <div className="flex items-center space-x-2 p-2 border border-input rounded bg-card">
           {getProductImage(selectedProduct) && (
-            <div className="w-10 h-10 relative flex-shrink-0">
+            <div className="w-10 h-10 relative shrink-0">
               <Image
                 src={getProductImage(selectedProduct)}
                 alt={selectedProduct.name}
@@ -131,7 +131,7 @@ export default function ProductSelector({
               />
             </div>
           )}
-          <div className="flex-grow">
+          <div className="grow">
             <p className="font-medium">{selectedProduct.name}</p>
             <p className="text-sm text-muted-foreground">
               {selectedProduct.slug}
@@ -184,7 +184,7 @@ export default function ProductSelector({
                 className="flex items-center p-2 hover:bg-muted cursor-pointer"
               >
                 {getProductImage(product) && (
-                  <div className="w-8 h-8 relative flex-shrink-0 mr-2">
+                  <div className="w-8 h-8 relative shrink-0 mr-2">
                     <Image
                       src={getProductImage(product)}
                       alt={product.name}

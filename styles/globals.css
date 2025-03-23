@@ -1,21 +1,71 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
-@layer utilities {
-  .scrollbar-none {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-  
-  .scrollbar-none::-webkit-scrollbar {
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-gray: colors.neutral;
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+
+  --color-sidebar: hsl(var(--sidebar-background));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
     display: none;
   }
 }
 
-body {
-  /* font-family: Arial, Helvetica, sans-serif; */
+@layer utilities {
+  body {
+    /* font-family: Arial, Helvetica, sans-serif; */
+  }
 }
 
 @layer base {
@@ -99,69 +149,73 @@ body {
   }
 }
 
-section {
+@layer utilities {
+  section {
     background-color: white;
     padding-bottom: 13rem;
     padding-left: 1rem;
     z-index: 1;
     padding-right: 1rem;
     position: relative;
-}
+  }
 
-section.no-padding {
+  section.no-padding {
     padding-left: 0;
     padding-right: 0;
-}
+  }
 
-@media (min-width: 640px) {
+  @media (min-width: 640px) {
     section {
-        padding-left: 1.5rem;
-        padding-right: 1.5rem;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
     }
 
     section.no-padding {
-        padding-left: 0;
-        padding-right: 0;
+      padding-left: 0;
+      padding-right: 0;
     }
-}
+  }
 
-/* GENERAL */
-.logo-hover {
-  width: auto;
-
-  transition: all 0.3s ease;
-}
-
-/* Only apply grayscale effect on desktop */
-@media (min-width: 1024px) {
+  /* GENERAL */
   .logo-hover {
+    width: auto;
+
+    transition: all 0.3s ease;
+  }
+
+  /* Only apply grayscale effect on desktop */
+  @media (min-width: 1024px) {
+    .logo-hover {
       filter: grayscale(100%);
       opacity: 0.5;
-  }
+    }
 
-  .logo-hover:hover,
-  .group:hover .logo-hover {
+    .logo-hover:hover,
+    .group:hover .logo-hover {
       filter: grayscale(0);
       opacity: 1;
+    }
+  }
+
+  /* Hide the element that's causing the white gap in admin pan — no clue where it comes from */
+  section[aria-label='Notifications alt+T'] {
+    padding: 0 !important;
+  }
+
+  /* Make body background black in admin panel for overscrolling */
+  body.dark {
+    background-color: hsl(var(--background)) !important;
+  }
+
+  .work_page_section_title_holder {
+    padding-top: 6rem;
+    padding-bottom: 7rem;
   }
 }
 
-/* Hide the element that's causing the white gap in admin pan — no clue where it comes from */
-section[aria-label="Notifications alt+T"] {
-  padding: 0 !important;
-}
 
-/* Make body background black in admin panel for overscrolling */
-body.dark {
-  background-color: hsl(var(--background)) !important;
-}
 
-.work_page_section_title_holder {
-  padding-top: 6rem;
-  padding-bottom: 7rem;
-}
-/* THEME COLORS */
-
+  /* THEME COLORS */
 body {
   @apply overscroll-none bg-transparent;
 }
@@ -203,19 +257,14 @@ body {
 
 .theme-blue,
 .theme-blue-scaled {
-  --primary: 221.2 83.2% 53.3%;
-  --primary-foreground: 210 40% 98%;
-  --chart-1: 221.2 83.2% 53.3%;
-  --chart-2: 217.2 91.2% 59.8%;
-  --sidebar-primary: 221.2 83.2% 53.3%;
-  --sidebar-primary-foreground: 210 40% 98%;
-}
+  --primary: var(--color-blue-600);
+  --primary-foreground: var(--color-blue-50);
 
   @variant dark {
     --primary: var(--color-blue-500);
     --primary-foreground: var(--color-blue-50);
   }
-
+}
 
 .theme-green,
 .theme-green-scaled {

@@ -37,7 +37,7 @@ export default function SignIn() {
 
       await authClient.signIn.social({
         provider: "google",
-        callbackURL: "/admin",
+        callbackURL: "/dashboard",
       });
 
       // The code below won't be reached due to the redirect
@@ -53,7 +53,7 @@ export default function SignIn() {
       <CardHeader>
         <CardTitle className="text-lg md:text-xl">Sign In</CardTitle>
         <CardDescription className="text-xs md:text-sm">
-          Sign in with your Google account to access the admin panel
+          Sign in with your Google account to access the admin dashboard
         </CardDescription>
       </CardHeader>
       <CardContent>

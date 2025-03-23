@@ -77,7 +77,7 @@ export function CartItem({ item }: CartItemProps) {
   return (
     <div className="flex items-start gap-4 py-4 border-b border-gray-100">
       {/* Product image */}
-      <div className="flex-shrink-0 relative w-16 h-16 bg-gray-100 rounded overflow-hidden">
+      <div className="shrink-0 relative w-16 h-16 bg-gray-100 rounded overflow-hidden">
         {item.image ? (
           <Image
             src={`/${item.image}`}
@@ -93,7 +93,7 @@ export function CartItem({ item }: CartItemProps) {
       </div>
 
       {/* Product info */}
-      <div className="flex-grow">
+      <div className="grow">
         <Link
           href={`/product/${item.productSlug}`}
           className="font-medium hover:underline"
@@ -143,7 +143,7 @@ export function CartItem({ item }: CartItemProps) {
       {/* Remove button */}
       <button
         onClick={() => removeFromCart(item.productId, item.variationId)}
-        className="flex-shrink-0 p-1 text-gray-400 hover:text-gray-600"
+        className="shrink-0 p-1 text-gray-400 hover:text-gray-600"
         aria-label="Remove item"
       >
         <X size={16} />

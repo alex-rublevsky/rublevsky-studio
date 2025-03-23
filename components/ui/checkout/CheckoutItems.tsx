@@ -22,7 +22,7 @@ export default function CheckoutItems({ items }: CheckoutItemsProps) {
           className="flex items-start gap-3 py-2"
         >
           {/* Product image */}
-          <div className="flex-shrink-0 relative w-12 h-12 bg-gray-100 rounded overflow-hidden">
+          <div className="shrink-0 relative w-12 h-12 bg-gray-100 rounded overflow-hidden">
             {item.image ? (
               <Image
                 src={`/${item.image}`}
@@ -38,7 +38,7 @@ export default function CheckoutItems({ items }: CheckoutItemsProps) {
           </div>
 
           {/* Product info */}
-          <div className="flex-grow">
+          <div className="grow">
             <p className="font-medium text-sm">{item.productName}</p>
 
             {item.attributes && Object.keys(item.attributes).length > 0 && (

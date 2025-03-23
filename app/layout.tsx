@@ -66,12 +66,12 @@ export default async function RootLayout({
           disableTransitionOnChange
           enableColorScheme
         >
-          <AnimationProvider>
-            <ActiveThemeProvider initialTheme={activeThemeValue}>
+          <ActiveThemeProvider initialTheme={activeThemeValue}>
+            <AnimationProvider>
               <NavBar />
               {children}
-            </ActiveThemeProvider>
-          </AnimationProvider>
+            </AnimationProvider>
+          </ActiveThemeProvider>
         </ThemeProvider>
         <Toaster position="top-right" richColors />
       </body>

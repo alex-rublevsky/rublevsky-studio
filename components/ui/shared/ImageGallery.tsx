@@ -3,7 +3,7 @@ import { useState, useMemo } from "react";
 import { VariantProps, cva } from "class-variance-authority";
 
 const mainImageVariants = cva(
-  "max-w-full w-full lg:w-auto object-contain rounded-none lg:rounded-lg relative z-[2]",
+  "max-w-full w-full lg:w-auto object-contain rounded-none lg:rounded-lg relative z-2",
   {
     variants: {
       size: {
@@ -60,14 +60,14 @@ export default function ImageGallery({
       className={`gallery-stack flex flex-col lg:flex-row w-full gap-2 ${className}`}
     >
       {/* Thumbnails */}
-      <div className="order-2 lg:order-1 flex-shrink-0 w-full lg:w-24 overflow-x-auto lg:overflow-x-hidden">
+      <div className="order-2 lg:order-1 shrink-0 w-full lg:w-24 overflow-x-auto lg:overflow-x-hidden">
         {/* Scrollable container */}
         <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-y-auto px-4 lg:px-0">
           {images.map((image, index) => (
             <div
               key={index}
               className="
-                flex-shrink-0
+                shrink-0
                 w-24 h-24
                 relative
                 cursor-pointer
@@ -103,7 +103,7 @@ export default function ImageGallery({
       </div>
 
       {/* Main image */}
-      <div className="flex items-center justify-center lg:items-start lg:justify-start order-1 flex-grow relative">
+      <div className="flex items-center justify-center lg:items-start lg:justify-start order-1 grow relative">
         <div className="relative w-full">
           {selectedImage ? (
             <div className="relative">{memoizedImage}</div>

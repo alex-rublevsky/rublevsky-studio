@@ -25,7 +25,7 @@ export default function SplineHero() {
         loading-anim-type="spinner-big-dark"
         url="https://prod.spline.design/XRydKQhqfpYOjapX/scene.splinecode"
       /> */}
-      <div className="absolute bottom-0 left-0 right-0 h-[12rem] bg-gradient-to-t from-background via-background/70 to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-[12rem] bg-linear-to-t from-background via-background/70 to-transparent" />
     </div>
   );
 }

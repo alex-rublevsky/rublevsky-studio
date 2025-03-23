@@ -147,7 +147,7 @@ function BlogPostImageGallery({
           nextEl: ".swiper-button-next",
           prevEl: ".swiper-button-prev",
         }}
-        className="overflow-visible !pb-12 py-12"
+        className="overflow-visible pb-12! py-12"
       >
         {images.map((image, index) => (
           <SwiperSlide

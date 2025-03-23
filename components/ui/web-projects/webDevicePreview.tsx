@@ -20,7 +20,7 @@ export default function DevicePreview({
     <a
       href={websiteUrl}
       className={`block w-full relative ${
-        isPhone ? "aspect-[9/19.5]" : "aspect-[4/3]"
+        isPhone ? "aspect-[9/19.5]" : "aspect-4/3"
       }`}
       target="_blank"
       rel="noopener noreferrer"

@@ -72,7 +72,7 @@ function BlogPost({
       )}
 
       <div className="sticky-header-container">
-        <div className="relative max-w-2xl mx-auto z-[1]">
+        <div className="relative max-w-2xl mx-auto z-1">
           <h3>{title}</h3>
 
           <div className="my-2 flex gap-4 items-center">

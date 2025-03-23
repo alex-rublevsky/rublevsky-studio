@@ -6,7 +6,7 @@ type Session = typeof auth.$Infer.Session;
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 
-const adminRoutes = ["/admin", "/admin/products", "/admin/categories", "/admin/brands", "/admin/blog", "/admin/orders", "/admin/customers"];
+const adminRoutes = ["/dashboard", "/dashboard/products", "/dashboard/categories", "/dashboard/brands", "/dashboard/blog", "/dashboard/orders", "/dashboard/customers"];
 const authRoutes = ["/sign-in"]; 
 
 export async function middleware(request: NextRequest) {
@@ -33,13 +33,13 @@ export async function middleware(request: NextRequest) {
     );
    
     // Protect admin routes - redirect to sign-in if not authenticated
-    if (!session && isAdminRoute) {
-        return NextResponse.redirect(new URL("/sign-in", request.url));
-    }
+    // if (!session && isAdminRoute) {
+    //     return NextResponse.redirect(new URL("/sign-in", request.url));
+    // }
  
     // Redirect admin users from sign-in page to admin panel
     if (session?.user?.email === ADMIN_EMAIL && isAuthRoute) {
-        return NextResponse.redirect(new URL("/admin", request.url));
+        return NextResponse.redirect(new URL("/dashboard", request.url));
     }
     
     // Prevent non-admin users from accessing admin routes
