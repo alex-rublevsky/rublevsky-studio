@@ -1,6 +1,8 @@
 'use server';
 
 import { eq } from "drizzle-orm";
+import type { D1Database } from '@cloudflare/workers-types';
+import { drizzle } from "drizzle-orm/d1";
 import db from "@/server/db";
 import { brands } from "@/server/schema";
 import { Brand } from "@/types";
@@ -20,58 +22,44 @@ interface UpdateBrandData {
  */
 export default async function updateBrand(id: number, data: UpdateBrandData): Promise<Brand> {
   try {
-    if (!id) {
-      throw new Error("Brand ID is required");
-    }
-    
     if (!data.name || !data.slug) {
       throw new Error("Name and slug are required");
     }
-    
-    // Check if brand exists
-    const existingBrand = await db
-      .select()
+
+    // Initialize database (works for both local and production)
+    const database = typeof process === 'undefined' 
+      ? drizzle((globalThis as any)[Symbol.for("__cloudflare-context__")]?.env?.DB as D1Database)
+      : db;
+
+    // Fetch existing brand and check for duplicate slug in a single query
+    const [brand, duplicateSlug] = await Promise.all([
+      database.select().from(brands).where(eq(brands.id, id)).get(),
+      database.select().from(brands).where(eq(brands.slug, data.slug)).get()
+    ]);
+
+    if (!brand) throw new Error("Brand not found");
+    if (duplicateSlug && duplicateSlug.id !== id) {
+      throw new Error("A brand with this slug already exists");
+    }
+
+    // Update brand
+    await database.update(brands)
+      .set({
+        name: data.name,
+        slug: data.slug,
+        image: data.image || null,
+        isActive: data.isActive ?? brand.isActive
+      })
+      .where(eq(brands.id, id));
+
+    // Fetch and return updated brand
+    const updatedBrand = await database.select()
       .from(brands)
       .where(eq(brands.id, id))
       .get();
-    
-    if (!existingBrand) {
-      throw new Error("Brand not found");
-    }
-    
-    // Check if slug already exists (but not for this brand)
-    const slugExists = await db
-      .select()
-      .from(brands)
-      .where(eq(brands.slug, data.slug))
-      .all();
-    
-    if (slugExists.length > 0 && slugExists.some((b: { id: number }) => b.id !== id)) {
-      throw new Error("A different brand with this slug already exists");
-    }
-    
-    // Format data for update
-    const brandData = {
-      name: data.name,
-      slug: data.slug,
-      image: data.image || null,
-      isActive: data.isActive !== undefined ? data.isActive : existingBrand.isActive,
-    };
-    
-    // Update brand in database
-    await db
-      .update(brands)
-      .set(brandData)
-      .where(eq(brands.id, id))
-      .run();
-    
-    // Return the updated brand
-    return {
-      id,
-      ...brandData,
-    };
+
+    return updatedBrand as Brand;
   } catch (error) {
-    console.error("Error updating brand:", error);
     throw new Error(`Failed to update brand: ${(error as Error).message}`);
   }
 } 

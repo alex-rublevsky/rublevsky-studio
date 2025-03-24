@@ -4,11 +4,11 @@
 //TODO optimize stock validation to check with locally stored value?
 //TODO implement bulk stock validation (all items at once) for cart
 
-import { eq, desc, and, SQL } from "drizzle-orm";
+import { eq, desc, and, SQL, InferModel, sql } from "drizzle-orm";
 import { unstable_cache } from 'next/cache';
 import db from "@/server/db";
-import { products, categories, brands, productVariations, variationAttributes, blogPosts, productTeaCategories, teaCategories } from "@/server/schema";
-import { Product, ProductWithVariations, ProductVariationWithAttributes } from "@/types";
+import { products, productVariations, variationAttributes, productTeaCategories } from "@/server/schema";
+import { Product, ProductWithVariations, ProductVariation, VariationAttribute } from "@/types";
 
 interface GetAllProductsOptions {
   categorySlug?: string | null;
@@ -16,33 +16,54 @@ interface GetAllProductsOptions {
   featured?: boolean;
 }
 
-interface EnrichedProductWithVariations extends ProductWithVariations {
-  _categoryOrder: number;
-  variations: ProductVariationWithAttributes[];
-  teaCategories: string[];
+type ProductSelect = InferModel<typeof products, "select">;
+type VariationSelect = InferModel<typeof productVariations, "select">;
+type AttributeSelect = InferModel<typeof variationAttributes, "select">;
+type TeaCategorySelect = InferModel<typeof productTeaCategories, "select">;
+
+interface QueryRow {
+  products: ProductSelect;
+  product_variations: VariationSelect | null;
+  variation_attributes: AttributeSelect | null;
+  product_tea_categories: TeaCategorySelect | null;
 }
 
-// Function to fetch products from database
+/**
+ * Fetch products from database with only the data needed for store listing
+ */
 async function fetchProducts({
   categorySlug = null,
   brandSlug = null,
   featured = false
 }: GetAllProductsOptions = {}): Promise<ProductWithVariations[]> {
   try {
-    // Execute a single query to get all related data
-    const result = await db
-      .select({
-        product: products,
-        blogPost: {
-          body: blogPosts.body
-        },
-        variations: productVariations,
-        attributes: variationAttributes,
-        teaCategorySlug: teaCategories.slug
-      })
+    // Build where conditions
+    const conditions: SQL[] = [eq(products.isActive, true)];
+    if (categorySlug !== null) conditions.push(eq(products.categorySlug, categorySlug));
+    if (brandSlug !== null) conditions.push(eq(products.brandSlug, brandSlug));
+    if (featured) conditions.push(eq(products.isFeatured, true));
+
+    // Create custom category ordering
+    const categoryOrder = sql`CASE ${products.categorySlug}
+      WHEN 'apparel' THEN 1
+      WHEN 'posters' THEN 2
+      WHEN 'produce' THEN 3
+      WHEN 'tea' THEN 4
+      WHEN 'stickers' THEN 5
+      ELSE 6
+    END`;
+
+    // Execute a single query to get all necessary data
+    const rows = await db
+      .select()
       .from(products)
-      .leftJoin(blogPosts, eq(blogPosts.productSlug, products.slug))
-      .leftJoin(productVariations, eq(productVariations.productId, products.id))
+      .leftJoin(
+        productVariations,
+        and(
+          eq(productVariations.productId, products.id),
+          eq(products.hasVariations, true)
+        )
+      )
       .leftJoin(
         variationAttributes,
         productVariations.id
@@ -53,80 +74,74 @@ async function fetchProducts({
         productTeaCategories,
         eq(productTeaCategories.productId, products.id)
       )
-      .leftJoin(
-        teaCategories,
-        eq(teaCategories.slug, productTeaCategories.teaCategorySlug)
-      )
-      .where(eq(products.isActive, true))
-      .where(categorySlug ? eq(products.categorySlug, categorySlug) : undefined)
-      .where(brandSlug ? eq(products.brandSlug, brandSlug) : undefined)
-      .where(featured ? eq(products.isFeatured, true) : undefined)
-      .orderBy(desc(products.createdAt))
-      .all();
+      .where(and(...conditions))
+      .orderBy(categoryOrder, desc(products.createdAt));
 
     // Process the results to group variations and attributes
-    const productMap = new Map<number, EnrichedProductWithVariations>();
+    const productMap = new Map<number, ProductWithVariations>();
 
-    result.forEach((row: any) => {
-      if (!productMap.has(row.product.id)) {
-        // Define category order
-        const categoryOrder = {
-          'apparel': 1,
-          'posters': 2,
-          'produce': 3,
-          'tea': 4,
-          'stickers': 5
-        };
+    rows.forEach((row: QueryRow) => {
+      if (!productMap.has(row.products.id)) {
+        // Convert weight to string if it exists
+        const weight = row.products.weight !== null ? String(row.products.weight) : null;
 
-        productMap.set(row.product.id, {
-          ...row.product,
-          images: row.product.images,
-          description: row.blogPost?.body || row.product.description,
+        productMap.set(row.products.id, {
+          ...row.products,
+          weight,
           variations: [],
-          teaCategories: [],
-          _categoryOrder: categoryOrder[row.product.categorySlug as keyof typeof categoryOrder] || 999
+          teaCategories: []
         });
       }
 
-      const product = productMap.get(row.product.id)!;
-
-      // Add tea category if it exists and isn't already in the array
-      if (row.teaCategorySlug && !product.teaCategories.includes(row.teaCategorySlug)) {
-        product.teaCategories.push(row.teaCategorySlug);
+      const product = productMap.get(row.products.id)!;
+      
+      // Add tea category if it exists and isn't already added
+      if (row.product_tea_categories?.teaCategorySlug && 
+          !product.teaCategories?.includes(row.product_tea_categories.teaCategorySlug)) {
+        product.teaCategories = [...(product.teaCategories || []), row.product_tea_categories.teaCategorySlug];
       }
 
-      if (row.variations && !product.variations.find(v => v.id === row.variations.id)) {
-        const variation: ProductVariationWithAttributes = {
-          ...row.variations,
+      const variation = row.product_variations;
+
+      if (variation && !product.variations?.find(v => v.id === variation.id)) {
+        const newVariation: ProductVariation & { attributes: VariationAttribute[] } = {
+          id: variation.id,
+          productId: variation.productId!,
+          sku: variation.sku,
+          price: variation.price,
+          stock: variation.stock,
+          sort: variation.sort,
+          createdAt: variation.createdAt,
           attributes: []
         };
 
-        if (row.attributes) {
-          variation.attributes = [row.attributes];
+        if (row.variation_attributes) {
+          newVariation.attributes.push({
+            id: row.variation_attributes.id,
+            productVariationId: row.variation_attributes.productVariationId!,
+            attributeId: row.variation_attributes.attributeId,
+            value: row.variation_attributes.value
+          });
         }
 
-        product.variations.push(variation);
-      } else if (row.attributes && row.variations) {
-        const variation = product.variations.find(v => v.id === row.variations.id);
-        if (variation && !variation.attributes.find(a => a.id === row.attributes.id)) {
-          variation.attributes.push(row.attributes);
+        product.variations = product.variations || [];
+        product.variations.push(newVariation);
+      } else if (row.variation_attributes && variation) {
+        const existingVariation = product.variations?.find(v => v.id === variation.id);
+        if (existingVariation && !existingVariation.attributes.find(a => a.id === row.variation_attributes!.id)) {
+          existingVariation.attributes.push({
+            id: row.variation_attributes.id,
+            productVariationId: row.variation_attributes.productVariationId!,
+            attributeId: row.variation_attributes.attributeId,
+            value: row.variation_attributes.value
+          });
         }
       }
     });
 
-    // Convert map to array and sort by category order
-    const sortedProducts = Array.from(productMap.values()).sort((a, b) => {
-      if (a._categoryOrder !== b._categoryOrder) {
-        return a._categoryOrder - b._categoryOrder;
-      }
-      return 0;
-    });
-
-    // Remove the temporary _categoryOrder property and return the products
-    return sortedProducts.map(({ _categoryOrder, ...product }) => product);
+    return Array.from(productMap.values());
   } catch (error) {
-    console.error('Error fetching products:', error);
-    return [];
+    throw new Error(`Failed to fetch products: ${(error as Error).message}`);
   }
 }
 

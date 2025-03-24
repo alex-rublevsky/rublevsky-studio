@@ -6,17 +6,8 @@ import localFont from "next/font/local";
 import "@/styles/typography.css";
 import { AnimationProvider } from "@/components/providers/animation-provider";
 import { Toaster } from "@/components/ui/sonner";
-import { ThemeProvider } from "@/components/providers/theme-provider";
-import { ActiveThemeProvider } from "@/components/active-theme";
-import { cookies } from "next/headers";
-import { cn } from "@/lib/utils";
 
-const MetaThemeColors = [
-  {
-    light: "#ffffff",
-    dark: "#09090b",
-  },
-];
+import { cn } from "@/lib/utils";
 
 const overusedGrotesk = localFont({
   src: [
@@ -46,33 +37,18 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieStore = await cookies();
-  const activeThemeValue = cookieStore.get("active_theme")?.value;
-  const isScaled = activeThemeValue?.endsWith("-scaled");
-
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <body
         className={cn(
-          `${overusedGrotesk.variable} antialiased bg-background overscroll-none`,
-          activeThemeValue ? `theme-${activeThemeValue}` : "",
-          isScaled ? "theme-scaled" : ""
+          `${overusedGrotesk.variable} antialiased bg-background overscroll-none`
         )}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-          enableColorScheme
-        >
-          <ActiveThemeProvider initialTheme={activeThemeValue}>
-            <AnimationProvider>
-              <NavBar />
-              {children}
-            </AnimationProvider>
-          </ActiveThemeProvider>
-        </ThemeProvider>
+        <AnimationProvider>
+          <NavBar />
+          {children}
+        </AnimationProvider>
+
         <Toaster position="top-right" richColors />
       </body>
     </html>

@@ -13,8 +13,8 @@ import {
   createBlogPost,
   updateBlogPost,
   deleteBlogPost,
-  getAllTeaCategories,
 } from "@/lib/actions/blog";
+import getAllTeaCategories from "@/lib/actions/tea/getAllTeaCategories";
 import DeleteConfirmationDialog from "@/components/ui/admin/DeleteConfirmationDialog";
 import { toast } from "sonner";
 import ProductSelector from "@/components/ui/admin/ProductSelector";

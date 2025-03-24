@@ -51,9 +51,9 @@ export function FilterGroup({
   };
 
   return (
-    <div className={cn("space-y-2 min-w-[20rem]", className)}>
+    <div className="space-y-2 min-w-[20rem]">
       {title && <h6 className="text-sm font-medium">{title}</h6>}
-      <div className="flex flex-wrap gap-2">
+      <div className={cn("flex flex-wrap gap-2", className)}>
         {showAllOption && !multiSelect && (
           <button
             onClick={() => onOptionChange(null)}

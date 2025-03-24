@@ -2,59 +2,56 @@
 
 import { desc, eq } from "drizzle-orm";
 import db from "@/server/db";
-import { blogPosts, products, blogTeaCategories, teaCategories } from "@/server/schema";
+import { blogPosts, products, blogTeaCategories } from "@/server/schema";
 import { BlogPost } from "@/types";
 
+/**
+ * Get all blog posts with their tea categories and product images
+ * Used on the public blog page
+ */
 export default async function getAllBlogPosts(): Promise<BlogPost[]> {
   try {
-    // Get all blog posts with their tea categories
-    const result = await db
-      .select({
-        ...blogPosts,
-        productImages: products.images,
-        teaCategorySlug: teaCategories.slug
-      })
+    const results = await db
+      .select()
       .from(blogPosts)
-      .leftJoin(
-        products,
-        eq(blogPosts.productSlug, products.slug)
-      )
-      .leftJoin(
-        blogTeaCategories,
-        eq(blogTeaCategories.blogPostId, blogPosts.id)
-      )
-      .leftJoin(
-        teaCategories,
-        eq(teaCategories.slug, blogTeaCategories.teaCategorySlug)
-      )
-      .orderBy(desc(blogPosts.publishedAt))
-      .all();
-    
-    if (!Array.isArray(result)) {
-      console.error("Blog posts result is not an array:", result);
-      return [];
-    }
+      .leftJoin(products, eq(blogPosts.productSlug, products.slug))
+      .leftJoin(blogTeaCategories, eq(blogTeaCategories.blogPostId, blogPosts.id))
+      .orderBy(desc(blogPosts.publishedAt));
 
-    // Group the results by blog post ID to handle multiple tea categories per post
-    const blogPostMap = new Map();
+    // Group results by blog post ID and collect tea categories
+    const postsWithCategories = new Map<number, { post: BlogPost; categories: Set<string> }>();
 
-    result.forEach((row) => {
-      const postId = row.id;
-      if (!blogPostMap.has(postId)) {
-        blogPostMap.set(postId, {
-          ...row,
-          images: row.productSlug ? row.productImages : row.images,
-          teaCategories: []
+    for (const row of results) {
+      const post = row.blog_posts;
+      const product = row.products;
+      const teaCategory = row.blog_tea_categories;
+
+      if (!postsWithCategories.has(post.id)) {
+        postsWithCategories.set(post.id, {
+          post: {
+            id: post.id,
+            title: post.title ?? "",
+            slug: post.slug,
+            body: post.body ?? "",
+            images: product?.images ?? post.images ?? "",
+            productSlug: post.productSlug ?? "",
+            publishedAt: post.publishedAt.getTime(),
+            teaCategories: []
+          },
+          categories: new Set()
         });
       }
 
-      // Add tea category if it exists and isn't already in the array
-      if (row.teaCategorySlug && !blogPostMap.get(postId).teaCategories.includes(row.teaCategorySlug)) {
-        blogPostMap.get(postId).teaCategories.push(row.teaCategorySlug);
+      if (teaCategory?.teaCategorySlug) {
+        postsWithCategories.get(post.id)!.categories.add(teaCategory.teaCategorySlug);
       }
-    });
+    }
 
-    return Array.from(blogPostMap.values());
+    // Convert Sets to arrays and return the final blog posts
+    return Array.from(postsWithCategories.values()).map(({ post, categories }) => ({
+      ...post,
+      teaCategories: Array.from(categories)
+    }));
   } catch (error) {
     console.error("Error in getAllBlogPosts:", error);
     return [];

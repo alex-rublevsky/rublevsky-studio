@@ -4,38 +4,24 @@ import Database from "better-sqlite3";
 import * as schema from "./schema";
 import { resolve } from "path";
 import { readdirSync, existsSync } from "fs";
+import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
+import type { DrizzleD1Database } from "drizzle-orm/d1";
+
+// Define a union type for our database instance
+export type DB = DrizzleD1Database<typeof schema> | BetterSQLite3Database<typeof schema>;
 
 // Check if we're in production/Workers environment
-const isProduction = process.env.NODE_ENV === 'production' ||    // Build-time check
-                    typeof process === 'undefined' ||            // Runtime check for Workers
-                    typeof globalThis.caches !== 'undefined';    // Runtime check for Workers
+const isProduction = typeof process === 'undefined' || typeof globalThis.caches !== 'undefined';
 
-let db: any;
+let db: DB;
 
 if (isProduction) {
-  // In production/Workers environment, create a function that gets the DB from context
-  db = {
-    prepare: () => {
-      // @ts-ignore - Cloudflare Workers specific
-      const env = globalThis[Symbol.for("__cloudflare-context__")]?.env;
-      if (!env?.DB) throw new Error('Database binding not found in Cloudflare context');
-      return drizzle(env.DB, { schema });
-    }
-  };
-
-  // Wrap all database operations to use the prepared DB
-  const handler = {
-    get(target: any, prop: string) {
-      if (prop === 'prepare') return target.prepare;
-      
-      return (...args: any[]) => {
-        const preparedDb = target.prepare();
-        return preparedDb[prop](...args);
-      };
-    }
-  };
-
-  db = new Proxy(db, handler);
+  // In production/Workers environment, use D1
+  const d1 = (globalThis as any)[Symbol.for("__cloudflare-context__")]?.env?.DB;
+  if (!d1) {
+    throw new Error('Database binding not found in Cloudflare context');
+  }
+  db = drizzle(d1, { schema }) as DrizzleD1Database<typeof schema>;
 } else {
   // In development, use local SQLite database
   const basePath = resolve("./.wrangler/state/v3/d1/miniflare-D1DatabaseObject");
@@ -58,7 +44,7 @@ if (isProduction) {
   if (process.env.NODE_ENV === 'development') {
     console.log("Using local SQLite database:", dbPath);
   }
-  db = drizzleSQLite(new Database(dbPath), { schema });
+  db = drizzleSQLite(new Database(dbPath), { schema }) as BetterSQLite3Database<typeof schema>;
 }
 
 export default db;

@@ -1,78 +1,49 @@
 'use server';
 
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import db from "@/server/db";
 import { blogPosts, blogTeaCategories } from "@/server/schema";
 import { BlogPost } from "@/types";
 
-interface QueryResult {
-  id: number;
-  title: string;
-  slug: string;
-  body: string | null;
-  images: string | null;
-  productSlug: string | null;
-  publishedAt: Date;
-  teaCategorySlug: string | null;
-}
-
 /**
- * Server action to fetch a blog post by ID
- * @param id - The ID of the blog post to fetch
- * @returns The blog post object or null if not found
+ * Get a blog post by ID with its tea categories
+ * Used in the admin dashboard for editing posts
  */
 export default async function getBlogPostById(id: number): Promise<BlogPost | null> {
   try {
-    if (!id) {
-      throw new Error("Blog post ID is required");
-    }
-    
-    // Get blog post with its tea categories
+    if (!id) throw new Error("Blog post ID is required");
+
+    // Get blog post with its tea categories in a single query
     const results = await db
-      .select({
-        id: blogPosts.id,
-        title: blogPosts.title,
-        slug: blogPosts.slug,
-        body: blogPosts.body,
-        images: blogPosts.images,
-        productSlug: blogPosts.productSlug,
-        publishedAt: blogPosts.publishedAt,
-        teaCategorySlug: blogTeaCategories.teaCategorySlug,
-      })
+      .select()
       .from(blogPosts)
       .leftJoin(
         blogTeaCategories,
-        sql`${blogTeaCategories.blogPostId} = ${blogPosts.id}`
+        eq(blogTeaCategories.blogPostId, blogPosts.id)
       )
-      .where(sql`${blogPosts.id} = ${id}`) as QueryResult[];
-    
-    if (results.length === 0) {
-      return null;
-    }
+      .where(eq(blogPosts.id, id));
 
-    // Construct the blog post object with tea categories
-    const firstRow = results[0];
-    const blogPost: BlogPost = {
+    if (results.length === 0) return null;
+
+    // Get the first row for blog post data
+    const firstRow = results[0].blog_posts;
+    
+    // Extract tea categories from all rows
+    const teaCategories = results
+      .map(row => row.blog_tea_categories?.teaCategorySlug)
+      .filter((slug): slug is string => slug !== null && slug !== undefined);
+
+    // Return the formatted blog post
+    return {
       id: firstRow.id,
-      title: firstRow.title,
+      title: firstRow.title ?? "",
       slug: firstRow.slug,
       body: firstRow.body ?? "",
       images: firstRow.images ?? "",
       productSlug: firstRow.productSlug ?? "",
-      publishedAt: firstRow.publishedAt instanceof Date 
-        ? firstRow.publishedAt.getTime() 
-        : firstRow.publishedAt * 1000, // Convert seconds to milliseconds
-      teaCategories: [] as string[],
+      publishedAt: firstRow.publishedAt.getTime(),
+      teaCategories
     };
-
-    // Add tea categories
-    for (const row of results) {
-      if (row.teaCategorySlug && blogPost.teaCategories) {
-        blogPost.teaCategories.push(row.teaCategorySlug);
-      }
-    }
-    
-    return blogPost;
   } catch (error) {
     console.error("Error fetching blog post:", error);
     throw new Error(`Failed to fetch blog post: ${(error as Error).message}`);

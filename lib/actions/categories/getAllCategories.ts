@@ -12,17 +12,13 @@ import { Category } from "@/types";
  */
 export default async function getAllCategories(onlyActive: boolean = false): Promise<Category[]> {
   try {
-    // Build the query
-    let query = db.select().from(categories);
-    
-    // Filter by active status if requested
-    if (onlyActive) {
-      query = query.where(eq(categories.isActive, true));
-    }
-    
-    // Execute the query
-    const allCategories = await query.all();
-    
+    // Fetch all categories with optional active filter
+    const allCategories = await db
+      .select()
+      .from(categories)
+      .where(onlyActive ? eq(categories.isActive, true) : undefined)
+      .all();
+
     return allCategories;
   } catch (error) {
     console.error("Error fetching categories:", error);

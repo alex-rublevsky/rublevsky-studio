@@ -51,14 +51,8 @@ export interface OrderWithDetails {
 
 async function fetchOrders(): Promise<OrderWithDetails[]> {
   try {
-    const result = await db
-      .select({
-        order: orders,
-        address: addresses,
-        item: orderItems,
-        product: products,
-        variation: productVariations,
-      })
+    const results = await db
+      .select()
       .from(orders)
       .leftJoin(addresses, eq(addresses.orderId, orders.id))
       .leftJoin(orderItems, eq(orderItems.orderId, orders.id))
@@ -67,86 +61,82 @@ async function fetchOrders(): Promise<OrderWithDetails[]> {
       .orderBy(orders.createdAt)
       .all();
 
-    // Process the results to group items by order
+    // Process results into a map of orders
     const orderMap = new Map<number, OrderWithDetails>();
 
-    result.forEach((row: {
-      order: typeof orders.$inferSelect;
-      address: typeof addresses.$inferSelect | null;
-      item: typeof orderItems.$inferSelect | null;
-      product: typeof products.$inferSelect | null;
-      variation: typeof productVariations.$inferSelect | null;
-    }) => {
-      if (!orderMap.has(row.order.id)) {
-        // Initialize new order
-        orderMap.set(row.order.id, {
-          id: row.order.id,
-          status: row.order.status,
-          subtotalAmount: row.order.subtotalAmount,
-          discountAmount: row.order.discountAmount,
-          shippingAmount: row.order.shippingAmount,
-          totalAmount: row.order.totalAmount,
-          currency: row.order.currency,
-          paymentMethod: row.order.paymentMethod,
-          paymentStatus: row.order.paymentStatus,
-          shippingMethod: row.order.shippingMethod,
-          notes: row.order.notes,
-          createdAt: row.order.createdAt instanceof Date 
-            ? Math.floor(row.order.createdAt.getTime() / 1000)
-            : row.order.createdAt,
-          completedAt: row.order.completedAt 
-            ? (row.order.completedAt instanceof Date 
-                ? Math.floor(row.order.completedAt.getTime() / 1000)
-                : row.order.completedAt)
+    for (const row of results) {
+      if (!row.orders) continue;
+
+      // Initialize order if not exists
+      if (!orderMap.has(row.orders.id)) {
+        orderMap.set(row.orders.id, {
+          id: row.orders.id,
+          status: row.orders.status,
+          subtotalAmount: row.orders.subtotalAmount,
+          discountAmount: row.orders.discountAmount,
+          shippingAmount: row.orders.shippingAmount,
+          totalAmount: row.orders.totalAmount,
+          currency: row.orders.currency,
+          paymentMethod: row.orders.paymentMethod,
+          paymentStatus: row.orders.paymentStatus,
+          shippingMethod: row.orders.shippingMethod,
+          notes: row.orders.notes,
+          createdAt: row.orders.createdAt instanceof Date 
+            ? Math.floor(row.orders.createdAt.getTime() / 1000)
+            : row.orders.createdAt,
+          completedAt: row.orders.completedAt 
+            ? (row.orders.completedAt instanceof Date 
+                ? Math.floor(row.orders.completedAt.getTime() / 1000)
+                : row.orders.completedAt)
             : null,
           addresses: [],
           items: [],
         });
       }
 
-      const order = orderMap.get(row.order.id)!;
+      const order = orderMap.get(row.orders.id)!;
 
       // Add address if not already added
-      if (row.address && !order.addresses.find(addr => 
-        addr.addressType === row.address!.addressType && 
-        addr.email === row.address!.email
+      if (row.addresses && !order.addresses.some(addr => 
+        addr.addressType === row.addresses!.addressType && 
+        addr.email === row.addresses!.email
       )) {
         order.addresses.push({
-          addressType: row.address.addressType,
-          firstName: row.address.firstName,
-          lastName: row.address.lastName,
-          email: row.address.email,
-          phone: row.address.phone,
-          streetAddress: row.address.streetAddress,
-          city: row.address.city,
-          state: row.address.state,
-          zipCode: row.address.zipCode,
-          country: row.address.country,
+          addressType: row.addresses.addressType,
+          firstName: row.addresses.firstName,
+          lastName: row.addresses.lastName,
+          email: row.addresses.email,
+          phone: row.addresses.phone,
+          streetAddress: row.addresses.streetAddress,
+          city: row.addresses.city,
+          state: row.addresses.state,
+          zipCode: row.addresses.zipCode,
+          country: row.addresses.country,
         });
       }
 
-      // Add item if not already added
-      if (row.item && row.product && !order.items.find(item => item.id === row.item!.id)) {
+      // Add item if not already added and has required data
+      if (row.order_items && row.products && !order.items.some(item => item.id === row.order_items!.id)) {
         order.items.push({
-          id: row.item.id,
-          quantity: row.item.quantity,
-          unitAmount: row.item.unitAmount,
-          discountPercentage: row.item.discountPercentage,
-          finalAmount: row.item.finalAmount,
-          attributes: row.item.attributes ? JSON.parse(row.item.attributes) : {},
+          id: row.order_items.id,
+          quantity: row.order_items.quantity,
+          unitAmount: row.order_items.unitAmount,
+          discountPercentage: row.order_items.discountPercentage,
+          finalAmount: row.order_items.finalAmount,
+          attributes: row.order_items.attributes ? JSON.parse(row.order_items.attributes) : {},
           product: {
-            name: row.product.name,
-            slug: row.product.slug,
-            images: row.product.images,
+            name: row.products.name,
+            slug: row.products.slug,
+            images: row.products.images,
           },
-          ...(row.variation && {
+          ...(row.product_variations && {
             variation: {
-              sku: row.variation.sku,
+              sku: row.product_variations.sku,
             },
           }),
         });
       }
-    });
+    }
 
     return Array.from(orderMap.values());
   } catch (error) {
@@ -155,14 +145,18 @@ async function fetchOrders(): Promise<OrderWithDetails[]> {
   }
 }
 
-// Cached version of getAllOrders
-export default async function getAllOrders(): Promise<OrderWithDetails[]> {
+/**
+ * Get all orders with their details
+ * @param revalidate - Cache revalidation time in seconds (default: 60)
+ * @returns Array of orders with their details
+ */
+export default async function getAllOrders(revalidate: number = 60): Promise<OrderWithDetails[]> {
   return unstable_cache(
     async () => fetchOrders(),
     ['all-orders'],
     {
-      revalidate: 60, // Revalidate every minute
-      tags: ['orders'] // Tag for cache invalidation
+      revalidate,
+      tags: ['orders']
     }
   )();
 } 

@@ -8,25 +8,23 @@ import { revalidateTag } from "next/cache";
 export default async function toggleOrderStatus(orderId: number): Promise<{ success: boolean; message: string }> {
   try {
     // Get current order status
-    const [currentOrder] = await db
-      .select({ status: orders.status })
+    const currentOrder = await db
+      .select()
       .from(orders)
       .where(eq(orders.id, orderId))
-      .all();
+      .get();
 
     if (!currentOrder) {
       throw new Error('Order not found');
     }
 
-    // Toggle status between 'pending' and 'processed'
+    // Toggle status and update
     const newStatus = currentOrder.status === 'pending' ? 'processed' : 'pending';
-
-    // Update order status and completedAt
     await db
       .update(orders)
-      .set({ 
+      .set({
         status: newStatus,
-        completedAt: newStatus === 'processed' ? Math.floor(Date.now() / 1000) : null 
+        completedAt: newStatus === 'processed' ? new Date() : null
       })
       .where(eq(orders.id, orderId));
 
@@ -38,10 +36,6 @@ export default async function toggleOrderStatus(orderId: number): Promise<{ succ
       message: `Order status updated to ${newStatus}`
     };
   } catch (error) {
-    console.error("Error toggling order status:", error);
-    return {
-      success: false,
-      message: `Failed to update order status: ${(error as Error).message}`
-    };
+    throw new Error(`Failed to update order status: ${(error as Error).message}`);
   }
 } 

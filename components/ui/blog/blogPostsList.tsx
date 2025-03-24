@@ -41,6 +41,7 @@ export default function BlogPostsList({
     <div>
       <div className="flex justify-center mb-20">
         <FilterGroup
+          className="justify-center"
           options={usedTeaCategories}
           selectedOptions={selectedCategories}
           onOptionsChange={setSelectedCategories}

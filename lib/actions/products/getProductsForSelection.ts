@@ -20,15 +20,8 @@ interface ProductForSelection {
  */
 async function fetchProductsForSelection(): Promise<ProductForSelection[]> {
   try {
-    // Get all products (both active and inactive) with only the needed fields
-    // We include inactive products because this is used in admin interfaces
     return await db
-      .select({
-        id: products.id,
-        name: products.name,
-        slug: products.slug,
-        images: products.images
-      })
+      .select()
       .from(products)
       .orderBy(desc(products.createdAt))
       .all();

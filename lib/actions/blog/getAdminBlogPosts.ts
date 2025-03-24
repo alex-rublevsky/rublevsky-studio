@@ -2,59 +2,40 @@
 
 import db from "@/server/db";
 import { blogPosts, blogTeaCategories } from "@/server/schema";
-import { sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { BlogPost } from "@/types";
 
-interface QueryResult {
-  id: number;
-  title: string;
-  slug: string;
-  body: string | null;
-  images: string | null;
-  productSlug: string | null;
-  publishedAt: Date;
-  teaCategorySlug: string | null;
-}
-
+/**
+ * Server action to get all blog posts for admin dashboard
+ * Returns blog posts with their associated tea categories
+ */
 export async function getAdminBlogPosts(): Promise<BlogPost[]> {
-  const results = await db
-    .select({
-      id: blogPosts.id,
-      title: blogPosts.title,
-      slug: blogPosts.slug,
-      body: blogPosts.body,
-      images: blogPosts.images,
-      productSlug: blogPosts.productSlug,
-      publishedAt: blogPosts.publishedAt,
-      teaCategorySlug: blogTeaCategories.teaCategorySlug,
-    })
-    .from(blogPosts)
-    .leftJoin(
-      blogTeaCategories,
-      sql`${blogTeaCategories.blogPostId} = ${blogPosts.id}`
-    ) as QueryResult[];
+  // First, get all blog posts
+  const posts = await db.select().from(blogPosts);
+  
+  // Then, get all tea categories for these posts
+  const teaCategories = posts.length > 0
+    ? await db
+        .select()
+        .from(blogTeaCategories)
+        .where(sql`${blogTeaCategories.blogPostId} IN (${posts.map(p => p.id).join(',')})`)
+    : [];
 
-  const blogPostsMap = new Map<number, BlogPost>();
+  // Transform the results into the expected format
+  return posts.map(post => {
+    const postTeaCategories = teaCategories
+      .filter(tc => tc.blogPostId === post.id)
+      .map(tc => tc.teaCategorySlug);
 
-  for (const row of results) {
-    if (!blogPostsMap.has(row.id)) {
-      blogPostsMap.set(row.id, {
-        id: row.id,
-        title: row.title,
-        slug: row.slug,
-        body: row.body ?? "",
-        images: row.images ?? "",
-        productSlug: row.productSlug ?? "",
-        publishedAt: row.publishedAt.getTime(),
-        teaCategories: [] as string[],
-      });
-    }
-
-    const post = blogPostsMap.get(row.id)!;
-    if (row.teaCategorySlug && post.teaCategories) {
-      post.teaCategories.push(row.teaCategorySlug);
-    }
-  }
-
-  return Array.from(blogPostsMap.values());
+    return {
+      id: post.id,
+      title: post.title ?? "",
+      slug: post.slug,
+      body: post.body ?? "",
+      images: post.images ?? "",
+      productSlug: post.productSlug ?? "",
+      publishedAt: post.publishedAt.getTime(),
+      teaCategories: postTeaCategories
+    };
+  });
 }

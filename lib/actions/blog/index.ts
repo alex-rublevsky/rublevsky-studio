@@ -4,7 +4,6 @@ import getBlogPostById from './getBlogPostById';
 import { createBlogPost } from './createBlogPost';
 import { updateBlogPost } from './updateBlogPost';
 import deleteBlogPost from './deleteBlogPost';
-import getAllTeaCategories from './getAllTeaCategories';
 
 export {
   getAllBlogPosts,
@@ -13,5 +12,4 @@ export {
   createBlogPost,
   updateBlogPost,
   deleteBlogPost,
-  getAllTeaCategories,
 }; 

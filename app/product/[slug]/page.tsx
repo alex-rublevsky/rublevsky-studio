@@ -4,7 +4,11 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useParams } from "next/navigation";
-import { Product, ProductVariation, VariationAttribute } from "@/types";
+import {
+  Product,
+  ProductVariationWithAttributes,
+  VariationAttribute,
+} from "@/types";
 import getProductBySlug from "@/lib/actions/products/getProductBySlug";
 import Link from "next/link";
 import { useCart } from "@/lib/context/CartContext";
@@ -31,10 +35,6 @@ interface ProductWithDetails extends Product {
     body: string;
     blogUrl: string;
   } | null;
-}
-
-interface ProductVariationWithAttributes extends ProductVariation {
-  attributes: VariationAttribute[];
 }
 
 export default function ProductPage() {

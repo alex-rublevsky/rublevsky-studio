@@ -64,77 +64,86 @@ export async function createOrder(customerInfo: CustomerInfo, cartItems: CartIte
     const shippingAmount = 0; // Will be determined later
     const totalAmount = subtotalAmount - discountAmount + shippingAmount;
 
-    // Create order
-    const order = await db.insert(orders).values({
-      status: "pending",
-      subtotalAmount: subtotalAmount,
-      discountAmount: discountAmount,
-      shippingAmount: shippingAmount,
-      totalAmount: totalAmount,
-      currency: "CAD",
-      paymentStatus: "pending",
-      paymentMethod: null,
-      shippingMethod: customerInfo.shippingMethod,
-      notes: customerInfo.notes,
-      createdAt: Math.floor(Date.now() / 1000),
-      completedAt: null,
-    }).returning();
+    const now = new Date();
 
-    // Create shipping address
-    await db.insert(addresses).values({
-      orderId: order[0].id,
-      addressType: customerInfo.billingAddress ? 'shipping' : 'both',
-      firstName: customerInfo.shippingAddress.firstName,
-      lastName: customerInfo.shippingAddress.lastName,
-      email: customerInfo.shippingAddress.email,
-      phone: customerInfo.shippingAddress.phone,
-      streetAddress: customerInfo.shippingAddress.streetAddress,
-      city: customerInfo.shippingAddress.city,
-      state: customerInfo.shippingAddress.state,
-      zipCode: customerInfo.shippingAddress.zipCode,
-      country: customerInfo.shippingAddress.country,
-      createdAt: Math.floor(Date.now() / 1000),
-    });
+    // Create order first
+    const [order] = await db.insert(orders)
+      .values({
+        subtotalAmount,
+        discountAmount,
+        shippingAmount,
+        totalAmount,
+        currency: "CAD",
+        paymentStatus: "pending",
+        paymentMethod: null,
+        shippingMethod: customerInfo.shippingMethod ?? null,
+        notes: customerInfo.notes ?? null,
+        createdAt: now,
+        completedAt: null,
+      })
+      .returning();
 
-    // Create billing address if different from shipping
-    if (customerInfo.billingAddress) {
-      await db.insert(addresses).values({
-        orderId: order[0].id,
-        addressType: 'billing',
-        firstName: customerInfo.billingAddress.firstName,
-        lastName: customerInfo.billingAddress.lastName,
-        email: customerInfo.billingAddress.email,
-        phone: customerInfo.billingAddress.phone,
-        streetAddress: customerInfo.billingAddress.streetAddress,
-        city: customerInfo.billingAddress.city,
-        state: customerInfo.billingAddress.state,
-        zipCode: customerInfo.billingAddress.zipCode,
-        country: customerInfo.billingAddress.country,
-        createdAt: Math.floor(Date.now() / 1000),
-      });
-    }
+    // Create addresses and order items in parallel
+    await Promise.all([
+      // Create shipping address
+      db.insert(addresses)
+        .values({
+          orderId: order.id,
+          addressType: customerInfo.billingAddress ? 'shipping' : 'both',
+          firstName: customerInfo.shippingAddress.firstName,
+          lastName: customerInfo.shippingAddress.lastName,
+          email: customerInfo.shippingAddress.email,
+          phone: customerInfo.shippingAddress.phone,
+          streetAddress: customerInfo.shippingAddress.streetAddress,
+          city: customerInfo.shippingAddress.city,
+          state: customerInfo.shippingAddress.state,
+          zipCode: customerInfo.shippingAddress.zipCode,
+          country: customerInfo.shippingAddress.country,
+          createdAt: now,
+        }),
 
-    // Create order items
-    await db.insert(orderItems).values(
-      cartItems.map(item => ({
-        orderId: order[0].id,
-        productId: item.productId,
-        productVariationId: item.variationId,
-        quantity: item.quantity,
-        unitAmount: item.price,
-        discountPercentage: item.discount,
-        finalAmount: item.discount 
-          ? item.price * (1 - item.discount / 100) * item.quantity
-          : item.price * item.quantity,
-        attributes: JSON.stringify(item.attributes || {}),
-        createdAt: Math.floor(Date.now() / 1000),
-      }))
-    );
+      // Create billing address if different from shipping
+      customerInfo.billingAddress
+        ? db.insert(addresses)
+            .values({
+              orderId: order.id,
+              addressType: 'billing',
+              firstName: customerInfo.billingAddress.firstName,
+              lastName: customerInfo.billingAddress.lastName,
+              email: customerInfo.billingAddress.email,
+              phone: customerInfo.billingAddress.phone,
+              streetAddress: customerInfo.billingAddress.streetAddress,
+              city: customerInfo.billingAddress.city,
+              state: customerInfo.billingAddress.state,
+              zipCode: customerInfo.billingAddress.zipCode,
+              country: customerInfo.billingAddress.country,
+              createdAt: now,
+            })
+        : Promise.resolve(),
+
+      // Create order items
+      db.insert(orderItems)
+        .values(
+          cartItems.map(item => ({
+            orderId: order.id,
+            productId: item.productId,
+            productVariationId: item.variationId ?? null,
+            quantity: item.quantity,
+            unitAmount: item.price,
+            discountPercentage: item.discount ?? null,
+            finalAmount: item.discount 
+              ? item.price * (1 - item.discount / 100) * item.quantity
+              : item.price * item.quantity,
+            attributes: JSON.stringify(item.attributes || {}),
+            createdAt: now,
+          }))
+        )
+    ]);
 
     return { 
       success: true, 
       message: 'Order created successfully',
-      orderId: order[0].id 
+      orderId: order.id 
     };
   } catch (error) {
     console.error('Error creating order:', error);

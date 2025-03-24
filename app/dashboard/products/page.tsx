@@ -16,7 +16,7 @@ import Image from "next/image";
 import ProductVariationForm from "@/components/ui/admin/ProductVariationForm";
 import { getAllBrands } from "@/lib/actions/brands";
 import { getAllCategories } from "@/lib/actions/categories";
-import { getAllTeaCategories } from "@/lib/actions/blog";
+import getAllTeaCategories from "@/lib/actions/tea/getAllTeaCategories";
 import {
   getAdminProducts,
   getProductById,
