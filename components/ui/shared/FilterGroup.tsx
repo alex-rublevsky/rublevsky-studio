@@ -5,6 +5,35 @@ interface FilterOption {
   name: string;
 }
 
+interface FilterButtonProps {
+  onClick: () => void;
+  isSelected: boolean;
+  children: React.ReactNode;
+  className?: string;
+}
+
+function FilterButton({
+  onClick,
+  isSelected,
+  children,
+  className,
+}: FilterButtonProps) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium rounded-full transition-colors",
+        isSelected
+          ? "bg-primary text-primary-foreground"
+          : "border border-gray-400 hover:bg-gray-400",
+        className
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
 interface FilterGroupProps {
   title?: string;
   options: FilterOption[];
@@ -52,34 +81,24 @@ export function FilterGroup({
 
   return (
     <div className="space-y-2 min-w-[20rem]">
-      {title && <h6 className="text-sm font-medium">{title}</h6>}
+      {title && <p className="text-sm font-medium">{title}</p>}
       <div className={cn("flex flex-wrap gap-2", className)}>
         {showAllOption && !multiSelect && (
-          <button
+          <FilterButton
             onClick={() => onOptionChange(null)}
-            className={cn(
-              "px-4 py-2 text-sm font-medium rounded-full transition-colors",
-              selectedOptions === null
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted hover:bg-muted/80"
-            )}
+            isSelected={selectedOptions === null}
           >
             {allOptionLabel}
-          </button>
+          </FilterButton>
         )}
         {options.map((option) => (
-          <button
+          <FilterButton
             key={option.slug}
             onClick={() => handleOptionClick(option.slug)}
-            className={cn(
-              "px-4 py-2 text-sm font-medium rounded-full transition-colors",
-              isSelected(option.slug)
-                ? "bg-primary text-primary-foreground"
-                : "border border-gray-400 hover:bg-gray-400 "
-            )}
+            isSelected={isSelected(option.slug)}
           >
             {option.name}
-          </button>
+          </FilterButton>
         ))}
       </div>
     </div>

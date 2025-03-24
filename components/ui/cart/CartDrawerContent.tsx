@@ -3,8 +3,9 @@
 import React from "react";
 import { useCart } from "@/lib/context/CartContext";
 import { CartItem } from "./CartItem";
-import { CartSummary } from "./CartSummary";
+import { CartSummary, CartCheckoutButton } from "./CartSummary";
 import { ShoppingBag } from "lucide-react";
+import { DrawerHeader, DrawerBody, DrawerFooter } from "@/components/ui/drawer";
 
 export function CartDrawerContent() {
   let cartContext;
@@ -14,40 +15,54 @@ export function CartDrawerContent() {
   } catch {
     // If we're not within a CartProvider, show empty cart
     return (
-      <div className="p-6 h-full flex flex-col">
-        <h2 className="text-xl font-semibold mb-4">Shopping Cart</h2>
-        <div className="flex-1 flex flex-col items-center justify-center">
-          <ShoppingBag size={48} className="text-gray-300 mb-4" />
-          <p className="text-gray-500">Your cart is empty</p>
-        </div>
-      </div>
+      <>
+        <DrawerHeader>
+          <h5>Shopping Cart</h5>
+        </DrawerHeader>
+        <DrawerBody>
+          <div className="flex flex-col items-center justify-center h-full">
+            <ShoppingBag size={48} className="text-gray-300 mb-4" />
+            <p className="text-gray-500">Your cart is empty</p>
+          </div>
+        </DrawerBody>
+      </>
     );
   }
 
   const { cart } = cartContext;
 
   return (
-    <div className="p-6 h-full flex flex-col">
-      <h2 className="text-xl font-semibold mb-4">Shopping Cart</h2>
+    <>
+      <DrawerHeader>
+        <h5>Shopping Cart</h5>
+      </DrawerHeader>
 
-      {cart.items.length === 0 ? (
-        <div className="flex-1 flex flex-col items-center justify-center">
-          <ShoppingBag size={48} className="text-gray-300 mb-4" />
-          <p className="text-gray-500">Your cart is empty</p>
-        </div>
-      ) : (
-        <>
-          <div className="flex-1 overflow-y-auto">
-            {cart.items.map((item) => (
-              <CartItem
-                key={`${item.productId}-${item.variationId || "default"}`}
-                item={item}
-              />
-            ))}
+      <DrawerBody>
+        {cart.items.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full">
+            <ShoppingBag size={48} className="text-gray-300 mb-4" />
+            <p className="text-gray-500">Your cart is empty</p>
           </div>
-          <CartSummary />
-        </>
+        ) : (
+          <div className="space-y-6">
+            <div className="space-y-4">
+              {cart.items.map((item) => (
+                <CartItem
+                  key={`${item.productId}-${item.variationId || "default"}`}
+                  item={item}
+                />
+              ))}
+            </div>
+            <CartSummary />
+          </div>
+        )}
+      </DrawerBody>
+
+      {cart.items.length > 0 && (
+        <DrawerFooter>
+          <CartCheckoutButton />
+        </DrawerFooter>
       )}
-    </div>
+    </>
   );
 }

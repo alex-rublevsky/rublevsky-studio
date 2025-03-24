@@ -78,7 +78,7 @@ export default function ProductFilters({
         duration: 0.35,
         ease: "easeInOut",
       }}
-      className="sticky top-0 z-10 backdrop-blur-md bg-white/70 flex flex-col flex-wrap  md:flex-row gap-6 md:gap-10 p-4"
+      className="md:sticky top-0 z-10 backdrop-blur-md bg-white/70 flex flex-col flex-wrap  md:flex-row gap-6 md:gap-10 p-4"
     >
       {/* Main Categories */}
       <FilterGroup
@@ -100,24 +100,21 @@ export default function ProductFilters({
       )}
 
       {/* Price Range Filter */}
-      <div className="space-y-4 min-w-[20rem] w-full sm:max-w-[20rem]">
-        <div className="flex items-center justify-between gap-2">
-          <Label className="text-sm font-medium">Price Range</Label>
+      <Slider
+        value={localPriceRange}
+        min={priceRange.min}
+        max={priceRange.max}
+        step={1}
+        onValueChange={handlePriceRangeChange}
+        showTooltip
+        tooltipContent={(value) => `$${value}`}
+        label="Price Range"
+        valueDisplay={
           <output className="text-sm font-medium tabular-nums">
             ${localPriceRange[0]} - ${localPriceRange[1]}
           </output>
-        </div>
-        <Slider
-          value={localPriceRange}
-          min={priceRange.min}
-          max={priceRange.max}
-          step={1}
-          onValueChange={handlePriceRangeChange}
-          className="w-full"
-          showTooltip
-          tooltipContent={(value) => `$${value}`}
-        />
-      </div>
+        }
+      />
     </motion.div>
   );
 }

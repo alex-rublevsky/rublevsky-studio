@@ -67,13 +67,17 @@ const DrawerContent = React.forwardRef<
       ref={ref}
       className={cn(
         "fixed inset-x-0 bottom-0 z-50 mt-24 flex flex-col rounded-t-[10px] border bg-background",
-        "max-h-[95vh] transition-transform duration-300 ease-in-out",
+        "max-h-[95dvh] transition-transform duration-300 ease-in-out",
         className
       )}
       {...props}
     >
       <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted shrink-0" />
-      <div className={drawerContentVariants({ width })}>{children}</div>
+      <div
+        className={cn(drawerContentVariants({ width }), "h-full flex flex-col")}
+      >
+        {children}
+      </div>
     </DrawerPrimitive.Content>
   </DrawerPortal>
 ));
@@ -85,7 +89,7 @@ const DrawerHeader = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "grid gap-1.5 p-4 text-center sm:text-left shrink-0",
+      "grid gap-1.5 p-4  sm:text-left shrink-0 border-b border-border bg-background",
       className
     )}
     {...props}
@@ -98,10 +102,7 @@ const DrawerBody = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn(
-      "flex-1 overflow-y-auto px-4 py-2 scrollbar-none min-h-0",
-      className
-    )}
+    className={cn("flex-1 overflow-y-auto px-4 py-2  min-h-0", className)}
     {...props}
   />
 );

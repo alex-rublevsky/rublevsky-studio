@@ -6,18 +6,68 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
 export function CartSummary() {
-  const { cart, setCartOpen } = useCart();
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+  const { cart } = useCart();
 
-  // Calculate cart total
+  // Calculate cart totals with discounts
   const subtotal = cart.items.reduce(
     (total, item) => total + item.price * item.quantity,
     0
   );
 
-  // You can add tax, shipping calculations here as needed
-  const total = subtotal;
+  const discountTotal = cart.items.reduce((total, item) => {
+    if (item.discount) {
+      return total + (item.price * item.quantity * item.discount) / 100;
+    }
+    return total;
+  }, 0);
+
+  const total = subtotal - discountTotal;
+
+  return (
+    <div className="space-y-2 pb-0">
+      <div className="flex justify-between text-sm">
+        <p>Subtotal</p>
+        <p>${subtotal.toFixed(2)}</p>
+      </div>
+
+      {discountTotal > 0 && (
+        <div className="flex justify-between text-sm text-green-600">
+          <p>Discount</p>
+          <p>-${discountTotal.toFixed(2)}</p>
+        </div>
+      )}
+
+      <div className="flex justify-between">
+        <span>Total</span>
+        <h4>${total.toFixed(2)}</h4>
+      </div>
+
+      <p className="text-xs text-gray-500 text-center pt-2">
+        Prices and shipping calculated at checkout
+      </p>
+    </div>
+  );
+}
+
+export function CartCheckoutButton() {
+  const { cart, setCartOpen } = useCart();
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
+  // Calculate total with discounts
+  const subtotal = cart.items.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  );
+
+  const discountTotal = cart.items.reduce((total, item) => {
+    if (item.discount) {
+      return total + (item.price * item.quantity * item.discount) / 100;
+    }
+    return total;
+  }, 0);
+
+  const total = subtotal - discountTotal;
 
   const handleCheckout = async () => {
     if (cart.items.length === 0) return;
@@ -38,30 +88,12 @@ export function CartSummary() {
   };
 
   return (
-    <div className="mt-6 space-y-4">
-      <div className="flex justify-between text-sm">
-        <span>Subtotal</span>
-        <span>${subtotal.toFixed(2)}</span>
-      </div>
-
-      {/* Add other cost lines as needed (shipping, tax, etc.) */}
-
-      <div className="flex justify-between font-medium text-base pt-2 border-t">
-        <span>Total</span>
-        <span>${total.toFixed(2)}</span>
-      </div>
-
-      <Button
-        onClick={handleCheckout}
-        disabled={cart.items.length === 0 || isLoading}
-        className="w-full mt-4"
-      >
-        {isLoading ? "Processing..." : "Checkout"}
-      </Button>
-
-      <p className="text-xs text-center text-gray-500 mt-2">
-        Prices and shipping calculated at checkout
-      </p>
-    </div>
+    <Button
+      onClick={handleCheckout}
+      disabled={cart.items.length === 0 || isLoading}
+      className="w-full"
+    >
+      {isLoading ? "Processing..." : `Checkout $${total.toFixed(2)}`}
+    </Button>
   );
 }

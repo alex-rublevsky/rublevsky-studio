@@ -68,12 +68,7 @@ export function SkillsSection() {
         </Badge>
 
         <div className="flex flex-wrap justify-center gap-x-8 gap-y-10 md:gap-x-14 md:gap-y-16">
-          <SkillLogo
-            name="Figma"
-            alt="Figma Logo"
-            link="/logos/figma.svg"
-            wideLogo
-          />
+          <SkillLogo name="Figma" alt="Figma Logo" link="/logos/figma.svg" />
           <SkillLogo
             name="Photoshop"
             alt="Photoshop Logo"

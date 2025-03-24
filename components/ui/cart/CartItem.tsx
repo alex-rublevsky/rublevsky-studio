@@ -75,7 +75,7 @@ export function CartItem({ item }: CartItemProps) {
     : "";
 
   return (
-    <div className="flex items-start gap-4 py-4 border-b border-gray-100">
+    <div className="flex items-start gap-4 py-2 border-b border-gray-100">
       {/* Product image */}
       <div className="shrink-0 relative w-16 h-16 bg-gray-100 rounded overflow-hidden">
         {item.image ? (

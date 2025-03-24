@@ -46,21 +46,23 @@ export default function BrandingSection() {
 
       <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
         <DrawerContent className="" width="full">
-          <DrawerBody>
-            <div className="min-h-[calc(85vh-2rem)] flex flex-col lg:flex-row gap-0 lg:gap-10 items-start">
+          <DrawerBody className="p-0">
+            <div className="min-h-full flex flex-col lg:flex-row gap-0 lg:gap-10 items-start">
               {/* Left column - Gallery */}
               <div className="w-full lg:w-3/5 xl:w-2/3 flex flex-col lg:flex-row gap-2 lg:h-full self-start">
                 {selectedProject.type === "image" && selectedProject.images ? (
-                  <ImageGallery
-                    images={selectedProject.images}
-                    alt={selectedProject.name}
-                    size="compact"
-                  />
+                  <div className="w-full">
+                    <ImageGallery
+                      images={selectedProject.images}
+                      alt={selectedProject.name}
+                      size="compact"
+                    />
+                  </div>
                 ) : selectedProject.type === "video" && selectedProject.src ? (
                   <div className="relative aspect-4/3 w-full">
                     <video
                       src={`/${selectedProject.src}`}
-                      className="w-full h-full rounded-lg"
+                      className="w-full h-full rounded-none lg:rounded-lg"
                       controls
                       autoPlay={false}
                       loop
