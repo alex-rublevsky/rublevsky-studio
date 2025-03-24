@@ -34,27 +34,9 @@ interface OrderEmailData {
 
 export async function POST(request: Request) {
   try {
-    const {
-      firstName,
-      lastName,
-      email,
-      orderItems,
-      orderId,
-      subtotal,
-      totalDiscount,
-      orderTotal,
-      shippingAddress,
-      billingAddress,
-      shippingMethod,
-      notes
-    }: OrderEmailData = await request.json();
-
-    if (!email || !orderItems || !orderId) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
-    }
+    const data: OrderEmailData = await request.json();
+    
+    const { firstName, lastName, email, orderItems, orderId, subtotal, totalDiscount, orderTotal, shippingAddress, billingAddress, shippingMethod, notes } = data;
 
     // Format order items for email template
     const formattedOrderItems = orderItems.map(item => ({
@@ -62,14 +44,14 @@ export async function POST(request: Request) {
       quantity: item.quantity,
       price: item.price.toFixed(2),
       originalPrice: item.price.toFixed(2),
-      discount: item.discount || undefined,
+      discount: item.discount ?? undefined,
       image: item.image
     }));
 
-    await resend.emails.send({
-      from: process.env.EMAIL_FROM || 'onboarding@resend.dev',
+    const result = await resend.emails.send({
+      from: 'Rublevsky Studio <orders@rublevskystudio.com>',
       to: email,
-      subject: `Order #${orderId} Confirmed - Thank You for Your Purchase!`,
+      subject: `Order Confirmation #${orderId}`,
       react: ClientOrderConfirmation({
         Name: firstName,
         LastName: lastName,
@@ -77,25 +59,18 @@ export async function POST(request: Request) {
         orderId: orderId.toString(),
         orderDate: new Date().toISOString(),
         subtotal: subtotal.toFixed(2),
-        totalDiscount: totalDiscount ? totalDiscount.toFixed(2) : '0.00',
+        totalDiscount: totalDiscount.toFixed(2),
         orderTotal: orderTotal.toFixed(2),
         orderStatus: 'Confirmed',
         orderItems: formattedOrderItems
       }),
     });
 
-    return NextResponse.json({ 
-      success: true,
-      message: 'Order confirmation email sent successfully'
-    });
+    return NextResponse.json({ success: true, data: result });
   } catch (error) {
-    console.error('Failed to send email:', error);
+    console.error('Error sending order confirmation email:', error);
     return NextResponse.json(
-      { 
-        success: false,
-        error: 'Failed to send email',
-        details: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined
-      },
+      { success: false, error: 'Failed to send order confirmation email' },
       { status: 500 }
     );
   }

@@ -35,7 +35,7 @@ interface CreateOrderResult {
 export async function createOrder(customerInfo: CustomerInfo, cartItems: CartItem[]): Promise<CreateOrderResult> {
   try {
     // Validate stock for all items before creating order
-    const products = await getAllProducts();
+    const { products } = await getAllProducts();
     
     // Check stock availability for all items
     for (const item of cartItems) {
