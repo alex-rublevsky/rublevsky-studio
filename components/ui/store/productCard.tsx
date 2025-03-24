@@ -366,19 +366,19 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
   }, []);
 
   return (
-    <div
-      className="w-full product-card overflow-hidden rounded-lg group"
-      id={styles.productCard}
+    <Link
+      href={`/product/${product.slug}`}
+      className="block h-full relative"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
-      <div className="bg-white flex flex-col">
-        <div className="relative aspect-square overflow-hidden">
-          <div>
-            <Link
-              href={`/product/${product.slug}`}
-              className="block h-full relative"
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-            >
+      <div
+        className="w-full product-card overflow-hidden rounded-lg group"
+        id={styles.productCard}
+      >
+        <div className="bg-white flex flex-col">
+          <div className="relative aspect-square overflow-hidden">
+            <div>
               {/* Primary Image */}
               <div className="relative aspect-square flex items-center justify-center overflow-hidden">
                 {imageArray.length > 0 ? (
@@ -412,167 +412,14 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
                   />
                 </div>
               )}
-            </Link>
-          </div>
-
-          {/* Desktop Add to Cart button */}
-          <button
-            onClick={handleAddToCart}
-            className={`absolute bottom-0 left-0 right-0 hidden md:flex items-center justify-center space-x-2 bg-gray-200/70 backdrop-blur-xs text-black hover:bg-black hover:text-white transition-all duration-500 py-2 opacity-0 group-hover:opacity-100 ${
-              !isAvailable
-                ? "cursor-not-allowed hover:bg-gray-200/70 hover:text-black opacity-50"
-                : ""
-            }`}
-            disabled={!isAvailable}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              fill="none"
-              viewBox="0 0 33 30"
-              className="cart-icon"
-            >
-              <path
-                d="M1.94531 1.80127H7.27113L11.9244 18.602C12.2844 19.9016 13.4671 20.8013 14.8156 20.8013H25.6376C26.9423 20.8013 28.0974 19.958 28.495 18.7154L31.9453 7.9303H19.0041"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <circle cx="13.4453" cy="27.3013" r="2.5" fill="currentColor" />
-              <circle cx="26.4453" cy="27.3013" r="2.5" fill="currentColor" />
-            </svg>
-            {!isAddingToCart ? (
-              <span>
-                {!isAvailable
-                  ? "Out of Stock"
-                  : isComingSoon
-                    ? "Pre-order"
-                    : "Add to Cart"}
-              </span>
-            ) : (
-              <span>{isComingSoon ? "Pre-ordering..." : "Adding..."}</span>
-            )}
-          </button>
-        </div>
-
-        {/* Content Section */}
-        <div className="flex flex-col h-auto md:h-full">
-          {/* Info Section */}
-          <div className="p-4 flex flex-col h-auto md:h-full">
-            {/* Price and Stock */}
-            <div className="flex flex-col mb-2">
-              <div className="flex flex-wrap items-baseline justify-between w-full gap-x-2">
-                <div className="flex items-baseline gap-1">
-                  {product.discount ? (
-                    <>
-                      <h5 className=" line-through text-gray-500">
-                        ${currentPrice?.toFixed(2)}
-                      </h5>
-                      <h5 className="whitespace-nowrap">
-                        $
-                        {(currentPrice * (1 - product.discount / 100)).toFixed(
-                          2
-                        )}{" "}
-                        CAD
-                      </h5>
-                      <p className="ml-1 text-red-600">
-                        {product.discount}% OFF
-                      </p>
-                    </>
-                  ) : (
-                    <h5 className="whitespace-nowrap">
-                      ${currentPrice?.toFixed(2)} CAD
-                    </h5>
-                  )}
-                </div>
-
-                {!product.unlimitedStock && (
-                  <div className="mt-1 text-xs text-gray-500">
-                    {getEffectiveStock > 0 ? (
-                      <span>In stock: {getEffectiveStock}</span>
-                    ) : (
-                      <span className="text-red-600">Out of stock</span>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {isComingSoon && (
-                <>
-                  <span className="text-sm hidden sm:inline">Coming Soon</span>
-                  <span className="text-sm w-full block sm:hidden mt-1">
-                    Coming Soon
-                  </span>
-                </>
-              )}
             </div>
 
-            {/* Product Name */}
-            <p className=" mb-3">{product.name}</p>
-
-            {/* Variations */}
-            {product.hasVariations &&
-              product.variations &&
-              product.variations.length > 0 && (
-                <div className="space-y-2">
-                  {attributeNames.map((attributeId: string) => (
-                    <div key={attributeId}>
-                      <div className="text-xs font-medium text-gray-500 mb-1">
-                        {getAttributeDisplayName(attributeId)}
-                      </div>
-                      <div className="flex flex-wrap gap-1">
-                        {getUniqueAttributeValues(attributeId).map((value) => {
-                          const isAvailable = isAttributeValueAvailable(
-                            attributeId,
-                            value
-                          );
-                          const isSelected =
-                            selectedAttributes[attributeId] === value;
-
-                          return (
-                            <button
-                              key={value}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                selectVariation(attributeId, value);
-                              }}
-                              className={`
-                                px-2 py-1 text-xs rounded-full border transition-colors duration-200
-                                ${
-                                  isSelected
-                                    ? "border-black bg-black text-white"
-                                    : isAvailable
-                                      ? "border-gray-300 hover:border-black"
-                                      : "border-gray-200 text-gray-400"
-                                }
-                                ${isAvailable ? "" : "opacity-50"}
-                              `}
-                              title={
-                                !isAvailable
-                                  ? "This combination is not available"
-                                  : ""
-                              }
-                            >
-                              {value}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-          </div>
-
-          {/* Mobile Add to Cart button */}
-          <div className="md:hidden mt-auto">
+            {/* Desktop Add to Cart button */}
             <button
               onClick={handleAddToCart}
-              className={`w-full flex items-center justify-center space-x-2 bg-gray-200/70 backdrop-blur-xs text-black hover:bg-black hover:text-white transition-all duration-500 py-2 px-4 ${
+              className={`absolute bottom-0 left-0 right-0 hidden md:flex items-center justify-center space-x-2 bg-gray-200/70 backdrop-blur-xs text-black hover:bg-black hover:text-white transition-all duration-500 py-2 opacity-0 group-hover:opacity-100 ${
                 !isAvailable
-                  ? "opacity-50 cursor-not-allowed hover:bg-gray-200/70 hover:text-black"
+                  ? "cursor-not-allowed hover:bg-gray-200/70 hover:text-black opacity-50"
                   : ""
               }`}
               disabled={!isAvailable}
@@ -608,9 +455,179 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
               )}
             </button>
           </div>
+
+          {/* Content Section */}
+          <div className="flex flex-col h-auto md:h-full">
+            {/* Info Section */}
+            <div className="p-4 flex flex-col h-auto md:h-full">
+              {/* Price and Stock */}
+              <div className="flex flex-col mb-2">
+                <div className="flex flex-wrap items-baseline justify-between w-full gap-x-2">
+                  <div className="flex flex-col items-baseline gap-1">
+                    {product.discount ? (
+                      <>
+                        <h5 className="whitespace-nowrap">
+                          $
+                          {(
+                            currentPrice *
+                            (1 - product.discount / 100)
+                          ).toFixed(2)}{" "}
+                          CAD
+                        </h5>
+                        <div className="flex items-baseline gap-1">
+                          <h6 className=" line-through text-gray-500">
+                            ${currentPrice?.toFixed(2)}
+                          </h6>
+                          <p className="ml-1 text-red-600">
+                            {product.discount}% OFF
+                          </p>
+                        </div>
+                      </>
+                    ) : (
+                      <h5 className="whitespace-nowrap">
+                        ${currentPrice?.toFixed(2)} CAD
+                      </h5>
+                    )}
+                  </div>
+
+                  {!product.unlimitedStock && (
+                    <div className="mt-1 text-xs text-gray-500">
+                      {getEffectiveStock > 0 ? (
+                        <span>In stock: {getEffectiveStock}</span>
+                      ) : (
+                        <span className="text-red-600">Out of stock</span>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {isComingSoon && (
+                  <>
+                    <span className="text-sm hidden sm:inline">
+                      Coming Soon
+                    </span>
+                    <span className="text-sm w-full block sm:hidden mt-1">
+                      Coming Soon
+                    </span>
+                  </>
+                )}
+              </div>
+
+              {/* Product Name */}
+              <p className=" mb-3">{product.name}</p>
+
+              {/* Variations */}
+              {product.hasVariations &&
+                product.variations &&
+                product.variations.length > 0 && (
+                  <div className="space-y-2">
+                    {attributeNames.map((attributeId: string) => (
+                      <div key={attributeId}>
+                        <div className="text-xs font-medium text-gray-500 mb-1">
+                          {getAttributeDisplayName(attributeId)}
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          {getUniqueAttributeValues(attributeId).map(
+                            (value) => {
+                              const isAvailable = isAttributeValueAvailable(
+                                attributeId,
+                                value
+                              );
+                              const isSelected =
+                                selectedAttributes[attributeId] === value;
+
+                              return (
+                                <button
+                                  key={value}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    selectVariation(attributeId, value);
+                                  }}
+                                  className={`
+                                px-2 py-1 text-xs rounded-full border transition-colors duration-200
+                                ${
+                                  isSelected
+                                    ? "border-black bg-black text-white"
+                                    : isAvailable
+                                      ? "border-gray-300 hover:border-black"
+                                      : "border-gray-200 text-gray-400"
+                                }
+                                ${isAvailable ? "" : "opacity-50"}
+                              `}
+                                  title={
+                                    !isAvailable
+                                      ? "This combination is not available"
+                                      : ""
+                                  }
+                                >
+                                  {value}
+                                </button>
+                              );
+                            }
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+            </div>
+
+            {/* Mobile Add to Cart button */}
+            <div className="md:hidden mt-auto">
+              <button
+                onClick={handleAddToCart}
+                className={`w-full flex items-center justify-center space-x-2 bg-gray-200/70 backdrop-blur-xs text-black hover:bg-black hover:text-white transition-all duration-500 py-2 px-4 ${
+                  !isAvailable
+                    ? "opacity-50 cursor-not-allowed hover:bg-gray-200/70 hover:text-black"
+                    : ""
+                }`}
+                disabled={!isAvailable}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="none"
+                  viewBox="0 0 33 30"
+                  className="cart-icon"
+                >
+                  <path
+                    d="M1.94531 1.80127H7.27113L11.9244 18.602C12.2844 19.9016 13.4671 20.8013 14.8156 20.8013H25.6376C26.9423 20.8013 28.0974 19.958 28.495 18.7154L31.9453 7.9303H19.0041"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <circle
+                    cx="13.4453"
+                    cy="27.3013"
+                    r="2.5"
+                    fill="currentColor"
+                  />
+                  <circle
+                    cx="26.4453"
+                    cy="27.3013"
+                    r="2.5"
+                    fill="currentColor"
+                  />
+                </svg>
+                {!isAddingToCart ? (
+                  <span>
+                    {!isAvailable
+                      ? "Out of Stock"
+                      : isComingSoon
+                        ? "Pre-order"
+                        : "Add to Cart"}
+                  </span>
+                ) : (
+                  <span>{isComingSoon ? "Pre-ordering..." : "Adding..."}</span>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
 

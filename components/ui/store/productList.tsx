@@ -12,7 +12,7 @@ export default function ProductList({ data }: ProductListProps) {
   return (
     <div>
       <AnimatePresence mode="popLayout">
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-20">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-6 gap-x-3 sm:gap-4 mb-20">
           {data.length === 0 ? (
             <motion.p
               initial={{ opacity: 0 }}
