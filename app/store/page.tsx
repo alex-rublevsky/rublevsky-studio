@@ -15,13 +15,11 @@ export default async function StorePage() {
   ]);
 
   return (
-    <div>
-      <StoreFeed
-        products={productsData.products}
-        categories={categories}
-        teaCategories={teaCategories}
-        priceRange={productsData.priceRange}
-      />
-    </div>
+    <StoreFeed
+      products={productsData.products}
+      categories={categories}
+      teaCategories={teaCategories}
+      priceRange={productsData.priceRange}
+    />
   );
 }

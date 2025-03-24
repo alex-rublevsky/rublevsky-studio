@@ -11,7 +11,7 @@ export default async function StoreLayout({
   const products = await getAllProducts({});
 
   return (
-    <CartProvider initialProducts={products}>
+    <CartProvider initialProducts={products.products}>
       {children}
       <CartNav />
     </CartProvider>

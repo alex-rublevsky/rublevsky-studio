@@ -7,11 +7,10 @@ export default async function ProductLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Fetch all products for stock validation
-  const products = await getAllProducts({});
+  const productsData = await getAllProducts({ includePriceRange: true });
 
   return (
-    <CartProvider initialProducts={products}>
+    <CartProvider initialProducts={productsData.products}>
       {children}
       <CartNav />
     </CartProvider>

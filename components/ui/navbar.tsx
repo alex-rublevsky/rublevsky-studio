@@ -80,18 +80,6 @@ const defaultWorkItems: NavItem[] = [
   { name: "Posters", url: "/#posters" },
 ];
 
-const CVDownloadButton = () => {
-  return (
-    <ul className="relative flex w-fit rounded-full border border-black bg-white hover:bg-black hover:text-white transition-all duration-300 p-[0.3rem]">
-      <Link href="https://assets.rublevsky.studio/PDF/Resume%20Alexander%20Rublevsky.pdf">
-        <li className="relative z-10 block cursor-pointer px-3 py-1.5 text-xs uppercase text-white mix-blend-difference md:px-4 md:py-2 md:text-sm">
-          Resume
-        </li>
-      </Link>
-    </ul>
-  );
-};
-
 const defaultUtilityItems: NavItem[] = [
   { name: "Work", url: "/" },
   { name: "Blog", url: "/blog" },
@@ -206,13 +194,10 @@ export function NavBar({ className }: Omit<NavBarProps, "items">) {
         className
       )}
     >
-      {pathname === "/" && (
-        <div className="flex items-center gap-1.5">
-          <NavGroup items={defaultWorkItems} />
-          <CVDownloadButton />
-        </div>
-      )}
-      <NavGroup items={defaultUtilityItems} />
+      {pathname === "/" && <NavGroup items={defaultWorkItems} />}
+      <div className="w-full flex justify-center">
+        <NavGroup items={defaultUtilityItems} />
+      </div>
     </nav>
   );
 }
