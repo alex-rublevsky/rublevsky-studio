@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { VariantProps, cva } from "class-variance-authority";
 
 const mainImageVariants = cva(
@@ -30,20 +30,143 @@ export default function ImageGallery({
   size,
 }: ImageGalleryProps) {
   const [selectedImage, setSelectedImage] = useState(images[0] || "");
+  const mainImageContainerRef = useRef<HTMLDivElement>(null);
+  const thumbnailsContainerRef = useRef<HTMLDivElement>(null);
+  const isProgrammaticScrollRef = useRef(false);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const selectedIndex = images.indexOf(selectedImage);
+
+  // Debounced scroll handler to prevent rapid state updates
+  const handleScroll = useCallback(() => {
+    if (
+      isProgrammaticScrollRef.current ||
+      window.matchMedia("(min-width: 1024px)").matches
+    )
+      return;
+
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+
+    scrollTimeoutRef.current = setTimeout(() => {
+      if (mainImageContainerRef.current) {
+        const containerWidth = mainImageContainerRef.current.clientWidth;
+        const scrollLeft = mainImageContainerRef.current.scrollLeft;
+        const newIndex = Math.round(scrollLeft / containerWidth);
+
+        if (
+          newIndex >= 0 &&
+          newIndex < images.length &&
+          newIndex !== selectedIndex
+        ) {
+          setSelectedImage(images[newIndex]);
+        }
+      }
+    }, 50); // Small delay to ensure smooth scrolling
+  }, [images, selectedIndex]);
+
+  // Scroll to the selected image when thumbnail is clicked (mobile only)
+  useEffect(() => {
+    if (mainImageContainerRef.current) {
+      const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
+      if (!isDesktop) {
+        isProgrammaticScrollRef.current = true;
+        const containerWidth = mainImageContainerRef.current.clientWidth;
+
+        // Use requestAnimationFrame for smoother animation
+        requestAnimationFrame(() => {
+          mainImageContainerRef.current?.scrollTo({
+            left: selectedIndex * containerWidth,
+            behavior: "smooth",
+          });
+        });
+
+        // Reset the flag after the scroll animation completes
+        const duration = 200; // Reduced from 300ms to 200ms for faster animation
+        setTimeout(() => {
+          isProgrammaticScrollRef.current = false;
+        }, duration);
+      }
+    }
+  }, [selectedImage, selectedIndex]);
+
+  // Center the active thumbnail in the container (mobile only)
+  useEffect(() => {
+    if (
+      thumbnailsContainerRef.current &&
+      !window.matchMedia("(min-width: 1024px)").matches
+    ) {
+      const container = thumbnailsContainerRef.current;
+      const thumbnailWidth = 96; // 24 * 4 (w-24 = 6rem = 96px)
+      const containerWidth = container.clientWidth;
+      const scrollPosition =
+        selectedIndex * thumbnailWidth - (containerWidth - thumbnailWidth) / 2;
+
+      // Use requestAnimationFrame for smoother animation
+      requestAnimationFrame(() => {
+        container.scrollTo({
+          left: Math.max(0, scrollPosition),
+          behavior: "smooth",
+        });
+      });
+    }
+  }, [selectedIndex]);
+
+  // Add scroll event listener (mobile only)
+  useEffect(() => {
+    const container = mainImageContainerRef.current;
+    if (container && !window.matchMedia("(min-width: 1024px)").matches) {
+      container.addEventListener("scroll", handleScroll, { passive: true });
+      return () => {
+        container.removeEventListener("scroll", handleScroll);
+        if (scrollTimeoutRef.current) {
+          clearTimeout(scrollTimeoutRef.current);
+        }
+      };
+    }
+  }, [handleScroll]);
 
   // Memoize the Image component to prevent unnecessary re-renders
-  const memoizedImage = useMemo(() => {
-    if (!selectedImage) return null;
+  const memoizedImages = useMemo(() => {
+    return images.map((image, index) => (
+      <div
+        key={index}
+        className="shrink-0 w-full lg:hidden snap-center flex items-center justify-center"
+      >
+        <div className="relative w-full h-full flex items-center justify-center">
+          <div className="relative w-auto h-full flex items-center justify-center">
+            <Image
+              src={`/${image}`}
+              alt={`${alt} main image ${index + 1}`}
+              width={3000}
+              height={3000}
+              priority={index === 0}
+              className={mainImageVariants({ size })}
+              style={{
+                maxHeight: "100%",
+                width: "auto",
+                objectFit: "contain",
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    ));
+  }, [images, alt, size]);
 
+  // Memoize the selected image for desktop
+  const selectedImageDesktop = useMemo(() => {
     return (
-      <Image
-        src={`/${selectedImage}`}
-        alt={`${alt} main image`}
-        width={3000}
-        height={3000}
-        priority
-        className={mainImageVariants({ size })}
-      />
+      <div className="hidden lg:block">
+        <Image
+          src={`/${selectedImage}`}
+          alt={`${alt} main image`}
+          width={3000}
+          height={3000}
+          priority
+          className={mainImageVariants({ size })}
+        />
+      </div>
     );
   }, [selectedImage, alt, size]);
 
@@ -60,9 +183,12 @@ export default function ImageGallery({
       className={`gallery-stack flex flex-col lg:flex-row w-full gap-2 ${className}`}
     >
       {/* Thumbnails */}
-      <div className="order-2 lg:order-1 shrink-0 w-full lg:w-24 overflow-x-auto lg:overflow-x-hidden">
+      <div className="order-2 lg:order-1 shrink-0 w-full lg:w-24 overflow-x-auto lg:overflow-x-hidden scrollbar-none">
         {/* Scrollable container */}
-        <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-y-auto px-4 lg:px-0">
+        <div
+          ref={thumbnailsContainerRef}
+          className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-y-auto px-4 lg:px-0 scroll-smooth scrollbar-none"
+        >
           {images.map((image, index) => (
             <div
               key={index}
@@ -104,14 +230,14 @@ export default function ImageGallery({
 
       {/* Main image */}
       <div className="flex items-center justify-center lg:items-start lg:justify-start order-1 grow relative">
-        <div className="relative w-full">
-          {selectedImage ? (
-            <div className="relative">{memoizedImage}</div>
-          ) : (
-            <div className="w-full h-[75vh] bg-gray-100 flex items-center justify-center rounded-lg">
-              <p className="text-gray-500">No image available</p>
-            </div>
-          )}
+        <div
+          ref={mainImageContainerRef}
+          className="relative w-full h-[60vh] lg:h-auto overflow-x-auto lg:overflow-x-hidden overflow-y-hidden scroll-smooth snap-x snap-mandatory scrollbar-none lg:snap-none [scroll-behavior:200ms_ease-in-out]"
+        >
+          {/* Mobile sliding images */}
+          <div className="flex lg:hidden h-full">{memoizedImages}</div>
+          {/* Desktop selected image */}
+          {selectedImageDesktop}
         </div>
       </div>
     </div>
