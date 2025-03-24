@@ -12,7 +12,7 @@ function skillLogo({
   wideLogo?: boolean;
 }) {
   return (
-    <div className="flex flex-col gap-2 ">
+    <div className="flex flex-col gap-6 group transition-all">
       <div className="flex-1 w-full flex items-center justify-center">
         <div
           className={`relative flex items-center justify-center ${
@@ -22,12 +22,13 @@ function skillLogo({
           <Image
             src={link}
             alt={alt}
-            fill
-            className="hover:opacity-70 transition-opacity md:scale-125 object-contain"
+            width={100}
+            height={100}
+            className="group-hover:opacity-70 transition-opacity md:scale-125 object-contain"
           />
         </div>
       </div>
-      <p className="text-center text-sm md:text-base font-medium whitespace-nowrap">
+      <p className="text-center text-sm md:text-base font-medium whitespace-nowrap text-gray-500">
         {name}
       </p>
     </div>

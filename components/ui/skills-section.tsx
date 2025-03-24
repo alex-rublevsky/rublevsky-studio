@@ -1,21 +1,27 @@
 import Image from "next/image";
 import SkillLogo from "./skillLogo";
-
-export function ExpertiseSection() {
+import { Badge } from "@/components/ui/badge";
+export function SkillsSection() {
   return (
     <section className="w-full">
       <h2 heading-reveal="true">Skills</h2>
 
       <div className="mb-12 flex flex-col items-center">
-        <div className="bg-neutral-100 rounded-lg px-3 py-1 my-10">
-          <h3 className="text-lg md:text-xl lg:text-2xl">Development</h3>
-        </div>
+        <Badge variant="secondary" size="lg" className="z-50 my-10">
+          Development
+        </Badge>
+
         <div className="flex flex-wrap justify-center gap-x-8 gap-y-10 md:gap-x-14 md:gap-y-16">
           <SkillLogo
             name="Next.js"
             alt="Next.js Logo"
             link="/logos/next-js.svg"
             wideLogo
+          />
+          <SkillLogo
+            name="Typescript"
+            alt="Typescript Logo"
+            link="/logos/typescript.svg"
           />
           <SkillLogo name="React" alt="React Logo" link="/logos/react.svg" />
           <SkillLogo
@@ -28,6 +34,12 @@ export function ExpertiseSection() {
             name="Tailwind CSS"
             alt="Tailwind CSS Logo"
             link="/logos/tailwind.svg"
+          />
+
+          <SkillLogo
+            name="Cloudflare"
+            alt="Cloudflare Logo"
+            link="/logos/cloudflare.png"
           />
 
           <SkillLogo
@@ -51,15 +63,15 @@ export function ExpertiseSection() {
           />
         </div>
 
-        <div className="bg-neutral-100 rounded-lg px-3 py-1 mb-10 mt-20">
-          <h3 className="text-lg md:text-xl lg:text-2xl">Design</h3>
-        </div>
+        <Badge variant="secondary" size="lg" className="z-50 mb-10 mt-20">
+          Design
+        </Badge>
 
         <div className="flex flex-wrap justify-center gap-x-8 gap-y-10 md:gap-x-14 md:gap-y-16">
           <SkillLogo
-            name="Spline"
-            alt="Spline Logo"
-            link="/logos/spline.png"
+            name="Figma"
+            alt="Figma Logo"
+            link="/logos/figma.svg"
             wideLogo
           />
           <SkillLogo
@@ -82,6 +94,12 @@ export function ExpertiseSection() {
             name="InDesign"
             alt="InDesign Logo"
             link="/logos/indesisgn.svg"
+          />
+          <SkillLogo
+            name="Spline"
+            alt="Spline Logo"
+            link="/logos/spline.png"
+            wideLogo
           />
         </div>
       </div>

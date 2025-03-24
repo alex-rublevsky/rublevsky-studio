@@ -6,14 +6,14 @@ import { webProjects } from "@/data/web-projects";
 import { photos } from "@/data/photography";
 import { posters } from "@/data/posters";
 import GreetingsSection from "@/components/ui/greetingsSection";
-import { ExpertiseSection } from "@/components/ui/expertise-section";
+import { SkillsSection } from "@/components/ui/skills-section";
 import { ExperienceTimeline } from "@/components/ui/experience-timeline";
 export default function Home() {
   return (
     <main>
       {/* <SplineHero /> */}
       <GreetingsSection />
-      <ExpertiseSection />
+      <SkillsSection />
       <ExperienceTimeline />
       <WebProjectsSection projects={webProjects} />
       <BrandingSection />

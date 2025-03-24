@@ -35,7 +35,7 @@ export const webProjects: Project[] = [
     tools: [
       {
         name: 'Figma',
-        icon: 'logos/figma.svg'
+        icon: 'logos/figma-text.svg'
       },
       {
         name: 'Webflow',
@@ -106,7 +106,7 @@ export const webProjects: Project[] = [
     tools: [
       {
         name: 'Figma',
-        icon: 'logos/figma.svg'
+        icon: 'logos/figma-text.svg'
       },
       {
         name: 'Webflow',
@@ -138,7 +138,7 @@ export const webProjects: Project[] = [
     tools: [
       {
         name: 'Figma',
-        icon: 'logos/figma.svg'
+        icon: 'logos/figma-text.svg'
       },
       {
         name: 'Webflow',
