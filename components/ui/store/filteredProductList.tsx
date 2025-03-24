@@ -1,43 +1,34 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import { Category, TeaCategory, Product } from "@/types";
+import { useState, useMemo } from "react";
+import { Category, TeaCategory, ProductWithVariations } from "@/types";
 import ProductList from "./productList";
 import ProductFilters from "./productFilters";
 
 interface StoreFeedProps {
-  products: Product[];
+  products: ProductWithVariations[];
   categories: Category[];
   teaCategories: TeaCategory[];
+  priceRange: {
+    min: number;
+    max: number;
+  };
 }
 
 export default function StoreFeed({
   products = [],
   categories = [],
   teaCategories = [],
+  priceRange,
 }: StoreFeedProps) {
-  // Calculate min and max prices from products
-  const { minPrice, maxPrice } = useMemo(() => {
-    const prices = products.map((product) => product.price);
-    return {
-      minPrice: Math.floor(Math.min(...prices, 0)),
-      maxPrice: Math.ceil(Math.max(...prices, 0)),
-    };
-  }, [products]);
-
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedTeaCategory, setSelectedTeaCategory] = useState<string | null>(
     null
   );
-  const [priceRange, setPriceRange] = useState<[number, number]>([
-    minPrice,
-    maxPrice,
+  const [localPriceRange, setLocalPriceRange] = useState<[number, number]>([
+    priceRange.min,
+    priceRange.max,
   ]);
-
-  // Update price range when min/max prices change
-  useEffect(() => {
-    setPriceRange([minPrice, maxPrice]);
-  }, [minPrice, maxPrice]);
 
   // Filter tea categories to only show those that are used in products
   const filteredTeaCategories = useMemo(() => {
@@ -68,13 +59,26 @@ export default function StoreFeed({
     }
 
     // Apply price range filter
-    filtered = filtered.filter(
-      (product) =>
-        product.price >= priceRange[0] && product.price <= priceRange[1]
-    );
+    filtered = filtered.filter((product) => {
+      // For products with variations, check all variation prices
+      if (product.hasVariations && product.variations?.length) {
+        const variationPrices = product.variations.map((v) => v.price);
+        const minVariationPrice = Math.min(...variationPrices);
+        const maxVariationPrice = Math.max(...variationPrices);
+        return (
+          maxVariationPrice >= localPriceRange[0] &&
+          minVariationPrice <= localPriceRange[1]
+        );
+      }
+      // For products without variations, check the base price
+      return (
+        product.price >= localPriceRange[0] &&
+        product.price <= localPriceRange[1]
+      );
+    });
 
     return filtered;
-  }, [products, selectedCategory, selectedTeaCategory, priceRange]);
+  }, [products, selectedCategory, selectedTeaCategory, localPriceRange]);
 
   return (
     <div className="space-y-8">
@@ -85,9 +89,8 @@ export default function StoreFeed({
         selectedTeaCategory={selectedTeaCategory}
         onCategoryChange={setSelectedCategory}
         onTeaCategoryChange={setSelectedTeaCategory}
-        minPrice={minPrice}
-        maxPrice={maxPrice}
-        onPriceRangeChange={setPriceRange}
+        priceRange={priceRange}
+        onPriceRangeChange={setLocalPriceRange}
       />
       <ProductList data={filteredProducts} />
     </div>

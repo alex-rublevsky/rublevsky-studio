@@ -15,8 +15,10 @@ interface ProductFiltersProps {
   selectedTeaCategory: string | null;
   onCategoryChange: (category: string | null) => void;
   onTeaCategoryChange: (category: string | null) => void;
-  minPrice?: number;
-  maxPrice?: number;
+  priceRange: {
+    min: number;
+    max: number;
+  };
   onPriceRangeChange?: (range: [number, number]) => void;
 }
 
@@ -27,23 +29,22 @@ export default function ProductFilters({
   selectedTeaCategory,
   onCategoryChange,
   onTeaCategoryChange,
-  minPrice = 0,
-  maxPrice = 0,
+  priceRange,
   onPriceRangeChange,
 }: ProductFiltersProps) {
-  const [priceRange, setPriceRange] = useState<[number, number]>([
-    minPrice,
-    maxPrice,
+  const [localPriceRange, setLocalPriceRange] = useState<[number, number]>([
+    priceRange.min,
+    priceRange.max,
   ]);
 
-  // Update local price range when min/max props change
+  // Update local price range when priceRange prop changes
   useEffect(() => {
-    setPriceRange([minPrice, maxPrice]);
-  }, [minPrice, maxPrice]);
+    setLocalPriceRange([priceRange.min, priceRange.max]);
+  }, [priceRange]);
 
   const handlePriceRangeChange = (newValue: number[]) => {
     const range: [number, number] = [newValue[0], newValue[1]];
-    setPriceRange(range);
+    setLocalPriceRange(range);
     onPriceRangeChange?.(range);
   };
 
@@ -103,13 +104,13 @@ export default function ProductFilters({
         <div className="flex items-center justify-between gap-2">
           <Label className="text-sm font-medium">Price Range</Label>
           <output className="text-sm font-medium tabular-nums">
-            ${priceRange[0]} - ${priceRange[1]}
+            ${localPriceRange[0]} - ${localPriceRange[1]}
           </output>
         </div>
         <Slider
-          value={priceRange}
-          min={minPrice}
-          max={maxPrice}
+          value={localPriceRange}
+          min={priceRange.min}
+          max={priceRange.max}
           step={1}
           onValueChange={handlePriceRangeChange}
           className="w-full"

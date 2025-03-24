@@ -14,6 +14,7 @@ interface GetAllProductsOptions {
   categorySlug?: string | null;
   brandSlug?: string | null;
   featured?: boolean;
+  includePriceRange?: boolean;
 }
 
 type ProductSelect = InferModel<typeof products, "select">;
@@ -28,14 +29,23 @@ interface QueryRow {
   product_tea_categories: TeaCategorySelect | null;
 }
 
+interface GetAllProductsResult {
+  products: ProductWithVariations[];
+  priceRange: {
+    min: number;
+    max: number;
+  };
+}
+
 /**
  * Fetch products from database with only the data needed for store listing
  */
 async function fetchProducts({
   categorySlug = null,
   brandSlug = null,
-  featured = false
-}: GetAllProductsOptions = {}): Promise<ProductWithVariations[]> {
+  featured = false,
+  includePriceRange = false
+}: GetAllProductsOptions = {}): Promise<GetAllProductsResult> {
   try {
     // Build where conditions
     const conditions: SQL[] = [eq(products.isActive, true)];
@@ -79,6 +89,8 @@ async function fetchProducts({
 
     // Process the results to group variations and attributes
     const productMap = new Map<number, ProductWithVariations>();
+    let minPrice = Infinity;
+    let maxPrice = -Infinity;
 
     rows.forEach((row: QueryRow) => {
       if (!productMap.has(row.products.id)) {
@@ -91,6 +103,12 @@ async function fetchProducts({
           variations: [],
           teaCategories: []
         });
+
+        // Consider base product price if no variations
+        if (!row.products.hasVariations && row.products.price) {
+          minPrice = Math.min(minPrice, row.products.price);
+          maxPrice = Math.max(maxPrice, row.products.price);
+        }
       }
 
       const product = productMap.get(row.products.id)!;
@@ -114,6 +132,12 @@ async function fetchProducts({
           createdAt: variation.createdAt,
           attributes: []
         };
+
+        // Consider variation price for price range
+        if (variation.price) {
+          minPrice = Math.min(minPrice, variation.price);
+          maxPrice = Math.max(maxPrice, variation.price);
+        }
 
         if (row.variation_attributes) {
           newVariation.attributes.push({
@@ -139,14 +163,34 @@ async function fetchProducts({
       }
     });
 
-    return Array.from(productMap.values());
+    // If no prices were found, set default values
+    if (minPrice === Infinity) minPrice = 0;
+    if (maxPrice === -Infinity) {
+      // If no prices found, calculate from products array
+      const allPrices = Array.from(productMap.values()).flatMap(product => {
+        const prices = [];
+        if (!product.hasVariations && product.price) {
+          prices.push(product.price);
+        }
+        if (product.variations?.length) {
+          prices.push(...product.variations.map(v => v.price));
+        }
+        return prices;
+      });
+      maxPrice = allPrices.length > 0 ? Math.max(...allPrices) : 1000;
+    }
+
+    return {
+      products: Array.from(productMap.values()),
+      priceRange: { min: minPrice, max: maxPrice }
+    };
   } catch (error) {
     throw new Error(`Failed to fetch products: ${(error as Error).message}`);
   }
 }
 
 // Cached version of getAllProducts
-export default async function getAllProducts(options: GetAllProductsOptions = {}): Promise<ProductWithVariations[]> {
+export default async function getAllProducts(options: GetAllProductsOptions = {}): Promise<GetAllProductsResult> {
   return unstable_cache(
     async () => fetchProducts(options),
     ['all-products', options.categorySlug || 'all', options.brandSlug || 'all', options.featured ? 'featured' : 'all'],

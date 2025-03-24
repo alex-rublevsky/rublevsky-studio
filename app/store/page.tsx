@@ -8,8 +8,8 @@ export const dynamic = "force-dynamic";
 
 export default async function StorePage() {
   // Fetch all products and categories
-  const [products, categories, teaCategories] = await Promise.all([
-    getAllProducts({}),
+  const [productsData, categories, teaCategories] = await Promise.all([
+    getAllProducts({ includePriceRange: true }),
     getAllCategories(),
     getAllTeaCategories(),
   ]);
@@ -17,9 +17,10 @@ export default async function StorePage() {
   return (
     <div>
       <StoreFeed
-        products={products}
+        products={productsData.products}
         categories={categories}
         teaCategories={teaCategories}
+        priceRange={productsData.priceRange}
       />
     </div>
   );
