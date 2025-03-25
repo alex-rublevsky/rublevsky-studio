@@ -5,6 +5,12 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import {
+  DropdownNavMenu,
+  DropdownNavMenuTrigger,
+  DropdownNavMenuContent,
+  DropdownMenuItem,
+} from "./dropdown-nav-menu";
 
 interface NavItem {
   name: string;
@@ -80,7 +86,7 @@ const defaultWorkItems: NavItem[] = [
   { name: "Posters", url: "/#posters" },
 ];
 
-const defaultUtilityItems: NavItem[] = [
+const menuItems: NavItem[] = [
   { name: "Work", url: "/" },
   { name: "Blog", url: "/blog" },
   { name: "Store", url: "/store" },
@@ -195,8 +201,33 @@ export function NavBar({ className }: Omit<NavBarProps, "items">) {
       )}
     >
       {pathname === "/" && <NavGroup items={defaultWorkItems} />}
-      <div className="w-full flex justify-center">
-        <NavGroup items={defaultUtilityItems} />
+      <div className="w-full flex justify-center gap-2">
+        <DropdownNavMenu>
+          <DropdownNavMenuTrigger asChild>
+            <div className="relative flex w-fit rounded-full border border-black bg-white hover:bg-black hover:text-white transition-all duration-300 p-[0.3rem]">
+              <li className="relative z-10 block cursor-pointer px-3 py-1.5 text-xs uppercase text-white mix-blend-difference md:px-4 md:py-2 md:text-sm">
+                Menu
+              </li>
+            </div>
+          </DropdownNavMenuTrigger>
+          <DropdownNavMenuContent align="center" side="top" className="mb-2">
+            {menuItems.map((item) => (
+              <DropdownMenuItem key={item.url} asChild>
+                <Link href={item.url}>{item.name}</Link>
+              </DropdownMenuItem>
+            ))}
+          </DropdownNavMenuContent>
+        </DropdownNavMenu>
+
+        {pathname === "/" && (
+          <div className="relative flex w-fit rounded-full border border-black bg-white hover:bg-black hover:text-white transition-all duration-300 p-[0.3rem]">
+            <Link href="https://assets.rublevsky.studio/PDF/Resume%20Alexander%20Rublevsky.pdf">
+              <li className="relative z-10 block cursor-pointer px-3 py-1.5 text-xs uppercase text-white mix-blend-difference md:px-4 md:py-2 md:text-sm">
+                CV
+              </li>
+            </Link>
+          </div>
+        )}
       </div>
     </nav>
   );

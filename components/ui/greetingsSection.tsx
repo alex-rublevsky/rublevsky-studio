@@ -1,11 +1,12 @@
 import Image from "next/image";
-
+import { LiquidMetalR } from "@/app/components/LiquidMetalR";
 function greetingsSection({}) {
   return (
     <section className="pt-4 relative">
       <div className="flex flex-col md:grid md:grid-cols-5 md:gap-4">
         <div className="py-2 md:col-span-3 md:h-full md:flex md:flex-col">
           <div>
+            <LiquidMetalR />
             <h3 className="text-2xl leading-[1.3] md:text-3xl md:leading-[1.3] lg:text-4xl lg:leading-[1.4] mb-4 break-words">
               Greetings! My name is Alexander. I am a{" "}
               <strong className="font-semibold">visual web developer</strong>{" "}
