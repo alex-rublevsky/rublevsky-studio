@@ -1,9 +1,11 @@
 import ClientOrderConfirmation from '@/emails/clientOrderConfirmation';
+import AdminOrderConfirmation from '@/emails/adminEmailConfirmation';
 import { Resend } from 'resend';
 import { NextResponse } from 'next/server';
 import { CartItem } from '@/lib/context/CartContext';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+const ADMIN_EMAIL = 'alexander.rublevskii@gmail.com';
 
 interface OrderEmailData {
   firstName: string;
@@ -15,6 +17,10 @@ interface OrderEmailData {
   totalDiscount: number;
   orderTotal: number;
   shippingAddress: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
     streetAddress: string;
     city: string;
     state: string;
@@ -22,6 +28,10 @@ interface OrderEmailData {
     zipCode: string;
   };
   billingAddress?: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
     streetAddress: string;
     city: string;
     state: string;
@@ -48,7 +58,8 @@ export async function POST(request: Request) {
       image: item.image
     }));
 
-    const result = await resend.emails.send({
+    // Send client confirmation email
+    const clientEmailResult = await resend.emails.send({
       from: 'Rublevsky Studio <orders@rublevskystudio.com>',
       to: email,
       subject: `Order Confirmation #${orderId}`,
@@ -66,11 +77,39 @@ export async function POST(request: Request) {
       }),
     });
 
-    return NextResponse.json({ success: true, data: result });
+    // Send admin notification email
+    const adminEmailResult = await resend.emails.send({
+      from: 'Rublevsky Studio <orders@rublevskystudio.com>',
+      to: ADMIN_EMAIL,
+      subject: `New Order #${orderId} - Rublevsky Studio`,
+      react: AdminOrderConfirmation({
+        Name: firstName,
+        LastName: lastName,
+        email,
+        orderId: orderId.toString(),
+        orderDate: new Date().toISOString(),
+        subtotal: subtotal.toFixed(2),
+        totalDiscount: totalDiscount.toFixed(2),
+        orderTotal: orderTotal.toFixed(2),
+        orderStatus: 'Pending',
+        shippingMethod,
+        shippingAddress,
+        billingAddress,
+        orderItems: formattedOrderItems
+      }),
+    });
+
+    return NextResponse.json({ 
+      success: true, 
+      data: { 
+        clientEmail: clientEmailResult,
+        adminEmail: adminEmailResult 
+      } 
+    });
   } catch (error) {
-    console.error('Error sending order confirmation email:', error);
+    console.error('Error sending order emails:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to send order confirmation email' },
+      { success: false, error: 'Failed to send order emails' },
       { status: 500 }
     );
   }

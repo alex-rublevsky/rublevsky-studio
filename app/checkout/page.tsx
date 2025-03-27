@@ -8,7 +8,6 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/context/CartContext";
 import { Button } from "@/components/ui/shared/button";
-import { Input } from "@/components/ui/shared/input";
 import { toast } from "sonner";
 import { createOrder } from "@/lib/actions/cart/createOrder";
 import Image from "next/image";
@@ -152,20 +151,22 @@ export default function CheckoutPage() {
             lastName: customerInfo.shippingAddress.lastName,
             email: customerInfo.shippingAddress.email,
             orderItems: cart.items.map((item) => ({
-              name: item.productName,
+              productName: item.productName,
               quantity: item.quantity,
-              price: item.discount
-                ? (item.price * (1 - item.discount / 100)).toFixed(2)
-                : item.price.toFixed(2),
-              originalPrice: item.price.toFixed(2),
+              price: item.price,
               discount: item.discount,
               image: item.image
                 ? `https://assets.rublevsky.studio/${item.image}`
                 : undefined,
             })),
-            subtotal: subtotal.toFixed(2),
-            totalDiscount: totalDiscount.toFixed(2),
-            orderTotal: total.toFixed(2),
+            orderId: result.orderId,
+            subtotal,
+            totalDiscount,
+            orderTotal: total,
+            shippingAddress: customerInfo.shippingAddress,
+            billingAddress: customerInfo.billingAddress,
+            shippingMethod: customerInfo.shippingMethod,
+            notes: customerInfo.notes,
           }),
         });
       } catch (emailError) {
@@ -178,7 +179,7 @@ export default function CheckoutPage() {
       clearCart();
 
       // Redirect to order confirmation page
-      router.push(`/orders/confirmation?orderId=${result.orderId}`);
+      router.push(`/order/${result.orderId}?new=true`);
     } catch (error) {
       toast.error(
         error instanceof Error

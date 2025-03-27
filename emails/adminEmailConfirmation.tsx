@@ -17,7 +17,7 @@ import {
 } from "@react-email/components";
 import * as React from "react";
 
-interface ClientOrderConfirmationProps {
+interface AdminOrderConfirmationProps {
   userImage?: string;
   Name?: string;
   LastName?: string;
@@ -28,6 +28,29 @@ interface ClientOrderConfirmationProps {
   totalDiscount?: string;
   orderTotal?: string;
   orderStatus?: string;
+  shippingMethod?: string;
+  shippingAddress?: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    streetAddress: string;
+    city: string;
+    state: string;
+    country: string;
+    zipCode: string;
+  };
+  billingAddress?: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    streetAddress: string;
+    city: string;
+    state: string;
+    country: string;
+    zipCode: string;
+  };
   orderItems?: Array<{
     name: string;
     quantity: number;
@@ -38,7 +61,7 @@ interface ClientOrderConfirmationProps {
   }>;
 }
 
-export const ClientOrderConfirmation = ({
+export const AdminOrderConfirmation = ({
   Name,
   LastName,
   email,
@@ -48,9 +71,12 @@ export const ClientOrderConfirmation = ({
   totalDiscount,
   orderTotal,
   orderStatus,
+  shippingMethod,
+  shippingAddress,
+  billingAddress,
   orderItems = [],
-}: ClientOrderConfirmationProps) => {
-  const previewText = `Order Confirmation from Rublevsky Studio`;
+}: AdminOrderConfirmationProps) => {
+  const previewText = `New Order #${orderId} - Rublevsky Studio`;
 
   return (
     <Html>
@@ -71,14 +97,63 @@ export const ClientOrderConfirmation = ({
               />
             </Section>
             <Heading className="text-black text-[24px] font-normal text-center p-0 my-[30px] mx-0">
-              Your order has been placed successfully!
+              New Order Received!
             </Heading>
             <Text className="text-black text-[14px] leading-[15px]">
-              Greetings, {Name} {LastName}!
+              Order #{orderId} has been placed by {Name} {LastName}.
             </Text>
             <Text className="text-black text-[14px] leading-[15px]">
-              You will be contacted shortly regarding delivery and payment.
+              Customer Email: {email}
             </Text>
+
+            <Hr className="border border-solid border-[#eaeaea] my-[16px] mx-0 w-full" />
+
+            <Text className="text-black text-[16px] font-semibold mb-2">
+              Shipping Details
+            </Text>
+            <Text className="text-black text-[14px] leading-[20px]">
+              Method: {shippingMethod || "Not specified"}
+            </Text>
+            {shippingAddress && (
+              <div className="mb-4">
+                <Text className="text-black text-[14px] leading-[20px]">
+                  {shippingAddress.firstName} {shippingAddress.lastName}
+                  <br />
+                  {shippingAddress.streetAddress}
+                  <br />
+                  {shippingAddress.city}, {shippingAddress.state}{" "}
+                  {shippingAddress.zipCode}
+                  <br />
+                  {shippingAddress.country}
+                  <br />
+                  Phone: {shippingAddress.phone}
+                </Text>
+              </div>
+            )}
+
+            {billingAddress && billingAddress !== shippingAddress && (
+              <>
+                <Text className="text-black text-[16px] font-semibold mb-2">
+                  Billing Details
+                </Text>
+                <div className="mb-4">
+                  <Text className="text-black text-[14px] leading-[20px]">
+                    {billingAddress.firstName} {billingAddress.lastName}
+                    <br />
+                    {billingAddress.streetAddress}
+                    <br />
+                    {billingAddress.city}, {billingAddress.state}{" "}
+                    {billingAddress.zipCode}
+                    <br />
+                    {billingAddress.country}
+                    <br />
+                    Phone: {billingAddress.phone}
+                  </Text>
+                </div>
+              </>
+            )}
+
+            <Hr className="border border-solid border-[#eaeaea] my-[16px] mx-0 w-full" />
 
             <Section className="py-[8px] text-center">
               <table className="mb-[16px] w-full">
@@ -152,9 +227,9 @@ export const ClientOrderConfirmation = ({
                 <Column align="center">
                   <Button
                     className="box-border w-full rounded-[8px] bg-black px-[12px] py-[12px] text-center font-normal text-white"
-                    href={`https://www.rublevsky.studio/order/${orderId}`}
+                    href={`https://www.rublevsky.studio/admin/orders/${orderId}`}
                   >
-                    View Order
+                    View Order Details
                   </Button>
                 </Column>
               </Row>
@@ -163,21 +238,18 @@ export const ClientOrderConfirmation = ({
             <Text className="text-gray-400 text-[14px] leading-[24px]">
               or copy and paste this URL into your browser:{" "}
               <Link
-                href={`https://www.rublevsky.studio/order/${orderId}`}
+                href={`https://www.rublevsky.studio/admin/orders/${orderId}`}
                 className="text-blue-400 no-underline"
               >
-                {`https://www.rublevsky.studio/order/${orderId}`}
+                {`https://www.rublevsky.studio/admin/orders/${orderId}`}
               </Link>
             </Text>
             <Hr className="border border-solid border-[#eaeaea] my-[26px] mx-0 w-full" />
             <Text className="text-[#666666] text-[12px] leading-[22px]">
-              This order confirmation was intended for{" "}
-              <span className="text-black">{Name}</span>. This email was sent
-              from <span className="text-black">Rublevsky Studio</span> located
-              in <span className="text-black">Ontario, Canada</span>. If you
-              were not expecting this order confirmation, you can ignore this
-              email. If you are concerned about your account's safety, please
-              reply to this email to get in touch with us.
+              This is an automated admin notification from{" "}
+              <span className="text-black">Rublevsky Studio</span>. If you
+              received this email by mistake, please contact the system
+              administrator.
             </Text>
           </Container>
         </Body>
@@ -186,8 +258,7 @@ export const ClientOrderConfirmation = ({
   );
 };
 
-ClientOrderConfirmation.PreviewProps = {
-  username: "alanturing",
+AdminOrderConfirmation.PreviewProps = {
   Name: "Alan",
   LastName: "Turing",
   email: "alan.turing@example.com",
@@ -197,6 +268,18 @@ ClientOrderConfirmation.PreviewProps = {
   totalDiscount: "45.00",
   orderTotal: "205.00",
   orderStatus: "Pending",
+  shippingMethod: "Standard Shipping",
+  shippingAddress: {
+    firstName: "Alan",
+    lastName: "Turing",
+    email: "alan.turing@example.com",
+    phone: "+1 (555) 123-4567",
+    streetAddress: "123 Computing Lane",
+    city: "Cambridge",
+    state: "ON",
+    country: "Canada",
+    zipCode: "N2L 3G1",
+  },
   orderItems: [
     {
       name: "Red Graffiti Print",
@@ -213,6 +296,6 @@ ClientOrderConfirmation.PreviewProps = {
       image: "https://assets.rublevsky.studio/yin-yan-shirt-7.jpg",
     },
   ],
-} as ClientOrderConfirmationProps;
+} as AdminOrderConfirmationProps;
 
-export default ClientOrderConfirmation;
+export default AdminOrderConfirmation;
