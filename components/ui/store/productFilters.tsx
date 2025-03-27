@@ -3,7 +3,7 @@
 import { Category, TeaCategory } from "@/types";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
-import { Label } from "@/components/ui/label";
+import { Label } from "@/components/ui/shared/label";
 import { Slider } from "@/components/ui/slider";
 import { motion, useMotionValueEvent, useScroll } from "framer-motion";
 import { FilterGroup } from "../shared/FilterGroup";
@@ -78,7 +78,7 @@ export default function ProductFilters({
         duration: 0.35,
         ease: "easeInOut",
       }}
-      className="md:sticky top-0 z-10 backdrop-blur-md bg-white/70 flex flex-col flex-wrap  md:flex-row gap-6 md:gap-10 p-4"
+      className="md:sticky top-0 z-10 backdrop-blur-md bg-background/60 flex flex-col flex-wrap  md:flex-row gap-6 md:gap-10 p-4"
     >
       {/* Main Categories */}
       <FilterGroup

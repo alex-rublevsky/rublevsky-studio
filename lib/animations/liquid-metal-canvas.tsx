@@ -136,13 +136,17 @@ export const Canvas: FC<{
     gl.uniform1f(uniforms.u_refraction, params.refraction);
     gl.uniform1f(uniforms.u_liquid, params.liquid);
 
-    // Set up canvas size
-    const size = 1000;
-    canvas.width = size * devicePixelRatio;
-    canvas.height = size * devicePixelRatio;
-    gl.viewport(0, 0, canvas.width, canvas.width);
-    gl.uniform1f(uniforms.u_ratio, 1);
-    gl.uniform1f(uniforms.u_img_ratio, 1);
+    // Set up canvas size preserving aspect ratio
+    const deviceScale = devicePixelRatio;
+    canvas.width = imageData.width * deviceScale;
+    canvas.height = imageData.height * deviceScale;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+
+    // Calculate and set aspect ratios
+    const canvasRatio = canvas.width / canvas.height;
+    const imageRatio = imageData.width / imageData.height;
+    gl.uniform1f(uniforms.u_ratio, canvasRatio);
+    gl.uniform1f(uniforms.u_img_ratio, imageRatio);
 
     // Clean up old texture
     if (textureRef.current) {
@@ -212,6 +216,10 @@ export const Canvas: FC<{
   }, [params.speed]);
 
   return (
-    <canvas ref={canvasRef} className="block h-full w-full object-contain" />
+    <canvas
+      ref={canvasRef}
+      className="block h-full w-full object-contain"
+      style={{ aspectRatio: `${imageData.width} / ${imageData.height}` }}
+    />
   );
 };

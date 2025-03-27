@@ -18,8 +18,8 @@ import getAllTeaCategories from "@/lib/actions/tea/getAllTeaCategories";
 import DeleteConfirmationDialog from "@/components/ui/admin/DeleteConfirmationDialog";
 import { toast } from "sonner";
 import ProductSelector from "@/components/ui/admin/ProductSelector";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/shared/button";
+import { Input } from "@/components/ui/shared/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Drawer,
@@ -28,7 +28,7 @@ import {
   DrawerTitle,
   DrawerFooter,
   DrawerBody,
-} from "@/components/ui/drawer";
+} from "@/components/ui/shared/drawer";
 
 export default function BlogPage() {
   const router = useRouter();

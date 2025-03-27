@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/shared/button";
 import { Cart } from "@/lib/context/CartContext";
 
 interface CheckoutSummaryProps {

@@ -15,9 +15,9 @@ import {
 import DeleteConfirmationDialog from "@/components/ui/admin/DeleteConfirmationDialog";
 import { toast } from "sonner";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/shared/button";
+import { Badge } from "@/components/ui/shared/badge";
+import { Input } from "@/components/ui/shared/input";
 import { Switch } from "@/components/ui/switch";
 import {
   Drawer,
@@ -26,7 +26,7 @@ import {
   DrawerTitle,
   DrawerBody,
   DrawerFooter,
-} from "@/components/ui/drawer";
+} from "@/components/ui/shared/drawer";
 
 export default function BrandsPage() {
   const router = useRouter();

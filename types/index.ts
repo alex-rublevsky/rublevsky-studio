@@ -3,7 +3,7 @@ import {
   categories,
   brands,
   productVariations,
-  variationAttributes,
+
   orders,
   orderItems,
   addresses,
@@ -182,4 +182,23 @@ export interface CartItem {
   weightInfo?: {
     totalWeight: number;
   };
+}
+
+export interface ProductWithDetails extends Product {
+  category?: {
+    name: string;
+    slug: string;
+  } | null;
+  brand?: {
+    name: string;
+    slug: string;
+  } | null;
+  variations?: ProductVariationWithAttributes[];
+  blogPost?: {
+    id: number;
+    title: string;
+    slug: string;
+    body: string;
+    blogUrl: string;
+  } | null;
 }

@@ -9,7 +9,7 @@ import {
 } from "swiper/modules";
 import { useEffect, useRef, memo } from "react";
 import type { Swiper as SwiperType } from "swiper";
-import "./blogPostImageGallery.css";
+import "./sliders.css";
 
 interface BlogPostImageGalleryProps {
   images: string[];

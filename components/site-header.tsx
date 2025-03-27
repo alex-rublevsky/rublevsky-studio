@@ -1,7 +1,7 @@
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/ui/shared/theme-toggle";
-import { ThemeSelector } from "@/components/theme-selector";
+
 interface SiteHeaderProps {
   title?: string;
 }
@@ -17,7 +17,6 @@ export function SiteHeader({ title = "Dashboard" }: SiteHeaderProps) {
         />
         <h1 className="!text-base font-medium">{title}</h1>
         <div className="ml-auto flex items-center gap-2">
-          <ThemeSelector />
           <ThemeToggle />
         </div>
       </div>

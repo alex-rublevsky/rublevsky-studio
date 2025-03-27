@@ -28,7 +28,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #ff6f61;
+    background-color: #000000;
     transform: translateY(100%);
     transition: transform 0.3s ease;
     z-index: -1;

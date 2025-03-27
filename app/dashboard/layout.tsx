@@ -8,16 +8,8 @@ import { data } from "@/components/app-sidebar";
 import { type Icon } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/providers/theme-provider";
-import { ActiveThemeProvider } from "@/components/active-theme";
 import { getCookie } from "../../lib/utils/cookies";
 import { useEffect, useState } from "react";
-
-const MetaThemeColors = [
-  {
-    light: "#ffffff",
-    dark: "#09090b",
-  },
-];
 
 interface NavItem {
   title: string;
@@ -54,29 +46,27 @@ export default function DashboardLayout({
         disableTransitionOnChange
         enableColorScheme
       >
-        <ActiveThemeProvider initialTheme={activeThemeValue}>
-          <SidebarProvider
-            suppressHydrationWarning
-            style={
-              {
-                "--sidebar-width": "calc(var(--spacing) * 72)",
-                "--header-height": "calc(var(--spacing) * 12)",
-              } as React.CSSProperties
-            }
-          >
-            <AppSidebar variant="inset" />
-            <SidebarInset>
-              <SiteHeader title={currentPage?.title} />
-              <div className="flex flex-1 flex-col">
-                <div className="@container/main flex flex-1 flex-col gap-2">
-                  <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-                    {children}
-                  </div>
+        <SidebarProvider
+          suppressHydrationWarning
+          style={
+            {
+              "--sidebar-width": "calc(var(--spacing) * 72)",
+              "--header-height": "calc(var(--spacing) * 12)",
+            } as React.CSSProperties
+          }
+        >
+          <AppSidebar variant="inset" />
+          <SidebarInset>
+            <SiteHeader title={currentPage?.title} />
+            <div className="flex flex-1 flex-col">
+              <div className="@container/main flex flex-1 flex-col gap-2">
+                <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+                  {children}
                 </div>
               </div>
-            </SidebarInset>
-          </SidebarProvider>
-        </ActiveThemeProvider>
+            </div>
+          </SidebarInset>
+        </SidebarProvider>
       </ThemeProvider>
     </div>
   );

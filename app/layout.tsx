@@ -4,7 +4,6 @@ import "@/styles/links.css";
 import { NavBar } from "@/components/ui/navbar";
 import localFont from "next/font/local";
 import "@/styles/typography.css";
-import { AnimationProvider } from "@/components/providers/animation-provider";
 import { Toaster } from "@/components/ui/sonner";
 
 import { cn } from "@/lib/utils";
@@ -44,10 +43,8 @@ export default async function RootLayout({
           `${overusedGrotesk.variable} antialiased bg-background overscroll-none`
         )}
       >
-        <AnimationProvider>
-          <NavBar />
-          {children}
-        </AnimationProvider>
+        <NavBar />
+        {children}
 
         <Toaster position="top-right" richColors />
       </body>

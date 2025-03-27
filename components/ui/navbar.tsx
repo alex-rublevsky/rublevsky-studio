@@ -5,12 +5,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import {
-  DropdownNavMenu,
-  DropdownNavMenuTrigger,
-  DropdownNavMenuContent,
-  DropdownMenuItem,
-} from "./dropdown-nav-menu";
+import { Menu, Transition } from "@headlessui/react";
 
 interface NavItem {
   name: string;
@@ -86,11 +81,63 @@ const defaultWorkItems: NavItem[] = [
   { name: "Posters", url: "/#posters" },
 ];
 
-const menuItems: NavItem[] = [
-  { name: "Work", url: "/" },
+const desktopMenuItems: NavItem[] = [
+  { name: "Studio", url: "/" },
   { name: "Blog", url: "/blog" },
   { name: "Store", url: "/store" },
 ];
+
+const mobileMenuItems: NavItem[] = [
+  { name: "Studio", url: "/" },
+  { name: "Blog", url: "/blog" },
+  { name: "Store", url: "/store" },
+  {
+    name: "Resume",
+    url: "https://assets.rublevsky.studio/PDF/Resume%20Alexander%20Rublevsky.pdf",
+  },
+];
+
+const DropdownNavMenu = ({ items }: { items: NavItem[] }) => {
+  return (
+    <Menu as="div" className="relative inline-block text-left">
+      <div>
+        <Menu.Button className="relative flex w-fit rounded-full border border-black bg-background hover:bg-black hover:text-white transition-all duration-300 p-[0.3rem]">
+          <span className="relative z-10 block cursor-pointer px-2.5 md:px-4 py-1.5 text-xs text-white mix-blend-difference md:py-2 md:text-sm">
+            Other
+          </span>
+        </Menu.Button>
+      </div>
+
+      <Transition
+        enter="transition ease-out duration-100"
+        enterFrom="transform opacity-0 scale-95"
+        enterTo="transform opacity-100 scale-100"
+        leave="transition ease-in duration-75"
+        leaveFrom="transform opacity-100 scale-100"
+        leaveTo="transform opacity-0 scale-95"
+      >
+        <Menu.Items className="absolute bottom-full left-0 z-10 mb-2 w-56 origin-bottom-left rounded-md bg-background shadow-lg ring-1 ring-black/5 focus:outline-none overflow-hidden">
+          <div className="overflow-hidden">
+            {items.map((item, index) => (
+              <Menu.Item key={item.url}>
+                {({ active }) => (
+                  <Link
+                    href={item.url}
+                    className={`${
+                      active ? "bg-primary text-primary-foreground" : ""
+                    } text-foreground block px-4 py-2 text-sm transition-colors duration-150`}
+                  >
+                    {item.name}
+                  </Link>
+                )}
+              </Menu.Item>
+            ))}
+          </div>
+        </Menu.Items>
+      </Transition>
+    </Menu>
+  );
+};
 
 interface TabProps {
   children: React.ReactNode;
@@ -120,7 +167,7 @@ const Tab = ({ children, setPosition, href, isActive }: TabProps) => {
           });
         }}
         className={cn(
-          "relative z-10 block cursor-pointer px-2 sm:px-3 py-1.5 text-xs uppercase text-white mix-blend-difference md:px-4 md:py-2 md:text-sm",
+          "relative z-10 block cursor-pointer px-2.5 md:px-4 py-1.5 text-xs  text-white mix-blend-difference md:py-2 md:text-sm",
           isActive && "underline underline-offset-4"
         )}
       >
@@ -166,7 +213,7 @@ const NavGroup = ({ items, className }: NavGroupProps) => {
   return (
     <ul
       className={cn(
-        "relative flex w-fit rounded-full border border-black bg-white p-[0.3rem]",
+        "relative flex w-fit rounded-full border border-black bg-background p-[0.3rem]",
         className
       )}
       onMouseLeave={() => setPosition((prev) => ({ ...prev, opacity: 0 }))}
@@ -196,39 +243,50 @@ export function NavBar({ className }: Omit<NavBarProps, "items">) {
   return (
     <nav
       className={cn(
-        "fixed bottom-0 left-0 right-0 z-50 mb-2 flex flex-col justify-center gap-2 items-center",
+        "fixed bottom-0 left-0 right-0 z-50 mb-3 flex justify-between items-center px-3",
         className
       )}
     >
-      {pathname === "/" && <NavGroup items={defaultWorkItems} />}
-      <div className="w-full flex justify-center gap-2">
-        <DropdownNavMenu>
-          <DropdownNavMenuTrigger asChild>
-            <div className="relative flex w-fit rounded-full border border-black bg-white hover:bg-black hover:text-white transition-all duration-300 p-[0.3rem]">
-              <li className="relative z-10 block cursor-pointer px-3 py-1.5 text-xs uppercase text-white mix-blend-difference md:px-4 md:py-2 md:text-sm">
-                Menu
-              </li>
-            </div>
-          </DropdownNavMenuTrigger>
-          <DropdownNavMenuContent align="center" side="top" className="mb-2">
-            {menuItems.map((item) => (
-              <DropdownMenuItem key={item.url} asChild>
-                <Link href={item.url}>{item.name}</Link>
-              </DropdownMenuItem>
-            ))}
-          </DropdownNavMenuContent>
-        </DropdownNavMenu>
-
-        {pathname === "/" && (
-          <div className="relative flex w-fit rounded-full border border-black bg-white hover:bg-black hover:text-white transition-all duration-300 p-[0.3rem]">
-            <Link href="https://assets.rublevsky.studio/PDF/Resume%20Alexander%20Rublevsky.pdf">
-              <li className="relative z-10 block cursor-pointer px-3 py-1.5 text-xs uppercase text-white mix-blend-difference md:px-4 md:py-2 md:text-sm">
-                CV
-              </li>
-            </Link>
+      {pathname === "/" ? (
+        <>
+          <div className="hidden md:block">
+            <DropdownNavMenu items={desktopMenuItems} />
           </div>
-        )}
-      </div>
+          <div className="absolute left-1/2 -translate-x-1/2 hidden md:block">
+            <NavGroup items={defaultWorkItems} />
+          </div>
+          <div className="md:hidden">
+            <DropdownNavMenu items={mobileMenuItems} />
+          </div>
+          <div className="hidden md:block">
+            <div className="relative flex w-fit rounded-full border border-black bg-background hover:bg-black hover:text-white transition-all duration-300 p-[0.3rem]">
+              <button
+                onClick={() => {
+                  window.open(
+                    `https://assets.rublevsky.studio/PDF/Resume%20Alexander%20Rublevsky.pdf?`,
+                    "_blank"
+                  );
+                }}
+                className="relative z-10 block cursor-pointer px-3 py-1.5 text-xs text-white mix-blend-difference md:px-4 md:py-2 md:text-sm"
+              >
+                Resume
+              </button>
+            </div>
+          </div>
+          <div className="md:hidden">
+            <NavGroup items={defaultWorkItems} />
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="hidden md:block">
+            <DropdownNavMenu items={desktopMenuItems} />
+          </div>
+          <div className="md:hidden">
+            <DropdownNavMenu items={mobileMenuItems} />
+          </div>
+        </>
+      )}
     </nav>
   );
 }

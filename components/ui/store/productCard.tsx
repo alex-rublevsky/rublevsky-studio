@@ -376,7 +376,7 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
         className="w-full product-card overflow-hidden rounded-lg group"
         id={styles.productCard}
       >
-        <div className="bg-white flex flex-col">
+        <div className="bg-background flex flex-col">
           <div className="relative aspect-square overflow-hidden">
             <div>
               {/* Primary Image */}

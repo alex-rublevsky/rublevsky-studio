@@ -23,8 +23,8 @@ import {
   PRODUCT_ATTRIBUTES,
   getAttributeDisplayName,
 } from "@/lib/utils/productAttributes";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/shared/input";
+import { Button } from "@/components/ui/shared/button";
 import {
   Select,
   SelectContent,

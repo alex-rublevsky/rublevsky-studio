@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useCart } from "@/lib/context/CartContext";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/shared/button";
 import { useRouter } from "next/navigation";
 
 export function CartSummary() {

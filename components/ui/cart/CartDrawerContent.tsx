@@ -5,7 +5,11 @@ import { useCart } from "@/lib/context/CartContext";
 import { CartItem } from "./CartItem";
 import { CartSummary, CartCheckoutButton } from "./CartSummary";
 import { ShoppingBag } from "lucide-react";
-import { DrawerHeader, DrawerBody, DrawerFooter } from "@/components/ui/drawer";
+import {
+  DrawerHeader,
+  DrawerBody,
+  DrawerFooter,
+} from "@/components/ui/shared/drawer";
 
 export function CartDrawerContent() {
   let cartContext;

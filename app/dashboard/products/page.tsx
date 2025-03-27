@@ -26,8 +26,8 @@ import {
 } from "@/lib/actions/products";
 import DeleteConfirmationDialog from "@/components/ui/admin/DeleteConfirmationDialog";
 import { toast } from "sonner";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/shared/input";
+import { Button } from "@/components/ui/shared/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -37,7 +37,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/shared/badge";
 import {
   Drawer,
   DrawerContent,
@@ -45,7 +45,7 @@ import {
   DrawerTitle,
   DrawerFooter,
   DrawerBody,
-} from "@/components/ui/drawer";
+} from "@/components/ui/shared/drawer";
 import { cn } from "@/lib/utils";
 
 // Define the Variation interface to match the one in ProductVariationForm

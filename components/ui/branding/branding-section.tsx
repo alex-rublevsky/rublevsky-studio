@@ -10,7 +10,7 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerBody,
-} from "@/components/ui/drawer";
+} from "@/components/ui/shared/drawer";
 import Image from "next/image";
 import ImageGallery from "@/components/ui/shared/ImageGallery";
 

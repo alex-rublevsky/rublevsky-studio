@@ -1,6 +1,6 @@
 import Image from "next/image";
-import SkillLogo from "./skillLogo";
-import { Badge } from "@/components/ui/badge";
+import SkillLogo from "@/components/ui/studio/skillLogo";
+import { Badge } from "@/components/ui/shared/badge";
 export function SkillsSection() {
   return (
     <section className="w-full">
@@ -24,11 +24,7 @@ export function SkillsSection() {
             link="/logos/typescript.svg"
           />
           <SkillLogo name="React" alt="React Logo" link="/logos/react.svg" />
-          <SkillLogo
-            name="Laravel"
-            alt="Laravel Logo"
-            link="/logos/laravel.svg"
-          />
+
           <SkillLogo name="HTML5" alt="HTML5 Logo" link="/logos/html5.svg" />
           <SkillLogo
             name="Tailwind CSS"
@@ -40,6 +36,7 @@ export function SkillsSection() {
             name="Cloudflare"
             alt="Cloudflare Logo"
             link="/logos/cloudflare.png"
+            wideLogo
           />
 
           <SkillLogo
@@ -47,7 +44,6 @@ export function SkillsSection() {
             alt="Webflow Logo"
             link="/logos/webflow.svg"
           />
-          <SkillLogo name="PHP" alt="PHP Logo" link="/logos/php.svg" />
           <SkillLogo name="Git" alt="Git Logo" link="/logos/git.svg" wideLogo />
           <SkillLogo
             name="Wized"
@@ -61,6 +57,18 @@ export function SkillsSection() {
             link="/logos/google-analytics.svg"
             wideLogo
           />
+          <SkillLogo
+            name="PostHog"
+            alt="PostHog Logo"
+            link="/logos/posthog.svg"
+            wideLogo
+          />
+          <SkillLogo
+            name="Drizzle"
+            alt="Drizzle Logo"
+            link="/logos/drizzle.png"
+          />
+          <SkillLogo name="SQLite" alt="SQLite Logo" link="/logos/sqlite.svg" />
         </div>
 
         <Badge variant="secondary" size="lg" className="z-50 mb-10 mt-20">

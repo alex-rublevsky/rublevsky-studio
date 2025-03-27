@@ -25,7 +25,7 @@ function FilterButton({
         "px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium rounded-full transition-colors",
         isSelected
           ? "bg-primary text-primary-foreground"
-          : "border border-gray-400 hover:bg-gray-400",
+          : "border border-border hover:bg-border",
         className
       )}
     >

@@ -70,7 +70,7 @@ export function ExperienceTimeline() {
 
   return (
     <>
-      <section>
+      <section className="pb-20">
         <h2>Experience</h2>
       </section>
 

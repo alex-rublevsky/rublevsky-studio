@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 import React, { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/shared/button";
 import { CheckCircle } from "lucide-react";
 
 function OrderConfirmationContent() {

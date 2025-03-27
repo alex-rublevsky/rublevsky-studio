@@ -2,8 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { Canvas } from "@/lib/animations/liquid-metal-canvas";
+import { cn } from "@/lib/utils";
 
-// Fixed shader parameters optimized for the R logo
+// Inline SVG path for the R logo
+const R_LOGO_SVG = `
+<svg width="68" height="80" viewBox="0 0 68 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M34.4355 54.5039L41.2266 42.3516C46.707 42.3516 51.1549 42.9076 54.5703 44.0195C57.9857 45.0521 60.5671 46.9583 62.3145 49.7383C64.0618 52.4388 65.2135 56.291 65.7695 61.2949L67.9141 80H45.1582L43.0137 63.4395C42.696 60.4212 41.862 58.1973 40.5117 56.7676C39.2409 55.2585 37.2155 54.5039 34.4355 54.5039ZM35.7461 19.9531H23.7129V35.2031H35.7461C37.5729 35.2031 39.082 34.9251 40.2734 34.3691C41.5443 33.7337 42.4974 32.86 43.1328 31.748C43.8477 30.5566 44.2051 29.127 44.2051 27.459C44.2051 25.0762 43.4505 23.2493 41.9414 21.9785C40.5117 20.6283 38.4466 19.9531 35.7461 19.9531ZM41.2266 45.9258L40.2734 54.5039H23.7129V80H0.480469V0.652344H39.4395C44.9993 0.652344 49.8444 1.60547 53.9746 3.51172C58.1048 5.41797 61.3216 8.11849 63.625 11.6133C65.9284 15.0286 67.0801 19.0794 67.0801 23.7656C67.0801 28.2135 66.0078 32.1055 63.8633 35.4414C61.7188 38.7773 58.7005 41.3587 54.8086 43.1855C50.9167 45.0124 46.3893 45.9258 41.2266 45.9258Z" fill="black"/>
+</svg>
+`;
+
 const SHADER_PARAMS = {
   refraction: 0.03,
   edge: 0.6,
@@ -112,42 +119,101 @@ function smoothEdges(imageData: ImageData): ImageData {
   return outImg;
 }
 
-export function LiquidMetalR() {
+export function LiquidMetalR({ className }: { className?: string }) {
   const [imageData, setImageData] = useState<ImageData | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Original SVG dimensions and aspect ratio
+  const SVG_WIDTH = 68;
+  const SVG_HEIGHT = 80;
+  const SVG_ASPECT_RATIO = SVG_WIDTH / SVG_HEIGHT;
+
+  // Define canvas size maintaining aspect ratio
+  const CANVAS_HEIGHT = 1000;
+  const CANVAS_WIDTH = Math.round(CANVAS_HEIGHT * SVG_ASPECT_RATIO);
+  const SCALE_RATIO = 1.0;
+  const TARGET_HEIGHT = CANVAS_HEIGHT * SCALE_RATIO;
+  const TARGET_WIDTH = CANVAS_WIDTH * SCALE_RATIO;
+  const OFFSET_Y = (CANVAS_HEIGHT - TARGET_HEIGHT) / 2;
+  const OFFSET_X = (CANVAS_WIDTH - TARGET_WIDTH) / 2;
 
   useEffect(() => {
     const canvas = document.createElement("canvas");
-    const size = 1000;
-    canvas.width = size;
-    canvas.height = size;
+    canvas.width = CANVAS_WIDTH;
+    canvas.height = CANVAS_HEIGHT;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const img = new Image();
+    // Create a Blob from the SVG string
+    const blob = new Blob([R_LOGO_SVG], { type: "image/svg+xml" });
+    const url = URL.createObjectURL(blob);
+
+    const img = new window.Image();
     img.onload = () => {
       // Fill white background
       ctx.fillStyle = "white";
-      ctx.fillRect(0, 0, size, size);
+      ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-      // Draw SVG centered at 80% of canvas size
-      const targetSize = size * 0.8;
-      const offset = (size - targetSize) / 2;
-      ctx.drawImage(img, offset, offset, targetSize, targetSize);
+      // Draw SVG maintaining aspect ratio
+      ctx.drawImage(img, OFFSET_X, OFFSET_Y, TARGET_WIDTH, TARGET_HEIGHT);
 
       // Process the image
-      const rawData = ctx.getImageData(0, 0, size, size);
+      const rawData = ctx.getImageData(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
       const processedData = smoothEdges(rawData);
       setImageData(processedData);
+      setIsLoaded(true);
+
+      // Clean up
+      URL.revokeObjectURL(url);
     };
 
-    img.src = "/r-overused-grotesk.svg";
+    img.src = url;
+
+    // Cleanup function
+    return () => {
+      URL.revokeObjectURL(url);
+    };
   }, []);
 
-  if (!imageData) return null;
-
   return (
-    <div className="-m-4 w-[11rem] h-[11rem]">
-      <Canvas imageData={imageData} params={SHADER_PARAMS} />
+    <div
+      className={cn(
+        "relative -ml-1.5 h-32 w-32 md:-ml-4 md:h-48 md:w-48",
+        className
+      )}
+    >
+      {/* Static SVG that's always visible until animation loads */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <svg
+          width={SVG_WIDTH}
+          height={SVG_HEIGHT}
+          viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className={cn(
+            "w-full h-full transition-opacity duration-1000 ease-in",
+            isLoaded ? "opacity-0" : "opacity-100"
+          )}
+          preserveAspectRatio="xMidYMid meet"
+          style={{ objectFit: "contain" }}
+        >
+          <path
+            d="M34.4355 54.5039L41.2266 42.3516C46.707 42.3516 51.1549 42.9076 54.5703 44.0195C57.9857 45.0521 60.5671 46.9583 62.3145 49.7383C64.0618 52.4388 65.2135 56.291 65.7695 61.2949L67.9141 80H45.1582L43.0137 63.4395C42.696 60.4212 41.862 58.1973 40.5117 56.7676C39.2409 55.2585 37.2155 54.5039 34.4355 54.5039ZM35.7461 19.9531H23.7129V35.2031H35.7461C37.5729 35.2031 39.082 34.9251 40.2734 34.3691C41.5443 33.7337 42.4974 32.86 43.1328 31.748C43.8477 30.5566 44.2051 29.127 44.2051 27.459C44.2051 25.0762 43.4505 23.2493 41.9414 21.9785C40.5117 20.6283 38.4466 19.9531 35.7461 19.9531ZM41.2266 45.9258L40.2734 54.5039H23.7129V80H0.480469V0.652344H39.4395C44.9993 0.652344 49.8444 1.60547 53.9746 3.51172C58.1048 5.41797 61.3216 8.11849 63.625 11.6133C65.9284 15.0286 67.0801 19.0794 67.0801 23.7656C67.0801 28.2135 66.0078 32.1055 63.8633 35.4414C61.7188 38.7773 58.7005 41.3587 54.8086 43.1855C50.9167 45.0124 46.3893 45.9258 41.2266 45.9258Z"
+            fill="currentColor"
+            className="text-border"
+          />
+        </svg>
+      </div>
+
+      {/* Liquid metal animation that fades in when ready */}
+      <div
+        className={cn(
+          "absolute inset-0 transition-opacity duration-1000 ease-in",
+          isLoaded ? "opacity-100" : "opacity-0"
+        )}
+      >
+        {imageData && <Canvas imageData={imageData} params={SHADER_PARAMS} />}
+      </div>
     </div>
   );
 }

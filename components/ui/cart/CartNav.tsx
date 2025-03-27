@@ -1,7 +1,11 @@
 "use client";
 
 import { useCart } from "@/lib/context/CartContext";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerTrigger,
+} from "@/components/ui/shared/drawer";
 import { CartDrawerContent } from "./CartDrawerContent";
 
 export function CartNav() {
@@ -13,7 +17,7 @@ export function CartNav() {
         <DrawerTrigger asChild>
           <button
             onClick={() => setCartOpen(true)}
-            className="relative flex items-center justify-center w-[2.6rem] h-[2.6rem] md:w-[3.2rem] md:h-[3.2rem] rounded-full border border-black bg-white hover:bg-black hover:text-white transition-all duration-500"
+            className="relative flex items-center justify-center w-[2.6rem] h-[2.6rem] md:w-[3.2rem] md:h-[3.2rem] rounded-full border border-black bg-background hover:bg-black hover:text-white transition-all duration-500"
           >
             {/* Cart SVG Icon */}
             <svg

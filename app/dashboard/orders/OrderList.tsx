@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { OrderWithDetails } from "@/lib/actions/orders/getAllOrders";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/shared/badge";
 import Image from "next/image";
 import { Switch } from "@/components/ui/switch";
 import toggleOrderStatus from "@/lib/actions/orders/toggleOrderStatus";

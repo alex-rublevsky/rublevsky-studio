@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-background: hsl(var(--background));
+  --color-background: var(--background);
   --color-foreground: hsl(var(--foreground));
   --color-gray: colors.neutral;
 
@@ -14,13 +14,13 @@
   --color-popover: hsl(var(--popover));
   --color-popover-foreground: hsl(var(--popover-foreground));
 
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
 
-  --color-secondary: hsl(var(--secondary));
+  --color-secondary: var(--secondary);
   --color-secondary-foreground: hsl(var(--secondary-foreground));
 
-  --color-muted: hsl(var(--muted));
+  --color-muted: var(--muted);
   --color-muted-foreground: hsl(var(--muted-foreground));
 
   --color-accent: hsl(var(--accent));
@@ -29,7 +29,7 @@
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
 
-  --color-border: hsl(var(--border));
+  --color-border: var(--border);
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
 
@@ -51,6 +51,29 @@
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
+
+  /* Accordion animation */
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
 }
 
 @utility scrollbar-none {
@@ -70,23 +93,23 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: oklch(95.85% 0.0037 286.33);
     --foreground: 0 0% 3.9%;
     --card: 0 0% 100%;
     --card-foreground: 0 0% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
+    --primary: oklch(0.147 0.004 49.25);
+    --primary-foreground: oklch(95.85% 0.0037 286.33);
+    --secondary: oklch(95.85% 0.0037 286.33);
     --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 93%;
+    --muted: oklch(90% 0.0037 286.33);
     --muted-foreground: 0 0% 45.1%;
     --accent: 0 0% 96.1%;
     --accent-foreground: 0 0% 9%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
+    --border: oklch(86% 0.0037 286.33);
     --input: 0 0% 89.8%;
     --ring: 0 0% 3.9%;
     --chart-1: 12 76% 61%;
@@ -144,6 +167,7 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -151,7 +175,7 @@
 
 @layer utilities {
   section {
-    background-color: white;
+    background-color: var(--background);
     padding-bottom: 13rem;
     padding-left: 1rem;
     z-index: 1;
@@ -163,6 +187,7 @@
     padding-left: 0;
     padding-right: 0;
   }
+  
 
   @media (min-width: 640px) {
     section {
@@ -204,7 +229,7 @@
 
   /* Make body background black in admin panel for overscrolling */
   body.dark {
-    background-color: hsl(var(--background)) !important;
+    background-color: var(--background) !important;
   }
 
   .work_page_section_title_holder {
@@ -215,109 +240,4 @@
 
 
 
-  /* THEME COLORS */
-body {
-  @apply overscroll-none bg-transparent;
-}
 
-:root {
-  --font-sans: var(--font-inter);
-  --header-height: calc(var(--spacing) * 12 + 1px);
-}
-
-.theme-scaled {
-  @media (min-width: 1024px) {
-    --radius: 0.6rem;
-    --text-lg: 1.05rem;
-    --text-base: 0.85rem;
-    --text-sm: 0.8rem;
-    --spacing: 0.222222rem;
-  }
-
-  [data-slot="card"] {
-    --spacing: 0.16rem;
-  }
-
-  [data-slot="select-trigger"],
-  [data-slot="toggle-group-item"] {
-    --spacing: 0.222222rem;
-  }
-}
-
-.theme-default,
-.theme-default-scaled {
-  --primary: var(--color-neutral-600);
-  --primary-foreground: var(--color-neutral-50);
-
-  @variant dark {
-    --primary: var(--color-neutral-500);
-    --primary-foreground: var(--color-neutral-50);
-  }
-}
-
-.theme-blue,
-.theme-blue-scaled {
-  --primary: var(--color-blue-600);
-  --primary-foreground: var(--color-blue-50);
-
-  @variant dark {
-    --primary: var(--color-blue-500);
-    --primary-foreground: var(--color-blue-50);
-  }
-}
-
-.theme-green,
-.theme-green-scaled {
-  --primary: var(--color-lime-600);
-  --primary-foreground: var(--color-lime-50);
-
-  @variant dark {
-    --primary: var(--color-lime-600);
-    --primary-foreground: var(--color-lime-50);
-  }
-}
-
-.theme-amber,
-.theme-amber-scaled {
-  --primary: var(--color-amber-600);
-  --primary-foreground: var(--color-amber-50);
-
-  @variant dark {
-    --primary: var(--color-amber-500);
-    --primary-foreground: var(--color-amber-50);
-  }
-}
-
-.theme-mono,
-.theme-mono-scaled {
-  --font-sans: var(--font-mono);
-  --primary: var(--color-neutral-600);
-  --primary-foreground: var(--color-neutral-50);
-
-  @variant dark {
-    --primary: var(--color-neutral-500);
-    --primary-foreground: var(--color-neutral-50);
-  }
-
-  .rounded-xs,
-  .rounded-sm,
-  .rounded-md,
-  .rounded-lg,
-  .rounded-xl {
-    @apply !rounded-none;
-    border-radius: 0;
-  }
-
-  .shadow-xs,
-  .shadow-sm,
-  .shadow-md,
-  .shadow-lg,
-  .shadow-xl {
-    @apply !shadow-none;
-  }
-
-  [data-slot="toggle-group"],
-  [data-slot="toggle-group-item"] {
-    @apply !rounded-none !shadow-none;
-  }
-}

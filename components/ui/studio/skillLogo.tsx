@@ -16,7 +16,7 @@ function skillLogo({
       <div className="flex-1 w-full flex items-center justify-center">
         <div
           className={`relative flex items-center justify-center ${
-            wideLogo ? "w-24 md:w-28 h-12 md:h-14" : "w-14 md:w-22 h-14 md:h-22"
+            wideLogo ? "w-24 md:w-28 h-12 md:h-14" : "w-14 h-14 md:h-22"
           }`}
         >
           <Image

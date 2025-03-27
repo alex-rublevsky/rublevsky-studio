@@ -15,8 +15,8 @@ import {
 import DeleteConfirmationDialog from "@/components/ui/admin/DeleteConfirmationDialog";
 import { toast } from "sonner";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/shared/button";
+import { Input } from "@/components/ui/shared/input";
 import { Switch } from "@/components/ui/switch";
 import {
   Drawer,
@@ -25,8 +25,8 @@ import {
   DrawerTitle,
   DrawerBody,
   DrawerFooter,
-} from "@/components/ui/drawer";
-import { Badge } from "@/components/ui/badge";
+} from "@/components/ui/shared/drawer";
+import { Badge } from "@/components/ui/shared/badge";
 
 export default function CategoriesPage() {
   const router = useRouter();

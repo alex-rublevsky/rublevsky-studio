@@ -10,7 +10,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-black text-white border border-black hover:bg-transparent hover:text-black",
+          "bg-primary text-primary-foreground border border-black hover:bg-transparent hover:text-black",
         inverted:
           "bg-white text-black border border-white hover:bg-transparent hover:text-white",
         destructive:
@@ -20,7 +20,7 @@ const buttonVariants = cva(
         greenInverted:
           "bg-green-500 text-black font-medium border border-green-500 hover:bg-transparent hover:text-green-500",
         outline:
-          "border border-input bg-background shadow-xs hover:bg-accent hover:text-accent-foreground",
+          "bg-transparent text-black border border-black hover:bg-black hover:text-white",
         secondary:
           "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
         secondaryInverted:
@@ -53,7 +53,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const Comp = asChild ? Slot : "button";
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(
+          "cursor-pointer",
+          buttonVariants({ variant, size, className })
+        )}
         ref={ref}
         {...props}
       />
