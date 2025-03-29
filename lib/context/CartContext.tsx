@@ -32,6 +32,7 @@ export interface Cart {
 interface CartContextType {
   cart: Cart;
   cartOpen: boolean;
+  products: ProductWithVariations[]; // Make products directly accessible
   setCartOpen: (open: boolean) => void;
   addToCart: (item: CartItem) => void;
   addProductToCart: (
@@ -52,12 +53,15 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-// Cookie name constant
+// Cookie and localStorage constants
 const CART_COOKIE_NAME = "rublevsky-cart";
+const PRODUCTS_STORAGE_KEY = "rublevsky-products";
+const PRODUCTS_TIMESTAMP_KEY = "rublevsky-products-timestamp";
+const PRODUCTS_CACHE_DURATION = 1000 * 60 * 5; // 5 minutes
 
 interface CartProviderProps {
   children: React.ReactNode;
-  initialProducts: ProductWithVariations[];
+  initialProducts?: ProductWithVariations[];
 }
 
 export function CartProvider({ children, initialProducts }: CartProviderProps) {
@@ -65,6 +69,7 @@ export function CartProvider({ children, initialProducts }: CartProviderProps) {
     items: [],
     lastUpdated: Date.now(),
   });
+  const [products, setProducts] = useState<ProductWithVariations[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [initialized, setInitialized] = useState(false);
 
@@ -82,6 +87,38 @@ export function CartProvider({ children, initialProducts }: CartProviderProps) {
     }
     setInitialized(true);
   }, []);
+
+  // Load or update products in localStorage
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    if (initialProducts?.length) {
+      // If we have initial products, update localStorage
+      localStorage.setItem(
+        PRODUCTS_STORAGE_KEY,
+        JSON.stringify(initialProducts)
+      );
+      localStorage.setItem(PRODUCTS_TIMESTAMP_KEY, Date.now().toString());
+      setProducts(initialProducts);
+    } else {
+      // Try to load from localStorage if no initial products
+      const timestamp = parseInt(
+        localStorage.getItem(PRODUCTS_TIMESTAMP_KEY) || "0"
+      );
+      const isStale = Date.now() - timestamp > PRODUCTS_CACHE_DURATION;
+
+      if (!isStale) {
+        try {
+          const savedProducts = localStorage.getItem(PRODUCTS_STORAGE_KEY);
+          if (savedProducts) {
+            setProducts(JSON.parse(savedProducts));
+          }
+        } catch (error) {
+          console.error("Failed to parse products from localStorage:", error);
+        }
+      }
+    }
+  }, [initialProducts]);
 
   // Save cart to cookie whenever it changes
   useEffect(() => {
@@ -159,9 +196,60 @@ export function CartProvider({ children, initialProducts }: CartProviderProps) {
     selectedAttributes?: Record<string, string>
   ): Promise<boolean> => {
     try {
+      // Basic validation
+      if (!product || !product.id) {
+        toast.error("Invalid product");
+        return false;
+      }
+
+      if (quantity <= 0) {
+        toast.error("Invalid quantity");
+        return false;
+      }
+
+      // Validate variation requirement
+      if (product.hasVariations && !selectedVariation) {
+        toast.error("Please select a variation");
+        return false;
+      }
+
+      if (!product.hasVariations && selectedVariation) {
+        toast.error("This product does not support variations");
+        return false;
+      }
+
+      // Find the product in products state to get the latest data
+      const currentProduct = products.find((p) => p.id === product.id);
+      if (!currentProduct) {
+        toast.error("Product not found");
+        return false;
+      }
+
+      // Validate variation exists and matches
+      if (selectedVariation) {
+        const currentVariation = currentProduct.variations?.find(
+          (v) => v.id === selectedVariation.id
+        );
+        if (!currentVariation) {
+          toast.error("Selected variation not found");
+          return false;
+        }
+        // Validate variation price matches
+        if (currentVariation.price !== selectedVariation.price) {
+          toast.error("Product price has changed");
+          return false;
+        }
+      } else {
+        // Validate base product price matches
+        if (currentProduct.price !== product.price) {
+          toast.error("Product price has changed");
+          return false;
+        }
+      }
+
       // Validate stock using client-side validation
       const result = validateStock(
-        initialProducts,
+        products,
         cart.items,
         product.id,
         quantity,
@@ -169,7 +257,7 @@ export function CartProvider({ children, initialProducts }: CartProviderProps) {
       );
 
       if (!result.isAvailable && !result.unlimitedStock) {
-        toast.error("Requested quantity is not available");
+        toast.error(`Only ${result.availableStock} items available`);
         return false;
       }
 
@@ -227,7 +315,7 @@ export function CartProvider({ children, initialProducts }: CartProviderProps) {
   ) => {
     // Validate stock using client-side validation
     const result = validateStock(
-      initialProducts,
+      products,
       cart.items,
       productId,
       quantity,
@@ -279,6 +367,7 @@ export function CartProvider({ children, initialProducts }: CartProviderProps) {
       value={{
         cart,
         cartOpen,
+        products, // Use products from state
         setCartOpen,
         addToCart,
         addProductToCart,

@@ -81,7 +81,7 @@ export default async function OrderPage({
 
         {/* What Happens Next Section - Only shown for new orders */}
         {isNewOrder && (
-          <div className="p-6 bg-muted rounded-lg space-y-4">
+          <NeumorphismCard className="space-y-4">
             <h2 className="font-semibold text-lg">What happens next?</h2>
             <ol className="list-decimal list-inside space-y-2 text-secondary">
               <li>You will receive an order confirmation email shortly.</li>
@@ -97,7 +97,7 @@ export default async function OrderPage({
                 shipping.
               </li>
             </ol>
-          </div>
+          </NeumorphismCard>
         )}
 
         {/* Order Items Section */}

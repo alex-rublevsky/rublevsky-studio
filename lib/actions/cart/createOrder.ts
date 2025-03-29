@@ -3,9 +3,8 @@
 import db from "@/server/db";
 import { orders, orderItems, addresses } from "@/server/schema";
 import { CartItem } from "@/lib/context/CartContext";
-import { eq } from "drizzle-orm";
-import { validateStock, type StockValidationResult } from "@/lib/utils/validateStock";
-import getAllProducts from "../products/getAllProducts";
+import { validateStock, validateVariation } from "@/lib/utils/validateStock";
+import { ProductWithVariations } from "@/types";
 
 interface Address {
   firstName: string;
@@ -32,45 +31,88 @@ interface CreateOrderResult {
   orderId?: number;
 }
 
-export async function createOrder(customerInfo: CustomerInfo, cartItems: CartItem[]): Promise<CreateOrderResult> {
+export async function createOrder(
+  customerInfo: CustomerInfo, 
+  cartItems: CartItem[],
+  clientProducts: ProductWithVariations[]
+): Promise<CreateOrderResult> {
   try {
-    // Validate stock for all items before creating order
-    const { products } = await getAllProducts();
-    
-    // Check stock availability for all items
-    for (const item of cartItems) {
-      const result = validateStock(
-        products,
-        [item], // Only pass the current item instead of all cart items
-        item.productId,
-        item.quantity,
-        item.variationId
-      );
-
-      if (!result.isAvailable && !result.unlimitedStock) {
-        const product = products.find(p => p.id === item.productId);
-        throw new Error(`Insufficient stock for product: ${item.productName}. Available: ${result.availableStock}, Requested: ${item.quantity}`);
-      }
+    if (!cartItems || cartItems.length === 0) {
+      throw new Error("Cart is empty");
     }
 
-    // Calculate order amounts
-    const subtotalAmount = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const discountAmount = cartItems.reduce((sum, item) => {
-      if (item.discount) {
-        return sum + (item.price * item.quantity * (item.discount / 100));
+    // Create a map for O(1) lookups
+    const productMap = new Map(clientProducts.map(p => [p.id, p]));
+    
+    // Validate all items in one pass
+    const orderAmounts = cartItems.reduce((acc, item) => {
+      // 1. Validate product exists
+      const product = productMap.get(item.productId);
+      if (!product) {
+        throw new Error(`Product not found: ${item.productName}`);
       }
-      return sum;
-    }, 0);
+
+      // 2. Validate variation and price
+      const variationValidation = validateVariation(product, item.variationId);
+      if (!variationValidation.isValid) {
+        throw new Error(variationValidation.error || `Invalid variation for product: ${item.productName}`);
+      }
+
+      // 3. Validate price
+      const expectedPrice = product.hasVariations && item.variationId
+        ? product.variations?.find(v => v.id === item.variationId)?.price
+        : product.price;
+
+      if (expectedPrice !== item.price) {
+        throw new Error(`Price mismatch for ${item.productName}: Expected ${expectedPrice}, got ${item.price}`);
+      }
+
+      // 4. Validate stock, treating each item as an existing cart item since we're validating the final order
+      const stockValidation = validateStock(
+        clientProducts,
+        cartItems,
+        item.productId,
+        item.quantity,
+        item.variationId,
+        true // This item is already in the cart
+      );
+
+      if (!stockValidation.isAvailable && !stockValidation.unlimitedStock) {
+        throw new Error(stockValidation.error || 
+          `Insufficient stock for ${item.productName}. Available: ${stockValidation.availableStock}, Requested: ${item.quantity}`
+        );
+      }
+
+      // 5. Calculate amounts
+      if (item.price < 0 || item.quantity <= 0) {
+        throw new Error(`Invalid price or quantity for ${item.productName}`);
+      }
+
+      const itemSubtotal = item.price * item.quantity;
+      const itemDiscount = item.discount && item.discount > 0 && item.discount <= 100
+        ? itemSubtotal * (item.discount / 100)
+        : 0;
+
+      return {
+        subtotalAmount: acc.subtotalAmount + itemSubtotal,
+        discountAmount: acc.discountAmount + itemDiscount
+      };
+    }, { subtotalAmount: 0, discountAmount: 0 });
+
     const shippingAmount = 0; // Will be determined later
-    const totalAmount = subtotalAmount - discountAmount + shippingAmount;
+    const totalAmount = orderAmounts.subtotalAmount - orderAmounts.discountAmount + shippingAmount;
+
+    if (totalAmount < 0) {
+      throw new Error(`Invalid total amount: ${totalAmount}`);
+    }
 
     const now = new Date();
 
-    // Create order first
+    // Create order
     const [order] = await db.insert(orders)
       .values({
-        subtotalAmount,
-        discountAmount,
+        subtotalAmount: orderAmounts.subtotalAmount,
+        discountAmount: orderAmounts.discountAmount,
         shippingAmount,
         totalAmount,
         currency: "CAD",
@@ -83,62 +125,42 @@ export async function createOrder(customerInfo: CustomerInfo, cartItems: CartIte
       })
       .returning();
 
-    // Create addresses and order items in parallel
-    await Promise.all([
-      // Create shipping address
-      db.insert(addresses)
+    // Create addresses
+    await db.insert(addresses)
+      .values({
+        orderId: order.id,
+        addressType: customerInfo.billingAddress ? 'shipping' : 'both',
+        ...customerInfo.shippingAddress,
+        createdAt: now,
+      });
+
+    if (customerInfo.billingAddress) {
+      await db.insert(addresses)
         .values({
           orderId: order.id,
-          addressType: customerInfo.billingAddress ? 'shipping' : 'both',
-          firstName: customerInfo.shippingAddress.firstName,
-          lastName: customerInfo.shippingAddress.lastName,
-          email: customerInfo.shippingAddress.email,
-          phone: customerInfo.shippingAddress.phone,
-          streetAddress: customerInfo.shippingAddress.streetAddress,
-          city: customerInfo.shippingAddress.city,
-          state: customerInfo.shippingAddress.state,
-          zipCode: customerInfo.shippingAddress.zipCode,
-          country: customerInfo.shippingAddress.country,
+          addressType: 'billing',
+          ...customerInfo.billingAddress,
           createdAt: now,
-        }),
+        });
+    }
 
-      // Create billing address if different from shipping
-      customerInfo.billingAddress
-        ? db.insert(addresses)
-            .values({
-              orderId: order.id,
-              addressType: 'billing',
-              firstName: customerInfo.billingAddress.firstName,
-              lastName: customerInfo.billingAddress.lastName,
-              email: customerInfo.billingAddress.email,
-              phone: customerInfo.billingAddress.phone,
-              streetAddress: customerInfo.billingAddress.streetAddress,
-              city: customerInfo.billingAddress.city,
-              state: customerInfo.billingAddress.state,
-              zipCode: customerInfo.billingAddress.zipCode,
-              country: customerInfo.billingAddress.country,
-              createdAt: now,
-            })
-        : Promise.resolve(),
-
-      // Create order items
-      db.insert(orderItems)
-        .values(
-          cartItems.map(item => ({
-            orderId: order.id,
-            productId: item.productId,
-            productVariationId: item.variationId ?? null,
-            quantity: item.quantity,
-            unitAmount: item.price,
-            discountPercentage: item.discount ?? null,
-            finalAmount: item.discount 
-              ? item.price * (1 - item.discount / 100) * item.quantity
-              : item.price * item.quantity,
-            attributes: JSON.stringify(item.attributes || {}),
-            createdAt: now,
-          }))
-        )
-    ]);
+    // Create order items
+    await db.insert(orderItems)
+      .values(
+        cartItems.map(item => ({
+          orderId: order.id,
+          productId: item.productId,
+          productVariationId: item.variationId ?? null,
+          quantity: item.quantity,
+          unitAmount: item.price,
+          discountPercentage: item.discount ?? null,
+          finalAmount: item.discount 
+            ? item.price * (1 - item.discount / 100) * item.quantity
+            : item.price * item.quantity,
+          attributes: JSON.stringify(item.attributes || {}),
+          createdAt: now,
+        }))
+      );
 
     return { 
       success: true, 

@@ -21,7 +21,8 @@ interface ProductDetailsProps {
 export default function ProductDetails({
   initialProduct,
 }: ProductDetailsProps) {
-  const [product] = useState<ProductWithDetails>(initialProduct);
+  const { addProductToCart, cart, products } = useCart();
+  const [product, setProduct] = useState<ProductWithDetails>(initialProduct);
   const [selectedImage, setSelectedImage] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [selectedVariation, setSelectedVariation] =
@@ -29,7 +30,21 @@ export default function ProductDetails({
   const [selectedAttributes, setSelectedAttributes] = useState<
     Record<string, string>
   >({});
-  const { addProductToCart, cart } = useCart();
+
+  // Sync product data with cart context
+  useEffect(() => {
+    // Find the product in the cart context cache
+    const cachedProduct = products.find((p) => p.id === initialProduct.id);
+    if (cachedProduct) {
+      // Update local product state with cached data
+      setProduct((prev) => ({
+        ...prev,
+        stock: cachedProduct.stock,
+        unlimitedStock: cachedProduct.unlimitedStock,
+        variations: cachedProduct.variations,
+      }));
+    }
+  }, [initialProduct.id, products]);
 
   // Initialize selected image and variation
   useEffect(() => {

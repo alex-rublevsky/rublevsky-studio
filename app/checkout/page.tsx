@@ -35,10 +35,11 @@ interface CustomerInfo {
 }
 
 export default function CheckoutPage() {
-  const { cart, clearCart } = useCart();
+  const { cart, clearCart, products } = useCart();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [isCartLoaded, setIsCartLoaded] = useState(false);
+  const [isOrderComplete, setIsOrderComplete] = useState(false);
   const [useSeparateBilling, setUseSeparateBilling] = useState(false);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
     shippingAddress: {
@@ -56,22 +57,19 @@ export default function CheckoutPage() {
     shippingMethod: "standard",
   });
 
-  // Wait for cart to be loaded from cookies before checking if it's empty
+  // Wait for cart and products to be loaded
   useEffect(() => {
-    // Set a small delay to ensure cart is loaded from cookies
-    const timer = setTimeout(() => {
+    if (cart.items.length > 0 && products.length > 0) {
       setIsCartLoaded(true);
-    }, 500);
+    }
+  }, [cart.items.length, products.length]);
 
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Only redirect if cart is empty AND cart has been loaded
+  // Only redirect if cart is empty AND cart has been loaded AND order is not complete
   useEffect(() => {
-    if (isCartLoaded && cart.items.length === 0) {
+    if (isCartLoaded && cart.items.length === 0 && !isOrderComplete) {
       router.push("/store");
     }
-  }, [cart.items.length, router, isCartLoaded]);
+  }, [cart.items.length, router, isCartLoaded, isOrderComplete]);
 
   const handleAddressChange =
     (addressType: "shipping" | "billing") => (name: string, value: string) => {
@@ -129,62 +127,87 @@ export default function CheckoutPage() {
       return;
     }
 
+    // Validate that we have products data
+    if (products.length === 0) {
+      toast.error("Unable to validate products. Please try again.");
+      router.push("/store");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      // First create the order
-      const result = await createOrder(customerInfo, cart.items);
+      // Pass products from context to createOrder
+      const result = await createOrder(customerInfo, cart.items, products);
 
       if (!result.success) {
         throw new Error(result.message);
       }
 
       // If order was created successfully, send the email
-      try {
-        await fetch("/api/emails", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            firstName: customerInfo.shippingAddress.firstName,
-            lastName: customerInfo.shippingAddress.lastName,
-            email: customerInfo.shippingAddress.email,
-            orderItems: cart.items.map((item) => ({
-              productName: item.productName,
-              quantity: item.quantity,
-              price: item.price,
-              discount: item.discount,
-              image: item.image
-                ? `https://assets.rublevsky.studio/${item.image}`
-                : undefined,
-            })),
-            orderId: result.orderId,
-            subtotal,
-            totalDiscount,
-            orderTotal: total,
-            shippingAddress: customerInfo.shippingAddress,
-            billingAddress: customerInfo.billingAddress,
-            shippingMethod: customerInfo.shippingMethod,
-            notes: customerInfo.notes,
-          }),
-        });
-      } catch (emailError) {
-        console.error("Failed to send email:", emailError);
-        // Don't throw here - we still want to proceed with redirect even if email fails
+      const emailResponse = await fetch("/api/emails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          firstName: customerInfo.shippingAddress.firstName,
+          lastName: customerInfo.shippingAddress.lastName,
+          email: customerInfo.shippingAddress.email,
+          orderItems: cart.items.map((item) => ({
+            productName: item.productName,
+            quantity: item.quantity,
+            price: item.price,
+            discount: item.discount,
+            image: item.image
+              ? `https://assets.rublevsky.studio/${item.image}`
+              : undefined,
+          })),
+          orderId: result.orderId,
+          subtotal,
+          totalDiscount,
+          orderTotal: total,
+          shippingAddress: customerInfo.shippingAddress,
+          billingAddress: customerInfo.billingAddress,
+          shippingMethod: customerInfo.shippingMethod,
+          notes: customerInfo.notes,
+        }),
+      });
+
+      const emailResult = await emailResponse.json();
+
+      if (!emailResult.success) {
+        console.error("Failed to send confirmation email:", emailResult.error);
+        // Show warning but don't prevent order completion
+        toast.warning(
+          "Order placed but confirmation email could not be sent. Our team will contact you shortly.",
+          {
+            duration: 5000,
+          }
+        );
       }
 
-      // Clear the cart and show success message
-      toast.success("Order placed successfully!");
-      clearCart();
+      // Set order as complete before clearing cart
+      setIsOrderComplete(true);
 
-      // Redirect to order confirmation page
-      router.push(`/order/${result.orderId}?new=true`);
+      // Show success toast
+      toast.success("Order placed successfully!", {
+        duration: 3000,
+      });
+
+      // Redirect to order page immediately
+      router.replace(`/order/${result.orderId}?new=true`);
+
+      // Clear the cart after redirect is initiated
+      clearCart();
     } catch (error) {
       toast.error(
         error instanceof Error
           ? error.message
-          : "Failed to place order. Please try again."
+          : "Failed to place order. Please try again.",
+        {
+          duration: 5000,
+        }
       );
       console.error("Checkout error:", error);
     } finally {

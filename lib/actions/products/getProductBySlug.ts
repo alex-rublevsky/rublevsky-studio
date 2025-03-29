@@ -1,7 +1,6 @@
 'use server';
 
 import { eq } from "drizzle-orm";
-import { unstable_cache } from 'next/cache';
 import db from "@/server/db";
 import { products, categories, brands, productVariations, variationAttributes, blogPosts } from "@/server/schema";
 import { Product, ProductVariationWithAttributes } from "@/types";
@@ -25,12 +24,7 @@ interface ProductWithDetails extends Product {
   } | null;
 }
 
-/**
- * Fetch a product by slug with all its related data
- * Since most products have both variations and blog posts,
- * we use a single efficient JOIN query to get all data at once
- */
-async function fetchProduct(slug: string): Promise<ProductWithDetails | null> {
+export default async function getProductBySlug(slug: string): Promise<ProductWithDetails | null> {
   try {
     if (!slug) {
       throw new Error("Slug parameter is required");
@@ -110,16 +104,4 @@ async function fetchProduct(slug: string): Promise<ProductWithDetails | null> {
   } catch (error) {
     throw new Error(`Failed to fetch product: ${(error as Error).message}`);
   }
-}
-
-// Cached version of getProductBySlug
-export default async function getProductBySlug(slug: string): Promise<ProductWithDetails | null> {
-  return unstable_cache(
-    async () => fetchProduct(slug),
-    ['product', slug],
-    {
-      revalidate: 1, // TODO: change to 259200 (3 days)
-      tags: ['products', `product-${slug}`] // Tags for cache invalidation
-    }
-  )();
 }
