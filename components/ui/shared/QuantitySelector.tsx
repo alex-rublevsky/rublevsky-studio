@@ -3,6 +3,47 @@
 import React from "react";
 import { Minus, Plus } from "lucide-react";
 
+interface QuantitySelectorButtonProps {
+  onClick: () => void;
+  disabled: boolean;
+  size: "default" | "compact";
+  styles: {
+    button: string;
+    text: string;
+    iconSize: number;
+  };
+  isIncrement: boolean;
+  ariaLabel: string;
+}
+
+function QuantitySelectorButton({
+  onClick,
+  disabled,
+  size,
+  styles,
+  isIncrement,
+  ariaLabel,
+}: QuantitySelectorButtonProps) {
+  return (
+    <button
+      onClick={onClick}
+      className={`${styles.button} hover:bg-muted transition flex items-center justify-center ${
+        disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+      }`}
+      disabled={disabled}
+      aria-label={ariaLabel}
+    >
+      {size === "default" ? (
+        <span className={styles.text}>{isIncrement ? "+" : "-"}</span>
+      ) : isIncrement ? (
+        <Plus size={styles.iconSize} />
+      ) : (
+        <Minus size={styles.iconSize} />
+      )}
+    </button>
+  );
+}
+
 export interface QuantitySelectorProps {
   quantity: number;
   onIncrement: () => void;
@@ -48,35 +89,23 @@ export function QuantitySelector({
 
   return (
     <div className={`flex items-center ${styles.container}`}>
-      <button
+      <QuantitySelectorButton
         onClick={onDecrement}
-        className={`${styles.button} hover:bg-gray-100 transition flex items-center justify-center ${
-          isDecrementDisabled ? "opacity-50 cursor-not-allowed" : ""
-        }`}
         disabled={isDecrementDisabled}
-        aria-label="Decrease quantity"
-      >
-        {size === "default" ? (
-          <span className={styles.text}>-</span>
-        ) : (
-          <Minus size={styles.iconSize} />
-        )}
-      </button>
+        size={size}
+        styles={styles}
+        isIncrement={false}
+        ariaLabel="Decrease quantity"
+      />
       <span className={styles.quantityText}>{quantity}</span>
-      <button
+      <QuantitySelectorButton
         onClick={onIncrement}
-        className={`${styles.button} hover:bg-gray-100 transition flex items-center justify-center ${
-          isIncrementDisabled ? "opacity-50 cursor-not-allowed" : ""
-        }`}
         disabled={isIncrementDisabled}
-        aria-label="Increase quantity"
-      >
-        {size === "default" ? (
-          <span className={styles.text}>+</span>
-        ) : (
-          <Plus size={styles.iconSize} />
-        )}
-      </button>
+        size={size}
+        styles={styles}
+        isIncrement={true}
+        ariaLabel="Increase quantity"
+      />
     </div>
   );
 }
