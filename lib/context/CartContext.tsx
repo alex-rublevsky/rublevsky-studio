@@ -319,7 +319,8 @@ export function CartProvider({ children, initialProducts }: CartProviderProps) {
       cart.items,
       productId,
       quantity,
-      variationId
+      variationId,
+      true // Add isExistingCartItem flag as true
     );
 
     if (!result.isAvailable && !result.unlimitedStock) {

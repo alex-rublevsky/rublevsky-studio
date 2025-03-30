@@ -43,7 +43,7 @@ export function CartSummary() {
       </div>
 
       <p className="text-xs text-muted-foreground text-center pt-2">
-        Prices and shipping calculated at checkout
+        Shipping will be calculated at checkout
       </p>
     </div>
   );

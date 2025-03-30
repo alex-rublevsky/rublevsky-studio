@@ -144,7 +144,7 @@ export default async function OrderPage({
                     <div className="text-right self-end">
                       {item.discountPercentage ? (
                         <>
-                          <Badge variant="greenOutline" className="mb-1">
+                          <Badge variant="greenOutline" className="mb-1 -mr-1">
                             -{item.discountPercentage}%
                           </Badge>
                           <p className="line-through text-muted-foreground">
@@ -171,7 +171,7 @@ export default async function OrderPage({
             {order.discountAmount > 0 && (
               <div className="flex justify-between text-green-600">
                 <p>Discount</p>
-                <Badge variant="green">
+                <Badge variant="green" className="self-end">
                   -CA${order.discountAmount.toFixed(2)}
                 </Badge>
               </div>

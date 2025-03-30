@@ -7,6 +7,7 @@ import { X } from "lucide-react";
 import { useCart, CartItem as CartItemType } from "@/lib/context/CartContext";
 import { QuantitySelector } from "@/components/ui/shared/QuantitySelector";
 import { getAttributeDisplayName } from "@/lib/utils/productAttributes";
+import { Badge } from "../shared/badge";
 
 interface CartItemProps {
   item: CartItemType;
@@ -75,37 +76,50 @@ export function CartItem({ item }: CartItemProps) {
     : "";
 
   return (
-    <div className="flex items-start gap-4 py-2 border-b border-border">
-      {/* Product image */}
-      <div className="shrink-0 relative w-16 h-16 bg-muted rounded overflow-hidden">
-        {item.image ? (
-          <Image
-            src={`/${item.image}`}
-            alt={item.productName}
-            fill
-            className="object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-            No image
-          </div>
-        )}
+    <div className="flex items-start gap-4 py-4">
+      {/* Product image with overlapping remove button */}
+      <div className="shrink-0 relative w-20">
+        <div className="w-full bg-muted rounded-md overflow-hidden">
+          {item.image ? (
+            <Image
+              src={`/${item.image}`}
+              alt={item.productName}
+              width={80}
+              height={80}
+              className="w-full h-auto object-contain"
+            />
+          ) : (
+            <div className="aspect-square w-full h-full flex items-center justify-center text-muted-foreground">
+              No image
+            </div>
+          )}
+        </div>
+        <button
+          onClick={() => removeFromCart(item.productId, item.variationId)}
+          className="absolute translate-x-1/2 translate-y-1/2 bottom-0 right-0 p-1 bg-background/80 hover:bg-background/80 backdrop-blur-[2px] rounded-md shadow-sm text-secondary-foreground hover:text-foreground cursor-pointer transition-colors"
+          aria-label="Remove item"
+        >
+          <X size={16} />
+        </button>
       </div>
 
       {/* Product info */}
       <div className="grow">
-        <Link
-          href={`/product/${item.productSlug}`}
-          className="font-medium hover:underline"
-        >
+        <Link href={`/product/${item.productSlug}`} className="hover:underline">
           {item.productName}
         </Link>
 
-        {attributeText && (
-          <p className="text-sm text-muted-foreground mt-1">{attributeText}</p>
+        {item.attributes && Object.entries(item.attributes).length > 0 && (
+          <div className="flex flex-wrap gap-x-6 gap-y-0 mt-1">
+            {Object.entries(item.attributes).map(([key, value]) => (
+              <span key={key} className="text-sm text-muted-foreground">
+                {getAttributeDisplayName(key)}: {value}
+              </span>
+            ))}
+          </div>
         )}
 
-        <div className="flex items-center justify-between mt-2">
+        <div className="mt-2">
           <QuantitySelector
             quantity={item.quantity}
             onIncrement={handleIncrement}
@@ -113,41 +127,30 @@ export function CartItem({ item }: CartItemProps) {
             maxQuantity={effectiveMaxQuantity}
             size="compact"
           />
-          <div className="font-medium">
-            {item.discount ? (
-              <div className="flex flex-col items-end">
-                <span className="line-through text-sm text-muted-foreground">
-                  ${(item.price * item.quantity).toFixed(2)}
-                </span>
-                <div className="flex items-center gap-2">
-                  <span>
-                    $
-                    {(
-                      item.price *
-                      (1 - item.discount / 100) *
-                      item.quantity
-                    ).toFixed(2)}
-                  </span>
-                  <span className="text-xs text-red-600">
-                    {item.discount}% OFF
-                  </span>
-                </div>
-              </div>
-            ) : (
-              <span>${(item.price * item.quantity).toFixed(2)}</span>
-            )}
-          </div>
         </div>
       </div>
 
-      {/* Remove button */}
-      <button
-        onClick={() => removeFromCart(item.productId, item.variationId)}
-        className="shrink-0 p-1 text-muted-foreground hover:text-foreground cursor-pointer"
-        aria-label="Remove item"
-      >
-        <X size={20} />
-      </button>
+      {/* Price column */}
+      <div className="flex flex-col items-end">
+        {item.discount ? (
+          <div className="flex flex-col items-end">
+            <Badge variant="greenOutline" className="-mr-1">
+              {item.discount}% OFF
+            </Badge>
+            <span className="line-through text-sm text-muted-foreground">
+              ${(item.price * item.quantity).toFixed(2)}
+            </span>
+            <h6>
+              $
+              {(item.price * (1 - item.discount / 100) * item.quantity).toFixed(
+                2
+              )}
+            </h6>
+          </div>
+        ) : (
+          <h6>${(item.price * item.quantity).toFixed(2)}</h6>
+        )}
+      </div>
     </div>
   );
 }
