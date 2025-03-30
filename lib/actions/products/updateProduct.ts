@@ -84,8 +84,8 @@ export default async function updateProduct(id: number, data: ProductFormData): 
             ]);
           }
 
-          // Insert new variations
-          await db.insert(productVariations)
+          // Insert new variations and get their IDs
+          const insertedVariations = await db.insert(productVariations)
             .values(data.variations.map(v => ({
               productId: id,
               sku: v.sku,
@@ -93,7 +93,24 @@ export default async function updateProduct(id: number, data: ProductFormData): 
               stock: parseInt(v.stock.toString()),
               sort: v.sort,
               createdAt: new Date()
-            })));
+            })))
+            .returning();
+
+          // Insert variation attributes if they exist
+          const attributesToInsert = data.variations.flatMap((variation, index) => {
+            const insertedVariation = insertedVariations[index];
+            return variation.attributes?.map(attr => ({
+              productVariationId: insertedVariation.id,
+              attributeId: attr.attributeId,
+              value: attr.value,
+              createdAt: new Date()
+            })) || [];
+          });
+
+          if (attributesToInsert.length > 0) {
+            await db.insert(variationAttributes)
+              .values(attributesToInsert);
+          }
         }
       })()
     ]);
