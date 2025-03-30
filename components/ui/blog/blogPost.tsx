@@ -11,9 +11,8 @@ import "swiper/css/mousewheel";
 
 import Link from "next/link";
 import { CopyLinkButton } from "../shared/copyLinkButton";
-import type { Components } from "react-markdown";
-
 import BlogPostImageGallery from "./blogPostImageGallery";
+import { markdownComponents } from "../shared/MarkdownComponents";
 
 interface BlogPostProps {
   title: string | null;
@@ -34,32 +33,6 @@ function BlogPost({
 }: BlogPostProps) {
   // Convert comma-separated string to array, or empty array if null
   const imageArray = images?.split(",").map((img) => img.trim()) ?? [];
-
-  // opening external/internal links in markdown
-  const components: Components = {
-    a: ({ href, children, ...props }) => {
-      if (href?.startsWith("/")) {
-        // Internal link
-        return (
-          <Link href={href} className="text-primary hover:underline" {...props}>
-            {children}
-          </Link>
-        );
-      }
-      // External link
-      return (
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-primary hover:underline"
-          {...props}
-        >
-          {children}
-        </a>
-      );
-    },
-  };
 
   return (
     <article id={`${slug}`} className="max-w-2xl mx-auto">
@@ -96,7 +69,7 @@ function BlogPost({
         </div>
       </div>
       <div className="prose prose-lg -mt-6">
-        <ReactMarkdown components={components}>{body}</ReactMarkdown>
+        <ReactMarkdown components={markdownComponents}>{body}</ReactMarkdown>
       </div>
     </article>
   );

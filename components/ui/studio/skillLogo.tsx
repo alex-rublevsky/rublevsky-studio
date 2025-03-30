@@ -28,7 +28,7 @@ function skillLogo({
           />
         </div>
       </div>
-      <p className="text-center text-sm md:text-base font-medium whitespace-nowrap text-gray-500">
+      <p className="text-center text-sm md:text-base font-medium whitespace-nowrap text-muted-foreground">
         {name}
       </p>
     </div>

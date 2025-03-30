@@ -42,7 +42,7 @@ export function CartSummary() {
         <h4>${total.toFixed(2)}</h4>
       </div>
 
-      <p className="text-xs text-gray-500 text-center pt-2">
+      <p className="text-xs text-muted-foreground text-center pt-2">
         Prices and shipping calculated at checkout
       </p>
     </div>

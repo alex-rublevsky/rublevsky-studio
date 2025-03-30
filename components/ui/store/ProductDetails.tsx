@@ -1,18 +1,24 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
-import Image from "next/image";
+import ReactMarkdown from "react-markdown";
+import type { Components } from "react-markdown";
+
 import { Button } from "@/components/ui/shared/button";
 import Link from "next/link";
 import { useCart } from "@/lib/context/CartContext";
 import { QuantitySelector } from "@/components/ui/shared/QuantitySelector";
 import { getAttributeDisplayName } from "@/lib/utils/productAttributes";
 import ImageGallery from "@/components/ui/shared/ImageGallery";
+import { FilterGroup } from "@/components/ui/shared/FilterGroup";
 import {
   ProductWithDetails,
   ProductVariationWithAttributes,
   VariationAttribute,
 } from "@/types";
+import { Badge } from "../shared/badge";
+import { getAvailableQuantityForVariation } from "@/lib/utils/validateStock";
+import { markdownComponents } from "../shared/MarkdownComponents";
 
 interface ProductDetailsProps {
   initialProduct: ProductWithDetails;
@@ -83,50 +89,11 @@ export default function ProductDetails({
   const getEffectiveStock = useMemo(() => {
     if (!product) return 0;
 
-    if (product.unlimitedStock) return Infinity;
-
-    // For weight-based products with variations
-    if (product.weight && selectedVariation) {
-      const weightAttr = selectedVariation.attributes.find(
-        (attr: VariationAttribute) => attr.attributeId === "WEIGHT_G"
-      );
-
-      if (weightAttr) {
-        const totalWeight = parseInt(product.weight);
-        const variationWeight = parseInt(weightAttr.value);
-
-        // Calculate total weight used by all variations in cart
-        const weightUsedInCart = cart.items
-          .filter((item) => item.productId === product.id)
-          .reduce((total, item) => {
-            // Find the weight of this cart item's variation
-            const cartItemWeight = item.attributes?.["WEIGHT_G"];
-            if (cartItemWeight) {
-              return total + parseInt(cartItemWeight) * item.quantity;
-            }
-            return total;
-          }, 0);
-
-        // Calculate remaining weight
-        const remainingWeight = Math.max(0, totalWeight - weightUsedInCart);
-
-        // Calculate how many packages of current variation can be made
-        return Math.floor(remainingWeight / variationWeight);
-      }
-    }
-
-    // For regular variations
-    const dbStock = selectedVariation ? selectedVariation.stock : product.stock;
-
-    // Find matching item in cart (if any)
-    const cartItem = cart.items.find(
-      (item) =>
-        item.productId === product.id &&
-        item.variationId === (selectedVariation?.id || undefined)
+    return getAvailableQuantityForVariation(
+      product,
+      selectedVariation?.id,
+      cart.items
     );
-
-    // Subtract cart quantity from database stock
-    return cartItem ? Math.max(0, dbStock - cartItem.quantity) : dbStock;
   }, [product, selectedVariation, cart.items]);
 
   // Handle quantity changes
@@ -271,36 +238,47 @@ export default function ProductDetails({
   };
 
   // Check if a specific attribute value is available with current selections
-  const isAttributeValueAvailable = (
-    attributeId: string,
-    attributeValue: string
-  ): boolean => {
-    if (!product?.variations) return false;
+  const isAttributeValueAvailable = useCallback(
+    (attributeId: string, attributeValue: string): boolean => {
+      if (!product?.variations) return false;
 
-    // Get all other selected attributes except the one we're checking
-    const otherAttributes = { ...selectedAttributes };
-    delete otherAttributes[attributeId];
+      // Get all other selected attributes except the one we're checking
+      const otherAttributes = { ...selectedAttributes };
+      delete otherAttributes[attributeId];
 
-    // Check if there's any variation that matches this attribute value and all other selected attributes
-    return product.variations.some(
-      (variation: ProductVariationWithAttributes) => {
-        const matchesThisAttribute = variation.attributes.some(
-          (attr: VariationAttribute) =>
-            attr.attributeId === attributeId && attr.value === attributeValue
-        );
+      // Check if there's any variation that matches this attribute value and all other selected attributes
+      return product.variations.some(
+        (variation: ProductVariationWithAttributes) => {
+          const matchesThisAttribute = variation.attributes.some(
+            (attr: VariationAttribute) =>
+              attr.attributeId === attributeId && attr.value === attributeValue
+          );
 
-        const matchesOtherAttributes = Object.entries(otherAttributes).every(
-          ([id, value]) =>
-            variation.attributes.some(
-              (attr: VariationAttribute) =>
-                attr.attributeId === id && attr.value === value
-            )
-        );
+          const matchesOtherAttributes = Object.entries(otherAttributes).every(
+            ([id, value]) =>
+              variation.attributes.some(
+                (attr: VariationAttribute) =>
+                  attr.attributeId === id && attr.value === value
+              )
+          );
 
-        return matchesThisAttribute && matchesOtherAttributes;
-      }
-    );
-  };
+          // Check if this variation has stock available using our centralized function
+          const availableQuantity = getAvailableQuantityForVariation(
+            product,
+            variation.id,
+            cart.items
+          );
+
+          return (
+            matchesThisAttribute &&
+            matchesOtherAttributes &&
+            availableQuantity > 0
+          );
+        }
+      );
+    },
+    [product, selectedAttributes, cart.items]
+  );
 
   const handleAddToCart = useCallback(async () => {
     if (!product) return;
@@ -334,23 +312,30 @@ export default function ProductDetails({
   const canAddToCart = product?.isActive && effectiveStock > 0;
   const attributeNames = getUniqueAttributeNames();
 
-  const renderBlogPostLink = () => {
-    if (product?.blogPost) {
+  // Add markdown components configuration
+  const markdownComponents: Components = {
+    a: ({ href, children, ...props }) => {
+      if (href?.startsWith("/")) {
+        // Internal link
+        return (
+          <Link href={href} className="text-primary hover:underline" {...props}>
+            {children}
+          </Link>
+        );
+      }
+      // External link
       return (
-        <div className="border-t pt-4 mt-4">
-          <div className="mb-2">
-            <span className="text-gray-500">Read more:</span>{" "}
-            <Link
-              href={product.blogPost.blogUrl}
-              className="text-blue-600 hover:underline"
-            >
-              {product.blogPost.title}
-            </Link>
-          </div>
-        </div>
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary hover:underline"
+          {...props}
+        >
+          {children}
+        </a>
       );
-    }
-    return null;
+    },
   };
 
   return (
@@ -370,84 +355,67 @@ export default function ProductDetails({
               <h3>{product.name}</h3>
 
               {/* Price */}
-              <div className="text-xl font-medium">
+              <div className="flex gap-8 items-center">
                 {product.discount ? (
-                  <div className="flex items-baseline gap-2">
-                    <span className="line-through text-gray-500">
-                      ${currentPrice.toFixed(2)}
-                    </span>
-                    <span>
-                      $
-                      {(currentPrice * (1 - product.discount / 100)).toFixed(2)}{" "}
-                      CAD
-                    </span>
-                    <span className="text-sm text-red-600">
-                      {product.discount}% OFF
-                    </span>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="green">{product.discount}% OFF</Badge>
+                    <div className="flex items-baseline gap-2">
+                      <h4>
+                        $
+                        {(currentPrice * (1 - product.discount / 100)).toFixed(
+                          2
+                        )}{" "}
+                        CAD
+                      </h4>
+                      <span className="line-through text-muted-foreground">
+                        ${currentPrice.toFixed(2)}
+                      </span>
+                    </div>
                   </div>
                 ) : (
-                  <span>${currentPrice.toFixed(2)} CAD</span>
+                  <h4>${currentPrice.toFixed(2)} CAD</h4>
+                )}
+
+                {/* Stock information - moved here and updated styling */}
+                {!product.unlimitedStock && (
+                  <div className="">
+                    {effectiveStock > 0 ? (
+                      <Badge variant="outline">
+                        <span className="text-muted-foreground">
+                          In stock:{" "}
+                        </span>
+                        <span>{effectiveStock}</span>
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline">Out of stock</Badge>
+                    )}
+                  </div>
                 )}
               </div>
 
               {/* Variation selection */}
               {product.hasVariations && attributeNames.length > 0 && (
-                <div className="flex flex-wrap gap-8">
+                <div className="flex flex-wrap gap-4">
                   {attributeNames.map((attributeId) => (
-                    <div key={attributeId} className="w-auto min-w-fit">
-                      <h4 className="text-lg font-medium mb-1">
-                        {getAttributeDisplayName(attributeId)}
-                      </h4>
-                      <div className="flex flex-wrap gap-2">
-                        {getUniqueAttributeValues(attributeId).map((value) => {
-                          const isAvailable = isAttributeValueAvailable(
-                            attributeId,
-                            value
-                          );
-                          const isSelected =
-                            selectedAttributes[attributeId] === value;
-
-                          return (
-                            <button
-                              key={value}
-                              onClick={() =>
-                                selectVariation(attributeId, value)
-                              }
-                              className={`
-                                  px-4 py-2 border rounded-md transition-colors duration-200
-                                  ${
-                                    isSelected
-                                      ? "bg-black text-white"
-                                      : isAvailable
-                                        ? "bg-transparent text-black"
-                                        : "bg-gray-200 text-gray-600"
-                                  }
-                                  ${isAvailable ? "" : "opacity-50"}
-                                `}
-                              title={
-                                isAvailable
-                                  ? ""
-                                  : "This variation is currently unavailable"
-                              }
-                            >
-                              {value}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
+                    <FilterGroup
+                      key={attributeId}
+                      title={getAttributeDisplayName(attributeId)}
+                      options={getUniqueAttributeValues(attributeId)}
+                      selectedOptions={selectedAttributes[attributeId] || null}
+                      onOptionChange={(value) => {
+                        if (value) {
+                          selectVariation(attributeId, value);
+                        }
+                      }}
+                      showAllOption={false}
+                      variant="default"
+                      getOptionAvailability={(value) =>
+                        isAttributeValueAvailable(attributeId, value)
+                      }
+                      titleClassName=""
+                      className=""
+                    />
                   ))}
-                </div>
-              )}
-
-              {/* Stock information - updated to hide for unlimited stock */}
-              {!product.unlimitedStock && (
-                <div className="text-sm">
-                  {effectiveStock > 0 ? (
-                    <p>In stock: {effectiveStock}</p>
-                  ) : (
-                    <p className="text-red-600">Out of stock</p>
-                  )}
                 </div>
               )}
 
@@ -473,20 +441,33 @@ export default function ProductDetails({
                 </Button>
               </div>
 
+              {/* Blog post link */}
+              {product?.blogPost && (
+                <div className="border-t pt-4">
+                  <div className="mb-2">
+                    <span className="text-muted-foreground">Read more:</span>{" "}
+                    <Link
+                      href={product.blogPost.blogUrl}
+                      className="blurLink hover:underline"
+                    >
+                      {product.blogPost.title}
+                    </Link>
+                  </div>
+                </div>
+              )}
+
               {/* Product description */}
               <div className="prose max-w-none">
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: product.description || "",
-                  }}
-                />
+                <ReactMarkdown components={markdownComponents}>
+                  {product.description || ""}
+                </ReactMarkdown>
               </div>
 
               {/* Metadata */}
-              <div className="space-y-2 text-sm text-gray-600">
+              <div className="space-y-2 text-sm text-muted-foreground">
                 {product.category && (
                   <div className="flex items-center gap-2">
-                    <span className="text-gray-500">Category:</span>
+                    <span className="text-muted-foreground">Category:</span>
                     <Link href={`/store?category=${product.category.slug}`}>
                       {product.category.name}
                     </Link>
@@ -494,7 +475,7 @@ export default function ProductDetails({
                 )}
                 {product.brand && (
                   <div className="flex items-center gap-2">
-                    <span className="text-gray-500">Brand:</span>
+                    <span className="text-muted-foreground">Brand:</span>
                     <Link href={`/store?brand=${product.brand.slug}`}>
                       {product.brand.name}
                     </Link>
@@ -505,8 +486,6 @@ export default function ProductDetails({
           </div>
         </div>
       </div>
-
-      {renderBlogPostLink()}
     </main>
   );
 }

@@ -13,7 +13,10 @@ import { createOrder } from "@/lib/actions/cart/createOrder";
 import Image from "next/image";
 import { getAttributeDisplayName } from "@/lib/utils/productAttributes";
 import { AddressFields } from "@/components/ui/checkout/AddressFields";
-import { cn } from "@/lib/utils";
+
+import NeumorphismCard from "@/components/ui/shared/neumorphism-card";
+import { Checkbox } from "@/components/ui/shared/checkbox";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Address {
   firstName: string;
@@ -37,6 +40,7 @@ interface CustomerInfo {
 export default function CheckoutPage() {
   const { cart, clearCart, products } = useCart();
   const router = useRouter();
+  const formRef = React.useRef<HTMLFormElement>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isCartLoaded, setIsCartLoaded] = useState(false);
   const [isOrderComplete, setIsOrderComplete] = useState(false);
@@ -99,26 +103,47 @@ export default function CheckoutPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Basic validation
-    const requiredFields = [
-      "firstName",
-      "lastName",
-      "email",
-      "phone",
-      "streetAddress",
-      "city",
-      "country",
-      "zipCode",
-    ];
+    // Combined field definitions with display names
+    const requiredFields = {
+      firstName: "First Name",
+      lastName: "Last Name",
+      email: "Email",
+      phone: "Phone Number",
+      streetAddress: "Street Address",
+      city: "City",
+      country: "Country",
+      zipCode: "ZIP/Postal Code",
+    } as const;
 
-    const missingFields = requiredFields.filter(
-      (field) => !customerInfo.shippingAddress[field as keyof Address]
+    const missingFields = Object.entries(requiredFields).filter(
+      ([field]) => !customerInfo.shippingAddress[field as keyof Address]
     );
 
     if (missingFields.length > 0) {
-      toast.error(
-        `Please fill in all required fields: ${missingFields.join(", ")}`
+      // Get the friendly names directly from the missingFields entries
+      const missingFieldNames = missingFields.map(
+        ([_, displayName]) => displayName
       );
+
+      toast.error(
+        `Please fill in all required fields: ${missingFieldNames.join(", ")}`
+      );
+
+      // Focus the first missing field using the form ref
+      if (formRef.current) {
+        const firstMissingFieldId = missingFields[0][0];
+        const firstMissingField = formRef.current.querySelector(
+          `input[name="${firstMissingFieldId}"]`
+        ) as HTMLInputElement;
+
+        if (firstMissingField) {
+          firstMissingField.focus();
+          firstMissingField.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }
+      }
       return;
     }
 
@@ -233,17 +258,17 @@ export default function CheckoutPage() {
   const total = subtotal - totalDiscount;
 
   return (
-    <div className="w-full px-4 py-10">
+    <div className="w-full px-4 pt-10 pb-20">
       <div className="max-w-[2000px] mx-auto">
         <h2 className="">Checkout</h2>
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Customer Information Form - Left Side */}
           <div className="flex-1">
-            <form onSubmit={handleSubmit}>
+            <form ref={formRef} onSubmit={handleSubmit}>
               <div className="mb-8">
                 <h2 className="text-xl font-bold mb-4">Payment Information</h2>
-                <p className="text-gray-700">
+                <p>
                   You will be contacted regarding payment options after placing
                   your order.
                 </p>
@@ -258,12 +283,11 @@ export default function CheckoutPage() {
 
                 <div className="mb-6">
                   <label className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
+                    <Checkbox
                       checked={useSeparateBilling}
-                      onChange={(e) => {
-                        setUseSeparateBilling(e.target.checked);
-                        if (e.target.checked && !customerInfo.billingAddress) {
+                      onCheckedChange={(checked: boolean) => {
+                        setUseSeparateBilling(checked);
+                        if (checked && !customerInfo.billingAddress) {
                           setCustomerInfo((prev) => ({
                             ...prev,
                             billingAddress: { ...prev.shippingAddress },
@@ -277,10 +301,8 @@ export default function CheckoutPage() {
                 </div>
 
                 {useSeparateBilling && (
-                  <div className="mt-6 p-4 border rounded-lg">
-                    <h3 className="text-lg font-semibold mb-4">
-                      Billing Address
-                    </h3>
+                  <div className="">
+                    <h3 className="mb-4">Billing Address</h3>
                     <AddressFields
                       values={
                         customerInfo.billingAddress ||
@@ -292,10 +314,8 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
-                <div className="mt-6">
-                  <h3 className="text-lg font-semibold mb-4">
-                    Additional Information
-                  </h3>
+                <div className="mt-12">
+                  <h3 className=" mb-4">Additional Information</h3>
 
                   <div className="mb-6">
                     <label className="block text-sm font-medium mb-2">
@@ -310,12 +330,12 @@ export default function CheckoutPage() {
                             shippingMethod: "standard",
                           }))
                         }
-                        className={cn(
-                          "flex-1",
+                        variant={
                           customerInfo.shippingMethod === "standard"
-                            ? "bg-primary"
-                            : "bg-secondary hover:bg-secondary/80"
-                        )}
+                            ? "default"
+                            : "outline"
+                        }
+                        className="flex-1"
                       >
                         Standard Shipping
                       </Button>
@@ -327,12 +347,12 @@ export default function CheckoutPage() {
                             shippingMethod: "pickup",
                           }))
                         }
-                        className={cn(
-                          "flex-1",
+                        variant={
                           customerInfo.shippingMethod === "pickup"
-                            ? "bg-primary"
-                            : "bg-secondary hover:bg-secondary/80"
-                        )}
+                            ? "default"
+                            : "outline"
+                        }
+                        className="flex-1"
                       >
                         Local Pickup
                       </Button>
@@ -346,7 +366,7 @@ export default function CheckoutPage() {
                     >
                       Order Notes
                     </label>
-                    <textarea
+                    <Textarea
                       id="notes"
                       name="notes"
                       value={customerInfo.notes}
@@ -363,33 +383,31 @@ export default function CheckoutPage() {
 
           {/* Order Summary - Right Side */}
           <div className="lg:w-[27rem]">
-            <div className="bg-gray-50 p-6 rounded-lg">
+            <NeumorphismCard className="">
               <h5>Summary</h5>
 
-              <div className="flex justify-between my-2">
+              <div className="flex justify-between items-baseline my-2">
                 <span>Subtotal</span>
                 <span>CA${subtotal.toFixed(2)}</span>
               </div>
 
               {totalDiscount > 0 && (
-                <div className="flex justify-between my-2 text-red-600">
+                <div className="flex justify-between items-baseline my-2 text-red-600">
                   <span>Discount</span>
                   <span>-CA${totalDiscount.toFixed(2)}</span>
                 </div>
               )}
 
-              <div className="flex justify-between mb-4">
-                <span>Shipping</span>
-                <span className="text-right">
-                  To be discussed
-                  <br />
-                  after order
-                </span>
+              <div className="flex justify-between items-baseline mb-4">
+                <p>Shipping</p>
+                <p className="text-right text-muted-foreground">
+                  To be discussed after order
+                </p>
               </div>
 
-              <div className="flex justify-between text-xl mb-6 border-t pt-4">
+              <div className="flex justify-between items-baseline text-xl mb-2 border-t pt-4">
                 <span>Total</span>
-                <span className="font-bold">CA${total.toFixed(2)}</span>
+                <h3 className="">CA${total.toFixed(2)}</h3>
               </div>
 
               <Button
@@ -409,7 +427,7 @@ export default function CheckoutPage() {
                     className="flex items-start gap-3 py-2"
                   >
                     {/* Product image */}
-                    <div className="shrink-0 relative w-16 h-16 bg-gray-100 rounded overflow-hidden">
+                    <div className="shrink-0 relative w-16 h-16 bg-muted rounded overflow-hidden">
                       {item.image ? (
                         <Image
                           src={`/${item.image}`}
@@ -418,7 +436,7 @@ export default function CheckoutPage() {
                           className="object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                        <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                           No image
                         </div>
                       )}
@@ -430,7 +448,7 @@ export default function CheckoutPage() {
 
                       {item.attributes &&
                         Object.keys(item.attributes).length > 0 && (
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-muted-foreground">
                             {Object.entries(item.attributes)
                               .map(
                                 ([key, value]) =>
@@ -439,7 +457,7 @@ export default function CheckoutPage() {
                               .join(", ")}
                           </p>
                         )}
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-muted-foreground">
                         Quantity: {item.quantity}
                       </p>
                     </div>
@@ -448,7 +466,7 @@ export default function CheckoutPage() {
                     <div className="text-right">
                       {item.discount ? (
                         <>
-                          <p className="text-sm font-medium line-through text-gray-500">
+                          <p className="text-sm font-medium line-through text-muted-foreground">
                             CA${(item.price * item.quantity).toFixed(2)}
                           </p>
                           <div className="flex items-center justify-end gap-2">
@@ -474,7 +492,7 @@ export default function CheckoutPage() {
                   </div>
                 ))}
               </div>
-            </div>
+            </NeumorphismCard>
           </div>
         </div>
       </div>

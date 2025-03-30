@@ -27,7 +27,9 @@ function HeroSection() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center justify-items-center">
         <div className="flex flex-col gap-4 mr-auto">
           <h1 className="max-w-[15ch]">Design subscriptions for everyone</h1>
-          <p className="text-xl text-gray-600">Pause or cancel anytime.</p>
+          <p className="text-xl text-muted-foreground">
+            Pause or cancel anytime.
+          </p>
         </div>
 
         <NeumorphismCard className="size-fit mr-auto md:mx-auto">
@@ -71,7 +73,7 @@ function HeroSection() {
               >
                 <div className="flex flex-col justify-center gap-2">
                   <h5>Book a 15-min call</h5>
-                  <p className="text-gray-600">Schedule now</p>
+                  <p className="text-muted-foreground">Schedule now</p>
                 </div>
               </div>
             </div>

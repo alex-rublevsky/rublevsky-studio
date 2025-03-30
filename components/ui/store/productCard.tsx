@@ -8,6 +8,9 @@ import styles from "./productCard.module.css";
 import { useCart } from "@/lib/context/CartContext";
 import { useCallback, useRef } from "react";
 import { getAttributeDisplayName } from "@/lib/utils/productAttributes";
+import { Badge } from "../shared/badge";
+import { FilterGroup } from "../shared/FilterGroup";
+import { getAvailableQuantityForVariation } from "@/lib/utils/validateStock";
 
 // Extended product interface with variations
 interface ProductWithVariations extends Product {
@@ -31,6 +34,9 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
 
   // Ref for debouncing hover state
   const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // Add a ref for the variations container
+  const variationsRef = useRef<HTMLDivElement>(null);
 
   // Convert comma-separated string to array, or empty array if null
   const imageArray = useMemo(
@@ -216,6 +222,7 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
       delete otherAttributes[attributeId];
 
       // Check if there's any variation that matches this attribute value and all other selected attributes
+      // AND has stock available
       return product.variations.some((variation) => {
         const matchesThisAttribute = variation.attributes.some(
           (attr) =>
@@ -229,62 +236,32 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
             )
         );
 
-        return matchesThisAttribute && matchesOtherAttributes;
+        // Check if this variation has stock available using our centralized function
+        const availableQuantity = getAvailableQuantityForVariation(
+          product,
+          variation.id,
+          cart.items
+        );
+
+        return (
+          matchesThisAttribute &&
+          matchesOtherAttributes &&
+          availableQuantity > 0
+        );
       });
     },
-    [product.variations, selectedAttributes]
+    [product, selectedAttributes, cart.items]
   );
 
   // Calculate effective stock by subtracting cart quantities
   const getEffectiveStock = useMemo(() => {
-    if (!product.unlimitedStock) {
-      // For weight-based products with variations
-      if (product.weight && selectedVariation) {
-        const weightAttr = selectedVariation.attributes.find(
-          (attr) => attr.attributeId === "WEIGHT_G"
-        );
+    if (!product) return 0;
 
-        if (weightAttr) {
-          const totalWeight = parseInt(product.weight);
-          const variationWeight = parseInt(weightAttr.value);
-
-          // Calculate total weight used by all variations in cart
-          const weightUsedInCart = cart.items
-            .filter((item) => item.productId === product.id)
-            .reduce((total, item) => {
-              // Find the weight of this cart item's variation
-              const cartItemWeight = item.attributes?.["WEIGHT_G"];
-              if (cartItemWeight) {
-                return total + parseInt(cartItemWeight) * item.quantity;
-              }
-              return total;
-            }, 0);
-
-          // Calculate remaining weight
-          const remainingWeight = Math.max(0, totalWeight - weightUsedInCart);
-
-          // Calculate how many packages of current variation can be made
-          return Math.floor(remainingWeight / variationWeight);
-        }
-      }
-
-      // For regular variations
-      const dbStock = selectedVariation
-        ? selectedVariation.stock
-        : product.stock;
-
-      // Find matching item in cart (if any)
-      const cartItem = cart.items.find(
-        (item) =>
-          item.productId === product.id &&
-          item.variationId === (selectedVariation?.id || undefined)
-      );
-
-      // Subtract cart quantity from database stock
-      return cartItem ? Math.max(0, dbStock - cartItem.quantity) : dbStock;
-    }
-
-    return Infinity;
+    return getAvailableQuantityForVariation(
+      product,
+      selectedVariation?.id,
+      cart.items
+    );
   }, [product, selectedVariation, cart.items]);
 
   // Calculate if the product is available to add to cart
@@ -365,12 +342,21 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
     }, 100);
   }, []);
 
+  // Handle card click
+  const handleCardClick = useCallback((e: React.MouseEvent) => {
+    // If the click originated from within the variations container, prevent navigation
+    if (variationsRef.current?.contains(e.target as Node)) {
+      e.preventDefault();
+    }
+  }, []);
+
   return (
     <Link
       href={`/product/${product.slug}`}
       className="block h-full relative"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onClick={handleCardClick}
     >
       <div
         className="w-full product-card overflow-hidden rounded-lg group"
@@ -391,8 +377,8 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
                     onLoad={() => handleImageLoad(0)}
                   />
                 ) : (
-                  <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
-                    <span className="text-gray-400">No image</span>
+                  <div className="absolute inset-0 bg-muted flex items-center justify-center">
+                    <span className="text-muted-foreground">No image</span>
                   </div>
                 )}
               </div>
@@ -417,10 +403,10 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
             {/* Desktop Add to Cart button */}
             <button
               onClick={handleAddToCart}
-              className={`absolute bottom-0 left-0 right-0 hidden md:flex items-center justify-center space-x-2 bg-gray-200/70 backdrop-blur-xs text-black hover:bg-black hover:text-white transition-all duration-500 py-2 opacity-0 group-hover:opacity-100 ${
+              className={`absolute bottom-0 left-0 right-0 hidden md:flex items-center justify-center space-x-2 bg-muted/70 backdrop-blur-xs text-black hover:bg-black  transition-all duration-500 py-2 opacity-0 group-hover:opacity-100 ${
                 !isAvailable
-                  ? "cursor-not-allowed hover:bg-gray-200/70 hover:text-black opacity-50"
-                  : ""
+                  ? "cursor-not-allowed hover:bg-muted/70 opacity-50"
+                  : "hover:text-white"
               }`}
               disabled={!isAvailable}
             >
@@ -474,13 +460,11 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
                           ).toFixed(2)}{" "}
                           CAD
                         </h5>
-                        <div className="flex items-baseline gap-1">
-                          <h6 className=" line-through text-gray-500">
+                        <div className="flex items-center gap-1">
+                          <h6 className=" line-through text-muted-foreground">
                             ${currentPrice?.toFixed(2)}
                           </h6>
-                          <p className="ml-1 text-red-600">
-                            {product.discount}% OFF
-                          </p>
+                          <Badge variant="green">{product.discount}% OFF</Badge>
                         </div>
                       </>
                     ) : (
@@ -491,11 +475,21 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
                   </div>
 
                   {!product.unlimitedStock && (
-                    <div className="mt-1 text-xs text-gray-500">
+                    <div className="mt-1 text-xs">
                       {getEffectiveStock > 0 ? (
-                        <span>In stock: {getEffectiveStock}</span>
+                        <Badge variant="outline">
+                          <span className="text-muted-foreground">
+                            In stock:{" "}
+                          </span>
+                          <span>{getEffectiveStock}</span>
+                        </Badge>
                       ) : (
-                        <span className="text-red-600">Out of stock</span>
+                        <Badge
+                          variant="outline"
+                          className="text-muted-foreground"
+                        >
+                          Out of stock
+                        </Badge>
                       )}
                     </div>
                   )}
@@ -520,53 +514,26 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
               {product.hasVariations &&
                 product.variations &&
                 product.variations.length > 0 && (
-                  <div className="space-y-2">
+                  <div ref={variationsRef} className="space-y-2">
                     {attributeNames.map((attributeId: string) => (
-                      <div key={attributeId}>
-                        <div className="text-xs font-medium text-gray-500 mb-1">
-                          {getAttributeDisplayName(attributeId)}
-                        </div>
-                        <div className="flex flex-wrap gap-1">
-                          {getUniqueAttributeValues(attributeId).map(
-                            (value) => {
-                              const isAvailable = isAttributeValueAvailable(
-                                attributeId,
-                                value
-                              );
-                              const isSelected =
-                                selectedAttributes[attributeId] === value;
-
-                              return (
-                                <button
-                                  key={value}
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    selectVariation(attributeId, value);
-                                  }}
-                                  className={`
-                                px-2 py-1 text-xs rounded-full border transition-colors duration-200
-                                ${
-                                  isSelected
-                                    ? "border-black bg-black text-white"
-                                    : isAvailable
-                                      ? "border-gray-300 hover:border-black"
-                                      : "border-gray-200 text-gray-400"
-                                }
-                                ${isAvailable ? "" : "opacity-50"}
-                              `}
-                                  title={
-                                    !isAvailable
-                                      ? "This combination is not available"
-                                      : ""
-                                  }
-                                >
-                                  {value}
-                                </button>
-                              );
-                            }
-                          )}
-                        </div>
-                      </div>
+                      <FilterGroup
+                        key={attributeId}
+                        title={getAttributeDisplayName(attributeId)}
+                        options={getUniqueAttributeValues(attributeId)}
+                        selectedOptions={
+                          selectedAttributes[attributeId] || null
+                        }
+                        onOptionChange={(value) => {
+                          if (value) {
+                            selectVariation(attributeId, value);
+                          }
+                        }}
+                        showAllOption={false}
+                        variant="product"
+                        getOptionAvailability={(value) =>
+                          isAttributeValueAvailable(attributeId, value)
+                        }
+                      />
                     ))}
                   </div>
                 )}
@@ -576,10 +543,10 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
             <div className="md:hidden mt-auto">
               <button
                 onClick={handleAddToCart}
-                className={`w-full flex items-center justify-center space-x-2 bg-gray-200/70 backdrop-blur-xs text-black hover:bg-black hover:text-white transition-all duration-500 py-2 px-4 ${
+                className={`w-full flex items-center justify-center space-x-2 bg-muted backdrop-blur-xs text-black hover:bg-black  transition-all duration-500 py-2 px-4 ${
                   !isAvailable
-                    ? "opacity-50 cursor-not-allowed hover:bg-gray-200/70 hover:text-black"
-                    : ""
+                    ? "opacity-50 cursor-not-allowed hover:bg-muted/70 hover:text-black"
+                    : "hover:text-white"
                 }`}
                 disabled={!isAvailable}
               >

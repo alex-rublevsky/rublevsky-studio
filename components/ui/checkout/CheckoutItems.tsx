@@ -11,7 +11,7 @@ interface CheckoutItemsProps {
 
 export default function CheckoutItems({ items }: CheckoutItemsProps) {
   if (items.length === 0) {
-    return <p className="text-gray-500 text-sm">No items in cart</p>;
+    return <p className="text-muted-foreground text-sm">No items in cart</p>;
   }
 
   return (
@@ -22,7 +22,7 @@ export default function CheckoutItems({ items }: CheckoutItemsProps) {
           className="flex items-start gap-3 py-2"
         >
           {/* Product image */}
-          <div className="shrink-0 relative w-12 h-12 bg-gray-100 rounded overflow-hidden">
+          <div className="shrink-0 relative w-12 h-12 bg-muted rounded overflow-hidden">
             {item.image ? (
               <Image
                 src={`/${item.image}`}
@@ -31,7 +31,7 @@ export default function CheckoutItems({ items }: CheckoutItemsProps) {
                 className="object-cover"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-400">
+              <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                 No image
               </div>
             )}
@@ -42,7 +42,7 @@ export default function CheckoutItems({ items }: CheckoutItemsProps) {
             <p className="font-medium text-sm">{item.productName}</p>
 
             {item.attributes && Object.keys(item.attributes).length > 0 && (
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 {Object.entries(item.attributes)
                   .map(
                     ([key, value]) =>
@@ -57,7 +57,7 @@ export default function CheckoutItems({ items }: CheckoutItemsProps) {
           <div className="text-right">
             {item.discount ? (
               <>
-                <p className="text-sm font-medium line-through text-gray-500">
+                <p className="text-sm font-medium line-through text-muted-foreground">
                   ${(item.price * item.quantity).toFixed(2)}
                 </p>
                 <div className="flex items-center justify-end gap-2">
@@ -79,7 +79,9 @@ export default function CheckoutItems({ items }: CheckoutItemsProps) {
                 ${(item.price * item.quantity).toFixed(2)}
               </p>
             )}
-            <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+            <p className="text-xs text-muted-foreground">
+              Qty: {item.quantity}
+            </p>
           </div>
         </div>
       ))}

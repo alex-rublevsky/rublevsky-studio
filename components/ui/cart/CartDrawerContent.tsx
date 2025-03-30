@@ -25,8 +25,8 @@ export function CartDrawerContent() {
         </DrawerHeader>
         <DrawerBody>
           <div className="flex flex-col items-center justify-center h-full">
-            <ShoppingBag size={48} className="text-gray-300 mb-4" />
-            <p className="text-gray-500">Your cart is empty</p>
+            <ShoppingBag size={48} className="text-muted mb-4" />
+            <p className="text-muted-foreground">Your cart is empty</p>
           </div>
         </DrawerBody>
       </>
@@ -44,8 +44,8 @@ export function CartDrawerContent() {
       <DrawerBody>
         {cart.items.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full">
-            <ShoppingBag size={48} className="text-gray-300 mb-4" />
-            <p className="text-gray-500">Your cart is empty</p>
+            <ShoppingBag size={48} className="text-muted mb-4" />
+            <p className="text-muted-foreground">Your cart is empty</p>
           </div>
         ) : (
           <div className="space-y-6">

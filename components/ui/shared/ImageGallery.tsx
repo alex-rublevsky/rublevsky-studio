@@ -172,8 +172,8 @@ export default function ImageGallery({
 
   if (!images.length) {
     return (
-      <div className="w-full h-[75vh] bg-gray-100 flex items-center justify-center rounded-lg">
-        <p className="text-gray-500">No images available</p>
+      <div className="w-full h-[75vh] bg-muted flex items-center justify-center rounded-lg">
+        <p className="text-muted-foreground">No images available</p>
       </div>
     );
   }

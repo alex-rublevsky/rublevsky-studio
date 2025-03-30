@@ -13,7 +13,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div>
         {label && (
-          <label className="block text-sm font-medium mb-1">
+          <label className="block text-sm mb-1">
             {label}
             {required && " *"}
           </label>

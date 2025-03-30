@@ -75,9 +75,9 @@ export function CartItem({ item }: CartItemProps) {
     : "";
 
   return (
-    <div className="flex items-start gap-4 py-2 border-b border-gray-100">
+    <div className="flex items-start gap-4 py-2 border-b border-border">
       {/* Product image */}
-      <div className="shrink-0 relative w-16 h-16 bg-gray-100 rounded overflow-hidden">
+      <div className="shrink-0 relative w-16 h-16 bg-muted rounded overflow-hidden">
         {item.image ? (
           <Image
             src={`/${item.image}`}
@@ -86,7 +86,7 @@ export function CartItem({ item }: CartItemProps) {
             className="object-cover"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-400">
+          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
             No image
           </div>
         )}
@@ -102,7 +102,7 @@ export function CartItem({ item }: CartItemProps) {
         </Link>
 
         {attributeText && (
-          <p className="text-sm text-gray-500 mt-1">{attributeText}</p>
+          <p className="text-sm text-muted-foreground mt-1">{attributeText}</p>
         )}
 
         <div className="flex items-center justify-between mt-2">
@@ -116,7 +116,7 @@ export function CartItem({ item }: CartItemProps) {
           <div className="font-medium">
             {item.discount ? (
               <div className="flex flex-col items-end">
-                <span className="line-through text-sm text-gray-500">
+                <span className="line-through text-sm text-muted-foreground">
                   ${(item.price * item.quantity).toFixed(2)}
                 </span>
                 <div className="flex items-center gap-2">
@@ -143,7 +143,7 @@ export function CartItem({ item }: CartItemProps) {
       {/* Remove button */}
       <button
         onClick={() => removeFromCart(item.productId, item.variationId)}
-        className="shrink-0 p-1 text-gray-400 hover:text-gray-600"
+        className="shrink-0 p-1 text-muted-foreground hover:text-primary-foreground"
         aria-label="Remove item"
       >
         <X size={16} />

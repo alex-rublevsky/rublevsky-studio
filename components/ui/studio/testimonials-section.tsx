@@ -105,7 +105,9 @@ function TestimonialsSection() {
                     <p className="font-semibold group-hover:underline">
                       {testimonial.name}
                     </p>
-                    <p className="text-sm text-gray-500">{testimonial.role}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {testimonial.role}
+                    </p>
                   </div>
                 </a>
               </div>

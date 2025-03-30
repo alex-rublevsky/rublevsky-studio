@@ -1,33 +1,67 @@
 import { cn } from "@/lib/utils";
+import { cva } from "class-variance-authority";
 
 interface FilterOption {
   slug: string;
   name: string;
 }
-
 interface FilterButtonProps {
   onClick: () => void;
   isSelected: boolean;
+  isDisabled?: boolean;
   children: React.ReactNode;
   className?: string;
+  variant?: "default" | "product";
+  title?: string;
 }
+
+const buttonVariants = cva(
+  "transition-all duration-200 border cursor-pointer",
+  {
+    variants: {
+      variant: {
+        default:
+          "px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium rounded-full",
+        product: "px-2 py-1 text-xs rounded-full",
+      },
+      state: {
+        selected: "border-black bg-black text-white",
+        unselected:
+          "border-border hover:border-black hover:bg-black/5 active:scale-95",
+        disabled: "border-border hover:border-black text-muted-foreground",
+        "selected-disabled":
+          "border-muted-foreground bg-muted/50 text-muted-foreground",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      state: "unselected",
+    },
+  }
+);
 
 function FilterButton({
   onClick,
   isSelected,
+  isDisabled = false,
   children,
   className,
+  variant = "default",
+  title,
 }: FilterButtonProps) {
+  const state = isDisabled
+    ? isSelected
+      ? "selected-disabled"
+      : "disabled"
+    : isSelected
+      ? "selected"
+      : "unselected";
+
   return (
     <button
       onClick={onClick}
-      className={cn(
-        "px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium rounded-full transition-colors",
-        isSelected
-          ? "bg-primary text-primary-foreground"
-          : "border border-border hover:bg-border",
-        className
-      )}
+      className={cn(buttonVariants({ variant, state }), className)}
+      title={title}
     >
       {children}
     </button>
@@ -36,7 +70,7 @@ function FilterButton({
 
 interface FilterGroupProps {
   title?: string;
-  options: FilterOption[];
+  options: (FilterOption | string)[];
   selectedOptions: string | string[] | null;
   onOptionChange: (option: string | null) => void;
   onOptionsChange?: (options: string[]) => void;
@@ -44,6 +78,9 @@ interface FilterGroupProps {
   showAllOption?: boolean;
   allOptionLabel?: string;
   multiSelect?: boolean;
+  variant?: "default" | "product";
+  getOptionAvailability?: (option: string) => boolean;
+  titleClassName?: string;
 }
 
 export function FilterGroup({
@@ -56,6 +93,9 @@ export function FilterGroup({
   showAllOption = true,
   allOptionLabel = "All",
   multiSelect = false,
+  variant = "default",
+  getOptionAvailability,
+  titleClassName,
 }: FilterGroupProps) {
   const handleOptionClick = (optionSlug: string) => {
     if (multiSelect && onOptionsChange) {
@@ -79,27 +119,57 @@ export function FilterGroup({
     return selectedOptions === optionSlug;
   };
 
+  const getOptionName = (option: FilterOption | string) => {
+    return typeof option === "string" ? option : option.name;
+  };
+
+  const getOptionSlug = (option: FilterOption | string) => {
+    return typeof option === "string" ? option : option.slug;
+  };
+
   return (
-    <div className="space-y-2 min-w-[20rem]">
-      {title && <p className="text-sm font-medium">{title}</p>}
-      <div className={cn("flex flex-wrap gap-2", className)}>
+    <div className="space-y-2">
+      {title && (
+        <div
+          className={cn(
+            variant === "product"
+              ? "text-xs font-medium text-muted-foreground mb-1"
+              : "text-sm font-medium",
+            titleClassName
+          )}
+        >
+          {title}
+        </div>
+      )}
+      <div className={cn("flex flex-wrap gap-1", className)}>
         {showAllOption && !multiSelect && (
           <FilterButton
             onClick={() => onOptionChange(null)}
             isSelected={selectedOptions === null}
+            variant={variant}
           >
             {allOptionLabel}
           </FilterButton>
         )}
-        {options.map((option) => (
-          <FilterButton
-            key={option.slug}
-            onClick={() => handleOptionClick(option.slug)}
-            isSelected={isSelected(option.slug)}
-          >
-            {option.name}
-          </FilterButton>
-        ))}
+        {options.map((option) => {
+          const optionSlug = getOptionSlug(option);
+          const isAvailable = getOptionAvailability
+            ? getOptionAvailability(optionSlug)
+            : true;
+
+          return (
+            <FilterButton
+              key={optionSlug}
+              onClick={() => handleOptionClick(optionSlug)}
+              isSelected={isSelected(optionSlug)}
+              isDisabled={!isAvailable}
+              variant={variant}
+              title={!isAvailable ? "This option is not available" : undefined}
+            >
+              {getOptionName(option)}
+            </FilterButton>
+          );
+        })}
       </div>
     </div>
   );

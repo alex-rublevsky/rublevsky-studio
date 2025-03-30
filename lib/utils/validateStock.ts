@@ -31,6 +31,66 @@ function getCartQuantity(
 }
 
 /**
+ * Calculates available quantity for a variation, considering weight-based products
+ */
+export function getAvailableQuantityForVariation(
+  product: ProductWithVariations,
+  variationId: number | undefined,
+  cartItems: CartItem[],
+  excludeCurrentItem: boolean = false
+): number {
+  // Handle unlimited stock products
+  if (product.unlimitedStock) {
+    return Number.MAX_SAFE_INTEGER;
+  }
+
+  // Handle weight-based products with variations
+  if (product.weight && variationId) {
+    const variation = product.variations?.find(v => v.id === variationId);
+    if (!variation) {
+      return 0;
+    }
+
+    const weightAttr = variation.attributes.find(attr => attr.attributeId === "WEIGHT_G");
+    if (!weightAttr) {
+      return 0;
+    }
+
+    const totalWeight = parseInt(product.weight || "0");
+    const variationWeight = parseInt(weightAttr.value);
+
+    // Calculate total weight used by other variations, excluding the current item if specified
+    const otherVariationsWeight = cartItems
+      .filter(item => {
+        const isOtherVariation = item.productId === product.id && 
+          item.attributes?.["WEIGHT_G"] &&
+          // If this is the item being validated and we should exclude it, skip it
+          !(excludeCurrentItem && item.variationId === variationId);
+        
+        return isOtherVariation;
+      })
+      .reduce((total, item) => {
+        return total + (parseInt(item.attributes!["WEIGHT_G"]) * item.quantity);
+      }, 0);
+
+    const availableWeight = totalWeight - otherVariationsWeight;
+    return Math.max(0, Math.floor(availableWeight / variationWeight));
+  }
+
+  // Handle regular variations or base products
+  const stockToCheck = variationId 
+    ? product.variations?.find(v => v.id === variationId)?.stock
+    : product.stock;
+
+  if (typeof stockToCheck !== 'number') {
+    return 0;
+  }
+
+  const cartQuantity = getCartQuantity(cartItems, product.id, variationId, excludeCurrentItem);
+  return Math.max(0, stockToCheck - cartQuantity);
+}
+
+/**
  * Validates stock availability for both regular and weight-based products
  */
 export function validateStock(
@@ -61,89 +121,19 @@ export function validateStock(
     };
   }
 
-  // Get current quantity in cart, excluding the item being validated if it's an existing cart item
-  const cartQuantity = getCartQuantity(cartItems, productId, variationId, isExistingCartItem);
-
-  // Handle weight-based products with variations
-  if (product.weight && variationId) {
-    const variation = product.variations?.find(v => v.id === variationId);
-    if (!variation) {
-      return {
-        isAvailable: false,
-        availableStock: 0,
-        unlimitedStock: false,
-        error: `Variation not found: ${variationId}`
-      };
-    }
-
-    const weightAttr = variation.attributes.find(attr => attr.attributeId === "WEIGHT_G");
-    if (!weightAttr) {
-      return {
-        isAvailable: false,
-        availableStock: 0,
-        unlimitedStock: false,
-        error: "Missing weight attribute for variation"
-      };
-    }
-
-    const totalWeight = parseInt(product.weight || "0");
-    const variationWeight = parseInt(weightAttr.value);
-
-    // Calculate total weight used by other variations, excluding the current item if it's an existing cart item
-    const otherVariationsWeight = cartItems
-      .filter(item => {
-        const isOtherVariation = item.productId === productId && 
-          item.variationId !== variationId &&
-          item.attributes?.["WEIGHT_G"];
-        
-        // If this is the item being validated and we should exclude it, skip it
-        if (isExistingCartItem && item.productId === productId && item.variationId === variationId) {
-          return false;
-        }
-        
-        return isOtherVariation;
-      })
-      .reduce((total, item) => {
-        return total + (parseInt(item.attributes!["WEIGHT_G"]) * item.quantity);
-      }, 0);
-
-    const availableWeight = totalWeight - otherVariationsWeight;
-    const requestedWeight = variationWeight * requestedQuantity;
-    const maxPossibleQuantity = Math.floor(availableWeight / variationWeight);
-
-    return {
-      isAvailable: availableWeight >= requestedWeight,
-      availableStock: maxPossibleQuantity,
-      unlimitedStock: false,
-      error: availableWeight >= requestedWeight ? undefined : 
-        `Insufficient weight available. Maximum possible quantity: ${maxPossibleQuantity}`
-    };
-  }
-
-  // Handle regular variations or base products
-  const stockToCheck = variationId 
-    ? product.variations?.find(v => v.id === variationId)?.stock
-    : product.stock;
-
-  if (typeof stockToCheck !== 'number') {
-    return {
-      isAvailable: false,
-      availableStock: 0,
-      unlimitedStock: false,
-      error: variationId 
-        ? `Variation not found: ${variationId}`
-        : `Invalid stock value for product: ${productId}`
-    };
-  }
-
-  const availableStock = Math.max(0, stockToCheck - cartQuantity);
-  const canFulfill = availableStock >= requestedQuantity;
+  // Calculate available quantity using our helper
+  const availableStock = getAvailableQuantityForVariation(
+    product,
+    variationId,
+    cartItems,
+    isExistingCartItem
+  );
 
   return {
-    isAvailable: canFulfill,
+    isAvailable: availableStock >= requestedQuantity,
     availableStock,
     unlimitedStock: false,
-    error: canFulfill ? undefined : 
+    error: availableStock >= requestedQuantity ? undefined : 
       `Insufficient stock. Available: ${availableStock}, Requested: ${requestedQuantity}`
   };
 }
