@@ -11,6 +11,7 @@ import { getAttributeDisplayName } from "@/lib/utils/productAttributes";
 import { Badge } from "../shared/badge";
 import { FilterGroup } from "../shared/FilterGroup";
 import { getAvailableQuantityForVariation } from "@/lib/utils/validateStock";
+import { useVariationSelection } from "@/lib/hooks/useVariationSelection";
 
 // Extended product interface with variations
 interface ProductWithVariations extends Product {
@@ -23,14 +24,20 @@ interface ProductVariationWithAttributes extends ProductVariation {
 
 function ProductCard({ product }: { product: ProductWithVariations }) {
   const [isHovering, setIsHovering] = useState(false);
-  const [selectedVariation, setSelectedVariation] =
-    useState<ProductVariationWithAttributes | null>(null);
-  const [selectedAttributes, setSelectedAttributes] = useState<
-    Record<string, string>
-  >({});
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [imagesLoaded, setImagesLoaded] = useState<boolean[]>([]);
   const { addProductToCart, cart } = useCart();
+
+  // Use the variation selection hook
+  const {
+    selectedVariation,
+    selectedAttributes,
+    selectVariation,
+    isAttributeValueAvailable,
+  } = useVariationSelection({
+    product,
+    cartItems: cart.items,
+  });
 
   // Ref for debouncing hover state
   const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -43,33 +50,6 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
     () => product.images?.split(",").map((img) => img.trim()) ?? [],
     [product.images]
   );
-
-  // Initialize selected variation when product loads
-  useEffect(() => {
-    if (
-      product.hasVariations &&
-      product.variations &&
-      product.variations.length > 0
-    ) {
-      // Sort variations by sort property (descending order)
-      const sortedVariations = [...product.variations].sort(
-        (a, b) => (b.sort ?? 0) - (a.sort ?? 0)
-      );
-      // Select first available variation
-      const firstVariation = sortedVariations[0];
-      setSelectedVariation(firstVariation);
-
-      // Initialize selected attributes from the first variation
-      const initialAttributes: Record<string, string> = {};
-      firstVariation.attributes.forEach((attr: VariationAttribute) => {
-        initialAttributes[attr.attributeId] = attr.value;
-      });
-      setSelectedAttributes(initialAttributes);
-    }
-
-    // Initialize image loading state
-    setImagesLoaded(new Array(imageArray.length).fill(false));
-  }, [product, imageArray.length]);
 
   // Handle image load events with useCallback
   const handleImageLoad = useCallback((index: number) => {
@@ -117,140 +97,6 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
       return Array.from(values);
     },
     [product.variations]
-  );
-
-  // Find a variation that matches all the selected attributes
-  const findMatchingVariation = useCallback(
-    (attributes: Record<string, string>) => {
-      if (!product.variations) return null;
-
-      return (
-        product.variations.find((variation) => {
-          return Object.entries(attributes).every(([attributeId, value]) =>
-            variation.attributes.some(
-              (attr) => attr.attributeId === attributeId && attr.value === value
-            )
-          );
-        }) || null
-      );
-    },
-    [product.variations]
-  );
-
-  // Find the best combination of attributes that includes the selected attribute
-  const findBestAttributeCombination = useCallback(
-    (
-      attributeId: string,
-      attributeValue: string
-    ): Record<string, string> | null => {
-      if (!product.variations) return null;
-
-      // Find variations that match the selected attribute
-      const matchingVariations = product.variations.filter((variation) =>
-        variation.attributes.some(
-          (attr) =>
-            attr.attributeId === attributeId && attr.value === attributeValue
-        )
-      );
-
-      if (matchingVariations.length === 0) return null;
-
-      // Use the first matching variation's attributes
-      const bestVariation = matchingVariations[0];
-      const bestAttributes: Record<string, string> = {};
-
-      bestVariation.attributes.forEach((attr) => {
-        bestAttributes[attr.attributeId] = attr.value;
-      });
-
-      return bestAttributes;
-    },
-    [product.variations]
-  );
-
-  // Select a variation based on attribute ID and value
-  const selectVariation = useCallback(
-    (attributeId: string, attributeValue: string) => {
-      if (!product.variations) return;
-
-      // Update selected attributes
-      const newSelectedAttributes = {
-        ...selectedAttributes,
-        [attributeId]: attributeValue,
-      };
-
-      // First, try to find a variation that matches all selected attributes
-      let newVariation = findMatchingVariation(newSelectedAttributes);
-
-      // If no matching variation found, adjust other attributes to find a valid combination
-      if (!newVariation) {
-        // Keep the current attribute selection and find the best matching variation
-        const bestAttributes = findBestAttributeCombination(
-          attributeId,
-          attributeValue
-        );
-
-        if (bestAttributes) {
-          newVariation = findMatchingVariation(bestAttributes);
-          if (newVariation) {
-            setSelectedAttributes(bestAttributes);
-          }
-        }
-      } else {
-        setSelectedAttributes(newSelectedAttributes);
-      }
-
-      if (newVariation) {
-        setSelectedVariation(newVariation);
-      }
-    },
-    [
-      product.variations,
-      selectedAttributes,
-      findMatchingVariation,
-      findBestAttributeCombination,
-    ]
-  );
-
-  // Check if a specific attribute value is available with current selections
-  const isAttributeValueAvailable = useCallback(
-    (attributeId: string, attributeValue: string): boolean => {
-      if (!product.variations) return false;
-
-      // Get all other selected attributes except the one we're checking
-      const otherAttributes = { ...selectedAttributes };
-      delete otherAttributes[attributeId];
-
-      // Check if there's any variation that matches this attribute value and all other selected attributes
-      // AND has stock available
-      return product.variations.some((variation) => {
-        const matchesThisAttribute = variation.attributes.some(
-          (attr) =>
-            attr.attributeId === attributeId && attr.value === attributeValue
-        );
-
-        const matchesOtherAttributes = Object.entries(otherAttributes).every(
-          ([id, value]) =>
-            variation.attributes.some(
-              (attr) => attr.attributeId === id && attr.value === value
-            )
-        );
-
-        // Check if this variation has stock available using our centralized function
-        const availableQuantity = getAvailableQuantityForVariation(
-          product,
-          variation.id,
-          cart.items
-        );
-
-        return (
-          matchesThisAttribute &&
-          matchesOtherAttributes &&
-          availableQuantity > 0
-        );
-      });
-    },
-    [product, selectedAttributes, cart.items]
   );
 
   // Calculate effective stock by subtracting cart quantities

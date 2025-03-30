@@ -143,10 +143,10 @@ export function CartItem({ item }: CartItemProps) {
       {/* Remove button */}
       <button
         onClick={() => removeFromCart(item.productId, item.variationId)}
-        className="shrink-0 p-1 text-muted-foreground hover:text-primary-foreground"
+        className="shrink-0 p-1 text-muted-foreground hover:text-foreground cursor-pointer"
         aria-label="Remove item"
       >
-        <X size={16} />
+        <X size={20} />
       </button>
     </div>
   );

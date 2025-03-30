@@ -19,6 +19,7 @@ import {
 import { Badge } from "../shared/badge";
 import { getAvailableQuantityForVariation } from "@/lib/utils/validateStock";
 import { markdownComponents } from "../shared/MarkdownComponents";
+import { useVariationSelection } from "@/lib/hooks/useVariationSelection";
 
 interface ProductDetailsProps {
   initialProduct: ProductWithDetails;
@@ -31,11 +32,18 @@ export default function ProductDetails({
   const [product, setProduct] = useState<ProductWithDetails>(initialProduct);
   const [selectedImage, setSelectedImage] = useState("");
   const [quantity, setQuantity] = useState(1);
-  const [selectedVariation, setSelectedVariation] =
-    useState<ProductVariationWithAttributes | null>(null);
-  const [selectedAttributes, setSelectedAttributes] = useState<
-    Record<string, string>
-  >({});
+
+  // Use the variation selection hook
+  const {
+    selectedVariation,
+    selectedAttributes,
+    selectVariation,
+    isAttributeValueAvailable,
+  } = useVariationSelection({
+    product,
+    cartItems: cart.items,
+    onVariationChange: () => setQuantity(1), // Reset quantity when variation changes
+  });
 
   // Sync product data with cart context
   useEffect(() => {
@@ -52,36 +60,13 @@ export default function ProductDetails({
     }
   }, [initialProduct.id, products]);
 
-  // Initialize selected image and variation
+  // Initialize selected image
   useEffect(() => {
     // Get first image from comma-separated string
     const imageArray =
       product.images?.split(",").map((img: string) => img.trim()) ?? [];
     if (imageArray.length > 0) {
       setSelectedImage(imageArray[0]);
-    }
-
-    // If product has variations, select the first available one
-    if (
-      product.hasVariations &&
-      product.variations &&
-      product.variations.length > 0
-    ) {
-      // Sort variations by sort property (descending order)
-      const sortedVariations = [...product.variations].sort(
-        (a, b) => (b.sort ?? 0) - (a.sort ?? 0)
-      );
-
-      // Select first available variation
-      const firstVariation = sortedVariations[0];
-      setSelectedVariation(firstVariation);
-
-      // Initialize selected attributes from the first variation
-      const initialAttributes: Record<string, string> = {};
-      firstVariation.attributes.forEach((attribute: VariationAttribute) => {
-        initialAttributes[attribute.attributeId] = attribute.value;
-      });
-      setSelectedAttributes(initialAttributes);
     }
   }, [product]);
 
@@ -120,7 +105,7 @@ export default function ProductDetails({
     if (!product?.variations) return [];
 
     const attributeNames = new Set<string>();
-    product.variations.forEach((variation: ProductVariationWithAttributes) => {
+    product.variations.forEach((variation) => {
       variation.attributes.forEach((attr: VariationAttribute) => {
         attributeNames.add(attr.attributeId);
       });
@@ -140,7 +125,7 @@ export default function ProductDetails({
       );
 
       const values = new Set<string>();
-      sortedVariations.forEach((variation: ProductVariationWithAttributes) => {
+      sortedVariations.forEach((variation) => {
         const attribute = variation.attributes.find(
           (attr: VariationAttribute) => attr.attributeId === attributeId
         );
@@ -152,132 +137,6 @@ export default function ProductDetails({
       return Array.from(values);
     },
     [product?.variations]
-  );
-
-  // Find a variation that matches all the selected attributes
-  const findMatchingVariation = (attributes: Record<string, string>) => {
-    if (!product?.variations) return null;
-
-    return product.variations.find(
-      (variation: ProductVariationWithAttributes) => {
-        return Object.entries(attributes).every(([attributeId, value]) =>
-          variation.attributes.some(
-            (attr: VariationAttribute) =>
-              attr.attributeId === attributeId && attr.value === value
-          )
-        );
-      }
-    );
-  };
-
-  // Find the best combination of attributes that includes the selected attribute
-  const findBestAttributeCombination = (
-    attributeId: string,
-    attributeValue: string
-  ) => {
-    if (!product?.variations) return null;
-
-    // Find variations that match the selected attribute
-    const matchingVariations = product.variations.filter(
-      (variation: ProductVariationWithAttributes) =>
-        variation.attributes.some(
-          (attr: VariationAttribute) =>
-            attr.attributeId === attributeId && attr.value === attributeValue
-        )
-    );
-
-    if (matchingVariations.length === 0) return null;
-
-    // Use the first matching variation's attributes
-    const bestVariation = matchingVariations[0];
-    const bestAttributes: Record<string, string> = {};
-
-    bestVariation.attributes.forEach((attr: VariationAttribute) => {
-      bestAttributes[attr.attributeId] = attr.value;
-    });
-
-    return bestAttributes;
-  };
-
-  // Select a variation based on attribute ID and value
-  const selectVariation = (attributeId: string, attributeValue: string) => {
-    if (!product?.variations) return;
-
-    // Update selected attributes
-    const newSelectedAttributes = {
-      ...selectedAttributes,
-      [attributeId]: attributeValue,
-    };
-
-    // First, try to find a variation that matches all selected attributes
-    let newVariation = findMatchingVariation(newSelectedAttributes);
-
-    // If no matching variation found, adjust other attributes to find a valid combination
-    if (!newVariation) {
-      // Keep the current attribute selection and find the best matching variation
-      const bestAttributes = findBestAttributeCombination(
-        attributeId,
-        attributeValue
-      );
-
-      if (bestAttributes) {
-        newVariation = findMatchingVariation(bestAttributes);
-        if (newVariation) {
-          setSelectedAttributes(bestAttributes);
-        }
-      }
-    } else {
-      setSelectedAttributes(newSelectedAttributes);
-    }
-
-    if (newVariation) {
-      setSelectedVariation(newVariation);
-      // Reset quantity to 1 when variation changes
-      setQuantity(1);
-    }
-  };
-
-  // Check if a specific attribute value is available with current selections
-  const isAttributeValueAvailable = useCallback(
-    (attributeId: string, attributeValue: string): boolean => {
-      if (!product?.variations) return false;
-
-      // Get all other selected attributes except the one we're checking
-      const otherAttributes = { ...selectedAttributes };
-      delete otherAttributes[attributeId];
-
-      // Check if there's any variation that matches this attribute value and all other selected attributes
-      return product.variations.some(
-        (variation: ProductVariationWithAttributes) => {
-          const matchesThisAttribute = variation.attributes.some(
-            (attr: VariationAttribute) =>
-              attr.attributeId === attributeId && attr.value === attributeValue
-          );
-
-          const matchesOtherAttributes = Object.entries(otherAttributes).every(
-            ([id, value]) =>
-              variation.attributes.some(
-                (attr: VariationAttribute) =>
-                  attr.attributeId === id && attr.value === value
-              )
-          );
-
-          // Check if this variation has stock available using our centralized function
-          const availableQuantity = getAvailableQuantityForVariation(
-            product,
-            variation.id,
-            cart.items
-          );
-
-          return (
-            matchesThisAttribute &&
-            matchesOtherAttributes &&
-            availableQuantity > 0
-          );
-        }
-      );
-    },
-    [product, selectedAttributes, cart.items]
   );
 
   const handleAddToCart = useCallback(async () => {
