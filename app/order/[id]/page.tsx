@@ -83,8 +83,8 @@ export default async function OrderPage({
         {/* What Happens Next Section - Only shown for new orders */}
         {isNewOrder && (
           <NeumorphismCard className="space-y-4">
-            <h2 className="font-semibold text-lg">What happens next?</h2>
-            <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
+            <h5 className="text-muted-foreground">What happens next?</h5>
+            <ol className="list-decimal list-inside space-y-2 text-secondary-foreground">
               <li>You will receive an order confirmation email shortly.</li>
               <li>
                 Our team will review your order and contact you to discuss
@@ -107,49 +107,54 @@ export default async function OrderPage({
             {order.items.map((item) => (
               <NeumorphismCard key={item.id} className="flex gap-4">
                 {item.product.images && (
-                  <div className="w-20 h-fit flex-shrink-0">
-                    <div className="relative w-full pb-[100%]">
-                      <Image
-                        src={`/${getFirstImage(item.product.images)}`}
-                        alt={item.product.name}
-                        fill
-                        className="object-contain rounded-md"
-                      />
-                    </div>
+                  <div className="w-20 flex-shrink-0">
+                    <Image
+                      src={`/${getFirstImage(item.product.images)}`}
+                      alt={item.product.name}
+                      width={80}
+                      height={80}
+                      className="rounded-md w-full h-auto"
+                    />
                   </div>
                 )}
-                <div className="flex-grow min-w-0">
+                <div className="grid flex-grow grid-rows-[auto_1fr] gap-2">
                   <h6 className="font-medium break-words">
                     {item.product.name}
                   </h6>
-                  <p className="text-sm text-muted-foreground">
-                    Quantity: {item.quantity}
-                  </p>
-                  {Object.entries(item.attributes).length > 0 && (
-                    <div className="flex flex-wrap gap-6 mt-1">
-                      {Object.entries(item.attributes).map(([key, value]) => (
-                        <span
-                          key={key}
-                          className="text-sm text-muted-foreground"
-                        >
-                          {getAttributeDisplayName(key)}: {value}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <div className="flex flex-col justify-end text-right shrink-0">
-                  {item.discountPercentage ? (
-                    <>
-                      <Badge variant="greenOutline" className="mb-1 self-end">
-                        -{item.discountPercentage}%
-                      </Badge>
-                      <p className="line-through text-muted-foreground">
-                        CA${(item.unitAmount * item.quantity).toFixed(2)}
+                  <div className="grid grid-cols-[1fr_auto] gap-4">
+                    <div className="space-y-1 -mt-1">
+                      <p className="text-sm text-muted-foreground">
+                        Quantity: {item.quantity}
                       </p>
-                    </>
-                  ) : null}
-                  <h6 className="">CA${item.finalAmount.toFixed(2)}</h6>
+                      {Object.entries(item.attributes).length > 0 && (
+                        <div className="flex flex-wrap gap-x-6 gap-y-0">
+                          {Object.entries(item.attributes).map(
+                            ([key, value]) => (
+                              <span
+                                key={key}
+                                className="text-sm text-muted-foreground"
+                              >
+                                {getAttributeDisplayName(key)}: {value}
+                              </span>
+                            )
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-right self-end">
+                      {item.discountPercentage ? (
+                        <>
+                          <Badge variant="greenOutline" className="mb-1">
+                            -{item.discountPercentage}%
+                          </Badge>
+                          <p className="line-through text-muted-foreground">
+                            CA${(item.unitAmount * item.quantity).toFixed(2)}
+                          </p>
+                        </>
+                      ) : null}
+                      <h6 className="">CA${item.finalAmount.toFixed(2)}</h6>
+                    </div>
+                  </div>
                 </div>
               </NeumorphismCard>
             ))}
