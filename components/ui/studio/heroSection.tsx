@@ -51,12 +51,12 @@ function HeroSection() {
                 onMouseLeave={() => setIsHovered(false)}
               >
                 <div
-                  className={`absolute inset-0 overflow-hidden rounded-full aspect-square transition-all duration-500 ${isHovered ? "md:scale-[3]" : ""}`}
+                  className={`absolute inset-0 overflow-hidden rounded-full aspect-square w-24 h-24 transition-all duration-500 ${isHovered ? "md:scale-[3]" : ""}`}
                 >
                   <Image
                     src="/me.jpg"
                     alt="Profile picture"
-                    className={`w-[200%] h-[200%] object-cover object-top transition-all duration-500 ${isHovered ? "md:w-full md:h-full" : ""}`}
+                    className={`w-full h-full object-cover object-top transition-all duration-500 ${isHovered ? "" : ""}`}
                     width={192}
                     height={192}
                   />
