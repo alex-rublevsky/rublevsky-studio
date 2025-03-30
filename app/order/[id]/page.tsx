@@ -7,6 +7,7 @@ import { CheckCircle, Clock } from "lucide-react";
 import getOrderById from "@/lib/actions/orders/getOrderById";
 import { getAttributeDisplayName } from "@/lib/utils/productAttributes";
 import NeumorphismCard from "@/components/ui/shared/neumorphism-card";
+import { Badge } from "@/components/ui/shared/badge";
 
 interface OrderItem {
   name: string;
@@ -66,14 +67,14 @@ export default async function OrderPage({
             )}
           </div>
 
-          <h1 className="text-3xl font-bold mb-4">
+          <h3 className="mb-3 text-muted-foreground">
             {isNewOrder ? "Thank You for Your Order!" : "Order Details"}
-          </h1>
+          </h3>
 
           <div className="flex justify-center gap-8">
             {" "}
-            <p className="text-lg mb-2">Order #{order.id}</p>
-            <p className="text-secondary">
+            <p className="text-muted-foreground mb-2">Order #{order.id}</p>
+            <p className="text-muted-foreground">
               Placed on {new Date(order.createdAt).toLocaleDateString()}
             </p>
           </div>
@@ -83,7 +84,7 @@ export default async function OrderPage({
         {isNewOrder && (
           <NeumorphismCard className="space-y-4">
             <h2 className="font-semibold text-lg">What happens next?</h2>
-            <ol className="list-decimal list-inside space-y-2 text-secondary">
+            <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
               <li>You will receive an order confirmation email shortly.</li>
               <li>
                 Our team will review your order and contact you to discuss
@@ -102,42 +103,48 @@ export default async function OrderPage({
 
         {/* Order Items Section */}
         <div className="space-y-4">
-          <h5 className="text-secondary">Order Items</h5>
           <div className="space-y-4">
             {order.items.map((item) => (
               <NeumorphismCard key={item.id} className="flex gap-4">
                 {item.product.images && (
-                  <div className="relative w-20  rounded-md overflow-hidden">
-                    <Image
-                      src={`/${getFirstImage(item.product.images)}`}
-                      alt={item.product.name}
-                      fill
-                      className="object-cover"
-                    />
+                  <div className="w-20 h-fit flex-shrink-0">
+                    <div className="relative w-full pb-[100%]">
+                      <Image
+                        src={`/${getFirstImage(item.product.images)}`}
+                        alt={item.product.name}
+                        fill
+                        className="object-contain rounded-md"
+                      />
+                    </div>
                   </div>
                 )}
                 <div className="flex-grow min-w-0">
-                  <h3 className="font-medium truncate">{item.product.name}</h3>
-                  <p className="text-sm text-secondary">
+                  <h6 className="font-medium break-words">
+                    {item.product.name}
+                  </h6>
+                  <p className="text-sm text-muted-foreground">
                     Quantity: {item.quantity}
                   </p>
                   {Object.entries(item.attributes).length > 0 && (
                     <div className="flex flex-wrap gap-6 mt-1">
                       {Object.entries(item.attributes).map(([key, value]) => (
-                        <span key={key} className="text-sm text-secondary">
+                        <span
+                          key={key}
+                          className="text-sm text-muted-foreground"
+                        >
                           {getAttributeDisplayName(key)}: {value}
                         </span>
                       ))}
                     </div>
                   )}
                 </div>
-                <div className="text-right h-fit shrink-0">
+                <div className="flex flex-col justify-end text-right shrink-0">
                   {item.discountPercentage ? (
                     <>
-                      <p className="text-red-600">
+                      <Badge variant="greenOutline" className="mb-1 self-end">
                         -{item.discountPercentage}%
-                      </p>
-                      <p className="line-through text-secondary">
+                      </Badge>
+                      <p className="line-through text-muted-foreground">
                         CA${(item.unitAmount * item.quantity).toFixed(2)}
                       </p>
                     </>
@@ -157,14 +164,16 @@ export default async function OrderPage({
               <p>CA${order.subtotalAmount.toFixed(2)}</p>
             </div>
             {order.discountAmount > 0 && (
-              <div className="flex justify-between text-red-600">
+              <div className="flex justify-between text-green-600">
                 <p>Discount</p>
-                <p>-CA${order.discountAmount.toFixed(2)}</p>
+                <Badge variant="green">
+                  -CA${order.discountAmount.toFixed(2)}
+                </Badge>
               </div>
             )}
             <div className="flex justify-between ">
               <p>Shipping</p>
-              <p className="text-secondary">
+              <p className="text-muted-foreground">
                 {order.shippingAmount
                   ? `CA$${order.shippingAmount.toFixed(2)}`
                   : "To be determined"}
@@ -180,7 +189,7 @@ export default async function OrderPage({
         {/* Shipping Address Section */}
         <div className="border-t pt-6">
           <h2 className="font-semibold text-lg mb-4">Shipping Address</h2>
-          <div className="text-secondary">
+          <div className="text-">
             <p>
               {shippingAddress.firstName} {shippingAddress.lastName}
             </p>

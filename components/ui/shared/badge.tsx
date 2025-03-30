@@ -18,7 +18,9 @@ const badgeVariants = cva(
         outline:
           "text-foreground border-muted hover:bg-muted hover:text-foreground",
         green:
-          "border-transparent bg-green-600 text-white hover:bg-green-600/90 focus-visible:ring-green-600/20 dark:focus-visible:ring-green-600/40 dark:bg-green-600/70",
+          "border-transparent bg-green-600 text-white font-medium hover:bg-green-600/90 focus-visible:ring-green-600/20 dark:focus-visible:ring-green-600/40 dark:bg-green-600/70",
+        greenOutline:
+          "border-green-600 bg-transparent text-green-600 hover:bg-green-600/10 focus-visible:ring-green-600/20 dark:focus-visible:ring-green-600/40 dark:bg-green-600/70",
       },
       size: {
         default: "px-2 py-0.5 text-xs",
