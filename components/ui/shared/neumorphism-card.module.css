@@ -11,6 +11,10 @@
   transition: all 0.3s ease;
 }
 
+.card.buttonVariant {
+  padding: 0;
+}
+
 .card:hover {
   box-shadow: 
     -2px -2px 5px #FFFFFF,
@@ -21,7 +25,7 @@
 }
 
 @media (max-width: 768px) {
-  .card {
+  .card:not(.buttonVariant) {
     padding: 2rem;
   }
 }

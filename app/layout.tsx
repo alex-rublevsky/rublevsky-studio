@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import "@/styles/globals.css";
-import "@/styles/links.css";
+import "@/app/globals.css";
 import { NavBar } from "@/components/ui/navbar";
 import localFont from "next/font/local";
-import "@/styles/typography.css";
 import { Toaster } from "@/components/ui/sonner";
 
 import { cn } from "@/lib/utils";

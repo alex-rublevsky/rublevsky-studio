@@ -53,14 +53,15 @@ function HeroSection() {
                 onMouseLeave={() => setIsHovered(false)}
               >
                 <div
-                  className={`absolute inset-0 overflow-hidden rounded-full aspect-square w-24 h-24 transition-all duration-500 ${isHovered ? "md:scale-[3]" : ""}`}
+                  className={`absolute inset-0 overflow-hidden rounded-full aspect-square transition-all duration-500 ${isHovered ? "md:scale-[3] md:z-50" : ""}`}
                 >
                   <Image
                     src="/me.jpg"
                     alt="Profile picture"
-                    className={`w-full h-full object-cover object-top transition-all duration-500 ${isHovered ? "" : ""}`}
+                    className={`w-[200%] h-[200%] object-cover object-top transition-all duration-500 ${isHovered ? "md:w-full md:h-full" : ""}`}
                     width={192}
                     height={192}
+                    priority
                   />
                 </div>
               </div>
@@ -73,7 +74,12 @@ function HeroSection() {
               >
                 <div className="flex flex-col justify-center gap-2">
                   <h5>Book a 15-min call</h5>
-                  <p className="text-muted-foreground">Schedule now</p>
+                  <Link
+                    href="#booking"
+                    className="blurLink text-muted-foreground"
+                  >
+                    Schedule now →
+                  </Link>
                 </div>
               </div>
             </div>

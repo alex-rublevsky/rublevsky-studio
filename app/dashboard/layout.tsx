@@ -1,10 +1,10 @@
 "use client";
 
-import { AppSidebar } from "@/components/app-sidebar";
-import { SiteHeader } from "@/components/site-header";
+import { AppSidebar } from "@/components/ui/admin/app-sidebar";
+import { SiteHeader } from "@/components/ui/admin/site-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
-import { data } from "@/components/app-sidebar";
+import { data } from "@/components/ui/admin/app-sidebar";
 import { type Icon } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/providers/theme-provider";

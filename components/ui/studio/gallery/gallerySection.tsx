@@ -1,7 +1,7 @@
 "use client";
 
 import { GalleryItem, GalleryType } from "@/types/gallery";
-import styles from "@/styles/branding-photography.module.css";
+import styles from "./branding-photography.module.css";
 import GalleryItemComponent from "./gallery-item";
 import { useState } from "react";
 import LightboxGallery from "./lightbox-gallery";

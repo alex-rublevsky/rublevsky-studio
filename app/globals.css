@@ -238,6 +238,99 @@
   }
 }
 
+  /* Links */
 
+.blurLink {
+  text-decoration: underline;
+  text-underline-offset: 0.3rem;
+  text-decoration-thickness: 0.15rem;
+  transition: filter 0.3s ease;
+  cursor: pointer;
+}
 
+.blurLink:hover {
+  filter: blur(0.3rem);
+} 
 
+  /* Typography */
+h1 {
+  font-size: 3.8rem;
+  font-weight: 300;
+  line-height: 1.1;
+}
+
+h2 {
+  font-size: 3.5rem;
+  font-weight: 300;
+  line-height: 1.2;
+}
+
+h3 {
+  font-size: 2.2rem;
+  line-height: 1.2;
+  font-weight: 300;
+}
+
+h4 {
+  font-size: 1.6rem;
+  line-height: 1.2;
+  font-weight: 300;
+}
+
+h5 {
+  font-size: 1.4rem;
+  line-height: 1.2;
+  font-weight: 300;
+}
+
+h6 {
+  font-size: 1.2rem;
+  line-height: 1.2;
+  font-weight: 300;
+}
+
+p {
+  line-height: 1.5;
+}
+
+.largeDescription {
+  line-height: 1.1;
+  font-weight: 100;
+  max-width: 45ch;
+}
+
+.smallerText {
+  font-size: 0.9rem;
+}
+
+@media (max-width: 640px) {
+  h1 {
+    font-size: 2.9rem;
+  }
+  h2 {
+    font-size: 2.5rem;
+  }
+  h3 {
+    font-size: 2rem;
+  }
+  h4 {
+    font-size: 1.6rem;
+  }
+} 
+
+.prose {
+  max-width: none;
+  padding-left: 0;
+  padding-right: 0;
+  overflow-x: visible;
+  color: #000;
+}
+
+.prose h6 {
+  margin-top: 0;
+  margin-bottom: 0.3rem;
+} 
+
+.prose p {
+  margin-top: 0;
+}

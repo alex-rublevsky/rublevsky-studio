@@ -1,6 +1,6 @@
 "use client";
 
-import styles from "@/styles/experience-timeline.module.css";
+import styles from "./experienceTimeline.module.css";
 import Image from "next/image";
 import { useEffect } from "react";
 import { initExperienceTimeline } from "@/lib/animations/experience-timeline";

@@ -1,72 +1,22 @@
-import dynamic from "next/dynamic";
 import HeroSection from "@/components/ui/studio/heroSection";
-import MembershipBenefitsSection from "@/components/ui/studio/membership-benefits-section";
+import MembershipBenefitsSection from "@/components/ui/studio/membershipBenefitsSection";
 import { webProjects } from "@/data/web-projects";
 import { photos } from "@/data/photography";
 import { posters } from "@/data/posters";
-
-// Dynamically import below-the-fold components
-const SubscriptionSection = dynamic(
-  () => import("@/components/ui/studio/subscription-section"),
-  { ssr: true, loading: () => <LoadingSpinner /> }
-);
-const TestimonialsSection = dynamic(
-  () => import("@/components/ui/studio/testimonials-section"),
-  { ssr: true, loading: () => <LoadingSpinner /> }
-);
-const FaqSection = dynamic(() => import("@/components/ui/studio/faq-section"), {
-  ssr: true,
-  loading: () => <LoadingSpinner />,
-});
-const ServicesOffered = dynamic(
-  () =>
-    import("@/components/ui/studio/services-offered").then(
-      (mod) => mod.ServicesOffered
-    ),
-  { ssr: true, loading: () => <LoadingSpinner /> }
-);
-const SkillsSection = dynamic(
-  () =>
-    import("@/components/ui/studio/skills-section").then(
-      (mod) => mod.SkillsSection
-    ),
-  { ssr: true, loading: () => <LoadingSpinner /> }
-);
-const ExperienceTimeline = dynamic(
-  () =>
-    import("@/components/ui/studio/experience-timeline").then(
-      (mod) => mod.ExperienceTimeline
-    ),
-  { ssr: true, loading: () => <LoadingSpinner /> }
-);
-const WebProjectsSection = dynamic(
-  () => import("@/components/ui/web-projects/webProjectsSection"),
-  { ssr: true, loading: () => <LoadingSpinner /> }
-);
-const BrandingSection = dynamic(
-  () => import("@/components/ui/branding/branding-section"),
-  { ssr: true, loading: () => <LoadingSpinner /> }
-);
-const GallerySection = dynamic(
-  () => import("@/components/ui/gallery/gallery-section"),
-  { ssr: true, loading: () => <LoadingSpinner /> }
-);
-const CallBookingSection = dynamic(
-  () => import("@/components/ui/studio/call-booking-section"),
-  { ssr: true, loading: () => <LoadingSpinner /> }
-);
-
-// Create a loading component
-const LoadingSpinner = () => (
-  <div className="flex justify-center items-center min-h-[200px]">
-    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-  </div>
-);
+import TestimonialsSection from "@/components/ui/studio/testimonialSliderSection";
+import SubscriptionSection from "@/components/ui/studio/subscriptionSection";
+import FaqSection from "@/components/ui/studio/faqSection";
+import { ServicesOffered } from "@/components/ui/studio/servicesSection";
+import { SkillsSection } from "@/components/ui/studio/skillsSection";
+import { ExperienceTimeline } from "@/components/ui/studio/experienceTimeline";
+import WebProjectsSection from "@/components/ui/studio/web-projects/webProjectsSection";
+import BrandingSection from "@/components/ui/studio/branding/branding-section";
+import GallerySection from "@/components/ui/studio/gallery/gallerySection";
+import CallBookingSection from "@/components/ui/studio/callBookingSection";
 
 export default function Home() {
   return (
     <>
-      {/* <SplineHero /> */}
       <HeroSection />
       <MembershipBenefitsSection />
       <SubscriptionSection />

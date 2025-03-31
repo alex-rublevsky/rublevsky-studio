@@ -1,13 +1,25 @@
 import styles from "./neumorphism-card.module.css";
 
+type NeumorphismCardProps = {
+  children: React.ReactNode;
+  className?: string;
+  variant?: "default" | "button";
+};
+
 function NeumorphismCard({
   children,
   className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return <div className={`${styles.card} ${className}`}>{children}</div>;
+  variant = "default",
+}: NeumorphismCardProps) {
+  return (
+    <div
+      className={`${styles.card} ${variant === "button" ? styles.buttonVariant : ""} ${
+        className || ""
+      }`}
+    >
+      {children}
+    </div>
+  );
 }
 
 export default NeumorphismCard;

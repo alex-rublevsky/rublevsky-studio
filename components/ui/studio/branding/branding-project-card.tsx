@@ -3,7 +3,7 @@
 import { BrandingProject } from "@/types/branding-project";
 import Image from "next/image";
 import { useEffect, useRef, useState, useCallback } from "react";
-import styles from "@/styles/branding-photography.module.css";
+import styles from "../gallery/branding-photography.module.css";
 import { memo } from "react";
 
 type BrandingProjectCardProps = {

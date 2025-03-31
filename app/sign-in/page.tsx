@@ -2,7 +2,7 @@
 
 import { authClient } from "@/lib/auth-client";
 import { useState } from "react";
-import SignIn from "@/components/sign-in";
+import SignIn from "@/components/ui/store/sign-in";
 
 export default function SignInPage() {
   const { isPending } = authClient.useSession();

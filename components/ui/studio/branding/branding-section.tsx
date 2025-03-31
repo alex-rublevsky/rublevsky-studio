@@ -3,12 +3,10 @@
 import { useState } from "react";
 import { brandingProjects } from "@/data/branding-projects";
 import BrandingProjectCard from "./branding-project-card";
-import styles from "@/styles/branding-photography.module.css";
+import styles from "../gallery/branding-photography.module.css";
 import {
   Drawer,
   DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
   DrawerBody,
 } from "@/components/ui/shared/drawer";
 import Image from "next/image";

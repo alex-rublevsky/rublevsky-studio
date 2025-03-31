@@ -8,7 +8,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@/components/ui/shared/tooltip";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 

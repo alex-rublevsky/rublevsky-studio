@@ -1,4 +1,4 @@
-import styles from "@/styles/services.module.css";
+import styles from "./services.module.css";
 
 export function ServicesOffered() {
   return (

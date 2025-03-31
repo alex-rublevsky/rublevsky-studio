@@ -17,7 +17,7 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart";
+} from "@/components/ui/admin/chart";
 import {
   Select,
   SelectContent,

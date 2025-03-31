@@ -3,7 +3,7 @@
 import type { GalleryItem } from "@/types/gallery";
 import Image from "next/image";
 import Link from "next/link";
-import styles from "@/styles/branding-photography.module.css";
+import styles from "./branding-photography.module.css";
 
 type GalleryItemProps = {
   item: GalleryItem;
