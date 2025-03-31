@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { initializeAnimations } from "@/lib/animations/gsap-text-reading-and-heading";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { initializeCardStackingAnimation } from "@/lib/animations/gsap-cards-stacking";
 
 export function AnimationProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -12,7 +11,6 @@ export function AnimationProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Initialize animations
     initializeAnimations();
-    initializeCardStackingAnimation();
 
     // Cleanup function that only kills ScrollTriggers that are no longer in the DOM
     return () => {
