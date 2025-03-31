@@ -3,7 +3,6 @@
 import styles from "./experienceTimeline.module.css";
 import Image from "next/image";
 import { useEffect } from "react";
-import { initExperienceTimeline } from "@/lib/animations/experience-timeline";
 
 interface TimelineItem {
   date: string;
@@ -64,10 +63,6 @@ const timelineItems: TimelineItem[] = [
 ];
 
 export function ExperienceTimeline() {
-  useEffect(() => {
-    initExperienceTimeline(styles);
-  }, []);
-
   return (
     <>
       <section className="pb-20">
