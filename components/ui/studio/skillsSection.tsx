@@ -38,6 +38,7 @@ export function SkillsSection() {
             link="/logos/cloudflare.png"
             wideLogo
           />
+          <SkillLogo name="Motion" alt="Motion Logo" link="/logos/motion.png" />
 
           <SkillLogo
             name="Webflow"

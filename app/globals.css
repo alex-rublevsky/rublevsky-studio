@@ -243,7 +243,7 @@
 .blurLink {
   text-decoration: underline;
   text-underline-offset: 0.3rem;
-  text-decoration-thickness: 0.15rem;
+  text-decoration-thickness: 0.1rem;
   transition: filter 0.3s ease;
   cursor: pointer;
 }
