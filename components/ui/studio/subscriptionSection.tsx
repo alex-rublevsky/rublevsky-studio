@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "../shared/button";
 import NeumorphismCard from "../shared/neumorphism-card";
+import { TextEffect } from "@/components/motion-primitives/text-effect";
 
 function SubscriptionSection() {
   return (
@@ -8,11 +9,12 @@ function SubscriptionSection() {
       <div className="grid md:grid-cols-2 gap-12 items-center">
         <div>
           <p className="text-sm uppercase tracking-wider mb-4">PRICING</p>
-          <h1 className="text-5xl font-display mb-8">
-            One Subscription,
-            <br />
-            endless design
-          </h1>
+          <TextEffect
+            as="h1"
+            className="text-5xl font-display mb-8 max-w-[15ch]"
+          >
+            One Subscription, endless design
+          </TextEffect>
         </div>
 
         <NeumorphismCard className="size-fit">

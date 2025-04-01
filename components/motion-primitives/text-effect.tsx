@@ -1,14 +1,16 @@
+//TODO: simplify what is not used
+
 "use client";
 import { cn } from "@/lib/utils";
 import {
-  AnimatePresence,
   motion,
   TargetAndTransition,
   Transition,
   Variant,
   Variants,
+  useInView,
 } from "motion/react";
-import React from "react";
+import React, { useRef } from "react";
 
 export type PresetType = "blur" | "fade-in-blur" | "scale" | "fade" | "slide";
 
@@ -27,7 +29,8 @@ export type TextEffectProps = {
   delay?: number;
   speedReveal?: number;
   speedSegment?: number;
-  trigger?: boolean;
+  amount?: number;
+  once?: boolean;
   onAnimationComplete?: () => void;
   onAnimationStart?: () => void;
   segmentWrapperClassName?: string;
@@ -38,7 +41,7 @@ export type TextEffectProps = {
 
 const defaultStaggerTimes: Record<PerType, number> = {
   char: 0.03,
-  word: 0.05,
+  word: 0.1,
   line: 0.1,
 };
 
@@ -115,6 +118,10 @@ const AnimationComponent: React.FC<{
   per: "line" | "word" | "char";
   segmentWrapperClassName?: string;
 }> = React.memo(({ segment, variants, per, segmentWrapperClassName }) => {
+  if (segment.trim() === "") {
+    return <span>{segment}</span>;
+  }
+
   const content =
     per === "line" ? (
       <motion.span variants={variants} className="block">
@@ -124,18 +131,18 @@ const AnimationComponent: React.FC<{
       <motion.span
         aria-hidden="true"
         variants={variants}
-        className="inline-block whitespace-pre"
+        className="inline-block"
       >
         {segment}
       </motion.span>
     ) : (
-      <motion.span className="inline-block whitespace-pre">
+      <motion.span className="inline-block">
         {segment.split("").map((char, charIndex) => (
           <motion.span
             key={`char-${charIndex}`}
             aria-hidden="true"
             variants={variants}
-            className="inline-block whitespace-pre"
+            className="inline-block"
           >
             {char}
           </motion.span>
@@ -147,7 +154,7 @@ const AnimationComponent: React.FC<{
     return content;
   }
 
-  const defaultWrapperClassName = per === "line" ? "block" : "inline-block";
+  const defaultWrapperClassName = per === "line" ? "block" : "inline";
 
   return (
     <span className={cn(defaultWrapperClassName, segmentWrapperClassName)}>
@@ -209,11 +216,12 @@ export function TextEffect({
   as = "p",
   variants,
   className,
-  preset = "fade",
+  preset = "fade-in-blur",
   delay = 0,
   speedReveal = 1,
   speedSegment = 1,
-  trigger = true,
+  amount = 0.5,
+  once = true,
   onAnimationComplete,
   onAnimationStart,
   segmentWrapperClassName,
@@ -221,6 +229,8 @@ export function TextEffect({
   segmentTransition,
   style,
 }: TextEffectProps) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { amount, once });
   const segments = splitText(children, per);
   const MotionTag = motion[as as keyof typeof motion] as typeof motion.div;
 
@@ -229,7 +239,6 @@ export function TextEffect({
     : { container: defaultContainerVariants, item: defaultItemVariants };
 
   const stagger = defaultStaggerTimes[per] / speedReveal;
-
   const baseDuration = 0.3 / speedSegment;
 
   const customStagger = hasTransition(variants?.container?.visible ?? {})
@@ -249,10 +258,6 @@ export function TextEffect({
         staggerChildren: customStagger ?? stagger,
         delayChildren: customDelay ?? delay,
         ...containerTransition,
-        exit: {
-          staggerChildren: customStagger ?? stagger,
-          staggerDirection: -1,
-        },
       }
     ),
     item: createVariantsWithTransition(variants?.item || baseVariants.item, {
@@ -262,30 +267,27 @@ export function TextEffect({
   };
 
   return (
-    <AnimatePresence mode="popLayout">
-      {trigger && (
-        <MotionTag
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-          variants={computedVariants.container}
-          className={className}
-          onAnimationComplete={onAnimationComplete}
-          onAnimationStart={onAnimationStart}
-          style={style}
-        >
-          {per !== "line" ? <span className="sr-only">{children}</span> : null}
-          {segments.map((segment, index) => (
-            <AnimationComponent
-              key={`${per}-${index}-${segment}`}
-              segment={segment}
-              variants={computedVariants.item}
-              per={per}
-              segmentWrapperClassName={segmentWrapperClassName}
-            />
-          ))}
-        </MotionTag>
-      )}
-    </AnimatePresence>
+    <div ref={ref}>
+      <MotionTag
+        initial="hidden"
+        animate={isInView ? "visible" : "hidden"}
+        variants={computedVariants.container}
+        className={className}
+        style={style}
+        onAnimationComplete={onAnimationComplete}
+        onAnimationStart={onAnimationStart}
+      >
+        {per !== "line" ? <span className="sr-only">{children}</span> : null}
+        {segments.map((segment, index) => (
+          <AnimationComponent
+            key={`${per}-${index}-${segment}`}
+            segment={segment}
+            variants={computedVariants.item}
+            per={per}
+            segmentWrapperClassName={segmentWrapperClassName}
+          />
+        ))}
+      </MotionTag>
+    </div>
   );
 }

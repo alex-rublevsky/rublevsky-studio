@@ -1,4 +1,6 @@
+import { AnimatedGroup } from "@/components/motion-primitives/animated-group";
 import NeumorphismCard from "../shared/neumorphism-card";
+import { TextEffect } from "@/components/motion-primitives/text-effect";
 
 const data = [
   {
@@ -28,15 +30,17 @@ const data = [
 function MembershipBenefitsSection() {
   return (
     <section className="mx-auto">
-      <h2 className="mb-12">Membership Benefits</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-8">
+      <TextEffect as="h2" className="mb-12">
+        Membership Benefits
+      </TextEffect>
+      <AnimatedGroup className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-8">
         {data.map((item) => (
           <NeumorphismCard key={item.title} className="w-full">
             <h3 className="mb-2">{item.title}</h3>
             <p className="text-muted-foreground">{item.description}</p>
           </NeumorphismCard>
         ))}
-      </div>
+      </AnimatedGroup>
     </section>
   );
 }

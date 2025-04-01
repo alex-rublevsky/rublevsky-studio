@@ -1,17 +1,23 @@
 import Image from "next/image";
 import SkillLogo from "@/components/ui/studio/skillLogo";
 import { Badge } from "@/components/ui/shared/badge";
+import { AnimatedGroup } from "@/components/motion-primitives/animated-group";
 export function SkillsSection() {
   return (
     <section className="w-full">
       <h2 heading-reveal="true">Skills</h2>
 
       <div className="mb-12 flex flex-col items-center">
-        <Badge variant="secondary" size="lg" className="z-50 my-10">
-          Development
-        </Badge>
+        <AnimatedGroup>
+          <Badge variant="secondary" size="lg" className="z-50 my-10">
+            Development
+          </Badge>
+        </AnimatedGroup>
 
-        <div className="flex flex-wrap justify-center gap-x-8 gap-y-10 md:gap-x-14 md:gap-y-16">
+        <AnimatedGroup
+          staggerChildren={0.05}
+          className="flex flex-wrap justify-center gap-x-8 gap-y-10 md:gap-x-14 md:gap-y-16"
+        >
           <SkillLogo
             name="Next.js"
             alt="Next.js Logo"
@@ -70,13 +76,18 @@ export function SkillsSection() {
             link="/logos/drizzle.png"
           />
           <SkillLogo name="SQLite" alt="SQLite Logo" link="/logos/sqlite.svg" />
-        </div>
+        </AnimatedGroup>
 
-        <Badge variant="secondary" size="lg" className="z-50 mb-10 mt-20">
-          Design
-        </Badge>
+        <AnimatedGroup>
+          <Badge variant="secondary" size="lg" className="z-50 mb-10 mt-20">
+            Design
+          </Badge>
+        </AnimatedGroup>
 
-        <div className="flex flex-wrap justify-center gap-x-8 gap-y-10 md:gap-x-14 md:gap-y-16">
+        <AnimatedGroup
+          staggerChildren={0.05}
+          className="flex flex-wrap justify-center gap-x-8 gap-y-10 md:gap-x-14 md:gap-y-16"
+        >
           <SkillLogo name="Figma" alt="Figma Logo" link="/logos/figma.svg" />
           <SkillLogo
             name="Photoshop"
@@ -105,7 +116,7 @@ export function SkillsSection() {
             link="/logos/spline.png"
             wideLogo
           />
-        </div>
+        </AnimatedGroup>
       </div>
     </section>
   );

@@ -10,6 +10,7 @@ import {
   usePrevNextButtons,
 } from "./testimonalSliderArrows";
 import { DotButton, useDotButton } from "./testimonialSliderDotButton";
+import { AnimatedGroup } from "@/components/motion-primitives/animated-group";
 
 const testimonials = [
   {
@@ -69,8 +70,13 @@ export default function TestimonialSliderSection() {
     <section className="embla no-padding">
       <div className="embla__viewport" ref={emblaRef}>
         <div className="embla__container">
-          {testimonials.map((testimonial) => (
-            <div className="embla__slide" key={testimonial.id}>
+          {testimonials.map((testimonial, index) => (
+            <AnimatedGroup
+              amount={0.5}
+              delay={index * 0.1}
+              className="embla__slide"
+              key={testimonial.id}
+            >
               <NeumorphismCard className=" m-10">
                 <div className="testimonial-card">
                   <p className="mb-6">"{testimonial.content}"</p>
@@ -99,7 +105,7 @@ export default function TestimonialSliderSection() {
                   </a>
                 </div>
               </NeumorphismCard>
-            </div>
+            </AnimatedGroup>
           ))}
         </div>
       </div>

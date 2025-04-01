@@ -1,11 +1,11 @@
 import styles from "./services.module.css";
-
+import { TextEffect } from "@/components/motion-primitives/text-effect";
 export function ServicesOffered() {
   return (
     <section>
-      <h2 className="mb-10" data-heading-reveal>
+      <TextEffect as="h2" className="mb-10">
         Services offered
-      </h2>
+      </TextEffect>
       <div className={styles.servicesGrid}>
         <div className={styles.serviceRow}>
           <div className={styles.serviceItem}>

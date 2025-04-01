@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/shared/button";
 import Link from "next/link";
 import Image from "next/image";
 import NeumorphismCard from "../shared/neumorphism-card";
+import { TextEffect } from "@/components/motion-primitives/text-effect";
+import { AnimatedGroup } from "@/components/motion-primitives/animated-group";
+
 const data = [
   {
     question: "How fast will I receive my designs?",
@@ -83,8 +86,10 @@ const data = [
 function FaqSection() {
   return (
     <section>
-      <h2 className=" mb-12">Frequently asked questions</h2>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 md:gap-8">
+      <TextEffect as="h2" className="mb-12">
+        Frequently asked questions
+      </TextEffect>
+      <AnimatedGroup className="grid grid-cols-1 lg:grid-cols-2 gap-16 md:gap-8">
         <Accordion type="single" collapsible className="max-w-lg col-span-1">
           {data.map((item, index) => (
             <AccordionItem
@@ -142,7 +147,7 @@ function FaqSection() {
             </h5>
           </div>
         </NeumorphismCard>
-      </div>
+      </AnimatedGroup>
     </section>
   );
 }

@@ -10,26 +10,6 @@ import NeumorphismCard from "../shared/neumorphism-card";
 import { TextEffect } from "@/components/motion-primitives/text-effect";
 import { AnimatedGroup } from "@/components/motion-primitives/animated-group";
 
-const transitionVariants = {
-  item: {
-    hidden: {
-      opacity: 0,
-      filter: "blur(12px)",
-      y: 12,
-    },
-    visible: {
-      opacity: 1,
-      filter: "blur(0px)",
-      y: 0,
-      transition: {
-        type: "spring",
-        bounce: 0.3,
-        duration: 1.5,
-      },
-    },
-  },
-};
-
 function HeroSection() {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -37,20 +17,7 @@ function HeroSection() {
     <section className="relative">
       <div className="relative flex top-2 mb-8 md:mb-12">
         <LiquidMetalR />
-        <AnimatedGroup
-          variants={{
-            container: {
-              visible: {
-                transition: {
-                  staggerChildren: 0.1,
-                  delayChildren: 0.3,
-                },
-              },
-            },
-            ...transitionVariants,
-          }}
-          className="hidden sm:flex sm:absolute sm:left-1/2 sm:-translate-x-1/2 gap-4"
-        >
+        <AnimatedGroup className="hidden sm:flex sm:absolute sm:left-1/2 sm:-translate-x-1/2 gap-4">
           <Button asChild variant="outline">
             <Link href="#booking">Book a call</Link>
           </Button>
@@ -61,47 +28,21 @@ function HeroSection() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center justify-items-center">
-        <AnimatedGroup
-          variants={{
-            container: {
-              visible: {
-                transition: {
-                  staggerChildren: 0.15,
-                  delayChildren: 0.5,
-                },
-              },
-            },
-            ...transitionVariants,
-          }}
-          className="flex flex-col gap-4 mr-auto"
-        >
-          <TextEffect
-            preset="fade-in-blur"
-            speedSegment={0.3}
-            as="h1"
-            className="max-w-[15ch]"
-          >
+        <div className="flex flex-col gap-4 mr-auto">
+          <TextEffect speedSegment={0.3} as="h1" className="max-w-[15ch]">
             Design subscriptions for everyone
           </TextEffect>
 
-          <p className="text-xl text-muted-foreground">
+          <TextEffect
+            speedSegment={0.3}
+            as="p"
+            className="text-xl text-muted-foreground"
+          >
             Pause or cancel anytime.
-          </p>
-        </AnimatedGroup>
+          </TextEffect>
+        </div>
 
-        <AnimatedGroup
-          variants={{
-            container: {
-              visible: {
-                transition: {
-                  staggerChildren: 0.1,
-                  delayChildren: 0.75,
-                },
-              },
-            },
-            ...transitionVariants,
-          }}
-        >
+        <AnimatedGroup delay={0.75}>
           <NeumorphismCard className="size-fit mr-auto md:mx-auto">
             <div className="flex flex-col gap-8">
               <div
