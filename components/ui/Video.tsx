@@ -1,6 +1,7 @@
 "use client";
 
 import cloudflareLoader from "@/image-loader";
+import { useState, useEffect } from "react";
 
 type VideoProps = {
   src: string;
@@ -23,18 +24,26 @@ export default function Video({
   playsInline = false,
   ref,
 }: VideoProps) {
+  const [isClient, setIsClient] = useState(false);
   const videoSrc = cloudflareLoader({ src, width: 0, quality: 0 });
 
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   return (
-    <video
-      ref={ref}
-      src={videoSrc}
-      className={className}
-      style={style}
-      autoPlay={autoPlay}
-      loop={loop}
-      muted={muted}
-      playsInline={playsInline}
-    />
+    <div className={className} style={style}>
+      {isClient && (
+        <video
+          ref={ref}
+          src={videoSrc}
+          className="w-full h-full object-cover"
+          autoPlay={autoPlay}
+          loop={loop}
+          muted={muted}
+          playsInline={playsInline}
+        />
+      )}
+    </div>
   );
 }

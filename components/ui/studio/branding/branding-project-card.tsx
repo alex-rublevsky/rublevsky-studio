@@ -15,7 +15,12 @@ export default memo(function BrandingProjectCard({
 }: BrandingProjectCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     if (project.type === "video" && videoRef.current) {
@@ -31,7 +36,7 @@ export default memo(function BrandingProjectCard({
   }, [isHovered, project.type]);
 
   useEffect(() => {
-    if (project.type === "image" && project.images && isHovered) {
+    if (project.type === "image" && project.images && isHovered && isClient) {
       const interval = setInterval(() => {
         setCurrentImageIndex((prevIndex) =>
           prevIndex === project.images!.length - 1 ? 0 : prevIndex + 1
@@ -40,7 +45,7 @@ export default memo(function BrandingProjectCard({
 
       return () => clearInterval(interval);
     }
-  }, [isHovered, project.type, project.images]);
+  }, [isHovered, project.type, project.images, isClient]);
 
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
@@ -90,16 +95,20 @@ export default memo(function BrandingProjectCard({
               className={`w-full h-auto transition-opacity duration-800 ease-in-out ${isHovered ? "opacity-0" : "opacity-100"}`}
               loading="lazy"
             />
-            <video
-              ref={videoRef}
-              src={`/${project.src}`}
-              className={`w-full h-full object-cover absolute top-0 left-0 transition-opacity duration-800 ease-in-out ${isHovered ? "opacity-100" : "opacity-0"}`}
-              autoPlay={isHovered}
-              loop
-              muted
-              playsInline
-              preload="none"
-            />
+            {isClient && (
+              <video
+                ref={videoRef}
+                src={`/${project.src}`}
+                className="absolute inset-0 w-full h-full object-cover"
+                style={{
+                  opacity: isHovered ? 1 : 0,
+                  transition: "opacity 800ms ease-in-out",
+                }}
+                muted
+                playsInline
+                preload="none"
+              />
+            )}
           </div>
         )}
       </div>

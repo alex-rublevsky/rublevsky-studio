@@ -55,7 +55,8 @@ export default function DevicePreview({
               ? "inset-[3%] bottom-[3.75%] w-[94%] h-[93.25%] rounded-[12%]"
               : "inset-[4%] w-[92%] h-[92%] rounded-[3%]"
           } object-cover`}
-          fill
+          width={isPhone ? 375 : 1024}
+          height={isPhone ? 812 : 768}
         />
       )}
     </a>

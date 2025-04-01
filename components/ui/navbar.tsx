@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useRef, useState, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Menu, Transition } from "@headlessui/react";
+import { motion } from "motion/react";
 
 interface NavItem {
   name: string;

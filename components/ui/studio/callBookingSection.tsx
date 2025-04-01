@@ -21,9 +21,7 @@ function CallBookingSection() {
       className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-12 relative w-full bg-background pb-28 [grid-template-areas:'logo''content''calendar''info'] lg:[grid-template-areas:'logo_calendar''content_calendar''info_calendar']"
       id="booking"
     >
-      <div className="[grid-area:logo]">
-        <LiquidMetalR />
-      </div>
+      <div className="[grid-area:logo]">{/* <LiquidMetalR /> */}</div>
 
       <div className="[grid-area:content] space-y-4">
         <h1 className="max-w-[21ch]">
