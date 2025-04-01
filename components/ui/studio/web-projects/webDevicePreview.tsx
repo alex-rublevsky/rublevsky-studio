@@ -38,7 +38,7 @@ export default function DevicePreview({
           src={`/${device.content.url}`}
           className={`absolute ${
             isPhone
-              ? "inset-[3%] bottom-[3.75%] w-[94%] h-[93.25%] rounded-[12%]"
+              ? "inset-[3%] bottom-[3.75%] w-[94%] h-[93.25%] rounded-[12%] overflow-hidden"
               : "inset-[4%] w-[92%] h-[92%] rounded-[3%]"
           } object-cover`}
           autoPlay
