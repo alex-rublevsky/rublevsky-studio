@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/shared/label";
 import { Slider } from "@/components/ui/slider";
-import { motion, useMotionValueEvent, useScroll } from "framer-motion";
+import { motion, useMotionValueEvent, useScroll } from "motion/react";
 import { FilterGroup } from "../shared/FilterGroup";
 
 interface ProductFiltersProps {

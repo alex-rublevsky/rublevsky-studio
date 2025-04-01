@@ -18,7 +18,7 @@ function CallBookingSection() {
 
   return (
     <section
-      className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-12 relative w-full bg-background pb-28 [grid-template-areas:'logo''content''calendar''info'] lg:[grid-template-areas:'logo_calendar''content_calendar''info_calendar']"
+      className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-12 relative w-full bg-background pb-20 [grid-template-areas:'logo''content''calendar''info'] lg:[grid-template-areas:'logo_calendar''content_calendar''info_calendar']"
       id="booking"
     >
       <div className="[grid-area:logo]">

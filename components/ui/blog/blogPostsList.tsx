@@ -4,7 +4,7 @@ import { BlogPost as BlogPostType, TeaCategory } from "@/types";
 import BlogPost from "@/components/ui/blog/blogPost";
 import { FilterGroup } from "@/components/ui/shared/FilterGroup";
 import { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 
 interface BlogPostsListProps {
   posts: BlogPostType[];
