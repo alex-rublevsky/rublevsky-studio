@@ -2,7 +2,8 @@
 
 import styles from "./experienceTimeline.module.css";
 import Image from "next/image";
-import { useEffect } from "react";
+import { motion, useScroll, useTransform } from "motion/react";
+import { useRef } from "react";
 
 interface TimelineItem {
   date: string;
@@ -76,48 +77,78 @@ export function ExperienceTimeline() {
           <div className={styles.experienceTimelineProgress}></div>
           <div className={styles.experienceTimelineProgressBar}></div>
 
-          {timelineItems.map((item, index) => (
-            <div key={index} className={styles.experienceTimelineItem}>
-              <div className={styles.experienceTimelineLeft}>
-                <div className={styles.experienceTimelineDateWrapper}>
-                  <h4 className={styles.experienceTimelineDateText}>
-                    {item.date}
-                  </h4>
+          {timelineItems.map((item, index) => {
+            const itemRef = useRef(null);
+            const { scrollYProgress } = useScroll({
+              target: itemRef,
+              offset: ["start 0.45", "start 0.36"],
+            });
+
+            const opacity = useTransform(scrollYProgress, [0, 1], [0.5, 1]);
+            const backgroundColor = useTransform(
+              scrollYProgress,
+              [0, 1],
+              ["#e5e5e5", "#000000"]
+            );
+
+            return (
+              <div
+                ref={itemRef}
+                key={index}
+                className={styles.experienceTimelineItem}
+              >
+                <motion.div
+                  className={styles.experienceTimelineLeft}
+                  style={{ opacity }}
+                >
+                  <div className={styles.experienceTimelineDateWrapper}>
+                    <h4 className={styles.experienceTimelineDateText}>
+                      {item.date}
+                    </h4>
+                  </div>
+                </motion.div>
+                <div className={styles.experienceTimelineCenter}>
+                  <div className={styles.experienceTimelineCircleWrapper}>
+                    <motion.div
+                      className={styles.experienceTimelineCircle}
+                      style={{
+                        backgroundColor,
+                      }}
+                    ></motion.div>
+                  </div>
                 </div>
-              </div>
-              <div className={styles.experienceTimelineCenter}>
-                <div className={styles.experienceTimelineCircleWrapper}>
-                  <div className={styles.experienceTimelineCircle}></div>
-                </div>
-              </div>
-              <div className={styles.experienceTimelineRight}>
-                <div className={styles.experienceTimelineContent}>
-                  <Image
-                    src={item.logo}
-                    alt={`${item.title} Logo`}
-                    width={item.wideLogo ? 300 : 200}
-                    height={item.wideLogo ? 60 : 40}
-                    className={`mb-8 w-auto ${
-                      item.wideLogo
-                        ? "h-[2rem] md:h-[4rem]"
-                        : "h-[5rem] md:h-[7rem]"
-                    }`}
-                  />
-                  <h5 className="font-semibold">{item.title}</h5>
-                  <p>{item.description}</p>
-                  {item.additionalImage && (
+                <motion.div
+                  className={styles.experienceTimelineRight}
+                  style={{ opacity }}
+                >
+                  <div className={styles.experienceTimelineContent}>
                     <Image
-                      src={item.additionalImage}
-                      alt={`Additional image for ${item.title}`}
-                      width={500}
-                      height={300}
-                      className="w-full mt-8 rounded-lg"
+                      src={item.logo}
+                      alt={`${item.title} Logo`}
+                      width={item.wideLogo ? 300 : 200}
+                      height={item.wideLogo ? 60 : 40}
+                      className={`mb-8 w-auto ${
+                        item.wideLogo
+                          ? "h-[2rem] md:h-[4rem]"
+                          : "h-[5rem] md:h-[7rem]"
+                      }`}
                     />
-                  )}
-                </div>
+                    <h5 className="font-semibold">{item.title}</h5>
+                    <p>{item.description}</p>
+                    {item.additionalImage && (
+                      <Image
+                        src={item.additionalImage}
+                        alt={`Additional image for ${item.title}`}
+                        width={500}
+                        height={300}
+                        className="w-full mt-8 rounded-lg"
+                      />
+                    )}
+                  </div>
+                </motion.div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
     </>
