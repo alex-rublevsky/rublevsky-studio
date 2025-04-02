@@ -3,7 +3,6 @@
 import { IconCirclePlusFilled, IconMail, type Icon } from "@tabler/icons-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/shared/button";
 import {

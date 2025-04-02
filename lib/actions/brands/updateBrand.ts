@@ -1,8 +1,6 @@
-'use server';
+"use server";
 
 import { eq } from "drizzle-orm";
-import type { D1Database } from '@cloudflare/workers-types';
-import { drizzle } from "drizzle-orm/d1";
 import db from "@/server/db";
 import { brands } from "@/server/schema";
 import { Brand } from "@/types";
@@ -26,15 +24,10 @@ export default async function updateBrand(id: number, data: UpdateBrandData): Pr
       throw new Error("Name and slug are required");
     }
 
-    // Initialize database (works for both local and production)
-    const database = typeof process === 'undefined' 
-      ? drizzle((globalThis as any)[Symbol.for("__cloudflare-context__")]?.env?.DB as D1Database)
-      : db;
-
     // Fetch existing brand and check for duplicate slug in a single query
     const [brand, duplicateSlug] = await Promise.all([
-      database.select().from(brands).where(eq(brands.id, id)).get(),
-      database.select().from(brands).where(eq(brands.slug, data.slug)).get()
+      db.select().from(brands).where(eq(brands.id, id)).get(),
+      db.select().from(brands).where(eq(brands.slug, data.slug)).get()
     ]);
 
     if (!brand) throw new Error("Brand not found");
@@ -43,7 +36,7 @@ export default async function updateBrand(id: number, data: UpdateBrandData): Pr
     }
 
     // Update brand
-    await database.update(brands)
+    await db.update(brands)
       .set({
         name: data.name,
         slug: data.slug,
@@ -53,7 +46,7 @@ export default async function updateBrand(id: number, data: UpdateBrandData): Pr
       .where(eq(brands.id, id));
 
     // Fetch and return updated brand
-    const updatedBrand = await database.select()
+    const updatedBrand = await db.select()
       .from(brands)
       .where(eq(brands.id, id))
       .get();

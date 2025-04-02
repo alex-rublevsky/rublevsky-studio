@@ -112,12 +112,16 @@ function FaqSection() {
         </Accordion>
         <NeumorphismCard className="col-span-1 sticky top-10  size-fit lg:mx-auto flex flex-col gap-4">
           <div
-            className={`relative w-24 h-24 inset-0 overflow-hidden rounded-full transition-all duration-500`}
+            className={
+              "relative w-24 h-24 inset-0 overflow-hidden rounded-full transition-all duration-500"
+            }
           >
             <Image
               src="/me.jpg"
               alt="Profile picture"
-              className={`w-[200%] h-[200%] object-cover object-top transition-all duration-500 `}
+              className={
+                "w-[200%] h-[200%] object-cover object-top transition-all duration-500"
+              }
               width={192}
               height={192}
             />

@@ -12,12 +12,17 @@ export async function generateStaticParams() {
   }));
 }
 
-export default async function ProductPage({
-  params,
-}: {
-  params: { slug: string };
+type PageParams = {
+  slug: string;
+};
+
+export default async function ProductPage(context: {
+  params: Promise<PageParams>;
+  searchParams: Promise<Record<string, string | undefined>>;
 }) {
-  const product = await getProductBySlug(params.slug);
+  const { slug } = await context.params;
+
+  const product = await getProductBySlug(slug);
 
   if (!product) {
     return (

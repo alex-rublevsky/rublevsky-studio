@@ -1,14 +1,14 @@
-'use server';
+"use server";
 
 //TODO add data caching for getAllProducts and getProductBySlug
 //TODO optimize stock validation to check with locally stored value?
 //TODO implement bulk stock validation (all items at once) for cart
 
 import { eq, desc, and, SQL, InferModel, sql } from "drizzle-orm";
-import { unstable_cache } from 'next/cache';
+import { unstable_cache } from "next/cache";
 import db from "@/server/db";
 import { products, productVariations, variationAttributes, productTeaCategories } from "@/server/schema";
-import { Product, ProductWithVariations, ProductVariation, VariationAttribute } from "@/types";
+import { ProductWithVariations, ProductVariation, VariationAttribute } from "@/types";
 
 interface GetAllProductsOptions {
   categorySlug?: string | null;
@@ -44,7 +44,7 @@ async function fetchProducts({
   categorySlug = null,
   brandSlug = null,
   featured = false,
-  includePriceRange = false
+ 
 }: GetAllProductsOptions = {}): Promise<GetAllProductsResult> {
   try {
     // Build where conditions
@@ -193,10 +193,10 @@ async function fetchProducts({
 export default async function getAllProducts(options: GetAllProductsOptions = {}): Promise<GetAllProductsResult> {
   return unstable_cache(
     async () => fetchProducts(options),
-    ['all-products', options.categorySlug || 'all', options.brandSlug || 'all', options.featured ? 'featured' : 'all'],
+    ["all-products", options.categorySlug || "all", options.brandSlug || "all", options.featured ? "featured" : "all"],
     {
       revalidate: 1, // TODO: Change to 259200 (3 days)
-      tags: ['products'] // Tag for cache invalidation
+      tags: ["products"], // Tag for cache invalidation
     }
   )();
 }

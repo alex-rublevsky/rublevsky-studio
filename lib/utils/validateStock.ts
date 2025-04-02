@@ -1,5 +1,5 @@
 import { CartItem } from "@/lib/context/CartContext";
-import { Product, ProductWithVariations } from "@/types";
+import { ProductWithVariations } from "@/types";
 
 export interface StockValidationResult {
   isAvailable: boolean;
@@ -82,7 +82,7 @@ export function getAvailableQuantityForVariation(
     ? product.variations?.find(v => v.id === variationId)?.stock
     : product.stock;
 
-  if (typeof stockToCheck !== 'number') {
+  if (typeof stockToCheck !== "number") {
     return 0;
   }
 

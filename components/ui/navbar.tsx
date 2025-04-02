@@ -44,7 +44,7 @@ const useVisibleSection = (items: NavItem[]) => {
       const visibleSection = sections.find((section) =>
         isElementVisible(section)
       );
-      setVisibleSection(visibleSection ? "#" + visibleSection.id : "");
+      setVisibleSection(visibleSection ? `#${visibleSection.id}` : "");
     };
 
     // Throttle scroll events
@@ -118,7 +118,7 @@ const DropdownNavMenu = ({ items }: { items: NavItem[] }) => {
       >
         <Menu.Items className="absolute bottom-full left-0 z-10 mb-2 w-56 origin-bottom-left rounded-md bg-background shadow-lg ring-1 ring-black/5 focus:outline-none overflow-hidden">
           <div className="overflow-hidden">
-            {items.map((item, index) => (
+            {items.map((item) => (
               <Menu.Item key={item.url}>
                 {({ active }) => (
                   <Link
@@ -263,7 +263,7 @@ export function NavBar({ className }: Omit<NavBarProps, "items">) {
               <button
                 onClick={() => {
                   window.open(
-                    `https://assets.rublevsky.studio/PDF/Resume%20Alexander%20Rublevsky.pdf?`,
+                    "https://assets.rublevsky.studio/PDF/Resume%20Alexander%20Rublevsky.pdf?",
                     "_blank"
                   );
                 }}

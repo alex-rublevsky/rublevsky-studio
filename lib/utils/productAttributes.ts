@@ -5,25 +5,25 @@ export interface ProductAttribute {
 
 export const PRODUCT_ATTRIBUTES: { [key: string]: ProductAttribute } = {
   SIZE_CM: {
-    id: 'SIZE_CM',
-    displayName: 'Size cm'
+    id: "SIZE_CM",
+    displayName: "Size cm",
   },
   SIZE: {
-    id: 'SIZE',
-    displayName: 'Size'
+    id: "SIZE",
+    displayName: "Size",
   },
   COLOR: {
-    id: 'COLOR',
-    displayName: 'Color'
+    id: "COLOR",
+    displayName: "Color",
   },
   APPAREL_TYPE: {
-    id: 'APPAREL_TYPE',
-    displayName: 'Apparel Type'
+    id: "APPAREL_TYPE",
+    displayName: "Apparel Type",
   },
   WEIGHT_G: {
-    id: 'WEIGHT_G',
-    displayName: 'Weight g'
-  }
+    id: "WEIGHT_G",
+    displayName: "Weight g",
+  },
 };
 
 /**

@@ -1,10 +1,10 @@
-'use server';
+"use server";
 
 import { eq } from "drizzle-orm";
 import db from "@/server/db";
 import { blogPosts, blogTeaCategories } from "@/server/schema";
 import { BlogPostFormData } from "@/types";
-import type { DB } from "@/server/db";
+
 
 /**
  * Server action to create a new blog post

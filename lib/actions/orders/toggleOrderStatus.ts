@@ -1,4 +1,4 @@
-'use server';
+"use server";
 
 import { eq } from "drizzle-orm";
 import db from "@/server/db";
@@ -15,25 +15,25 @@ export default async function toggleOrderStatus(orderId: number): Promise<{ succ
       .get();
 
     if (!currentOrder) {
-      throw new Error('Order not found');
+      throw new Error("Order not found");
     }
 
     // Toggle status and update
-    const newStatus = currentOrder.status === 'pending' ? 'processed' : 'pending';
+    const newStatus = currentOrder.status === "pending" ? "processed" : "pending";
     await db
       .update(orders)
       .set({
         status: newStatus,
-        completedAt: newStatus === 'processed' ? new Date() : null
+        completedAt: newStatus === "processed" ? new Date() : null,
       })
       .where(eq(orders.id, orderId));
 
     // Revalidate cache
-    revalidateTag('orders');
+    revalidateTag("orders");
 
     return {
       success: true,
-      message: `Order status updated to ${newStatus}`
+      message: `Order status updated to ${newStatus}`,
     };
   } catch (error) {
     throw new Error(`Failed to update order status: ${(error as Error).message}`);

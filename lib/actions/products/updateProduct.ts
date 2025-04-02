@@ -1,4 +1,4 @@
-'use server';
+"use server";
 
 import { eq, and } from "drizzle-orm";
 import db from "@/server/db";
@@ -26,7 +26,7 @@ export default async function updateProduct(id: number, data: ProductFormData): 
     }
 
     // Process images - data.images is already a string according to ProductFormData
-    const imageString = data.images?.trim() || product.images || '';
+    const imageString = data.images?.trim() || product.images || "";
 
     // Update product and related data in parallel
     await Promise.all([
@@ -124,7 +124,7 @@ export default async function updateProduct(id: number, data: ProductFormData): 
 
     return {
       ...updatedProduct,
-      parsedImages: updatedProduct?.images ? updatedProduct.images.split(',').filter(Boolean) : []
+      parsedImages: updatedProduct?.images ? updatedProduct.images.split(",").filter(Boolean) : [],
     } as Product;
   } catch (error) {
     throw new Error(`Failed to update product: ${(error as Error).message}`);

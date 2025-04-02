@@ -1,4 +1,3 @@
-import Image from "next/image";
 import SkillLogo from "@/components/ui/studio/skillLogo";
 import { Badge } from "@/components/ui/shared/badge";
 import { AnimatedGroup } from "@/components/motion-primitives/animated-group";

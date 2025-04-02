@@ -1,7 +1,7 @@
-'use server';
+"use server";
 
 import { desc } from "drizzle-orm";
-import { unstable_cache } from 'next/cache';
+import { unstable_cache } from "next/cache";
 import db from "@/server/db";
 import { products } from "@/server/schema";
 
@@ -35,10 +35,10 @@ async function fetchProductsForSelection(): Promise<ProductForSelection[]> {
 export default async function getProductsForSelection(): Promise<ProductForSelection[]> {
   return unstable_cache(
     async () => fetchProductsForSelection(),
-    ['products-for-selection'],
+    ["products-for-selection"],
     {
       revalidate: 60, // Cache for 1 minute since it's used in admin
-      tags: ['products'] // Invalidate when products change
+      tags: ["products"], // Invalidate when products change
     }
   )();
-} 
+}

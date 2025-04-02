@@ -68,13 +68,6 @@ export function CartItem({ item }: CartItemProps) {
     }
   };
 
-  // Format attributes for display
-  const attributeText = item.attributes
-    ? Object.entries(item.attributes)
-        .map(([key, value]) => `${getAttributeDisplayName(key)}: ${value}`)
-        .join(", ")
-    : "";
-
   return (
     <div className="flex items-start gap-4 py-4">
       {/* Product image with overlapping remove button */}

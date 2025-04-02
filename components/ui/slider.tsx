@@ -2,7 +2,6 @@
 
 import * as SliderPrimitive from "@radix-ui/react-slider";
 import * as React from "react";
-import { Label } from "@/components/ui/shared/label";
 import { cn } from "@/lib/utils";
 import {
   Tooltip,

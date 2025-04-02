@@ -12,12 +12,10 @@ import {
 } from "@/components/ui/shared/drawer";
 
 export function CartDrawerContent() {
-  let cartContext;
+  const cartContext = useCart();
 
-  try {
-    cartContext = useCart();
-  } catch {
-    // If we're not within a CartProvider, show empty cart
+  // If we're not within a CartProvider, show empty cart
+  if (!cartContext) {
     return (
       <>
         <DrawerHeader>

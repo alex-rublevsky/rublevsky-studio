@@ -1,4 +1,4 @@
-'use server';
+"use server";
 
 import { eq, inArray } from "drizzle-orm";
 import db from "@/server/db";
@@ -45,7 +45,7 @@ export default async function deleteProduct(id: number): Promise<void> {
       .where(eq(products.id, id));
 
     // Revalidate cache
-    revalidateTag('products');
+    revalidateTag("products");
   } catch (error) {
     throw new Error(`Failed to delete product: ${(error as Error).message}`);
   }

@@ -11,14 +11,9 @@ import { QuantitySelector } from "@/components/ui/shared/QuantitySelector";
 import { getAttributeDisplayName } from "@/lib/utils/productAttributes";
 import ImageGallery from "@/components/ui/shared/ImageGallery";
 import { FilterGroup } from "@/components/ui/shared/FilterGroup";
-import {
-  ProductWithDetails,
-  ProductVariationWithAttributes,
-  VariationAttribute,
-} from "@/types";
+import { ProductWithDetails, VariationAttribute } from "@/types";
 import { Badge } from "../shared/badge";
 import { getAvailableQuantityForVariation } from "@/lib/utils/validateStock";
-import { markdownComponents } from "../shared/MarkdownComponents";
 import { useVariationSelection } from "@/lib/hooks/useVariationSelection";
 
 interface ProductDetailsProps {
@@ -30,7 +25,6 @@ export default function ProductDetails({
 }: ProductDetailsProps) {
   const { addProductToCart, cart, products } = useCart();
   const [product, setProduct] = useState<ProductWithDetails>(initialProduct);
-  const [selectedImage, setSelectedImage] = useState("");
   const [quantity, setQuantity] = useState(1);
 
   // Use the variation selection hook
@@ -59,16 +53,6 @@ export default function ProductDetails({
       }));
     }
   }, [initialProduct.id, products]);
-
-  // Initialize selected image
-  useEffect(() => {
-    // Get first image from comma-separated string
-    const imageArray =
-      product.images?.split(",").map((img: string) => img.trim()) ?? [];
-    if (imageArray.length > 0) {
-      setSelectedImage(imageArray[0]);
-    }
-  }, [product]);
 
   // Calculate effective stock by subtracting cart quantities
   const getEffectiveStock = useMemo(() => {

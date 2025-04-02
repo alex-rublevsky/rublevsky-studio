@@ -10,9 +10,7 @@ type BrandingProjectCardProps = {
   project: BrandingProject;
 };
 
-export default memo(function BrandingProjectCard({
-  project,
-}: BrandingProjectCardProps) {
+const BrandingProjectCard = ({ project }: BrandingProjectCardProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [isClient, setIsClient] = useState(false);
@@ -136,4 +134,8 @@ export default memo(function BrandingProjectCard({
       )}
     </div>
   );
-});
+};
+
+BrandingProjectCard.displayName = "BrandingProjectCard";
+
+export default memo(BrandingProjectCard);

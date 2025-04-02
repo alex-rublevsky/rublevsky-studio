@@ -108,7 +108,7 @@ export function useVariationSelection({
         setSelectedAttributes(newAttributes);
       }
     }
-  }, [cartItems, product.id]);
+  }, [cartItems, product, selectedVariation, findFirstAvailableVariation]);
 
   // Select a variation based on attribute ID and value
   const selectVariation = useCallback(

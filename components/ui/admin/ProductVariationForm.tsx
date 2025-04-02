@@ -65,7 +65,11 @@ function SortableVariationItem({
 }: {
   variation: Variation;
   onRemove: (id: string) => void;
-  onUpdate: (id: string, field: keyof Variation, value: any) => void;
+  onUpdate: (
+    id: string,
+    field: keyof Variation,
+    value: string | number
+  ) => void;
   onAddAttribute: (variationId: string, attributeId: string) => void;
   onRemoveAttribute: (variationId: string, attributeId: string) => void;
   onUpdateAttributeValue: (
@@ -243,7 +247,6 @@ export default function ProductVariationForm({
   const [availableAttributes] = useState<string[]>(
     Object.values(PRODUCT_ATTRIBUTES).map((attr) => attr.id)
   );
-  const [error, setError] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -289,7 +292,7 @@ export default function ProductVariationForm({
   const handleUpdateVariation = (
     id: string,
     field: keyof Variation,
-    value: any
+    value: string | number
   ) => {
     onChange(
       variations.map((variation) =>
@@ -367,12 +370,6 @@ export default function ProductVariationForm({
 
   return (
     <div className="space-y-6 pb-6">
-      {error && (
-        <div className="bg-destructive/10 border border-destructive text-destructive px-4 py-3 rounded">
-          Error loading attributes: {error}
-        </div>
-      )}
-
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}

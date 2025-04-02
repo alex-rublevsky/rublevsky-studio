@@ -1,4 +1,4 @@
-'use server';
+"use server";
 
 import db from "@/server/db";
 import { orders, orderItems, addresses } from "@/server/schema";
@@ -129,7 +129,7 @@ export async function createOrder(
     await db.insert(addresses)
       .values({
         orderId: order.id,
-        addressType: customerInfo.billingAddress ? 'shipping' : 'both',
+        addressType: customerInfo.billingAddress ? "shipping" : "both",
         ...customerInfo.shippingAddress,
         createdAt: now,
       });
@@ -138,7 +138,7 @@ export async function createOrder(
       await db.insert(addresses)
         .values({
           orderId: order.id,
-          addressType: 'billing',
+          addressType: "billing",
           ...customerInfo.billingAddress,
           createdAt: now,
         });
@@ -164,14 +164,14 @@ export async function createOrder(
 
     return { 
       success: true, 
-      message: 'Order created successfully',
+      message: "Order created successfully",
       orderId: order.id 
     };
   } catch (error) {
-    console.error('Error creating order:', error);
+    console.error("Error creating order:", error);
     return {
       success: false,
-      message: `Failed to create order: ${(error as Error).message}`
+      message: `Failed to create order: ${(error as Error).message}`,
     };
   }
 } 

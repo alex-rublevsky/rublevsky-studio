@@ -1,9 +1,12 @@
-'use server';
+"use server";
 
 import { eq } from "drizzle-orm";
 import db from "@/server/db";
 import { orders, orderItems, addresses, products } from "@/server/schema";
-import { unstable_cache } from 'next/cache';
+import { unstable_cache } from "next/cache";
+
+// Define a type for product attributes
+type ProductAttribute = string | number | boolean | null;
 
 export interface OrderDetails {
   id: number;
@@ -37,7 +40,7 @@ export interface OrderDetails {
     unitAmount: number;
     discountPercentage: number | null;
     finalAmount: number;
-    attributes: Record<string, any>;
+    attributes: Record<string, ProductAttribute>;
     product: {
       name: string;
       slug: string;
@@ -89,14 +92,14 @@ async function fetchOrderById(id: number): Promise<OrderDetails | null> {
           slug: row.products.slug,
           images: row.products.images,
         } : {
-          name: 'Product Not Found',
-          slug: '',
+          name: "Product Not Found",
+          slug: "",
           images: null,
-        }
+        },
       }))
     };
   } catch (error) {
-    console.error('Error fetching order:', error);
+    console.error("Error fetching order:", error);
     throw new Error(`Failed to fetch order: ${(error as Error).message}`);
   }
 }
@@ -104,10 +107,10 @@ async function fetchOrderById(id: number): Promise<OrderDetails | null> {
 export default async function getOrderById(id: number): Promise<OrderDetails | null> {
   return unstable_cache(
     () => fetchOrderById(id),
-    ['order', id.toString()],
+    ["order", id.toString()],
     {
       revalidate: 60, // Cache for 1 minute
-      tags: ['orders', `order-${id}`]
+      tags: ["orders", "order-${id}"],
     }
   )();
-} 
+}

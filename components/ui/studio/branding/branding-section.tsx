@@ -24,7 +24,7 @@ export default function BrandingSection() {
   return (
     <section id="branding">
       <h1
-        className={`text-center work_page_section_title_holder`}
+        className="text-center work_page_section_title_holder"
         data-heading-reveal
       >
         Branding

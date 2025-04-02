@@ -1,9 +1,12 @@
-'use server';
+"use server";
 
 import { eq } from "drizzle-orm";
-import { unstable_cache } from 'next/cache';
+import { unstable_cache } from "next/cache";
 import db from "@/server/db";
 import { orders, orderItems, addresses, products, productVariations } from "@/server/schema";
+
+// Define a type for product attributes
+type ProductAttribute = string | number | boolean | null;
 
 export interface OrderWithDetails {
   id: number;
@@ -37,7 +40,7 @@ export interface OrderWithDetails {
     unitAmount: number;
     discountPercentage: number | null;
     finalAmount: number;
-    attributes: Record<string, any>;
+    attributes: Record<string, ProductAttribute>;
     product: {
       name: string;
       slug: string;
@@ -153,10 +156,10 @@ async function fetchOrders(): Promise<OrderWithDetails[]> {
 export default async function getAllOrders(revalidate: number = 60): Promise<OrderWithDetails[]> {
   return unstable_cache(
     async () => fetchOrders(),
-    ['all-orders'],
+    ["all-orders"],
     {
       revalidate,
-      tags: ['orders']
+      tags: ["orders"],
     }
   )();
 } 

@@ -1,8 +1,7 @@
-'use server';
+"use server";
 
 import { eq } from "drizzle-orm";
-import type { D1Database } from '@cloudflare/workers-types';
-import { drizzle } from "drizzle-orm/d1";
+
 import db from "@/server/db";
 import { brands } from "@/server/schema";
 
@@ -23,13 +22,8 @@ export default async function createBrand(data: CreateBrandData): Promise<void> 
       throw new Error("Name and slug are required");
     }
 
-    // Initialize database (works for both local and production)
-    const database = typeof process === 'undefined' 
-      ? drizzle((globalThis as any)[Symbol.for("__cloudflare-context__")]?.env?.DB as D1Database)
-      : db;
-
     // Check if slug already exists
-    const existingBrand = await database
+    const existingBrand = await db
       .select()
       .from(brands)
       .where(eq(brands.slug, data.slug))
@@ -40,7 +34,7 @@ export default async function createBrand(data: CreateBrandData): Promise<void> 
     }
 
     // Create brand
-    await database.insert(brands)
+    await db.insert(brands)
       .values({
         name: data.name,
         slug: data.slug,

@@ -6,10 +6,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
 import { data } from "@/components/ui/admin/app-sidebar";
 import { type Icon } from "@tabler/icons-react";
-import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/providers/theme-provider";
-import { getCookie } from "../../lib/utils/cookies";
-import { useEffect, useState } from "react";
 
 interface NavItem {
   title: string;
@@ -23,15 +20,6 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const [activeThemeValue, setActiveThemeValue] = useState<
-    string | undefined
-  >();
-
-  useEffect(() => {
-    // Get the theme from cookie on client side
-    const theme = getCookie("active_theme");
-    setActiveThemeValue(theme);
-  }, []);
 
   const currentPage = data.navMain.find(
     (item: NavItem) => item.url === pathname

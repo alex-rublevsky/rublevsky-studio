@@ -122,7 +122,7 @@ export default function CheckoutPage() {
     if (missingFields.length > 0) {
       // Get the friendly names directly from the missingFields entries
       const missingFieldNames = missingFields.map(
-        ([_, displayName]) => displayName
+        ([, displayName]) => displayName
       );
 
       toast.error(

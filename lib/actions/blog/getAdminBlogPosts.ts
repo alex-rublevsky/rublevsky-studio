@@ -1,8 +1,8 @@
-'use server';
+"use server";
 
 import db from "@/server/db";
 import { blogPosts, blogTeaCategories } from "@/server/schema";
-import { eq, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import { BlogPost } from "@/types";
 
 /**
@@ -18,7 +18,7 @@ export async function getAdminBlogPosts(): Promise<BlogPost[]> {
     ? await db
         .select()
         .from(blogTeaCategories)
-        .where(sql`${blogTeaCategories.blogPostId} IN (${posts.map(p => p.id).join(',')})`)
+        .where(sql`${blogTeaCategories.blogPostId} IN (${posts.map(p => p.id).join(",")})`)
     : [];
 
   // Transform the results into the expected format

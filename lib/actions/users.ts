@@ -2,14 +2,11 @@
 
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
-
 
 export const signOut = async () => {
-    const headersList = headers();
     await auth.api.signOut({
-        headers: headersList
-    });
-    
-    redirect("/sign-in");
-}
+    headers: {}, // Minimal headers since we're in a server action
+  });
+
+  redirect("/sign-in");
+};

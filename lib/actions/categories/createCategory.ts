@@ -1,8 +1,6 @@
-'use server';
+"use server";
 
 import { eq } from "drizzle-orm";
-import type { D1Database } from '@cloudflare/workers-types';
-import { drizzle } from "drizzle-orm/d1";
 import db from "@/server/db";
 import { categories } from "@/server/schema";
 
@@ -23,13 +21,8 @@ export default async function createCategory(data: CreateCategoryData): Promise<
       throw new Error("Name and slug are required");
     }
 
-    // Initialize database (works for both local and production)
-    const database = typeof process === 'undefined' 
-      ? drizzle((globalThis as any)[Symbol.for("__cloudflare-context__")]?.env?.DB as D1Database)
-      : db;
-
     // Check if slug already exists
-    const existingCategory = await database
+    const existingCategory = await db
       .select()
       .from(categories)
       .where(eq(categories.slug, data.slug))
@@ -40,7 +33,7 @@ export default async function createCategory(data: CreateCategoryData): Promise<
     }
 
     // Create category
-    await database.insert(categories)
+    await db.insert(categories)
       .values({
         name: data.name,
         slug: data.slug,

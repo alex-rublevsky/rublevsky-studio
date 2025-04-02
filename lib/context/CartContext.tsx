@@ -145,7 +145,7 @@ export function CartProvider({ children, initialProducts }: CartProviderProps) {
           cartItem.variationId === item.variationId
       );
 
-      let newItems = [...prevCart.items];
+      const newItems = [...prevCart.items];
 
       if (existingItemIndex >= 0) {
         // Item exists, update quantity

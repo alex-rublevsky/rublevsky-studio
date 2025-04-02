@@ -79,7 +79,7 @@ export default function TestimonialSliderSection() {
             >
               <NeumorphismCard className=" m-10">
                 <div className="testimonial-card">
-                  <p className="mb-6">"{testimonial.content}"</p>
+                  <p className="mb-6">&ldquo;{testimonial.content}&rdquo;</p>
                   <a
                     href={testimonial.link}
                     target="_blank"

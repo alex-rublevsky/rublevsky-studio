@@ -1,11 +1,11 @@
-import ClientOrderConfirmation from '@/emails/clientOrderConfirmation';
-import AdminOrderConfirmation from '@/emails/adminEmailConfirmation';
-import { Resend } from 'resend';
-import { NextResponse } from 'next/server';
-import { CartItem } from '@/lib/context/CartContext';
+import ClientOrderConfirmation from "@/emails/clientOrderConfirmation";
+import AdminOrderConfirmation from "@/emails/adminEmailConfirmation";
+import { Resend } from "resend";
+import { NextResponse } from "next/server";
+import { CartItem } from "@/lib/context/CartContext";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const ADMIN_EMAIL = 'alexander.rublevskii@gmail.com';
+const ADMIN_EMAIL = "alexander.rublevskii@gmail.com";
 
 interface OrderEmailData {
   firstName: string;
@@ -46,13 +46,13 @@ export async function POST(request: Request) {
   try {
     const data: OrderEmailData = await request.json();
     
-    const { firstName, lastName, email, orderItems, orderId, subtotal, totalDiscount, orderTotal, shippingAddress, billingAddress, shippingMethod, notes } = data;
+    const { firstName, lastName, email, orderItems, orderId, subtotal, totalDiscount, orderTotal, shippingAddress, billingAddress, shippingMethod } = data;
 
     // Validate required fields
     if (!email || !orderId || !orderItems || !shippingAddress) {
-      console.error('Missing required fields for order email:', { email, orderId, hasOrderItems: !!orderItems, hasShippingAddress: !!shippingAddress });
+      console.error("Missing required fields for order email:", { email, orderId, hasOrderItems: !!orderItems, hasShippingAddress: !!shippingAddress });
       return NextResponse.json(
-        { success: false, error: 'Missing required fields for order email' },
+        { success: false, error: "Missing required fields for order email" },
         { status: 400 }
       );
     }
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
     let clientEmailResult;
     try {
       clientEmailResult = await resend.emails.send({
-        from: 'Rublevsky Studio <orders@rublevsky.studio>',
+        from: "Rublevsky Studio <orders@rublevsky.studio>",
         to: email,
         subject: `Order Confirmation #${orderId}`,
         react: ClientOrderConfirmation({
@@ -83,20 +83,20 @@ export async function POST(request: Request) {
           subtotal: subtotal.toFixed(2),
           totalDiscount: totalDiscount.toFixed(2),
           orderTotal: orderTotal.toFixed(2),
-          orderStatus: 'Confirmed',
+          orderStatus: "Confirmed",
           orderItems: formattedOrderItems
         }),
       });
     } catch (error) {
-      console.error('Failed to send client confirmation email:', error);
-      throw new Error('Failed to send client confirmation email');
+      console.error("Failed to send client confirmation email:", error);
+      throw new Error("Failed to send client confirmation email");
     }
 
     // Send admin notification email
     let adminEmailResult;
     try {
       adminEmailResult = await resend.emails.send({
-        from: 'Rublevsky Studio <orders@rublevsky.studio>',
+        from: "Rublevsky Studio <orders@rublevsky.studio>",
         to: ADMIN_EMAIL,
         subject: `New Order #${orderId} - Rublevsky Studio`,
         react: AdminOrderConfirmation({
@@ -108,7 +108,7 @@ export async function POST(request: Request) {
           subtotal: subtotal.toFixed(2),
           totalDiscount: totalDiscount.toFixed(2),
           orderTotal: orderTotal.toFixed(2),
-          orderStatus: 'Pending',
+          orderStatus: "Pending",
           shippingMethod,
           shippingAddress,
           billingAddress,
@@ -116,7 +116,7 @@ export async function POST(request: Request) {
         }),
       });
     } catch (error) {
-      console.error('Failed to send admin notification email:', error);
+      console.error("Failed to send admin notification email:", error);
       // Don't throw here - we still want to return success if client email was sent
     }
 
@@ -128,11 +128,11 @@ export async function POST(request: Request) {
       } 
     });
   } catch (error) {
-    console.error('Error sending order emails:', error);
+    console.error("Error sending order emails:", error);
     return NextResponse.json(
       { 
         success: false, 
-        error: error instanceof Error ? error.message : 'Failed to send order emails'
+        error: error instanceof Error ? error.message : "Failed to send order emails"
       },
       { status: 500 }
     );

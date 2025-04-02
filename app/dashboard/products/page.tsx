@@ -11,6 +11,8 @@ import {
   Brand,
   ProductFormData,
   TeaCategory,
+  ProductWithVariations,
+  VariationAttribute,
 } from "@/types";
 import Image from "next/image";
 import ProductVariationForm from "@/components/ui/admin/ProductVariationForm";
@@ -48,7 +50,7 @@ import {
 } from "@/components/ui/shared/drawer";
 import { cn } from "@/lib/utils";
 
-// Define the Variation interface to match the one in ProductVariationForm
+// Remove unused interfaces and keep only the ones we need
 interface Variation {
   id: string;
   sku: string;
@@ -56,11 +58,6 @@ interface Variation {
   stock: number;
   sort: number;
   attributes: VariationAttribute[];
-}
-
-interface VariationAttribute {
-  attributeId: string;
-  value: string;
 }
 
 export default function ProductsPage() {
@@ -305,13 +302,13 @@ export default function ProductsPage() {
     setError("");
 
     // Convert variations to the format expected by the API
-    const formattedVariations = variations.map((variation) => ({
+    const formattedVariations = variations.map((variation: Variation) => ({
       id: variation.id.startsWith("temp-") ? undefined : parseInt(variation.id),
       sku: variation.sku,
       price: variation.price.toString(),
       stock: variation.stock.toString(),
       sort: variation.sort,
-      attributes: variation.attributes.map((attr) => ({
+      attributes: variation.attributes.map((attr: VariationAttribute) => ({
         attributeId: attr.attributeId,
         value: attr.value,
       })),
@@ -374,16 +371,23 @@ export default function ProductsPage() {
 
     // Fetch product variations if the product has variations
     if (productDetails.hasVariations) {
-      const variations = (productDetails as any).variations || [];
+      const variations =
+        (productDetails as ProductWithVariations).variations || [];
       setEditVariations(
-        variations.map((variation: any) => ({
+        variations.map((variation) => ({
           id: variation.id.toString(),
           sku: variation.sku,
-          price: parseFloat(variation.price),
-          stock: parseInt(variation.stock),
+          price:
+            typeof variation.price === "number"
+              ? variation.price
+              : parseFloat(variation.price),
+          stock:
+            typeof variation.stock === "number"
+              ? variation.stock
+              : parseInt(variation.stock),
           sort: variation.sort || 0,
           attributes: variation.attributes
-            ? variation.attributes.map((attr: any) => ({
+            ? variation.attributes.map((attr) => ({
                 attributeId: attr.attributeId,
                 value: attr.value,
               }))
@@ -401,13 +405,13 @@ export default function ProductsPage() {
     setError("");
 
     // Convert variations to the format expected by the API
-    const formattedVariations = editVariations.map((variation) => ({
+    const formattedVariations = editVariations.map((variation: Variation) => ({
       id: variation.id.startsWith("temp-") ? undefined : parseInt(variation.id),
       sku: variation.sku,
       price: variation.price.toString(),
       stock: variation.stock.toString(),
       sort: variation.sort,
-      attributes: variation.attributes.map((attr) => ({
+      attributes: variation.attributes.map((attr: VariationAttribute) => ({
         attributeId: attr.attributeId,
         value: attr.value,
       })),
@@ -564,13 +568,6 @@ export default function ProductsPage() {
     if (!slug) return null;
     const category = categories.find((cat) => cat.slug === slug);
     return category?.name || null;
-  };
-
-  // Helper function to get brand name from slug
-  const getBrandName = (slug: string | null): string | null => {
-    if (!slug) return null;
-    const brand = brands.find((b) => b.slug === slug);
-    return brand?.name || null;
   };
 
   const getTeaCategoryNames = (slugs: string[] | undefined): string => {
@@ -1052,10 +1049,10 @@ export default function ProductsPage() {
                   <Select
                     name="categorySlug"
                     value={editFormData.categorySlug}
-                    onValueChange={(value) =>
+                    onValueChange={(value: string) =>
                       handleEditChange({
                         target: { name: "categorySlug", value },
-                      } as any)
+                      } as React.ChangeEvent<HTMLSelectElement>)
                     }
                     required
                   >
@@ -1079,13 +1076,13 @@ export default function ProductsPage() {
                   <Select
                     name="brandSlug"
                     value={editFormData.brandSlug || undefined}
-                    onValueChange={(value) =>
+                    onValueChange={(value: string) =>
                       handleEditChange({
                         target: {
                           name: "brandSlug",
                           value: value || null,
                         },
-                      } as any)
+                      } as React.ChangeEvent<HTMLSelectElement>)
                     }
                   >
                     <SelectTrigger>

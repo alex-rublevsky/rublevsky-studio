@@ -1,8 +1,6 @@
-'use server';
+"use server";
 
 import { eq } from "drizzle-orm";
-import type { D1Database } from '@cloudflare/workers-types';
-import { drizzle } from "drizzle-orm/d1";
 import db from "@/server/db";
 import { categories } from "@/server/schema";
 import { Category } from "@/types";
@@ -26,15 +24,10 @@ export default async function updateCategory(id: number, data: UpdateCategoryDat
       throw new Error("Name and slug are required");
     }
 
-    // Initialize database (works for both local and production)
-    const database = typeof process === 'undefined' 
-      ? drizzle((globalThis as any)[Symbol.for("__cloudflare-context__")]?.env?.DB as D1Database)
-      : db;
-
     // Fetch existing category and check for duplicate slug in a single query
     const [category, duplicateSlug] = await Promise.all([
-      database.select().from(categories).where(eq(categories.id, id)).get(),
-      database.select().from(categories).where(eq(categories.slug, data.slug)).get()
+      db.select().from(categories).where(eq(categories.id, id)).get(),
+      db.select().from(categories).where(eq(categories.slug, data.slug)).get()
     ]);
 
     if (!category) throw new Error("Category not found");
@@ -43,7 +36,7 @@ export default async function updateCategory(id: number, data: UpdateCategoryDat
     }
 
     // Update category
-    await database.update(categories)
+    await db.update(categories)
       .set({
         name: data.name,
         slug: data.slug,
@@ -53,7 +46,7 @@ export default async function updateCategory(id: number, data: UpdateCategoryDat
       .where(eq(categories.id, id));
 
     // Fetch and return updated category
-    const updatedCategory = await database.select()
+    const updatedCategory = await db.select()
       .from(categories)
       .where(eq(categories.id, id))
       .get();

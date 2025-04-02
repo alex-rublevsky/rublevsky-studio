@@ -2,7 +2,7 @@
 
 import { Product, ProductVariation, VariationAttribute } from "@/types";
 import Link from "next/link";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import Image from "next/image";
 import styles from "./productCard.module.css";
 import { useCart } from "@/lib/context/CartContext";
@@ -25,7 +25,6 @@ interface ProductVariationWithAttributes extends ProductVariation {
 function ProductCard({ product }: { product: ProductWithVariations }) {
   const [isHovering, setIsHovering] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
-  const [imagesLoaded, setImagesLoaded] = useState<boolean[]>([]);
   const { addProductToCart, cart } = useCart();
 
   // Use the variation selection hook
@@ -53,26 +52,9 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
 
   // Handle image load events with useCallback
   const handleImageLoad = useCallback((index: number) => {
-    setImagesLoaded((prev) => {
-      const newState = [...prev];
-      newState[index] = true;
-      return newState;
-    });
+    // We don't need to track loaded state anymore
+    console.log("Image ${index} loaded");
   }, []);
-
-  // Get unique attribute names from all variations
-  const getUniqueAttributeNames = useMemo((): string[] => {
-    if (!product.variations) return [];
-
-    const attributeNames = new Set<string>();
-    product.variations.forEach((variation) => {
-      variation.attributes.forEach((attr: VariationAttribute) => {
-        attributeNames.add(attr.attributeId);
-      });
-    });
-
-    return Array.from(attributeNames);
-  }, [product.variations]);
 
   // Get unique attribute values for a specific attribute ID
   const getUniqueAttributeValues = useCallback(

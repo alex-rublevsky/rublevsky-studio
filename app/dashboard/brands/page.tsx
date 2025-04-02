@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Brand, BrandFormData, BrandsResponse } from "@/types";
+import { Brand, BrandFormData } from "@/types";
 import {
   getAllBrands,
   createBrand,

@@ -156,13 +156,6 @@ export default function BlogPage() {
     });
   };
 
-  const handleEditCategoryChange = (value: string[]) => {
-    setEditFormData({
-      ...editFormData,
-      teaCategories: value,
-    });
-  };
-
   const handleEditChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -312,11 +305,6 @@ export default function BlogPage() {
     }
   };
 
-  const handleDeleteCancel = () => {
-    setShowDeleteDialog(false);
-    setDeletingPostId(null);
-  };
-
   const closeEditModal = () => {
     setShowEditModal(false);
     setEditingPostId(null);
@@ -392,10 +380,7 @@ export default function BlogPage() {
                             : (createFormData.teaCategories || []).filter(
                                 (slug) => slug !== category.slug
                               );
-                          setCreateFormData((prev) => ({
-                            ...prev,
-                            teaCategories: newCategories,
-                          }));
+                          handleCategoryChange(newCategories);
                         }}
                         className="h-4 w-4 rounded border-gray-300"
                       />
@@ -414,12 +399,7 @@ export default function BlogPage() {
                 </label>
                 <ProductSelector
                   selectedProductSlug={createFormData.productSlug || ""}
-                  onProductSelect={(value: string) =>
-                    setCreateFormData((prev) => ({
-                      ...prev,
-                      productSlug: value,
-                    }))
-                  }
+                  onProductSelect={handleProductSelect}
                 />
               </div>
 
@@ -646,12 +626,7 @@ export default function BlogPage() {
                 </label>
                 <ProductSelector
                   selectedProductSlug={editFormData.productSlug || ""}
-                  onProductSelect={(value: string) =>
-                    setEditFormData((prev) => ({
-                      ...prev,
-                      productSlug: value,
-                    }))
-                  }
+                  onProductSelect={handleEditProductSelect}
                 />
               </div>
 

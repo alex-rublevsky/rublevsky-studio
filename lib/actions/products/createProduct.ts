@@ -1,4 +1,4 @@
-'use server';
+"use server";
 
 import { eq } from "drizzle-orm";
 import db from "@/server/db";
@@ -31,9 +31,9 @@ export default async function createProduct(data: ProductFormData): Promise<void
         discount: data.discount,
         hasVariations: data.hasVariations,
         weight: data.weight || null,
-        images: data.images?.trim() || '',
-        createdAt: new Date()
-      })
+        images: data.images?.trim() || "",
+        createdAt: new Date(),
+      }),
     ]);
 
     if (existingProduct) {

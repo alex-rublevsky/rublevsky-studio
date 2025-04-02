@@ -89,12 +89,12 @@ function smoothEdges(imageData: ImageData): ImageData {
   return outImg;
 }
 
+const CANVAS_HEIGHT = 1000;
+const CANVAS_WIDTH = Math.round(CANVAS_HEIGHT * (68 / 80)); // Using SVG aspect ratio directly
+
 export function LiquidMetalR({ className }: { className?: string }) {
   const [imageData, setImageData] = useState<ImageData | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-
-  const CANVAS_HEIGHT = 1000;
-  const CANVAS_WIDTH = Math.round(CANVAS_HEIGHT * (68 / 80)); // Using SVG aspect ratio directly
 
   useEffect(() => {
     const canvas = document.createElement("canvas");

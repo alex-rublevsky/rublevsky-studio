@@ -34,6 +34,7 @@ export function OrderList({ initialOrders }: OrderListProps) {
         toast.error(result.message);
       }
     } catch (error) {
+      console.error("Failed to update order status:", error);
       toast.error("Failed to update order status");
     }
   };

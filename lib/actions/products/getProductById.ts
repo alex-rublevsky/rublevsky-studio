@@ -1,4 +1,4 @@
-'use server';
+"use server";
 
 import { eq } from "drizzle-orm";
 import db from "@/server/db";
@@ -68,9 +68,9 @@ export default async function getProductById(id: number): Promise<ProductWithVar
 
     return {
       ...product,
-      images: product.images || '',
-      teaCategories: teaCategories.map(tc => tc.teaCategorySlug),
-      variations: Array.from(processedVariations.values())
+      images: product.images || "",
+      teaCategories: teaCategories.map((tc) => tc.teaCategorySlug),
+      variations: Array.from(processedVariations.values()),
     };
   } catch (error) {
     throw new Error(`Failed to fetch product: ${(error as Error).message}`);

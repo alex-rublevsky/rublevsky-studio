@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -9,31 +8,28 @@ import { getAttributeDisplayName } from "@/lib/utils/productAttributes";
 import NeumorphismCard from "@/components/ui/shared/neumorphism-card";
 import { Badge } from "@/components/ui/shared/badge";
 
-interface OrderItem {
-  name: string;
-  quantity: number;
-  price: number;
-  originalPrice?: number;
-  discount?: number;
-  image?: string;
-  attributes?: Record<string, string>;
-}
-
-interface OrderPageProps {
-  params: { id: string };
-  searchParams: { new?: string };
-}
-
 function getFirstImage(images: string | null): string | null {
   if (!images) return null;
   return images.split(",")[0].trim();
 }
 
-export default async function OrderPage({
-  params,
-  searchParams,
-}: OrderPageProps) {
-  const orderId = parseInt(params.id, 10);
+type PageParams = {
+  id: string;
+};
+
+type SearchParams = {
+  new?: string;
+};
+
+export default async function OrderPage(context: {
+  params: Promise<PageParams>;
+  searchParams: Promise<SearchParams>;
+}) {
+  const [{ id }, searchParams] = await Promise.all([
+    context.params,
+    context.searchParams,
+  ]);
+  const orderId = parseInt(id, 10);
   const isNewOrder = searchParams.new === "true";
 
   if (isNaN(orderId)) {

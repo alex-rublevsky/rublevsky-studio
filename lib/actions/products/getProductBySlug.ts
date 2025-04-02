@@ -1,4 +1,4 @@
-'use server';
+"use server";
 
 import { eq } from "drizzle-orm";
 import db from "@/server/db";
@@ -95,8 +95,8 @@ export default async function getProductBySlug(slug: string): Promise<ProductWit
         id: firstRow.blog_posts.id,
         title: firstRow.blog_posts.title,
         slug: firstRow.blog_posts.slug,
-        body: firstRow.blog_posts.body || '',
-        blogUrl: `/blog#${firstRow.blog_posts.slug}`
+        body: firstRow.blog_posts.body || "",
+        blogUrl: `/blog#${firstRow.blog_posts.slug}`,
       } : null,
       description: (firstRow.blog_posts?.body) || baseProduct.description,
       variations: Array.from(variationsMap.values())
