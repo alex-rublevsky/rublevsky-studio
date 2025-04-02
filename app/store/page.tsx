@@ -3,6 +3,8 @@ import { getAllCategories } from "@/lib/actions/categories";
 import getAllTeaCategories from "@/lib/actions/tea/getAllTeaCategories";
 import StoreFeed from "@/components/ui/store/filteredProductList";
 
+export const experimental_ppr = true;
+
 // Force this page to be dynamically rendered
 export const dynamic = "force-dynamic";
 
