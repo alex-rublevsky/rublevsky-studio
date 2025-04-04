@@ -50,12 +50,6 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
     [product.images]
   );
 
-  // Handle image load events with useCallback
-  const handleImageLoad = useCallback((index: number) => {
-    // We don't need to track loaded state anymore
-    console.log("Image ${index} loaded");
-  }, []);
-
   // Get unique attribute values for a specific attribute ID
   const getUniqueAttributeValues = useCallback(
     (attributeId: string): string[] => {
@@ -202,7 +196,6 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
                     fill
                     className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 ease-in-out"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    onLoad={() => handleImageLoad(0)}
                   />
                 ) : (
                   <div className="absolute inset-0 bg-muted flex items-center justify-center">
@@ -222,7 +215,6 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
                       isHovering ? "opacity-100" : "opacity-0"
                     }`}
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    onLoad={() => handleImageLoad(1)}
                   />
                 </div>
               )}

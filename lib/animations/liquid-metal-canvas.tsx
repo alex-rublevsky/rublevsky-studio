@@ -47,40 +47,33 @@ export const Canvas: FC<{
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const contextRef = useRef<RenderContext | null>(null);
   const textureRef = useRef<WebGLTexture | null>(null);
-  const totalAnimationTime = useRef(0);
-  const lastRenderTime = useRef(0);
+  const timeRef = useRef(0);
   const frameRef = useRef(0);
 
-  // Animation loop
+  // Start animation
   useEffect(() => {
+    timeRef.current = performance.now();
+    frameRef.current = requestAnimationFrame(render);
+    return () => cancelAnimationFrame(frameRef.current);
+  }, [params.speed]);
+
+  // Animation loop
+  const render = (now: number) => {
     const context = contextRef.current;
     if (!context) return;
-
     const { gl, uniforms } = context;
-    let isAnimating = true;
 
-    function render(currentTime: number) {
-      if (!isAnimating || !context) return;
-
-      const deltaTime = currentTime - lastRenderTime.current;
-      lastRenderTime.current = currentTime;
-      totalAnimationTime.current += deltaTime * params.speed;
+    if (!gl.isContextLost()) {
+      const delta = now - timeRef.current;
+      timeRef.current = now;
 
       gl.clear(gl.COLOR_BUFFER_BIT);
-      gl.uniform1f(uniforms.u_time, totalAnimationTime.current);
+      gl.uniform1f(uniforms.u_time, timeRef.current * params.speed);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
       frameRef.current = requestAnimationFrame(render);
     }
-
-    lastRenderTime.current = performance.now();
-    frameRef.current = requestAnimationFrame(render);
-
-    return () => {
-      isAnimating = false;
-      cancelAnimationFrame(frameRef.current);
-    };
-  }, [params.speed]);
+  };
 
   // Initialize WebGL context and resources
   const initializeWebGL = (canvas: HTMLCanvasElement, imageData: ImageData) => {
@@ -168,7 +161,8 @@ export const Canvas: FC<{
       const context = initializeWebGL(canvas, imageData);
       if (context) {
         contextRef.current = context;
-        lastRenderTime.current = performance.now();
+        timeRef.current = performance.now();
+        requestAnimationFrame(render);
       }
     };
 

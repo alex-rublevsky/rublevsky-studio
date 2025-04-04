@@ -1,10 +1,10 @@
-//const MillionLint = require('@million/lint');
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+
+initOpenNextCloudflareForDev();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    ppr: 'incremental'
-  },
+  output: 'standalone',
   images: {
     loader: "custom",
     loaderFile: "./image-loader.js",
@@ -17,7 +17,4 @@ const nextConfig = {
   },
 };
 
-// module.exports = MillionLint.next({
-//   rsc: true, // Required for app directory structure
-// })(nextConfig);
 export default nextConfig;
