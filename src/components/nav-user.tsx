@@ -5,6 +5,8 @@ import {
   MoreVerticalIcon,
   UserCircleIcon,
 } from "lucide-react";
+import { signOut } from "~/utils/auth-client";
+import { useNavigate } from "@tanstack/react-router";
 
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import {
@@ -33,6 +35,7 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
+  const navigate = useNavigate();
 
   return (
     <SidebarMenu>
@@ -92,7 +95,11 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() =>
+                signOut({}, { onSuccess: () => navigate({ to: "/" }) })
+              }
+            >
               <LogOutIcon />
               Log out
             </DropdownMenuItem>

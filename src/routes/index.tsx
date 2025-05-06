@@ -2,9 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import HeroSection from "~/components/ui/studio/HeroSection";
 import MembershipBenefitsSection from "~/components/ui/studio/MembershipBenefitsSection";
 import SubscriptionSection from "~/components/ui/studio/SubscriptionSection";
-import { Button } from "~/components/ui/Button";
-
-import { useSession, signOut, signIn } from "~/utils/auth-client";
 
 // import { webProjects } from "@/data/web-projects";
 // import { photos } from "@/data/photography";
@@ -24,14 +21,8 @@ export const Route = createFileRoute("/")({
 });
 
 function Work() {
-  const { data: session } = useSession();
   return (
     <>
-      <Button onClick={() => signIn.social({ provider: "github" })}>
-        Sign in with Github
-      </Button>
-      {session ? <p>Signed In</p> : <p>Not signed in</p>}
-
       <HeroSection />
       <MembershipBenefitsSection />
       <SubscriptionSection />

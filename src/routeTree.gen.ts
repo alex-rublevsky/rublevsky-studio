@@ -12,6 +12,7 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as RedirectImport } from './routes/redirect'
+import { Route as LoginImport } from './routes/login'
 import { Route as DeferredImport } from './routes/deferred'
 import { Route as DashboardImport } from './routes/dashboard'
 import { Route as PathlessLayoutImport } from './routes/_pathlessLayout'
@@ -32,6 +33,12 @@ import { Route as PathlessLayoutNestedLayoutRouteAImport } from './routes/_pathl
 const RedirectRoute = RedirectImport.update({
   id: '/redirect',
   path: '/redirect',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const LoginRoute = LoginImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -167,6 +174,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DeferredImport
       parentRoute: typeof rootRoute
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginImport
+      parentRoute: typeof rootRoute
+    }
     '/redirect': {
       id: '/redirect'
       path: '/redirect'
@@ -300,6 +314,7 @@ export interface FileRoutesByFullPath {
   '': typeof PathlessLayoutNestedLayoutRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/deferred': typeof DeferredRoute
+  '/login': typeof LoginRoute
   '/redirect': typeof RedirectRoute
   '/blog/$blogId': typeof BlogBlogIdRoute
   '/users/$userId': typeof UsersUserIdRoute
@@ -315,6 +330,7 @@ export interface FileRoutesByTo {
   '': typeof PathlessLayoutNestedLayoutRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/deferred': typeof DeferredRoute
+  '/login': typeof LoginRoute
   '/redirect': typeof RedirectRoute
   '/blog/$blogId': typeof BlogBlogIdRoute
   '/users/$userId': typeof UsersUserIdRoute
@@ -333,6 +349,7 @@ export interface FileRoutesById {
   '/_pathlessLayout': typeof PathlessLayoutRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/deferred': typeof DeferredRoute
+  '/login': typeof LoginRoute
   '/redirect': typeof RedirectRoute
   '/_pathlessLayout/_nested-layout': typeof PathlessLayoutNestedLayoutRouteWithChildren
   '/blog/$blogId': typeof BlogBlogIdRoute
@@ -353,6 +370,7 @@ export interface FileRouteTypes {
     | ''
     | '/dashboard'
     | '/deferred'
+    | '/login'
     | '/redirect'
     | '/blog/$blogId'
     | '/users/$userId'
@@ -367,6 +385,7 @@ export interface FileRouteTypes {
     | ''
     | '/dashboard'
     | '/deferred'
+    | '/login'
     | '/redirect'
     | '/blog/$blogId'
     | '/users/$userId'
@@ -383,6 +402,7 @@ export interface FileRouteTypes {
     | '/_pathlessLayout'
     | '/dashboard'
     | '/deferred'
+    | '/login'
     | '/redirect'
     | '/_pathlessLayout/_nested-layout'
     | '/blog/$blogId'
@@ -402,6 +422,7 @@ export interface RootRouteChildren {
   PathlessLayoutRoute: typeof PathlessLayoutRouteWithChildren
   DashboardRoute: typeof DashboardRoute
   DeferredRoute: typeof DeferredRoute
+  LoginRoute: typeof LoginRoute
   RedirectRoute: typeof RedirectRoute
   BlogBlogIdDeepRoute: typeof BlogBlogIdDeepRoute
 }
@@ -413,6 +434,7 @@ const rootRouteChildren: RootRouteChildren = {
   PathlessLayoutRoute: PathlessLayoutRouteWithChildren,
   DashboardRoute: DashboardRoute,
   DeferredRoute: DeferredRoute,
+  LoginRoute: LoginRoute,
   RedirectRoute: RedirectRoute,
   BlogBlogIdDeepRoute: BlogBlogIdDeepRoute,
 }
@@ -433,6 +455,7 @@ export const routeTree = rootRoute
         "/_pathlessLayout",
         "/dashboard",
         "/deferred",
+        "/login",
         "/redirect",
         "/blog_/$blogId/deep"
       ]
@@ -465,6 +488,9 @@ export const routeTree = rootRoute
     },
     "/deferred": {
       "filePath": "deferred.tsx"
+    },
+    "/login": {
+      "filePath": "login.tsx"
     },
     "/redirect": {
       "filePath": "redirect.tsx"

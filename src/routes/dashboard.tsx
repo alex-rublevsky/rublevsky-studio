@@ -1,7 +1,5 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { getUserID, getAvatar } from "~/utils/auth-server-func";
-import { Button } from "~/components/ui/Button";
-import { signOut } from "~/utils/auth-client";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AppSidebar } from "~/components/app-sidebar";
@@ -23,7 +21,7 @@ export const Route = createFileRoute("/dashboard")({
   },
   loader: async ({ context }) => {
     if (!context.userID) {
-      throw redirect({ to: "/" });
+      throw redirect({ to: "/login" });
     }
     return { userID: context.userID };
   },
@@ -31,7 +29,7 @@ export const Route = createFileRoute("/dashboard")({
 
 function RouteComponent() {
   const { userID } = Route.useLoaderData();
-  const navigate = useNavigate();
+
   const [avatar, setAvatar] = useState<string | null>(null);
 
   useEffect(() => {
@@ -46,11 +44,7 @@ function RouteComponent() {
   return (
     // <>
     //   <div>Hello "/dashboard" userID: {userID}!</div>
-    //   <Button
-    //     onClick={() => signOut({}, { onSuccess: () => navigate({ to: "/" }) })}
-    //   >
-    //     Sign Out
-    //   </Button>
+    //
     //   {avatar && (
     //     <img
     //       src={avatar}
