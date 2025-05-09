@@ -1,0 +1,46 @@
+.sticky-header-container {
+    position: sticky;
+    top: 0;
+    padding: 1rem 1.5rem 3rem;
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+    margin-right: calc(-50vw + 50%);
+    z-index: 40;
+}
+
+.sticky-header-container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: oklch(from var(--background) l c h / 0.8);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    mask-image: linear-gradient(to bottom,
+        rgba(0, 0, 0, 1) calc(100% - 4rem),
+        rgba(0, 0, 0, 0.95) calc(100% - 3.5rem),
+        rgba(0, 0, 0, 0.8) calc(100% - 3rem),
+        rgba(0, 0, 0, 0.6) calc(100% - 2.5rem),
+        rgba(0, 0, 0, 0.4) calc(100% - 2rem),
+        rgba(0, 0, 0, 0.2) calc(100% - 1.5rem),
+        rgba(0, 0, 0, 0)
+    );
+    -webkit-mask-image: linear-gradient(to bottom,
+        rgba(0, 0, 0, 1) calc(100% - 4rem),
+        rgba(0, 0, 0, 0.95) calc(100% - 3.5rem),
+        rgba(0, 0, 0, 0.8) calc(100% - 3rem),
+        rgba(0, 0, 0, 0.6) calc(100% - 2.5rem),
+        rgba(0, 0, 0, 0.4) calc(100% - 2rem),
+        rgba(0, 0, 0, 0.2) calc(100% - 1.5rem),
+        rgba(0, 0, 0, 0)
+    );
+}
+
+@media (max-width: 640px) {
+    .sticky-header-container {
+        padding: 1rem 1rem 3rem;
+    }
+
+    .sticky-header-container h3 {
+        font-size: 1.7rem !important;
+    }
+}

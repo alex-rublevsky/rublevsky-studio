@@ -1,6 +1,6 @@
 import { brandingProjects } from "~/data/brandingProjects";
 import { Image } from "~/components/ui/shared/Image";
-
+//import { unstable_ViewTransition as ViewTransition } from "react";
 import { motion } from "motion/react";
 import { BrandingProject } from "./brandingTypes";
 
@@ -14,20 +14,22 @@ const BrandingProjectCard = ({
   setSelected,
 }: BrandingProjectCardProps) => {
   return (
-    <motion.div
-      whileHover={{
-        scale: 1.025,
-        transition: {
-          duration: 0.25,
-          ease: "easeInOut",
-        },
-      }}
+    <div
+      // whileHover={{
+      //   scale: 1.025,
+      //   transition: {
+      //     duration: 0.25,
+      //     ease: "easeInOut",
+      //   },
+      // }}
       className="w-full mb-2 group grid grid-cols-1 grid-rows-1"
     >
       {project.type === "image" ? (
-        <motion.img
-          whileTap={{ scale: 0.95 }}
-          layoutId={`card-${project.id}`}
+        // <ViewTransition key={project.images![0]}>
+        <img
+          //viewTransition={{ types: ["slide-left"] }}
+          //whileTap={{ scale: 0.95 }}
+          //layoutId={`card-${project.id}`}
           src={`https://assets.rublevsky.studio/${project.images![0]}`}
           alt={project.name}
           width={800}
@@ -37,16 +39,17 @@ const BrandingProjectCard = ({
           onClick={() => setSelected(project)}
         />
       ) : (
-        <motion.video
-          layoutId={`card-video-${project.id}`}
-          whileHover={{
-            scale: 1.025,
-            transition: {
-              duration: 0.25,
-              ease: "easeInOut",
-            },
-          }}
-          whileTap={{ scale: 0.95 }}
+        //</ViewTransition>
+        <video
+          // layoutId={`card-video-${project.id}`}
+          // whileHover={{
+          //   scale: 1.025,
+          //   transition: {
+          //     duration: 0.25,
+          //     ease: "easeInOut",
+          //   },
+          // }}
+          // whileTap={{ scale: 0.95 }}
           src={`https://assets.rublevsky.studio/${project.src}`}
           className="overflow-hidden rounded-lg cursor-pointer w-full h-auto col-start-1 row-start-1"
           muted
@@ -79,7 +82,7 @@ const BrandingProjectCard = ({
           </div>
         </div>
       )}
-    </motion.div>
+    </div>
   );
 };
 

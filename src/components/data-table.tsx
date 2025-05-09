@@ -70,8 +70,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { Input } from "~/components/ui/shared/input";
-import { Label } from "~/components/ui/shared/label";
+import { Input } from "~/components/ui/shared/Input";
+import { Label } from "~/components/ui/shared/Label";
 import {
   Select,
   SelectContent,

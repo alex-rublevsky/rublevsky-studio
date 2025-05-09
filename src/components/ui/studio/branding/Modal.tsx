@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { Button } from "../../shared/Button";
 import { X } from "lucide-react";
 import { Image } from "~/components/ui/shared/Image";
+//import { unstable_ViewTransition as ViewTransition } from "react";
 
 export default function Modal({
   selected,
@@ -94,15 +95,17 @@ export default function Modal({
           <div className="flex items-center  justify-center lg:items-start lg:justify-start lg:grow relative pl-4 lg:pl-0 pr-4 lg:pr-0 pt-4 lg:pt-0">
             {selected.type === "image" ? (
               <div className="relative  w-full lg:w-auto lg:h-[60vh] flex items-center lg:items-start justify-center">
-                <motion.img
-                  layoutId={`card-${selected.id}`}
-                  transition={{ duration: 0.3 }}
+                {/* <ViewTransition key={displayedImage}> */}
+                <Image
+                  //layoutId={`card-${selected.id}`}
+                  //transition={{ duration: 0.3 }}
                   src={`https://assets.rublevsky.studio/${displayedImage}`}
                   alt={selected.name}
                   width={1000}
                   height={1000}
                   className="w-auto h-auto max-w-full max-h-[60dvh] lg:max-h-[calc(100vh-4rem)] object-contain rounded-lg relative z-2"
                 />
+                {/* </ViewTransition> */}
               </div>
             ) : (
               <motion.video
