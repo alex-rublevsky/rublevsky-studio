@@ -1,8 +1,9 @@
-import { Button } from "~/components/ui/Button";
+import { Button } from "~/components/ui/shared/Button";
 import NeumorphismCard from "~/components/ui/NeumorphismCard";
 import { TextEffect } from "~/components/motion_primitives/AnimatedText";
 import { AnimatedGroup } from "~/components/motion_primitives/AnimatedGroup";
 import { Link } from "@tanstack/react-router";
+import { Image } from "~/components/ui/shared/Image";
 
 function HeroSection() {
   return (
@@ -50,18 +51,14 @@ function HeroSection() {
               </div>
               <div className="flex gap-6">
                 <div className="relative w-24 h-24">
-                  <div
-                    className={`absolute inset-0 overflow-hidden rounded-full aspect-square transition-all duration-500 
-                      
-                      `}
-                  >
-                    <img
+                  <div className="absolute inset-0 overflow-hidden rounded-full aspect-square transition-all duration-500">
+                    <Image
                       src="/me.jpg"
                       alt="Profile picture"
-                      className={`w-full h-full object-cover object-top transition-all duration-500 scale-200 origin-top`}
                       width={96}
                       height={96}
-                      //priority
+                      quality={90}
+                      className="w-full h-full object-cover object-top transition-all duration-500 scale-200 origin-top"
                     />
                   </div>
                 </div>

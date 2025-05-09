@@ -101,7 +101,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             Posts
           </Link>{" "}
           <Link
-            to="/users"
+            to="/store"
             activeProps={{
               className: "font-bold",
             }}

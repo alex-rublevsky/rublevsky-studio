@@ -1,0 +1,38 @@
+import { createFileRoute } from "@tanstack/react-router";
+import type { User } from "~/utils/store";
+import { DEPLOY_URL } from "~/utils/store";
+import { NotFound } from "~/components/NotFound";
+import { UserErrorComponent } from "~/components/UserError";
+
+export const Route = createFileRoute("/store/$itemId")({
+  loader: async ({ params: { itemId } }) => {
+    try {
+      const res = await fetch(DEPLOY_URL + "/api/users/" + itemId);
+      if (!res.ok) {
+        throw new Error("Unexpected status code");
+      }
+
+      const data = (await res.json()) as User;
+
+      return data;
+    } catch {
+      throw new Error("Failed to fetch user");
+    }
+  },
+  errorComponent: UserErrorComponent,
+  component: UserComponent,
+  notFoundComponent: () => {
+    return <NotFound>User not found</NotFound>;
+  },
+});
+
+function UserComponent() {
+  const user = Route.useLoaderData();
+
+  return (
+    <div className="space-y-2">
+      <h4 className="text-xl font-bold underline">{user.name}</h4>
+      <div className="text-sm">{user.email}</div>
+    </div>
+  );
+}

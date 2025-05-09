@@ -1,4 +1,4 @@
-import { Button } from "~/components/ui/Button";
+import { Button } from "~/components/ui/shared/Button";
 import NeumorphismCard from "~/components/ui/NeumorphismCard";
 import { TextEffect } from "~/components/motion_primitives/AnimatedText";
 import { AnimatedGroup } from "~/components/motion_primitives/AnimatedGroup";

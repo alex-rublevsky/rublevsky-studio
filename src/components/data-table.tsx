@@ -53,8 +53,8 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { useIsMobile } from "~/hooks/use-mobile";
-import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
+import { Badge } from "~/components/ui/shared/Badge";
+import { Button } from "~/components/ui/shared/Button";
 import {
   ChartConfig,
   ChartContainer,
@@ -70,8 +70,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
+import { Input } from "~/components/ui/shared/input";
+import { Label } from "~/components/ui/shared/label";
 import {
   Select,
   SelectContent,
