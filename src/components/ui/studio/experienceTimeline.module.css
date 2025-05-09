@@ -3,10 +3,9 @@
     padding-bottom: 0;
     background-color: var(--background);
     position: relative;
+    z-index: -3;
     margin: 0 auto;
     width: 100%;
-    overflow: hidden;  /* Contain the fixed elements */
-    z-index: 0;  /* Create new stacking context */
 }
 
 .experienceTimelineComponent {
@@ -17,30 +16,28 @@
     flex-direction: column;
     min-height: 100vh;
     margin: 0 auto;
-    position: relative;
-    isolation: isolate; /* Create new stacking context */
 }
 
 .experienceTimelineProgress {
-    position: absolute; /* Change from fixed to absolute */
+    position: fixed;
     left: 50%;
     transform: translateX(-50%);
     top: 0;
     height: 100%;
     width: 0.3rem;
     background-color: #e5e5e5;
-    z-index: 1; /* Positive z-index within section */
+    z-index: -2;
 }
 
 .experienceTimelineProgressBar {
-    position: absolute; /* Change from fixed to absolute */
+    position: fixed;
     left: 50%;
     transform: translateX(-50%);
     top: 0;
     height: 50vh;
     width: 0.3rem;
     background: #ff6f61;
-    z-index: 2; /* Higher than progress */
+    z-index: -1;
     pointer-events: none;
 }
 
