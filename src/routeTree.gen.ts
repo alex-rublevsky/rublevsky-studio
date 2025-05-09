@@ -12,6 +12,7 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as RedirectImport } from './routes/redirect'
+import { Route as ProductImport } from './routes/product'
 import { Route as LoginImport } from './routes/login'
 import { Route as DeferredImport } from './routes/deferred'
 import { Route as DashboardImport } from './routes/dashboard'
@@ -24,7 +25,6 @@ import { Route as BlogIndexImport } from './routes/blog.index'
 import { Route as StoreItemIdImport } from './routes/store.$itemId'
 import { Route as BlogBlogIdImport } from './routes/blog.$blogId'
 import { Route as PathlessLayoutNestedLayoutImport } from './routes/_pathlessLayout/_nested-layout'
-import { Route as BlogBlogIdDeepImport } from './routes/blog_.$blogId.deep'
 import { Route as PathlessLayoutNestedLayoutRouteBImport } from './routes/_pathlessLayout/_nested-layout/route-b'
 import { Route as PathlessLayoutNestedLayoutRouteAImport } from './routes/_pathlessLayout/_nested-layout/route-a'
 
@@ -33,6 +33,12 @@ import { Route as PathlessLayoutNestedLayoutRouteAImport } from './routes/_pathl
 const RedirectRoute = RedirectImport.update({
   id: '/redirect',
   path: '/redirect',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ProductRoute = ProductImport.update({
+  id: '/product',
+  path: '/product',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -108,12 +114,6 @@ const PathlessLayoutNestedLayoutRoute = PathlessLayoutNestedLayoutImport.update(
   } as any,
 )
 
-const BlogBlogIdDeepRoute = BlogBlogIdDeepImport.update({
-  id: '/blog_/$blogId/deep',
-  path: '/blog/$blogId/deep',
-  getParentRoute: () => rootRoute,
-} as any)
-
 const PathlessLayoutNestedLayoutRouteBRoute =
   PathlessLayoutNestedLayoutRouteBImport.update({
     id: '/route-b',
@@ -181,6 +181,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginImport
       parentRoute: typeof rootRoute
     }
+    '/product': {
+      id: '/product'
+      path: '/product'
+      fullPath: '/product'
+      preLoaderRoute: typeof ProductImport
+      parentRoute: typeof rootRoute
+    }
     '/redirect': {
       id: '/redirect'
       path: '/redirect'
@@ -236,13 +243,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/route-b'
       preLoaderRoute: typeof PathlessLayoutNestedLayoutRouteBImport
       parentRoute: typeof PathlessLayoutNestedLayoutImport
-    }
-    '/blog_/$blogId/deep': {
-      id: '/blog_/$blogId/deep'
-      path: '/blog/$blogId/deep'
-      fullPath: '/blog/$blogId/deep'
-      preLoaderRoute: typeof BlogBlogIdDeepImport
-      parentRoute: typeof rootRoute
     }
   }
 }
@@ -315,6 +315,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/deferred': typeof DeferredRoute
   '/login': typeof LoginRoute
+  '/product': typeof ProductRoute
   '/redirect': typeof RedirectRoute
   '/blog/$blogId': typeof BlogBlogIdRoute
   '/store/$itemId': typeof StoreItemIdRoute
@@ -322,7 +323,6 @@ export interface FileRoutesByFullPath {
   '/store/': typeof StoreIndexRoute
   '/route-a': typeof PathlessLayoutNestedLayoutRouteARoute
   '/route-b': typeof PathlessLayoutNestedLayoutRouteBRoute
-  '/blog/$blogId/deep': typeof BlogBlogIdDeepRoute
 }
 
 export interface FileRoutesByTo {
@@ -331,6 +331,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/deferred': typeof DeferredRoute
   '/login': typeof LoginRoute
+  '/product': typeof ProductRoute
   '/redirect': typeof RedirectRoute
   '/blog/$blogId': typeof BlogBlogIdRoute
   '/store/$itemId': typeof StoreItemIdRoute
@@ -338,7 +339,6 @@ export interface FileRoutesByTo {
   '/store': typeof StoreIndexRoute
   '/route-a': typeof PathlessLayoutNestedLayoutRouteARoute
   '/route-b': typeof PathlessLayoutNestedLayoutRouteBRoute
-  '/blog/$blogId/deep': typeof BlogBlogIdDeepRoute
 }
 
 export interface FileRoutesById {
@@ -350,6 +350,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/deferred': typeof DeferredRoute
   '/login': typeof LoginRoute
+  '/product': typeof ProductRoute
   '/redirect': typeof RedirectRoute
   '/_pathlessLayout/_nested-layout': typeof PathlessLayoutNestedLayoutRouteWithChildren
   '/blog/$blogId': typeof BlogBlogIdRoute
@@ -358,7 +359,6 @@ export interface FileRoutesById {
   '/store/': typeof StoreIndexRoute
   '/_pathlessLayout/_nested-layout/route-a': typeof PathlessLayoutNestedLayoutRouteARoute
   '/_pathlessLayout/_nested-layout/route-b': typeof PathlessLayoutNestedLayoutRouteBRoute
-  '/blog_/$blogId/deep': typeof BlogBlogIdDeepRoute
 }
 
 export interface FileRouteTypes {
@@ -371,6 +371,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/deferred'
     | '/login'
+    | '/product'
     | '/redirect'
     | '/blog/$blogId'
     | '/store/$itemId'
@@ -378,7 +379,6 @@ export interface FileRouteTypes {
     | '/store/'
     | '/route-a'
     | '/route-b'
-    | '/blog/$blogId/deep'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -386,6 +386,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/deferred'
     | '/login'
+    | '/product'
     | '/redirect'
     | '/blog/$blogId'
     | '/store/$itemId'
@@ -393,7 +394,6 @@ export interface FileRouteTypes {
     | '/store'
     | '/route-a'
     | '/route-b'
-    | '/blog/$blogId/deep'
   id:
     | '__root__'
     | '/'
@@ -403,6 +403,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/deferred'
     | '/login'
+    | '/product'
     | '/redirect'
     | '/_pathlessLayout/_nested-layout'
     | '/blog/$blogId'
@@ -411,7 +412,6 @@ export interface FileRouteTypes {
     | '/store/'
     | '/_pathlessLayout/_nested-layout/route-a'
     | '/_pathlessLayout/_nested-layout/route-b'
-    | '/blog_/$blogId/deep'
   fileRoutesById: FileRoutesById
 }
 
@@ -423,8 +423,8 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   DeferredRoute: typeof DeferredRoute
   LoginRoute: typeof LoginRoute
+  ProductRoute: typeof ProductRoute
   RedirectRoute: typeof RedirectRoute
-  BlogBlogIdDeepRoute: typeof BlogBlogIdDeepRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -435,8 +435,8 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   DeferredRoute: DeferredRoute,
   LoginRoute: LoginRoute,
+  ProductRoute: ProductRoute,
   RedirectRoute: RedirectRoute,
-  BlogBlogIdDeepRoute: BlogBlogIdDeepRoute,
 }
 
 export const routeTree = rootRoute
@@ -456,8 +456,8 @@ export const routeTree = rootRoute
         "/dashboard",
         "/deferred",
         "/login",
-        "/redirect",
-        "/blog_/$blogId/deep"
+        "/product",
+        "/redirect"
       ]
     },
     "/": {
@@ -491,6 +491,9 @@ export const routeTree = rootRoute
     },
     "/login": {
       "filePath": "login.tsx"
+    },
+    "/product": {
+      "filePath": "product.tsx"
     },
     "/redirect": {
       "filePath": "redirect.tsx"
@@ -526,9 +529,6 @@ export const routeTree = rootRoute
     "/_pathlessLayout/_nested-layout/route-b": {
       "filePath": "_pathlessLayout/_nested-layout/route-b.tsx",
       "parent": "/_pathlessLayout/_nested-layout"
-    },
-    "/blog_/$blogId/deep": {
-      "filePath": "blog_.$blogId.deep.tsx"
     }
   }
 }

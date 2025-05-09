@@ -8,7 +8,7 @@ import { PanelLeft } from "lucide-react";
 import { useIsMobile } from "~/hooks/use-mobile";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/shared/Button";
-import { Input } from "~/components/ui/shared/input";
+import { Input } from "~/components/ui/shared/Input";
 import { Separator } from "~/components/ui/dashboard/separator";
 import {
   Sheet,
@@ -23,7 +23,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "~/components/ui/dashboard/tooltip";
+} from "~/components/ui/shared/Tooltip";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
