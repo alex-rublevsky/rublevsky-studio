@@ -3,18 +3,15 @@ import HeroSection from "~/components/ui/studio/HeroSection";
 import MembershipBenefitsSection from "~/components/ui/studio/MembershipBenefitsSection";
 import SubscriptionSection from "~/components/ui/studio/SubscriptionSection";
 
-// import { webProjects } from "@/data/web-projects";
-// import { photos } from "@/data/photography";
-// import { posters } from "@/data/posters";
-// import TestimonialsSection from "@/components/ui/studio/testimonialSliderSection";
-// import FaqSection from "@/components/ui/studio/faqSection";
-// import { ServicesOffered } from "@/components/ui/studio/servicesSection";
-// import { SkillsSection } from "@/components/ui/studio/skillsSection";
-// import { ExperienceTimeline } from "@/components/ui/studio/experienceTimeline";
-// import WebProjectsSection from "@/components/ui/studio/web-projects/webProjectsSection";
-// import BrandingSection from "@/components/ui/studio/branding/branding-section";
-// import GallerySection from "@/components/ui/studio/gallery/gallerySection";
-// import CallBookingSection from "@/components/ui/studio/callBookingSection";
+import TestimonialsSection from "~/components/ui/studio/testimonial/TestimonialSection";
+import FaqSection from "~/components/ui/studio/FaqSection";
+import ServicesOffered from "~/components/ui/studio/ServicesSection";
+import { SkillsSection } from "~/components/ui/studio/SkillsSection";
+import ExperienceTimelineSection from "~/components/ui/studio/ExperienceTimelineSection";
+import WebProjectsSection from "~/components/ui/studio/web/WebSection";
+import BrandingSection from "~/components/ui/studio/branding/BrandingSection";
+import GallerySection from "~/components/ui/studio/gallery/GallerySection";
+import CallBookingSection from "~/components/ui/studio/CallBookingSection";
 
 export const Route = createFileRoute("/")({
   component: Work,
@@ -26,16 +23,16 @@ function Work() {
       <HeroSection />
       <MembershipBenefitsSection />
       <SubscriptionSection />
-      {/*  <TestimonialsSection />
+      <TestimonialsSection />
       <FaqSection />
       <ServicesOffered />
       <SkillsSection />
-      <ExperienceTimeline />
-      <WebProjectsSection projects={webProjects} />
+      <ExperienceTimelineSection />
+      <WebProjectsSection />
       <BrandingSection />
-      <GallerySection type="photos" items={photos} />
-      <GallerySection type="posters" items={posters} />
-      <CallBookingSection /> */}
+      <GallerySection type="photos" />
+      <GallerySection type="posters" />
+      <CallBookingSection />
     </>
   );
 }

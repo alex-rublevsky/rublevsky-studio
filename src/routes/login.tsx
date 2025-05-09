@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Button } from "~/components/ui/Button";
+import { Button } from "~/components/ui/shared/Button";
 import { useSession, signIn } from "~/utils/auth-client";
 
 export const Route = createFileRoute("/login")({
@@ -12,8 +12,9 @@ function RouteComponent() {
   return (
     <>
       <Button
-        onClick={() =>
-          signIn.social({ provider: "github", callbackURL: "/dashboard" })
+        onClick={
+          () => console.log(process.env.RUBLEVSKY_STORAGE)
+          //signIn.social({ provider: "github", callbackURL: "/dashboard" })
         }
       >
         Sign in with Github
