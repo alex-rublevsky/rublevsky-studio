@@ -9,6 +9,8 @@ yarn.lock
 .output
 .vinxi
 
+wrangler.jsonc
+
 /build/
 /api/
 /server/build
