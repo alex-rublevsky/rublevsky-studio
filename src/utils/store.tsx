@@ -4,4 +4,6 @@ export type User = {
   email: string;
 };
 
-export const DEPLOY_URL = "http://localhost:8787/api/products";
+export const DEPLOY_URL = import.meta.env.DEV
+  ? "http://localhost:8787/api/products"
+  : "https://tanstack.rublevsky.studio/api/products";
