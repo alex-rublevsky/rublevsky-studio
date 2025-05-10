@@ -4,7 +4,7 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "dev": "vinxi build && wrangler dev",
+    "dev": "vinxi dev",
     "build": "vinxi build",
     "start": "vinxi start",
     "deploy": "pnpm run build && wrangler deploy",
