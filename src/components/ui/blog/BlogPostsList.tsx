@@ -11,12 +11,14 @@ interface BlogPostsListProps {
 
 export default function BlogPostsList({
   posts,
-  teaCategories,
+  teaCategories = [],
 }: BlogPostsListProps) {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   // Filter tea categories to only show those that are used in blog posts
   const usedTeaCategories = useMemo(() => {
+    if (teaCategories.length === 0) return [];
+
     const usedCategories = new Set(
       posts.flatMap((post) => post.teaCategories || [])
     );
@@ -38,15 +40,17 @@ export default function BlogPostsList({
   return (
     <div>
       <div className="flex justify-center mb-20">
-        <FilterGroup
-          className="justify-center"
-          options={usedTeaCategories}
-          selectedOptions={selectedCategories}
-          onOptionsChange={setSelectedCategories}
-          onOptionChange={() => {}}
-          multiSelect={true}
-          showAllOption={false}
-        />
+        {usedTeaCategories.length > 0 && (
+          <FilterGroup
+            className="justify-center"
+            options={usedTeaCategories}
+            selectedOptions={selectedCategories}
+            onOptionsChange={setSelectedCategories}
+            onOptionChange={() => {}}
+            multiSelect={true}
+            showAllOption={false}
+          />
+        )}
       </div>
 
       <AnimatePresence mode="popLayout">

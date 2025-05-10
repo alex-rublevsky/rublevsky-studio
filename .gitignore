@@ -2,6 +2,10 @@ node_modules
 package-lock.json
 yarn.lock
 
+wrangler.jsonc
+
+.wrangler
+
 .DS_Store
 .cache
 .env
@@ -9,7 +13,7 @@ yarn.lock
 .output
 .vinxi
 
-wrangler.jsonc
+
 
 /build/
 /api/
