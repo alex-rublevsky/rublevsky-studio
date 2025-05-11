@@ -112,6 +112,7 @@ const DropdownNavMenu = ({ items }: { items: NavItem[] }) => {
               <Menu.Item key={item.url}>
                 {({ active }) => (
                   <Link
+                    viewTransition={{ types: ["slide-left"] }}
                     to={item.url}
                     className={`${
                       active ? "bg-primary text-primary-foreground" : ""

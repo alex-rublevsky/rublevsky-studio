@@ -15,8 +15,6 @@ function StorePage() {
       fetch(`${DEPLOY_URL}/api/products`).then((res) => res.json()),
   });
 
-  const jsonData = JSON.stringify;
-
   if (isPending) {
     return <div>Loading...</div>;
   }

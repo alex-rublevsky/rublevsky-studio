@@ -78,7 +78,7 @@ export default function Modal({
                       `}
                       />
                       <div className="absolute inset-[2px] rounded-[6px] overflow-hidden">
-                        <Image
+                        <img
                           src={`https://assets.rublevsky.studio/${image}`}
                           alt={`${selected.name} thumbnail ${index + 1}`}
                           //fill
@@ -96,9 +96,10 @@ export default function Modal({
             {selected.type === "image" ? (
               <div className="relative  w-full lg:w-auto lg:h-[60vh] flex items-center lg:items-start justify-center">
                 {/* <ViewTransition key={displayedImage}> */}
-                <Image
+                <img
                   //layoutId={`card-${selected.id}`}
                   //transition={{ duration: 0.3 }}
+                  //style={{ viewTransitionName: `branding-image` }}
                   src={`https://assets.rublevsky.studio/${displayedImage}`}
                   alt={selected.name}
                   width={1000}

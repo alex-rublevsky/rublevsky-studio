@@ -1,5 +1,3 @@
-
-
 import { json } from '@tanstack/react-start'
 import { createAPIFileRoute } from '@tanstack/react-start/api'
 import { drizzle } from 'drizzle-orm/d1'
@@ -8,7 +6,8 @@ import { getBindings } from '~/utils/bindings'
 
 export const APIRoute = createAPIFileRoute('/api/blog')({
   GET: async ({ request, params }) => {
-    try {
+    
+    
       // Try to get bindings from our utility
       const bindings = await getBindings();
       const dbInstance = bindings.DB;
@@ -27,10 +26,7 @@ export const APIRoute = createAPIFileRoute('/api/blog')({
       }
       
       return json(allBlogPosts);
-    } catch (error) {
-      console.error('Error fetching products:', error);
-      return json({ error: 'Failed to fetch products' }, { status: 500 });
-    }
+    
   },
 });
         

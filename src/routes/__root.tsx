@@ -12,6 +12,7 @@ import { NotFound } from "~/components/NotFound";
 import appCss from "~/styles/app.css?url";
 import { seo } from "~/utils/seo";
 import { NavBar } from "~/components/ui/shared/NavBar";
+import { View } from "lucide-react";
 
 const queryClient = new QueryClient();
 
@@ -40,15 +41,15 @@ export const Route = createRootRoute({
       {
         rel: "icon",
         type: "image/png",
-        sizes: "32x32",
-        href: "/favicon-32x32.png",
+        sizes: "96x96",
+        href: "/favicon-96x96.png",
       },
-      {
-        rel: "icon",
-        type: "image/png",
-        sizes: "16x16",
-        href: "/favicon-16x16.png",
-      },
+      // {
+      //   rel: "icon",
+      //   type: "image/png",
+      //   sizes: "16x16",
+      //   href: "/favicon-16x16.png",
+      // },
       { rel: "manifest", href: "/site.webmanifest", color: "#fffff" },
       { rel: "icon", href: "/favicon.ico" },
     ],
@@ -84,6 +85,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <NavBar />
 
         <hr />
+
         {children}
         <TanStackRouterDevtools position="bottom-right" />
         <Scripts />
