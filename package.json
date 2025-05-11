@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vinxi dev",
+    "wdev": "pnpm run build && wrangler dev",
     "build": "vinxi build",
     "start": "vinxi start",
     "deploy": "pnpm run build && wrangler deploy",

@@ -84,7 +84,7 @@ export default function StoreFeed({
   ]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 [view-transition-name:main-content]">
       {/* <ProductFilters
         categories={categories}
         teaCategories={filteredTeaCategories}

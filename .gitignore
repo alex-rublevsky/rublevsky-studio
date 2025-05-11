@@ -13,7 +13,7 @@ wrangler.jsonc
 .output
 .vinxi
 
-
+.dev.vars
 
 /build/
 /api/

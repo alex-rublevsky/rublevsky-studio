@@ -27,6 +27,7 @@ const BrandingProjectCard = ({
       {project.type === "image" ? (
         // <ViewTransition key={project.images![0]}>
         <img
+          //style={{ viewTransitionName: `branding-image` }}
           //viewTransition={{ types: ["slide-left"] }}
           //whileTap={{ scale: 0.95 }}
           //layoutId={`card-${project.id}`}

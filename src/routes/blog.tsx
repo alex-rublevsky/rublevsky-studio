@@ -35,7 +35,7 @@ function PostsIndexComponent() {
   const hasError = postsError; //|| categoriesError;
 
   return (
-    <section className="pt-24 sm:pt-32">
+    <section className="pt-24 sm:pt-32 div [view-transition-name:main-content] bg-amber-300 min-h-screen">
       <div>
         <h1 className="text-center mb-8">What&apos;s in the gaiwan?</h1>
         <h5 className="text-center mb-16 sm:mb-24">
