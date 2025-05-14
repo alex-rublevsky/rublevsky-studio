@@ -12,9 +12,8 @@ function RouteComponent() {
   return (
     <>
       <Button
-        onClick={
-          () => console.log(process.env.RUBLEVSKY_STORAGE)
-          //signIn.social({ provider: "github", callbackURL: "/dashboard" })
+        onClick={() =>
+          signIn.social({ provider: "github", callbackURL: "/dashboard" })
         }
       >
         Sign in with Github
