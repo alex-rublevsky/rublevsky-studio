@@ -1,8 +1,9 @@
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { cn } from "~/utils/utils";
 import { Menu, Transition } from "@headlessui/react";
 import { motion } from "motion/react";
+import { Button } from "~/components/ui/shared/Button";
 
 interface NavItem {
   name: string;
@@ -112,11 +113,11 @@ const DropdownNavMenu = ({ items }: { items: NavItem[] }) => {
               <Menu.Item key={item.url}>
                 {({ active }) => (
                   <Link
-                    viewTransition={{ types: ["slide-left"] }}
+                    viewTransition={{ types: ["slide-out"] }}
                     to={item.url}
                     className={`${
                       active ? "bg-primary text-primary-foreground" : ""
-                    } text-foreground block px-4 py-2 text-sm transition-colors duration-150`}
+                    } text-foreground block px-4 py-2 text-sm transition-colors duration-150 `}
                   >
                     {item.name}
                   </Link>
@@ -229,9 +230,34 @@ const NavGroup = ({ items, className }: NavGroupProps) => {
   );
 };
 
+const GoBackButton = () => {
+  return (
+    <div className="absolute bottom-full mb-2 w-full rounded-full border border-black bg-background hover:bg-black hover:text-white transition-all duration-300 p-[0.3rem]">
+      <Button asChild variant="outline" className="font-normal">
+        <Link
+          to="/"
+          hash="#branding"
+          className="relative z-10 block w-full text-center cursor-pointer px-3 py-1.5 text-xs text-white mix-blend-difference md:px-4 md:py-2 md:text-sm"
+        >
+          Go Back
+        </Link>
+      </Button>
+    </div>
+  );
+};
+
 export function NavBar({ className }: Omit<NavBarProps, "items">) {
   const router = useRouter();
+  const routerState = useRouterState();
   const pathname = router.state.location.pathname;
+
+  // Check if we're on a branding detail page
+  const showGoBackButton =
+    routerState.location.pathname.startsWith("/branding/");
+
+  // Check if we should show the work sections (on homepage or branding detail pages)
+  const showWorkSections =
+    pathname === "/" || routerState.location.pathname.startsWith("/branding/");
 
   return (
     <nav
@@ -240,13 +266,16 @@ export function NavBar({ className }: Omit<NavBarProps, "items">) {
         className
       )}
     >
-      {pathname === "/" ? (
+      {showWorkSections ? (
         <>
           <div className="hidden md:block pointer-events-auto">
             <DropdownNavMenu items={desktopMenuItems} />
           </div>
           <div className="absolute left-1/2 -translate-x-1/2 hidden md:block pointer-events-auto">
-            <NavGroup items={defaultWorkItems} />
+            <div className="relative">
+              {showGoBackButton && <GoBackButton />}
+              <NavGroup items={defaultWorkItems} />
+            </div>
           </div>
           <div className="md:hidden pointer-events-auto">
             <DropdownNavMenu items={mobileMenuItems} />
@@ -267,7 +296,10 @@ export function NavBar({ className }: Omit<NavBarProps, "items">) {
             </div>
           </div>
           <div className="md:hidden pointer-events-auto">
-            <NavGroup items={defaultWorkItems} />
+            <div className="relative">
+              {showGoBackButton && <GoBackButton />}
+              <NavGroup items={defaultWorkItems} />
+            </div>
           </div>
         </>
       ) : (

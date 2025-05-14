@@ -55,7 +55,10 @@ function BlogPost({
 
           <div className="my-2 flex gap-4 items-center">
             <div className="flex gap-4">
+              {/* TODO: fix the link
+              
               {productSlug && (
+            
                 <Link
                   to="/store/$itemId"
                   params={{
@@ -65,7 +68,7 @@ function BlogPost({
                 >
                   <h6 className="whitespace-nowrap">Purchase →</h6>
                 </Link>
-              )}
+              )} */}
               <time className="whitespace-nowrap">
                 {new Date(publishedAt).toLocaleDateString("en-US", {
                   year: "numeric",
