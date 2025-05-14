@@ -1,6 +1,5 @@
 //TODO: simplify what is not used
 
-"use client";
 import { cn } from "~/utils/utils";
 import {
   motion,
@@ -12,7 +11,12 @@ import {
 } from "motion/react";
 import React, { useRef } from "react";
 
-export type PresetType = "blur-sm" | "fade-in-blur" | "scale" | "fade" | "slide";
+export type PresetType =
+  | "blur-sm"
+  | "fade-in-blur"
+  | "scale"
+  | "fade"
+  | "slide";
 
 export type PerType = "word" | "char" | "line";
 

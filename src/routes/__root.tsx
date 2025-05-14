@@ -12,7 +12,6 @@ import { NotFound } from "~/components/NotFound";
 import appCss from "~/styles/app.css?url";
 import { seo } from "~/utils/seo";
 import { NavBar } from "~/components/ui/shared/NavBar";
-import { View } from "lucide-react";
 
 const queryClient = new QueryClient();
 
@@ -69,7 +68,9 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <RootDocument>
-        <Outlet />
+        <div className="view-transition-group">
+          <Outlet />
+        </div>
       </RootDocument>
     </QueryClientProvider>
   );
@@ -77,7 +78,10 @@ function RootComponent() {
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html
+      lang="en"
+      //className="scroll-smooth"
+    >
       <head>
         <HeadContent />
       </head>

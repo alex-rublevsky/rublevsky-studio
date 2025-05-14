@@ -1,3 +1,19 @@
+import { drizzle } from 'drizzle-orm/d1'
+import { getBindings } from '~/utils/bindings'
+
+
+const bindings =  getBindings();
+const dbInstance = bindings.DB;
+     
+if (!dbInstance) {
+console.error('DB binding not available in environment');}
+export const db = drizzle(dbInstance);
+
+
+
+
+
+
 // import { drizzle } from "drizzle-orm/d1";
 // import { drizzle as drizzleSQLite } from "drizzle-orm/better-sqlite3";
 // import Database from "better-sqlite3";

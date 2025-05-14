@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-//import { getCookie, setCookie } from "cookies-next";
 import { toast } from "sonner";
 
 import { Product, ProductVariation, ProductWithVariations } from "~/types";
 import { validateStock } from "~/utils/validateStock";
+import { setCookie, getCookie } from "~/lib/cookies";
 
 // Types
 export interface CartItem {
