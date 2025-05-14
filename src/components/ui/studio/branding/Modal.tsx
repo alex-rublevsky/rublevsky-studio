@@ -96,15 +96,15 @@ export default function Modal({
             {selected.type === "image" ? (
               <div className="relative  w-full lg:w-auto lg:h-[60vh] flex items-center lg:items-start justify-center">
                 {/* <ViewTransition key={displayedImage}> */}
-                <img
-                  //layoutId={`card-${selected.id}`}
-                  //transition={{ duration: 0.3 }}
+                <motion.img
+                  layoutId={`card-${selected.id}`}
+                  transition={{ duration: 0.3 }}
                   //style={{ viewTransitionName: `branding-image` }}
                   src={`https://assets.rublevsky.studio/${displayedImage}`}
                   alt={selected.name}
                   width={1000}
                   height={1000}
-                  className="w-auto h-auto max-w-full max-h-[60dvh] lg:max-h-[calc(100vh-4rem)] object-contain rounded-lg relative z-2 [view-transition-name:branding-image]"
+                  className="w-auto h-auto max-w-full max-h-[60dvh] lg:max-h-[calc(100vh-4rem)] object-contain rounded-lg relative z-2"
                 />
                 {/* </ViewTransition> */}
               </div>
