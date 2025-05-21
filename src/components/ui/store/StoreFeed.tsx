@@ -85,7 +85,7 @@ export default function StoreFeed({
   ]);
 
   return (
-    <div className="space-y-8 [view-transition-name:main-content]">
+    <section className="space-y-8 [view-transition-name:main-content]">
       <ProductFilters
         categories={categories}
         teaCategories={filteredTeaCategories}
@@ -97,6 +97,6 @@ export default function StoreFeed({
         onPriceRangeChange={setLocalPriceRange}
       />
       <ProductList data={products} />
-    </div>
+    </section>
   );
 }
