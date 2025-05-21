@@ -16,11 +16,19 @@ import { ProductWithDetails } from "~/types";
 
 export const APIRoute = createAPIFileRoute("/api/product/$productId")({
   GET: async ({ request, params }) => {
+    // Add CORS headers to allow requests from localhost
+    const corsHeaders = {
+      "Access-Control-Allow-Origin": "*",
+    };
+
     try {
       const { productId } = params;
 
       if (!productId) {
-        return json({ error: "Product ID is required" }, { status: 400 });
+        return json({ error: "Product ID is required" }, {
+          status: 400,
+          headers: corsHeaders
+        });
       }
 
       const result = await db
@@ -41,7 +49,13 @@ export const APIRoute = createAPIFileRoute("/api/product/$productId")({
         .all();
 
       if (!result || result.length === 0) {
-        return json({ error: "Product not found" }, { status: 404 });
+        return json(
+          { error: "Product not found" },
+          {
+            status: 404,
+            headers: corsHeaders,
+          }
+        );
       }
 
       const firstRow = result[0];
@@ -107,12 +121,12 @@ export const APIRoute = createAPIFileRoute("/api/product/$productId")({
         variations: Array.from(variationsMap.values()),
       };
 
-      return json(productWithDetails);
+      return json(productWithDetails, { headers: corsHeaders });
     } catch (error) {
       console.error("Error fetching product:", error);
       return json(
         { error: `Failed to fetch product: ${(error as Error).message}` },
-        { status: 500 }
+        { status: 500, headers: corsHeaders }
       );
     }
   },
