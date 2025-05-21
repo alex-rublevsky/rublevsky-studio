@@ -37,7 +37,7 @@ function ProductPage() {
     queryKey: [`product`, productId],
     staleTime: 1000 * 60 * 60 * 1, // 1 hour
     queryFn: () =>
-      fetch(`${DEPLOY_URL}/api/product/${productId}`).then((res) => {
+      fetch(`${DEPLOY_URL}/api/store/${productId}`).then((res) => {
         if (!res.ok) {
           throw new Error(`API error: ${res.status}`);
         }
