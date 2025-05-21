@@ -5,7 +5,7 @@ import React, {
   useState,
 } from "react";
 import type { UseEmblaCarouselType } from "embla-carousel-react";
-import NeumorphismCard from "~/components/ui/NeumorphismCard";
+import NeumorphismCard from "~/components/ui/shared/NeumorphismCard";
 
 type UsePrevNextButtonsType = {
   prevBtnDisabled: boolean;
