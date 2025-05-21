@@ -20,6 +20,7 @@ import { Route as PathlessLayoutImport } from './routes/_pathlessLayout'
 import { Route as ProductRouteImport } from './routes/product/route'
 import { Route as IndexImport } from './routes/index'
 import { Route as StoreIndexImport } from './routes/store/index'
+import { Route as CheckoutIndexImport } from './routes/checkout/index'
 import { Route as StoreProductIdImport } from './routes/store/$productId'
 import { Route as PathlessLayoutNestedLayoutImport } from './routes/_pathlessLayout/_nested-layout'
 import { Route as PathlessLayoutNestedLayoutRouteBImport } from './routes/_pathlessLayout/_nested-layout/route-b'
@@ -77,6 +78,12 @@ const IndexRoute = IndexImport.update({
 const StoreIndexRoute = StoreIndexImport.update({
   id: '/store/',
   path: '/store/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const CheckoutIndexRoute = CheckoutIndexImport.update({
+  id: '/checkout/',
+  path: '/checkout/',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -181,6 +188,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StoreProductIdImport
       parentRoute: typeof rootRoute
     }
+    '/checkout/': {
+      id: '/checkout/'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutIndexImport
+      parentRoute: typeof rootRoute
+    }
     '/store/': {
       id: '/store/'
       path: '/store'
@@ -247,6 +261,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/redirect': typeof RedirectRoute
   '/store/$productId': typeof StoreProductIdRoute
+  '/checkout': typeof CheckoutIndexRoute
   '/store': typeof StoreIndexRoute
   '/route-a': typeof PathlessLayoutNestedLayoutRouteARoute
   '/route-b': typeof PathlessLayoutNestedLayoutRouteBRoute
@@ -262,6 +277,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/redirect': typeof RedirectRoute
   '/store/$productId': typeof StoreProductIdRoute
+  '/checkout': typeof CheckoutIndexRoute
   '/store': typeof StoreIndexRoute
   '/route-a': typeof PathlessLayoutNestedLayoutRouteARoute
   '/route-b': typeof PathlessLayoutNestedLayoutRouteBRoute
@@ -279,6 +295,7 @@ export interface FileRoutesById {
   '/redirect': typeof RedirectRoute
   '/_pathlessLayout/_nested-layout': typeof PathlessLayoutNestedLayoutRouteWithChildren
   '/store/$productId': typeof StoreProductIdRoute
+  '/checkout/': typeof CheckoutIndexRoute
   '/store/': typeof StoreIndexRoute
   '/_pathlessLayout/_nested-layout/route-a': typeof PathlessLayoutNestedLayoutRouteARoute
   '/_pathlessLayout/_nested-layout/route-b': typeof PathlessLayoutNestedLayoutRouteBRoute
@@ -296,6 +313,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/redirect'
     | '/store/$productId'
+    | '/checkout'
     | '/store'
     | '/route-a'
     | '/route-b'
@@ -310,6 +328,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/redirect'
     | '/store/$productId'
+    | '/checkout'
     | '/store'
     | '/route-a'
     | '/route-b'
@@ -325,6 +344,7 @@ export interface FileRouteTypes {
     | '/redirect'
     | '/_pathlessLayout/_nested-layout'
     | '/store/$productId'
+    | '/checkout/'
     | '/store/'
     | '/_pathlessLayout/_nested-layout/route-a'
     | '/_pathlessLayout/_nested-layout/route-b'
@@ -341,6 +361,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   RedirectRoute: typeof RedirectRoute
   StoreProductIdRoute: typeof StoreProductIdRoute
+  CheckoutIndexRoute: typeof CheckoutIndexRoute
   StoreIndexRoute: typeof StoreIndexRoute
 }
 
@@ -354,6 +375,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   RedirectRoute: RedirectRoute,
   StoreProductIdRoute: StoreProductIdRoute,
+  CheckoutIndexRoute: CheckoutIndexRoute,
   StoreIndexRoute: StoreIndexRoute,
 }
 
@@ -376,6 +398,7 @@ export const routeTree = rootRoute
         "/login",
         "/redirect",
         "/store/$productId",
+        "/checkout/",
         "/store/"
       ]
     },
@@ -416,6 +439,9 @@ export const routeTree = rootRoute
     },
     "/store/$productId": {
       "filePath": "store/$productId.tsx"
+    },
+    "/checkout/": {
+      "filePath": "checkout/index.tsx"
     },
     "/store/": {
       "filePath": "store/index.tsx"

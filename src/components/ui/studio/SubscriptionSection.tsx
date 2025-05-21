@@ -1,5 +1,5 @@
 import { Button } from "~/components/ui/shared/Button";
-import NeumorphismCard from "~/components/ui/NeumorphismCard";
+import NeumorphismCard from "~/components/ui/shared/NeumorphismCard";
 import { TextEffect } from "~/components/motion_primitives/AnimatedText";
 import { AnimatedGroup } from "~/components/motion_primitives/AnimatedGroup";
 import { Link } from "@tanstack/react-router";

@@ -1,6 +1,6 @@
 import useEmblaCarousel from "embla-carousel-react";
 import "./testimonial.css";
-import NeumorphismCard from "~/components/ui/NeumorphismCard";
+import NeumorphismCard from "~/components/ui/shared/NeumorphismCard";
 import { Image } from "~/components/ui/shared/Image";
 
 import {

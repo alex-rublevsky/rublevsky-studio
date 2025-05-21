@@ -1,5 +1,5 @@
 import { AnimatedGroup } from "~/components/motion_primitives/AnimatedGroup";
-import NeumorphismCard from "~/components/ui/NeumorphismCard";
+import NeumorphismCard from "~/components/ui/shared/NeumorphismCard";
 import { TextEffect } from "~/components/motion_primitives/AnimatedText";
 
 const data = [
