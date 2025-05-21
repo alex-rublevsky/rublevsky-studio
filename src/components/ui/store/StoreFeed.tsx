@@ -23,10 +23,11 @@ export default function StoreFeed({
   const [selectedTeaCategory, setSelectedTeaCategory] = useState<string | null>(
     null
   );
-  // const [localPriceRange, setLocalPriceRange] = useState<[number, number]>([
-  //   priceRange.min,
-  //   priceRange.max,
-  // ]);
+  const [localPriceRange, setLocalPriceRange] = useState<[number, number]>([
+    // priceRange.min,
+    // priceRange.max,
+    0, 100,
+  ]);
 
   // Filter tea categories to only show those that are used in products
   const filteredTeaCategories = useMemo(() => {
@@ -85,16 +86,16 @@ export default function StoreFeed({
 
   return (
     <div className="space-y-8 [view-transition-name:main-content]">
-      {/* <ProductFilters
+      <ProductFilters
         categories={categories}
         teaCategories={filteredTeaCategories}
         selectedCategory={selectedCategory}
         selectedTeaCategory={selectedTeaCategory}
         onCategoryChange={setSelectedCategory}
         onTeaCategoryChange={setSelectedTeaCategory}
-        priceRange={priceRange}
+        priceRange={{ min: 0, max: 100 }}
         onPriceRangeChange={setLocalPriceRange}
-      /> */}
+      />
       <ProductList data={products} />
     </div>
   );

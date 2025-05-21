@@ -14,7 +14,7 @@ import {
 import { db } from "~/db";
 import { ProductWithDetails } from "~/types";
 
-export const APIRoute = createAPIFileRoute("/api/product/$productId")({
+export const APIRoute = createAPIFileRoute("/api/store/$productId")({
   GET: async ({ request, params }) => {
     // Add CORS headers to allow requests from localhost
     const corsHeaders = {
