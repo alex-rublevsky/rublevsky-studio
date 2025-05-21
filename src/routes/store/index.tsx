@@ -5,7 +5,7 @@ import StoreFeed from "~/components/ui/store/FilteredProductList";
 import { ProductWithVariations } from "~/types";
 import { CartProvider } from "~/lib/cartContext";
 
-export const Route = createFileRoute("/store")({
+export const Route = createFileRoute("/store/")({
   component: StorePage,
 });
 
@@ -24,7 +24,6 @@ function StorePage() {
     return <div>Error: {error.message}</div>;
   }
   return (
-    //<div>{}</div>
     <CartProvider>
       <StoreFeed products={data as ProductWithVariations[]} />
     </CartProvider>

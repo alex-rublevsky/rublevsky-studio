@@ -16,7 +16,7 @@ import { useVariationSelection } from "~/hooks/useVariationSelection";
 import { useQuery } from "@tanstack/react-query";
 import { DEPLOY_URL } from "~/utils/store";
 
-export const Route = createFileRoute("/product/$productId")({
+export const Route = createFileRoute("/store/$productId")({
   component: ProductPage,
   loader: async ({ params }) => {
     return {
@@ -27,138 +27,35 @@ export const Route = createFileRoute("/product/$productId")({
   errorComponent: ({ error }) => <div>Error: {error.message}</div>,
 });
 
-async function getProduct(productId: string): Promise<ProductWithDetails> {
-  return await fetch(`${DEPLOY_URL}/api/product/${productId}`).then((res) => {
-    if (!res.ok) {
-      throw new Error(`API error: ${res.status}`);
-    }
-    return res.json();
-  });
-}
-
 function ProductPage() {
   const { productId } = Route.useLoaderData();
+  const [quantity, setQuantity] = useState(1);
+  const [product, setProduct] = useState<ProductWithDetails | null>(null);
 
+  // Query product data
   const { isPending, error, data } = useQuery<ProductWithDetails>({
     queryKey: [`product`, productId],
-    staleTime: 1000 * 60 * 60 * 12, // 12 hours
-    queryFn: () => getProduct(productId),
-    retry: 3,
-    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 60 * 1, // 1 hour
+    queryFn: () =>
+      fetch(`${DEPLOY_URL}/api/product/${productId}`).then((res) => {
+        if (!res.ok) {
+          throw new Error(`API error: ${res.status}`);
+        }
+        return res.json();
+      }),
   });
 
-  console.log(
-    "product api link:",
-    `${DEPLOY_URL}/api/product/${productId}`,
-    "Product data:",
-    data
-  );
-
-  const { addProductToCart, cart, products } = useCart();
-  const [quantity, setQuantity] = useState(1);
-
-  // Wait for data to be loaded before rendering
-  if (isPending)
-    return (
-      <div className="flex items-center justify-center h-screen">
-        Loading product...
-      </div>
-    );
-  if (error)
-    return (
-      <div className="flex items-center justify-center h-screen text-red-500">
-        Error: {error.message}
-      </div>
-    );
-  if (!data)
-    return (
-      <div className="flex items-center justify-center h-screen">
-        Product not found
-      </div>
-    );
-
-  // Now data is guaranteed to be available as ProductWithDetails
-  const [product, setProduct] = useState<ProductWithDetails>(data);
-
-  // Use the variation selection hook
-  const {
-    selectedVariation,
-    selectedAttributes,
-    selectVariation,
-    isAttributeValueAvailable,
-  } = useVariationSelection({
-    product,
-    cartItems: cart.items,
-    onVariationChange: () => setQuantity(1), // Reset quantity when variation changes
-  });
-
-  // Sync product data with cart context
-  useEffect(() => {
-    if (!data) return;
-
-    // Find the product in the cart context cache
-    const cachedProduct = products.find((p) => p.id === data.id);
-    if (cachedProduct) {
-      // Update local product state with cached data
-      setProduct((prev) => ({
-        ...prev,
-        stock: cachedProduct.stock,
-        unlimitedStock: cachedProduct.unlimitedStock,
-        variations: cachedProduct.variations,
-      }));
-    }
-  }, [data, products]);
-
-  // Calculate effective stock by subtracting cart quantities
-  const getEffectiveStock = useMemo(() => {
-    if (!product) return 0;
-
-    return getAvailableQuantityForVariation(
-      product,
-      selectedVariation?.id,
-      cart.items
-    );
-  }, [product, selectedVariation, cart.items]);
-
-  // Handle quantity changes
-  const incrementQuantity = useCallback(() => {
-    if (product?.unlimitedStock || quantity < getEffectiveStock) {
-      setQuantity((prev) => prev + 1);
-    }
-  }, [quantity, getEffectiveStock, product?.unlimitedStock]);
-
+  // Define all callbacks before any conditional returns
   const decrementQuantity = useCallback(() => {
     if (quantity > 1) {
       setQuantity((prev) => prev - 1);
     }
   }, [quantity]);
 
-  // Get images array from product
-  const getImages = (): string[] => {
-    if (!product || !product.images) return [];
-    return product.images.split(",").map((img: string) => img.trim());
-  };
-
-  // Get unique attribute names from all variations
-  const getUniqueAttributeNames = (): string[] => {
-    if (!product?.variations) return [];
-
-    const attributeNames = new Set<string>();
-    product.variations.forEach((variation) => {
-      variation.attributes.forEach((attr: VariationAttribute) => {
-        attributeNames.add(attr.attributeId);
-      });
-    });
-
-    return Array.from(attributeNames);
-  };
-
-  // Get unique attribute values for a specific attribute ID
   const getUniqueAttributeValues = useCallback(
     (attributeId: string): string[] => {
       if (!product?.variations) return [];
 
-      // Sort variations by sort property (descending order)
       const sortedVariations = [...product.variations].sort(
         (a, b) => (b.sort ?? 0) - (a.sort ?? 0)
       );
@@ -178,36 +75,52 @@ function ProductPage() {
     [product?.variations]
   );
 
-  const handleAddToCart = useCallback(async () => {
-    if (!product) return;
+  // Update product state when data changes
+  useEffect(() => {
+    if (data) {
+      setProduct(data);
+    }
+  }, [data]);
 
-    const success = await addProductToCart(
-      product,
-      quantity,
-      selectedVariation,
-      selectedAttributes
+  // Wait for data to be loaded before rendering
+  if (isPending)
+    return (
+      <div className="flex items-center justify-center h-screen">
+        Loading product...
+      </div>
+    );
+  if (error)
+    return (
+      <div className="flex items-center justify-center h-screen text-red-500">
+        Error: {error.message}
+      </div>
+    );
+  if (!product)
+    return (
+      <div className="flex items-center justify-center h-screen">
+        Product not found
+      </div>
     );
 
-    if (success) {
-      // Reset quantity to 1 after successful add
-      setQuantity(1);
-    }
-  }, [
-    product,
-    addProductToCart,
-    quantity,
-    selectedVariation,
-    selectedAttributes,
-  ]);
+  // Helper functions that don't need to be memoized
+  const getImages = (): string[] => {
+    if (!product || !product.images) return [];
+    return product.images.split(",").map((img: string) => img.trim());
+  };
 
-  const images = getImages();
-  const currentPrice = selectedVariation
-    ? selectedVariation.price
-    : product?.price || 0;
+  const getUniqueAttributeNames = (): string[] => {
+    if (!product?.variations) return [];
 
-  // Use the effective stock instead of just the database stock
-  const effectiveStock = getEffectiveStock;
-  const canAddToCart = product?.isActive && effectiveStock > 0;
+    const attributeNames = new Set<string>();
+    product.variations.forEach((variation) => {
+      variation.attributes.forEach((attr: VariationAttribute) => {
+        attributeNames.add(attr.attributeId);
+      });
+    });
+
+    return Array.from(attributeNames);
+  };
+
   const attributeNames = getUniqueAttributeNames();
 
   // Add markdown components configuration
@@ -242,9 +155,11 @@ function ProductPage() {
         <div className="w-full h-full flex flex-col lg:flex-row gap-0 lg:gap-10 items-start">
           {/* Image gallery */}
           <div className="w-full lg:w-3/5 xl:w-2/3 flex flex-col lg:flex-row gap-2 lg:h-full self-start">
-            {images.length > 0 && (
+            {product.images!.length > 0 && (
               <ImageGallery
-                images={images}
+                images={product
+                  .images!.split(",")
+                  .map((img: string) => img.trim())}
                 alt={product.name}
                 className="lg:pl-4 lg:pt-4 lg:pb-4"
               />
@@ -264,24 +179,24 @@ function ProductPage() {
                     <div className="flex items-baseline gap-2">
                       <h4>
                         $
-                        {(currentPrice * (1 - product.discount / 100)).toFixed(
+                        {/* {(currentPrice * (1 - product.discount / 100)).toFixed(
                           2
-                        )}{" "}
+                        )}{" "} */}
                         CAD
                       </h4>
                       <span className="line-through text-muted-foreground">
-                        ${currentPrice.toFixed(2)}
+                        {/* ${currentPrice.toFixed(2)} */}
                       </span>
                     </div>
                   </div>
                 ) : (
-                  <h4>${currentPrice.toFixed(2)} CAD</h4>
+                  <h4>{/* ${currentPrice.toFixed(2)} CAD */}</h4>
                 )}
 
                 {/* Stock information - moved here and updated styling */}
                 {!product.unlimitedStock && (
                   <div>
-                    {effectiveStock > 0 ? (
+                    {/* {effectiveStock > 0 ? (
                       <Badge variant="outline">
                         <span className="text-muted-foreground">
                           In stock:{" "}
@@ -290,7 +205,7 @@ function ProductPage() {
                       </Badge>
                     ) : (
                       <Badge variant="outline">Out of stock</Badge>
-                    )}
+                    )} */}
                   </div>
                 )}
               </div>
@@ -298,7 +213,7 @@ function ProductPage() {
               {/* Variation selection */}
               {product.hasVariations && attributeNames.length > 0 && (
                 <div className="flex flex-wrap gap-4">
-                  {attributeNames.map((attributeId) => (
+                  {/* {attributeNames.map((attributeId) => (
                     <FilterGroup
                       key={attributeId}
                       title={getAttributeDisplayName(attributeId)}
@@ -317,13 +232,13 @@ function ProductPage() {
                       titleClassName=""
                       className=""
                     />
-                  ))}
+                  ))} */}
                 </div>
               )}
 
               {/* Quantity selector and Add to cart */}
               <div className="flex flex-wrap items-center gap-4">
-                <QuantitySelector
+                {/* <QuantitySelector
                   quantity={quantity}
                   onIncrement={incrementQuantity}
                   onDecrement={decrementQuantity}
@@ -333,14 +248,14 @@ function ProductPage() {
                   }
                   disabled={!canAddToCart}
                   size="default"
-                />
-                <Button
+                /> */}
+                {/* <Button
                   onClick={handleAddToCart}
                   size="lg"
                   disabled={!canAddToCart}
                 >
                   {canAddToCart ? "Add to Cart" : "Out of Stock"}
-                </Button>
+                </Button> */}
               </div>
 
               {/* Blog post link */}
@@ -380,14 +295,14 @@ function ProductPage() {
                 {product.category && (
                   <div className="flex items-center gap-2">
                     <span className="text-muted-foreground">Category:</span>
-                    <Link
+                    {/* <Link
                       to="/product/$productId"
                       params={{
                         productId: product.category.slug,
                       }}
                     >
                       {product.category.name}
-                    </Link>
+                    </Link> */}
                   </div>
                 )}
                 {product.brand && (

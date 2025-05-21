@@ -25,10 +25,13 @@ export const APIRoute = createAPIFileRoute("/api/product/$productId")({
       const { productId } = params;
 
       if (!productId) {
-        return json({ error: "Product ID is required" }, {
-          status: 400,
-          headers: corsHeaders
-        });
+        return json(
+          { error: "Product ID is required" },
+          {
+            status: 400,
+            headers: corsHeaders,
+          }
+        );
       }
 
       const result = await db
