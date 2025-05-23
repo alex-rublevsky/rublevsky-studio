@@ -21,7 +21,7 @@ import {
 import { NavDocuments } from "~/components/nav-documents";
 import { NavMain } from "~/components/nav-main";
 import { NavSecondary } from "~/components/nav-secondary";
-import { NavUser } from "~/components/nav-user";
+import { NavUser } from "~/components/ui/dashboard/DashboardNavUser";
 import {
   Sidebar,
   SidebarContent,
@@ -37,7 +37,7 @@ export const data = {
   user: {
     name: "shadcn",
     email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    avatar: "me.jpg",
   },
   navMain: [
     {

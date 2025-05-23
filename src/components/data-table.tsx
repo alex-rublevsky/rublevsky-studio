@@ -61,7 +61,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "~/components/ui/dashboard/chart";
-import { Checkbox } from "~/components/ui/checkbox";
+import { Checkbox } from "~/components/ui/shared/Checkbox";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
