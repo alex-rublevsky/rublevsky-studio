@@ -2,7 +2,7 @@ import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { getUserID, getAvatar } from "~/utils/auth-server-func";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { AppSidebar } from "~/components/app-sidebar";
+import { AppSidebar } from "~/components/ui/dashboard/DashboardSidebar";
 
 import { SiteHeader } from "~/components/site-header";
 import {
@@ -28,32 +28,7 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 function RouteComponent() {
-  // const { userID } = Route.useLoaderData();
-
-  const [avatar, setAvatar] = useState<string | null>(null);
-
-  useEffect(() => {
-    getAvatar().then((avatar) => setAvatar(avatar ?? null));
-  }, []);
-
-  const { data: userName } = useQuery({
-    queryKey: ["name"],
-    queryFn: () => fetch("/api/name").then((res) => res.json()),
-  });
-
   return (
-    // <>
-    //   <div>Hello "/dashboard" userID: {userID}!</div>
-    //
-    //   {avatar && (
-    //     <img
-    //       src={avatar}
-    //       alt="User Avatar"
-    //       style={{ width: "100px", height: "100px", borderRadius: "50%" }}
-    //     />
-    //   )}
-    //   {userName && <h5>{userName.name}</h5>}
-    // </>
     <SidebarProvider>
       <AppSidebar variant="inset" />
       <SidebarInset>

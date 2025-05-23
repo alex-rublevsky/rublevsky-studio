@@ -17,12 +17,19 @@ import {
   DrawerFooter,
 } from "~/components/ui/shared/Drawer";
 import { Badge } from "~/components/ui/shared/Badge";
+import { useQuery } from "@tanstack/react-query";
+import { DEPLOY_URL } from "~/utils/store";
 
 export const Route = createFileRoute("/dashboard/categories")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const { isPending, data, isError } = useQuery({
+    queryKey: ["dashboad-categories"],
+    queryFn: () =>
+      fetch(`${DEPLOY_URL}/api/dashboard/categories`).then((res) => res.json()),
+  });
   const router = useRouter();
   // Separate form data for creating and editing
   const [createFormData, setCreateFormData] = useState<CategoryFormData>({
@@ -40,7 +47,7 @@ function RouteComponent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+
   const [isCreateAutoSlug, setIsCreateAutoSlug] = useState(true);
   const [isEditAutoSlug, setIsEditAutoSlug] = useState(false);
   const [editingCategoryId, setEditingCategoryId] = useState<number | null>(
@@ -350,7 +357,7 @@ function RouteComponent() {
       </div>
 
       <div className="bg-card rounded-lg shadow-sm border border-border p-6">
-        {isLoading ? (
+        {isPending ? (
           <div className="text-center py-4">Loading categories...</div>
         ) : categories.length === 0 ? (
           <div className="text-center py-4 text-muted-foreground">
