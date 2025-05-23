@@ -2,12 +2,13 @@ import { betterAuth } from "better-auth"
 import { reactStartCookies } from "better-auth/react-start";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import {db} from "~/db";
-import { user, session, account, verification } from "../schema";
+import { schema} from "../schema";
+
  
 export const auth = betterAuth({
     database: drizzleAdapter(db, {
-        provider: "sqlite", 
-        schema: {user, session, account, verification}
+        provider: "sqlite", // D1 is SQLite-compatible
+        schema: schema,
     }),
     baseURL: process.env.BETTER_AUTH_URL,
     socialProviders: {
