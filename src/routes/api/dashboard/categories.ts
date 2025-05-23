@@ -11,9 +11,9 @@ export const APIRoute = createAPIFileRoute("/api/dashboard/categories")({
     };
 
     try {
-      const productsResult = await db.select().from(categories).all();
+      const categoriesResult = await db.select().from(categories).all();
 
-      if (!productsResult || productsResult.length === 0) {
+      if (!categoriesResult || categoriesResult.length === 0) {
         return json(
           { message: "No categories found" },
           {
@@ -23,7 +23,7 @@ export const APIRoute = createAPIFileRoute("/api/dashboard/categories")({
         );
       }
 
-      return json(productsResult, { headers: corsHeaders });
+      return json(categoriesResult, { headers: corsHeaders });
     } catch (error) {
       console.error("Error fetching dashboard categories data:", error);
       return json(

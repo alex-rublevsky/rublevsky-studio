@@ -26,7 +26,7 @@ export const Route = createFileRoute("/dashboard/categories")({
 
 function RouteComponent() {
   const { isPending, data, isError } = useQuery<Category[]>({
-    queryKey: ["dashboad-categories"],
+    queryKey: ["dashboard-categories"],
     queryFn: () =>
       fetch(`${DEPLOY_URL}/api/dashboard/categories`).then((res) => res.json()),
   });
