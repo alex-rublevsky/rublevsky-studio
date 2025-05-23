@@ -174,8 +174,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <Image
                   src="https://assets.rublevsky.studio/logos/rublevsky-studio.svg"
                   alt="Rublevsky Studio"
-                  width={12}
-                  height={12}
+                  className="h-6"
                 />
                 <span className="text-base font-semibold">
                   Rublevsky Studio
