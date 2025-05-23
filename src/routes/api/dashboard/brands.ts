@@ -3,7 +3,7 @@ import { createAPIFileRoute } from "@tanstack/react-start/api";
 import { categories, teaCategories, brands } from "~/schema";
 import { db } from "~/db";
 
-export const APIRoute = createAPIFileRoute("/api/dashboard/products")({
+export const APIRoute = createAPIFileRoute("/api/dashboard/brands")({
   GET: async ({ request, params }) => {
     // Add CORS headers to allow requests from localhost
     const corsHeaders = {
