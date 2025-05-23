@@ -20,6 +20,13 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "~/components/ui/dashboard/sidebar";
+import {
+  IconDots,
+  IconFolder,
+  IconShare3,
+  IconTrash,
+  type Icon,
+} from "@tabler/icons-react";
 
 export function NavDocuments({
   items,
@@ -27,7 +34,7 @@ export function NavDocuments({
   items: {
     name: string;
     url: string;
-    icon: LucideIcon;
+    icon: Icon;
   }[];
 }) {
   const { isMobile } = useSidebar();
