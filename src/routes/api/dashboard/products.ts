@@ -1,6 +1,6 @@
 import { json } from "@tanstack/react-start";
 import { createAPIFileRoute } from "@tanstack/react-start/api";
-import { products, categories, teaCategories } from "~/schema";
+import { products, categories, teaCategories, brands } from "~/schema";
 import { db } from "~/db";
 
 export const APIRoute = createAPIFileRoute("/api/dashboard/products")({
@@ -14,6 +14,7 @@ export const APIRoute = createAPIFileRoute("/api/dashboard/products")({
       const productsResult = await db.select().from(products).all();
       const categoriesResult = await db.select().from(categories).all();
       const teaCategoriesResult = await db.select().from(teaCategories).all();
+      const brandsResult = await db.select().from(brands).all();
 
       if (!productsResult || productsResult.length === 0) {
         return json(
@@ -29,6 +30,7 @@ export const APIRoute = createAPIFileRoute("/api/dashboard/products")({
         products: productsResult,
         categories: categoriesResult,
         teaCategories: teaCategoriesResult,
+        brands: brandsResult,
       };
 
       return json(result, { headers: corsHeaders });
