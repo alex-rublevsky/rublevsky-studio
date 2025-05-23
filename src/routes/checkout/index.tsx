@@ -1,7 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-
 import React, { useState, useEffect } from "react";
-
 import { useCart, CartProvider } from "~/lib/cartContext";
 import { Button } from "~/components/ui/shared/Button";
 import { toast } from "sonner";
@@ -9,14 +7,9 @@ import { createOrder } from "~/server_functions/order/createOrder";
 import { Image } from "~/components/ui/shared/Image";
 import { getAttributeDisplayName } from "~/lib/productAttributes";
 import { AddressFields } from "~/components/ui/shared/AddressFields";
-
 import NeumorphismCard from "~/components/ui/shared/NeumorphismCard";
 import { Checkbox } from "~/components/ui/shared/Checkbox";
 import { Textarea } from "~/components/ui/shared/TextArea";
-
-export const Route = createFileRoute("/checkout/")({
-  component: CheckoutPage,
-});
 
 interface Address {
   firstName: string;
@@ -37,15 +30,20 @@ interface CustomerInfo {
   shippingMethod?: string;
 }
 
+export const Route = createFileRoute("/checkout/")({
+  component: CheckoutPage,
+});
+
 function CheckoutPage() {
-  <CartProvider>
-    <CheckoutScreen />
-  </CartProvider>;
+  return (
+    <CartProvider>
+      <CheckoutScreen />
+    </CartProvider>
+  );
 }
 
 function CheckoutScreen() {
   const { cart, clearCart, products } = useCart();
-  //const router = useRouter();
   const formRef = React.useRef<HTMLFormElement>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isCartLoaded, setIsCartLoaded] = useState(false);
@@ -264,229 +262,225 @@ function CheckoutScreen() {
   const total = subtotal - totalDiscount;
 
   return (
-    <CartProvider>
-      <div className="w-full px-4 pt-10 pb-20">
-        <div className="max-w-[2000px] mx-auto">
-          <h2 className="">Checkout</h2>
-          <div className="flex flex-col lg:flex-row gap-8">
-            {/* Customer Information Form - Left Side */}
-            <div className="flex-1">
-              <form ref={formRef} onSubmit={handleSubmit}>
-                <div className="mb-8">
-                  <h2 className="text-xl font-bold mb-4">
-                    Payment Information
-                  </h2>
-                  <p>
-                    You will be contacted regarding payment options after
-                    placing your order.
-                  </p>
-                </div>
-                <div className="mb-8">
-                  <h2 className="text-xl font-bold mb-4">Shipping Address</h2>
-                  <AddressFields
-                    values={customerInfo.shippingAddress}
-                    onChange={handleAddressChange("shipping")}
-                  />
-                  <div className="mb-6">
-                    <label className="flex items-center space-x-2">
-                      <Checkbox
-                        checked={useSeparateBilling}
-                        onCheckedChange={(checked: boolean) => {
-                          setUseSeparateBilling(checked);
-                          if (checked && !customerInfo.billingAddress) {
-                            setCustomerInfo((prev) => ({
-                              ...prev,
-                              billingAddress: { ...prev.shippingAddress },
-                            }));
-                          }
-                        }}
-                        className="form-checkbox"
-                      />
-                      <span>Use different billing address</span>
-                    </label>
-                  </div>
-                  {useSeparateBilling && (
-                    <div className="">
-                      <h3 className="mb-4">Billing Address</h3>
-                      <AddressFields
-                        values={
-                          customerInfo.billingAddress ||
-                          customerInfo.shippingAddress
+    <div className="w-full px-4 pt-10 pb-20">
+      <div className="max-w-[2000px] mx-auto">
+        <h2 className="">Checkout</h2>
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Customer Information Form - Left Side */}
+          <div className="flex-1">
+            <form ref={formRef} onSubmit={handleSubmit}>
+              <div className="mb-8">
+                <h2 className="text-xl font-bold mb-4">Payment Information</h2>
+                <p>
+                  You will be contacted regarding payment options after placing
+                  your order.
+                </p>
+              </div>
+              <div className="mb-8">
+                <h2 className="text-xl font-bold mb-4">Shipping Address</h2>
+                <AddressFields
+                  values={customerInfo.shippingAddress}
+                  onChange={handleAddressChange("shipping")}
+                />
+                <div className="mb-6">
+                  <label className="flex items-center space-x-2">
+                    <Checkbox
+                      checked={useSeparateBilling}
+                      onCheckedChange={(checked: boolean) => {
+                        setUseSeparateBilling(checked);
+                        if (checked && !customerInfo.billingAddress) {
+                          setCustomerInfo((prev) => ({
+                            ...prev,
+                            billingAddress: { ...prev.shippingAddress },
+                          }));
                         }
-                        onChange={handleAddressChange("billing")}
-                        required={useSeparateBilling}
-                      />
-                    </div>
-                  )}
-                  <div className="mt-12">
-                    <h3 className=" mb-4">Additional Information</h3>
-                    <div className="mb-6">
-                      <label className="block text-sm font-medium mb-2">
-                        Shipping Method
-                      </label>
-                      <div className="flex gap-4">
-                        <Button
-                          type="button"
-                          onClick={() =>
-                            setCustomerInfo((prev) => ({
-                              ...prev,
-                              shippingMethod: "standard",
-                            }))
-                          }
-                          variant={
-                            customerInfo.shippingMethod === "standard"
-                              ? "default"
-                              : "outline"
-                          }
-                          className="flex-1"
-                        >
-                          Standard Shipping
-                        </Button>
-                        <Button
-                          type="button"
-                          onClick={() =>
-                            setCustomerInfo((prev) => ({
-                              ...prev,
-                              shippingMethod: "pickup",
-                            }))
-                          }
-                          variant={
-                            customerInfo.shippingMethod === "pickup"
-                              ? "default"
-                              : "outline"
-                          }
-                          className="flex-1"
-                        >
-                          Local Pickup
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="mb-6">
-                      <label
-                        className="block text-sm font-medium mb-2"
-                        htmlFor="notes"
-                      >
-                        Order Notes
-                      </label>
-                      <Textarea
-                        id="notes"
-                        name="notes"
-                        value={customerInfo.notes}
-                        onChange={handleInputChange}
-                        rows={4}
-                        className="w-full p-2 border rounded-md"
-                        placeholder="Any special instructions for your order?"
-                      />
-                    </div>
-                  </div>
+                      }}
+                      className="form-checkbox"
+                    />
+                    <span>Use different billing address</span>
+                  </label>
                 </div>
-              </form>
-            </div>
-            {/* Order Summary - Right Side */}
-            <div className="lg:w-[27rem]">
-              <NeumorphismCard className="">
-                <h5>Summary</h5>
-                <div className="flex justify-between items-baseline my-2">
-                  <span>Subtotal</span>
-                  <span>CA${subtotal.toFixed(2)}</span>
-                </div>
-                {totalDiscount > 0 && (
-                  <div className="flex justify-between items-baseline my-2 text-red-600">
-                    <span>Discount</span>
-                    <span>-CA${totalDiscount.toFixed(2)}</span>
+                {useSeparateBilling && (
+                  <div className="">
+                    <h3 className="mb-4">Billing Address</h3>
+                    <AddressFields
+                      values={
+                        customerInfo.billingAddress ||
+                        customerInfo.shippingAddress
+                      }
+                      onChange={handleAddressChange("billing")}
+                      required={useSeparateBilling}
+                    />
                   </div>
                 )}
-                <div className="flex justify-between items-baseline mb-4">
-                  <p>Shipping</p>
-                  <p className="text-right text-muted-foreground">
-                    To be discussed after order
-                  </p>
-                </div>
-                <div className="flex justify-between items-baseline text-xl mb-2 border-t pt-4">
-                  <span>Total</span>
-                  <h3 className="">CA${total.toFixed(2)}</h3>
-                </div>
-                <Button
-                  onClick={handleSubmit}
-                  disabled={cart.items.length === 0 || isLoading}
-                  className="w-full"
-                >
-                  {isLoading ? "Processing..." : "Place Order"}
-                </Button>
-                <div className="mt-6 pt-4 border-t">
-                  <h6>Order Items</h6>
-                  {cart.items.map((item) => (
-                    <div
-                      key={`${item.productId}-${item.variationId || "default"}`}
-                      className="flex items-start gap-3 py-2"
+                <div className="mt-12">
+                  <h3 className=" mb-4">Additional Information</h3>
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium mb-2">
+                      Shipping Method
+                    </label>
+                    <div className="flex gap-4">
+                      <Button
+                        type="button"
+                        onClick={() =>
+                          setCustomerInfo((prev) => ({
+                            ...prev,
+                            shippingMethod: "standard",
+                          }))
+                        }
+                        variant={
+                          customerInfo.shippingMethod === "standard"
+                            ? "default"
+                            : "outline"
+                        }
+                        className="flex-1"
+                      >
+                        Standard Shipping
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={() =>
+                          setCustomerInfo((prev) => ({
+                            ...prev,
+                            shippingMethod: "pickup",
+                          }))
+                        }
+                        variant={
+                          customerInfo.shippingMethod === "pickup"
+                            ? "default"
+                            : "outline"
+                        }
+                        className="flex-1"
+                      >
+                        Local Pickup
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="mb-6">
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      htmlFor="notes"
                     >
-                      {/* Product image */}
-                      <div className="shrink-0 relative w-16 h-16 bg-muted rounded overflow-hidden">
-                        {item.image ? (
-                          <Image
-                            src={`/${item.image}`}
-                            alt={item.productName}
-                            className="object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                            No image
-                          </div>
-                        )}
-                      </div>
-                      {/* Product info */}
-                      <div className="grow">
-                        <p className="font-medium">{item.productName}</p>
-                        {item.attributes &&
-                          Object.keys(item.attributes).length > 0 && (
-                            <p className="text-sm text-muted-foreground">
-                              {Object.entries(item.attributes)
-                                .map(
-                                  ([key, value]) =>
-                                    `${getAttributeDisplayName(key)}: ${value}`
-                                )
-                                .join(", ")}
-                            </p>
-                          )}
-                        <p className="text-sm text-muted-foreground">
-                          Quantity: {item.quantity}
-                        </p>
-                      </div>
-                      {/* Price */}
-                      <div className="text-right">
-                        {item.discount ? (
-                          <>
-                            <p className="text-sm font-medium line-through text-muted-foreground">
-                              CA${(item.price * item.quantity).toFixed(2)}
-                            </p>
-                            <div className="flex items-center justify-end gap-2">
-                              <p className="text-sm font-medium">
-                                CA$
-                                {(
-                                  item.price *
-                                  (1 - item.discount / 100) *
-                                  item.quantity
-                                ).toFixed(2)}
-                              </p>
-                              <span className="text-xs text-red-600">
-                                {item.discount}% OFF
-                              </span>
-                            </div>
-                          </>
-                        ) : (
-                          <p className="text-sm font-medium">
-                            CA${(item.price * item.quantity).toFixed(2)}
+                      Order Notes
+                    </label>
+                    <Textarea
+                      id="notes"
+                      name="notes"
+                      value={customerInfo.notes}
+                      onChange={handleInputChange}
+                      rows={4}
+                      className="w-full p-2 border rounded-md"
+                      placeholder="Any special instructions for your order?"
+                    />
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+          {/* Order Summary - Right Side */}
+          <div className="lg:w-[27rem]">
+            <NeumorphismCard className="">
+              <h5>Summary</h5>
+              <div className="flex justify-between items-baseline my-2">
+                <span>Subtotal</span>
+                <span>CA${subtotal.toFixed(2)}</span>
+              </div>
+              {totalDiscount > 0 && (
+                <div className="flex justify-between items-baseline my-2 text-red-600">
+                  <span>Discount</span>
+                  <span>-CA${totalDiscount.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex justify-between items-baseline mb-4">
+                <p>Shipping</p>
+                <p className="text-right text-muted-foreground">
+                  To be discussed after order
+                </p>
+              </div>
+              <div className="flex justify-between items-baseline text-xl mb-2 border-t pt-4">
+                <span>Total</span>
+                <h3 className="">CA${total.toFixed(2)}</h3>
+              </div>
+              <Button
+                onClick={handleSubmit}
+                disabled={cart.items.length === 0 || isLoading}
+                className="w-full"
+              >
+                {isLoading ? "Processing..." : "Place Order"}
+              </Button>
+              <div className="mt-6 pt-4 border-t">
+                <h6>Order Items</h6>
+                {cart.items.map((item) => (
+                  <div
+                    key={`${item.productId}-${item.variationId || "default"}`}
+                    className="flex items-start gap-3 py-2"
+                  >
+                    {/* Product image */}
+                    <div className="shrink-0 relative w-16 h-16 bg-muted rounded overflow-hidden">
+                      {item.image ? (
+                        <Image
+                          src={`/${item.image}`}
+                          alt={item.productName}
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                          No image
+                        </div>
+                      )}
+                    </div>
+                    {/* Product info */}
+                    <div className="grow">
+                      <p className="font-medium">{item.productName}</p>
+                      {item.attributes &&
+                        Object.keys(item.attributes).length > 0 && (
+                          <p className="text-sm text-muted-foreground">
+                            {Object.entries(item.attributes)
+                              .map(
+                                ([key, value]) =>
+                                  `${getAttributeDisplayName(key)}: ${value}`
+                              )
+                              .join(", ")}
                           </p>
                         )}
-                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Quantity: {item.quantity}
+                      </p>
                     </div>
-                  ))}
-                </div>
-              </NeumorphismCard>
-            </div>
+                    {/* Price */}
+                    <div className="text-right">
+                      {item.discount ? (
+                        <>
+                          <p className="text-sm font-medium line-through text-muted-foreground">
+                            CA${(item.price * item.quantity).toFixed(2)}
+                          </p>
+                          <div className="flex items-center justify-end gap-2">
+                            <p className="text-sm font-medium">
+                              CA$
+                              {(
+                                item.price *
+                                (1 - item.discount / 100) *
+                                item.quantity
+                              ).toFixed(2)}
+                            </p>
+                            <span className="text-xs text-red-600">
+                              {item.discount}% OFF
+                            </span>
+                          </div>
+                        </>
+                      ) : (
+                        <p className="text-sm font-medium">
+                          CA${(item.price * item.quantity).toFixed(2)}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </NeumorphismCard>
           </div>
         </div>
       </div>
-    </CartProvider>
+    </div>
   );
 }
