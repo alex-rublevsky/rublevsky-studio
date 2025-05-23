@@ -251,9 +251,10 @@ export function NavBar({ className }: Omit<NavBarProps, "items">) {
   const routerState = useRouterState();
   const pathname = router.state.location.pathname;
 
-  // Check if we're on a branding detail page
   const showGoBackButton =
     routerState.location.pathname.startsWith("/branding/");
+
+  const showOther = !routerState.location.pathname.startsWith("/dashboard/");
 
   // Check if we should show the work sections (on homepage or branding detail pages)
   const showWorkSections =
@@ -302,7 +303,7 @@ export function NavBar({ className }: Omit<NavBarProps, "items">) {
             </div>
           </div>
         </>
-      ) : (
+      ) : showOther ? (
         <>
           <div className="hidden md:block pointer-events-auto">
             <DropdownNavMenu items={desktopMenuItems} />
@@ -311,7 +312,7 @@ export function NavBar({ className }: Omit<NavBarProps, "items">) {
             <DropdownNavMenu items={mobileMenuItems} />
           </div>
         </>
-      )}
+      ) : null}
     </nav>
   );
 }
