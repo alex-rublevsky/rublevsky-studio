@@ -1,6 +1,6 @@
 import { json } from "@tanstack/react-start";
 import { createAPIFileRoute } from "@tanstack/react-start/api";
-import { categories, teaCategories, brands } from "~/schema";
+import { brands } from "~/schema";
 import { db } from "~/db";
 
 export const APIRoute = createAPIFileRoute("/api/dashboard/brands")({
@@ -11,11 +11,11 @@ export const APIRoute = createAPIFileRoute("/api/dashboard/brands")({
     };
 
     try {
-      const productsResult = await db.select().from(brands).all();
+      const brandsResult = await db.select().from(brands).all();
 
-      if (!productsResult || productsResult.length === 0) {
+      if (!brandsResult || brandsResult.length === 0) {
         return json(
-          { message: "No products found" },
+          { message: "No brands found" },
           {
             status: 404,
             headers: corsHeaders,
@@ -23,11 +23,7 @@ export const APIRoute = createAPIFileRoute("/api/dashboard/brands")({
         );
       }
 
-      const result = {
-        products: productsResult,
-      };
-
-      return json(result, { headers: corsHeaders });
+      return json(brandsResult, { headers: corsHeaders });
     } catch (error) {
       console.error("Error fetching dashboard brands data:", error);
       return json(
