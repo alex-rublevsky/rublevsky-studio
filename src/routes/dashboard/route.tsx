@@ -3,15 +3,14 @@ import { getUserID, getAvatar } from "~/utils/auth-server-func";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AppSidebar } from "~/components/app-sidebar";
-import { ChartAreaInteractive } from "~/components/chart-area-interactive";
-import { DataTable } from "~/components/data-table";
-import { SectionCards } from "~/components/section-cards";
+
 import { SiteHeader } from "~/components/site-header";
 import {
   SidebarInset,
   SidebarProvider,
 } from "~/components/ui/dashboard/sidebar";
-import data from "~/data/data.json";
+
+import { Outlet } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/dashboard")({
   component: RouteComponent,
@@ -20,15 +19,16 @@ export const Route = createFileRoute("/dashboard")({
     return { userID };
   },
   loader: async ({ context }) => {
-    if (!context.userID) {
-      throw redirect({ to: "/login" });
-    }
+    //TODO: Uncomment this when auth is implemented
+    // if (!context.userID) {
+    //   throw redirect({ to: "/login" });
+    // }
     return { userID: context.userID };
   },
 });
 
 function RouteComponent() {
-  const { userID } = Route.useLoaderData();
+  // const { userID } = Route.useLoaderData();
 
   const [avatar, setAvatar] = useState<string | null>(null);
 
@@ -60,13 +60,7 @@ function RouteComponent() {
         <SiteHeader />
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
-            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-              <SectionCards />
-              <div className="px-4 lg:px-6">
-                <ChartAreaInteractive />
-              </div>
-              <DataTable data={data} />
-            </div>
+            <Outlet />
           </div>
         </div>
       </SidebarInset>

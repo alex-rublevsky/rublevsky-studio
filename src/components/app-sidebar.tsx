@@ -1,21 +1,22 @@
 import * as React from "react";
 import {
-  ArrowUpCircleIcon,
-  BarChartIcon,
-  CameraIcon,
-  ClipboardListIcon,
-  DatabaseIcon,
-  FileCodeIcon,
-  FileIcon,
-  FileTextIcon,
-  FolderIcon,
-  HelpCircleIcon,
-  LayoutDashboardIcon,
-  ListIcon,
-  SearchIcon,
-  SettingsIcon,
-  UsersIcon,
-} from "lucide-react";
+  IconCamera,
+  IconChartBar,
+  IconDashboard,
+  IconDatabase,
+  IconFileAi,
+  IconFileDescription,
+  IconFileWord,
+  IconHelp,
+  IconReport,
+  IconSearch,
+  IconSettings,
+  IconBox,
+  IconArticle,
+  IconCategory,
+  IconBadgeTm,
+  IconPackage,
+} from "@tabler/icons-react";
 
 import { NavDocuments } from "~/components/nav-documents";
 import { NavMain } from "~/components/nav-main";
@@ -30,8 +31,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "~/components/ui/dashboard/sidebar";
+import { Image } from "~/components/ui/shared/Image";
 
-const data = {
+export const data = {
   user: {
     name: "shadcn",
     email: "m@example.com",
@@ -40,34 +42,44 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
-      icon: LayoutDashboardIcon,
+      url: "/dashboard",
+      icon: IconDashboard,
     },
     {
-      title: "Lifecycle",
-      url: "#",
-      icon: ListIcon,
+      title: "Products",
+      url: "/dashboard/products",
+      icon: IconBox,
+    },
+    {
+      title: "Blog",
+      url: "/dashboard/blog",
+      icon: IconArticle,
+    },
+    {
+      title: "Categories",
+      url: "/dashboard/categories",
+      icon: IconCategory,
+    },
+    {
+      title: "Brands",
+      url: "/dashboard/brands",
+      icon: IconBadgeTm,
+    },
+    {
+      title: "Orders",
+      url: "/dashboard/orders",
+      icon: IconPackage,
     },
     {
       title: "Analytics",
       url: "#",
-      icon: BarChartIcon,
-    },
-    {
-      title: "Projects",
-      url: "#",
-      icon: FolderIcon,
-    },
-    {
-      title: "Team",
-      url: "#",
-      icon: UsersIcon,
+      icon: IconChartBar,
     },
   ],
   navClouds: [
     {
       title: "Capture",
-      icon: CameraIcon,
+      icon: IconCamera,
       isActive: true,
       url: "#",
       items: [
@@ -83,7 +95,7 @@ const data = {
     },
     {
       title: "Proposal",
-      icon: FileTextIcon,
+      icon: IconFileDescription,
       url: "#",
       items: [
         {
@@ -98,7 +110,7 @@ const data = {
     },
     {
       title: "Prompts",
-      icon: FileCodeIcon,
+      icon: IconFileAi,
       url: "#",
       items: [
         {
@@ -116,34 +128,34 @@ const data = {
     {
       title: "Settings",
       url: "#",
-      icon: SettingsIcon,
+      icon: IconSettings,
     },
     {
       title: "Get Help",
       url: "#",
-      icon: HelpCircleIcon,
+      icon: IconHelp,
     },
     {
       title: "Search",
       url: "#",
-      icon: SearchIcon,
+      icon: IconSearch,
     },
   ],
   documents: [
     {
       name: "Data Library",
       url: "#",
-      icon: DatabaseIcon,
+      icon: IconDatabase,
     },
     {
       name: "Reports",
       url: "#",
-      icon: ClipboardListIcon,
+      icon: IconReport,
     },
     {
       name: "Word Assistant",
       url: "#",
-      icon: FileIcon,
+      icon: IconFileWord,
     },
   ],
 };
@@ -159,8 +171,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:p-1.5!"
             >
               <a href="#">
-                <ArrowUpCircleIcon className="h-5 w-5" />
-                <span className="text-base font-semibold">Acme Inc.</span>
+                <Image
+                  src="https://assets.rublevsky.studio/logos/rublevsky-studio.svg"
+                  alt="Rublevsky Studio"
+                  width={12}
+                  height={12}
+                />
+                <span className="text-base font-semibold">
+                  Rublevsky Studio
+                </span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -168,7 +187,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
+        {/* <NavDocuments items={data.documents} /> */}
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>

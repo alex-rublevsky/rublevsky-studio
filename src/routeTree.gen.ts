@@ -14,14 +14,21 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as RedirectImport } from './routes/redirect'
 import { Route as LoginImport } from './routes/login'
 import { Route as DeferredImport } from './routes/deferred'
-import { Route as DashboardImport } from './routes/dashboard'
 import { Route as BlogImport } from './routes/blog'
 import { Route as PathlessLayoutImport } from './routes/_pathlessLayout'
 import { Route as ProductRouteImport } from './routes/product/route'
+import { Route as DashboardRouteImport } from './routes/dashboard/route'
 import { Route as IndexImport } from './routes/index'
 import { Route as StoreIndexImport } from './routes/store/index'
+import { Route as DashboardIndexImport } from './routes/dashboard/index'
 import { Route as CheckoutIndexImport } from './routes/checkout/index'
 import { Route as StoreProductIdImport } from './routes/store/$productId'
+import { Route as DashboardProductsImport } from './routes/dashboard/products'
+import { Route as DashboardOrdersImport } from './routes/dashboard/orders'
+import { Route as DashboardCategoriesImport } from './routes/dashboard/categories'
+import { Route as DashboardBrandsImport } from './routes/dashboard/brands'
+import { Route as DashboardBlogImport } from './routes/dashboard/blog'
+import { Route as DashboardAnalyticsImport } from './routes/dashboard/analytics'
 import { Route as PathlessLayoutNestedLayoutImport } from './routes/_pathlessLayout/_nested-layout'
 import { Route as PathlessLayoutNestedLayoutRouteBImport } from './routes/_pathlessLayout/_nested-layout/route-b'
 import { Route as PathlessLayoutNestedLayoutRouteAImport } from './routes/_pathlessLayout/_nested-layout/route-a'
@@ -46,12 +53,6 @@ const DeferredRoute = DeferredImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const DashboardRoute = DashboardImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => rootRoute,
-} as any)
-
 const BlogRoute = BlogImport.update({
   id: '/blog',
   path: '/blog',
@@ -69,6 +70,12 @@ const ProductRouteRoute = ProductRouteImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const DashboardRouteRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
@@ -81,6 +88,12 @@ const StoreIndexRoute = StoreIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const DashboardIndexRoute = DashboardIndexImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+
 const CheckoutIndexRoute = CheckoutIndexImport.update({
   id: '/checkout/',
   path: '/checkout/',
@@ -91,6 +104,42 @@ const StoreProductIdRoute = StoreProductIdImport.update({
   id: '/store/$productId',
   path: '/store/$productId',
   getParentRoute: () => rootRoute,
+} as any)
+
+const DashboardProductsRoute = DashboardProductsImport.update({
+  id: '/products',
+  path: '/products',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+
+const DashboardOrdersRoute = DashboardOrdersImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+
+const DashboardCategoriesRoute = DashboardCategoriesImport.update({
+  id: '/categories',
+  path: '/categories',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+
+const DashboardBrandsRoute = DashboardBrandsImport.update({
+  id: '/brands',
+  path: '/brands',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+
+const DashboardBlogRoute = DashboardBlogImport.update({
+  id: '/blog',
+  path: '/blog',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+
+const DashboardAnalyticsRoute = DashboardAnalyticsImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => DashboardRouteRoute,
 } as any)
 
 const PathlessLayoutNestedLayoutRoute = PathlessLayoutNestedLayoutImport.update(
@@ -125,6 +174,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRoute
+    }
     '/product': {
       id: '/product'
       path: '/product'
@@ -144,13 +200,6 @@ declare module '@tanstack/react-router' {
       path: '/blog'
       fullPath: '/blog'
       preLoaderRoute: typeof BlogImport
-      parentRoute: typeof rootRoute
-    }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardImport
       parentRoute: typeof rootRoute
     }
     '/deferred': {
@@ -181,6 +230,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PathlessLayoutNestedLayoutImport
       parentRoute: typeof PathlessLayoutImport
     }
+    '/dashboard/analytics': {
+      id: '/dashboard/analytics'
+      path: '/analytics'
+      fullPath: '/dashboard/analytics'
+      preLoaderRoute: typeof DashboardAnalyticsImport
+      parentRoute: typeof DashboardRouteImport
+    }
+    '/dashboard/blog': {
+      id: '/dashboard/blog'
+      path: '/blog'
+      fullPath: '/dashboard/blog'
+      preLoaderRoute: typeof DashboardBlogImport
+      parentRoute: typeof DashboardRouteImport
+    }
+    '/dashboard/brands': {
+      id: '/dashboard/brands'
+      path: '/brands'
+      fullPath: '/dashboard/brands'
+      preLoaderRoute: typeof DashboardBrandsImport
+      parentRoute: typeof DashboardRouteImport
+    }
+    '/dashboard/categories': {
+      id: '/dashboard/categories'
+      path: '/categories'
+      fullPath: '/dashboard/categories'
+      preLoaderRoute: typeof DashboardCategoriesImport
+      parentRoute: typeof DashboardRouteImport
+    }
+    '/dashboard/orders': {
+      id: '/dashboard/orders'
+      path: '/orders'
+      fullPath: '/dashboard/orders'
+      preLoaderRoute: typeof DashboardOrdersImport
+      parentRoute: typeof DashboardRouteImport
+    }
+    '/dashboard/products': {
+      id: '/dashboard/products'
+      path: '/products'
+      fullPath: '/dashboard/products'
+      preLoaderRoute: typeof DashboardProductsImport
+      parentRoute: typeof DashboardRouteImport
+    }
     '/store/$productId': {
       id: '/store/$productId'
       path: '/store/$productId'
@@ -194,6 +285,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/checkout'
       preLoaderRoute: typeof CheckoutIndexImport
       parentRoute: typeof rootRoute
+    }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexImport
+      parentRoute: typeof DashboardRouteImport
     }
     '/store/': {
       id: '/store/'
@@ -220,6 +318,30 @@ declare module '@tanstack/react-router' {
 }
 
 // Create and export the route tree
+
+interface DashboardRouteRouteChildren {
+  DashboardAnalyticsRoute: typeof DashboardAnalyticsRoute
+  DashboardBlogRoute: typeof DashboardBlogRoute
+  DashboardBrandsRoute: typeof DashboardBrandsRoute
+  DashboardCategoriesRoute: typeof DashboardCategoriesRoute
+  DashboardOrdersRoute: typeof DashboardOrdersRoute
+  DashboardProductsRoute: typeof DashboardProductsRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
+}
+
+const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
+  DashboardAnalyticsRoute: DashboardAnalyticsRoute,
+  DashboardBlogRoute: DashboardBlogRoute,
+  DashboardBrandsRoute: DashboardBrandsRoute,
+  DashboardCategoriesRoute: DashboardCategoriesRoute,
+  DashboardOrdersRoute: DashboardOrdersRoute,
+  DashboardProductsRoute: DashboardProductsRoute,
+  DashboardIndexRoute: DashboardIndexRoute,
+}
+
+const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
+  DashboardRouteRouteChildren,
+)
 
 interface PathlessLayoutNestedLayoutRouteChildren {
   PathlessLayoutNestedLayoutRouteARoute: typeof PathlessLayoutNestedLayoutRouteARoute
@@ -253,15 +375,22 @@ const PathlessLayoutRouteWithChildren = PathlessLayoutRoute._addFileChildren(
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRouteRouteWithChildren
   '/product': typeof ProductRouteRoute
   '': typeof PathlessLayoutNestedLayoutRouteWithChildren
   '/blog': typeof BlogRoute
-  '/dashboard': typeof DashboardRoute
   '/deferred': typeof DeferredRoute
   '/login': typeof LoginRoute
   '/redirect': typeof RedirectRoute
+  '/dashboard/analytics': typeof DashboardAnalyticsRoute
+  '/dashboard/blog': typeof DashboardBlogRoute
+  '/dashboard/brands': typeof DashboardBrandsRoute
+  '/dashboard/categories': typeof DashboardCategoriesRoute
+  '/dashboard/orders': typeof DashboardOrdersRoute
+  '/dashboard/products': typeof DashboardProductsRoute
   '/store/$productId': typeof StoreProductIdRoute
   '/checkout': typeof CheckoutIndexRoute
+  '/dashboard/': typeof DashboardIndexRoute
   '/store': typeof StoreIndexRoute
   '/route-a': typeof PathlessLayoutNestedLayoutRouteARoute
   '/route-b': typeof PathlessLayoutNestedLayoutRouteBRoute
@@ -272,12 +401,18 @@ export interface FileRoutesByTo {
   '/product': typeof ProductRouteRoute
   '': typeof PathlessLayoutNestedLayoutRouteWithChildren
   '/blog': typeof BlogRoute
-  '/dashboard': typeof DashboardRoute
   '/deferred': typeof DeferredRoute
   '/login': typeof LoginRoute
   '/redirect': typeof RedirectRoute
+  '/dashboard/analytics': typeof DashboardAnalyticsRoute
+  '/dashboard/blog': typeof DashboardBlogRoute
+  '/dashboard/brands': typeof DashboardBrandsRoute
+  '/dashboard/categories': typeof DashboardCategoriesRoute
+  '/dashboard/orders': typeof DashboardOrdersRoute
+  '/dashboard/products': typeof DashboardProductsRoute
   '/store/$productId': typeof StoreProductIdRoute
   '/checkout': typeof CheckoutIndexRoute
+  '/dashboard': typeof DashboardIndexRoute
   '/store': typeof StoreIndexRoute
   '/route-a': typeof PathlessLayoutNestedLayoutRouteARoute
   '/route-b': typeof PathlessLayoutNestedLayoutRouteBRoute
@@ -286,16 +421,23 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRouteRouteWithChildren
   '/product': typeof ProductRouteRoute
   '/_pathlessLayout': typeof PathlessLayoutRouteWithChildren
   '/blog': typeof BlogRoute
-  '/dashboard': typeof DashboardRoute
   '/deferred': typeof DeferredRoute
   '/login': typeof LoginRoute
   '/redirect': typeof RedirectRoute
   '/_pathlessLayout/_nested-layout': typeof PathlessLayoutNestedLayoutRouteWithChildren
+  '/dashboard/analytics': typeof DashboardAnalyticsRoute
+  '/dashboard/blog': typeof DashboardBlogRoute
+  '/dashboard/brands': typeof DashboardBrandsRoute
+  '/dashboard/categories': typeof DashboardCategoriesRoute
+  '/dashboard/orders': typeof DashboardOrdersRoute
+  '/dashboard/products': typeof DashboardProductsRoute
   '/store/$productId': typeof StoreProductIdRoute
   '/checkout/': typeof CheckoutIndexRoute
+  '/dashboard/': typeof DashboardIndexRoute
   '/store/': typeof StoreIndexRoute
   '/_pathlessLayout/_nested-layout/route-a': typeof PathlessLayoutNestedLayoutRouteARoute
   '/_pathlessLayout/_nested-layout/route-b': typeof PathlessLayoutNestedLayoutRouteBRoute
@@ -305,15 +447,22 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/dashboard'
     | '/product'
     | ''
     | '/blog'
-    | '/dashboard'
     | '/deferred'
     | '/login'
     | '/redirect'
+    | '/dashboard/analytics'
+    | '/dashboard/blog'
+    | '/dashboard/brands'
+    | '/dashboard/categories'
+    | '/dashboard/orders'
+    | '/dashboard/products'
     | '/store/$productId'
     | '/checkout'
+    | '/dashboard/'
     | '/store'
     | '/route-a'
     | '/route-b'
@@ -323,28 +472,41 @@ export interface FileRouteTypes {
     | '/product'
     | ''
     | '/blog'
-    | '/dashboard'
     | '/deferred'
     | '/login'
     | '/redirect'
+    | '/dashboard/analytics'
+    | '/dashboard/blog'
+    | '/dashboard/brands'
+    | '/dashboard/categories'
+    | '/dashboard/orders'
+    | '/dashboard/products'
     | '/store/$productId'
     | '/checkout'
+    | '/dashboard'
     | '/store'
     | '/route-a'
     | '/route-b'
   id:
     | '__root__'
     | '/'
+    | '/dashboard'
     | '/product'
     | '/_pathlessLayout'
     | '/blog'
-    | '/dashboard'
     | '/deferred'
     | '/login'
     | '/redirect'
     | '/_pathlessLayout/_nested-layout'
+    | '/dashboard/analytics'
+    | '/dashboard/blog'
+    | '/dashboard/brands'
+    | '/dashboard/categories'
+    | '/dashboard/orders'
+    | '/dashboard/products'
     | '/store/$productId'
     | '/checkout/'
+    | '/dashboard/'
     | '/store/'
     | '/_pathlessLayout/_nested-layout/route-a'
     | '/_pathlessLayout/_nested-layout/route-b'
@@ -353,10 +515,10 @@ export interface FileRouteTypes {
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
   ProductRouteRoute: typeof ProductRouteRoute
   PathlessLayoutRoute: typeof PathlessLayoutRouteWithChildren
   BlogRoute: typeof BlogRoute
-  DashboardRoute: typeof DashboardRoute
   DeferredRoute: typeof DeferredRoute
   LoginRoute: typeof LoginRoute
   RedirectRoute: typeof RedirectRoute
@@ -367,10 +529,10 @@ export interface RootRouteChildren {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DashboardRouteRoute: DashboardRouteRouteWithChildren,
   ProductRouteRoute: ProductRouteRoute,
   PathlessLayoutRoute: PathlessLayoutRouteWithChildren,
   BlogRoute: BlogRoute,
-  DashboardRoute: DashboardRoute,
   DeferredRoute: DeferredRoute,
   LoginRoute: LoginRoute,
   RedirectRoute: RedirectRoute,
@@ -390,10 +552,10 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/dashboard",
         "/product",
         "/_pathlessLayout",
         "/blog",
-        "/dashboard",
         "/deferred",
         "/login",
         "/redirect",
@@ -404,6 +566,18 @@ export const routeTree = rootRoute
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/dashboard": {
+      "filePath": "dashboard/route.tsx",
+      "children": [
+        "/dashboard/analytics",
+        "/dashboard/blog",
+        "/dashboard/brands",
+        "/dashboard/categories",
+        "/dashboard/orders",
+        "/dashboard/products",
+        "/dashboard/"
+      ]
     },
     "/product": {
       "filePath": "product/route.tsx"
@@ -416,9 +590,6 @@ export const routeTree = rootRoute
     },
     "/blog": {
       "filePath": "blog.tsx"
-    },
-    "/dashboard": {
-      "filePath": "dashboard.tsx"
     },
     "/deferred": {
       "filePath": "deferred.tsx"
@@ -437,11 +608,39 @@ export const routeTree = rootRoute
         "/_pathlessLayout/_nested-layout/route-b"
       ]
     },
+    "/dashboard/analytics": {
+      "filePath": "dashboard/analytics.tsx",
+      "parent": "/dashboard"
+    },
+    "/dashboard/blog": {
+      "filePath": "dashboard/blog.tsx",
+      "parent": "/dashboard"
+    },
+    "/dashboard/brands": {
+      "filePath": "dashboard/brands.tsx",
+      "parent": "/dashboard"
+    },
+    "/dashboard/categories": {
+      "filePath": "dashboard/categories.tsx",
+      "parent": "/dashboard"
+    },
+    "/dashboard/orders": {
+      "filePath": "dashboard/orders.tsx",
+      "parent": "/dashboard"
+    },
+    "/dashboard/products": {
+      "filePath": "dashboard/products.tsx",
+      "parent": "/dashboard"
+    },
     "/store/$productId": {
       "filePath": "store/$productId.tsx"
     },
     "/checkout/": {
       "filePath": "checkout/index.tsx"
+    },
+    "/dashboard/": {
+      "filePath": "dashboard/index.tsx",
+      "parent": "/dashboard"
     },
     "/store/": {
       "filePath": "store/index.tsx"
