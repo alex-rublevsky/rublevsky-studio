@@ -355,7 +355,7 @@ function RouteComponent() {
         </form>
       </div>
 
-      <div className="bg-card rounded-lg shadow-sm border border-border p-6">
+      <div>
         {isPending ? (
           <div className="text-center py-4">Loading categories...</div>
         ) : data === null ? (

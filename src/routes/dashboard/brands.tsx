@@ -265,7 +265,7 @@ function RouteComponent() {
 
   return (
     <div className="space-y-8">
-      <div className="bg-card rounded-lg shadow-sm border border-border p-6 mb-8">
+      <div className="">
         <h2 className="!text-xl font-semibold mb-4">Add New Brand</h2>
 
         {error && !showEditModal && (
@@ -361,7 +361,7 @@ function RouteComponent() {
         </form>
       </div>
 
-      <div className="bg-card rounded-lg shadow-sm border border-border p-6">
+      <div>
         {isPending ? (
           <div className="text-center py-4">Loading brands...</div>
         ) : data === null ? (
