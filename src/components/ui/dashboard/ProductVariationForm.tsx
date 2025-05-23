@@ -228,7 +228,6 @@ function SortableVariationItem({
             type="button"
             onClick={handleAddAttributeClick}
             disabled={!selectedAttribute}
-            variant="inverted"
             size="sm"
           >
             Add
@@ -395,7 +394,7 @@ export default function ProductVariationForm({
         </SortableContext>
       </DndContext>
 
-      <Button type="button" onClick={handleAddVariation} variant="inverted">
+      <Button type="button" onClick={handleAddVariation}>
         Add Variation
       </Button>
     </div>
