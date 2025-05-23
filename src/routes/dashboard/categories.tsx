@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useRouter } from "@tanstack/react-router";
-import { Category, CategoryFormData } from "~/types";
+import type { Category, CategoryFormData } from "~/types";
 import DeleteConfirmationDialog from "~/components/ui/dashboard/ConfirmationDialog";
 import { toast } from "sonner";
 import { Image } from "~/components/ui/shared/Image";
@@ -25,7 +25,7 @@ export const Route = createFileRoute("/dashboard/categories")({
 });
 
 function RouteComponent() {
-  const { isPending, data, isError } = useQuery({
+  const { isPending, data, isError } = useQuery<Category[]>({
     queryKey: ["dashboad-categories"],
     queryFn: () =>
       fetch(`${DEPLOY_URL}/api/dashboard/categories`).then((res) => res.json()),
@@ -46,7 +46,6 @@ function RouteComponent() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [categories, setCategories] = useState<Category[]>([]);
 
   const [isCreateAutoSlug, setIsCreateAutoSlug] = useState(true);
   const [isEditAutoSlug, setIsEditAutoSlug] = useState(false);
@@ -359,7 +358,7 @@ function RouteComponent() {
       <div className="bg-card rounded-lg shadow-sm border border-border p-6">
         {isPending ? (
           <div className="text-center py-4">Loading categories...</div>
-        ) : categories.length === 0 ? (
+        ) : data === null ? (
           <div className="text-center py-4 text-muted-foreground">
             No categories found
           </div>
@@ -386,7 +385,7 @@ function RouteComponent() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {categories.map((category) => (
+                {data?.map((category) => (
                   <tr key={category.id}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {category.name}
