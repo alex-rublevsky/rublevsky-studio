@@ -23,11 +23,7 @@ export const APIRoute = createAPIFileRoute("/api/dashboard/categories")({
         );
       }
 
-      const result = {
-        products: productsResult,
-      };
-
-      return json(result, { headers: corsHeaders });
+      return json(productsResult, { headers: corsHeaders });
     } catch (error) {
       console.error("Error fetching dashboard categories data:", error);
       return json(
