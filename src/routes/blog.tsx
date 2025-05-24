@@ -3,39 +3,30 @@ import BlogPostsList from "~/components/ui/blog/BlogPostsList";
 import { BlogPost as BlogPostType, TeaCategory } from "~/types/index";
 import { useQuery } from "@tanstack/react-query";
 import { DEPLOY_URL } from "~/utils/store";
-import { useState } from "react";
 
 export const Route = createFileRoute("/blog")({
   component: PostsIndexComponent,
 });
 
 function PostsIndexComponent() {
-  // Fetch blog posts
+  // Fetch blog posts and tea categories in a single API call
   const {
-    isPending: isPostsPending,
-    error: postsError,
-    data: postsData,
-  } = useQuery<BlogPostType[]>({
+    isPending: isLoading,
+    error: hasError,
+    data,
+  } = useQuery<{
+    posts: BlogPostType[];
+    teaCategories: TeaCategory[];
+  }>({
     queryKey: ["blog"],
     queryFn: () => fetch(`${DEPLOY_URL}/api/blog`).then((res) => res.json()),
   });
 
-  // Fetch tea categories
-  const {
-    isPending: isCategoriesPending,
-    error: categoriesError,
-    data: categoriesData,
-  } = useQuery<TeaCategory[]>({
-    queryKey: ["teaCategories"],
-    queryFn: () =>
-      fetch(`${DEPLOY_URL}/api/tea-categories`).then((res) => res.json()),
-  });
-
-  const isLoading = isPostsPending; //|| isCategoriesPending;
-  const hasError = postsError; //|| categoriesError;
+  const posts = data?.posts || [];
+  const teaCategories = data?.teaCategories || [];
 
   return (
-    <section className="pt-24 sm:pt-32 div [view-transition-name:main-content] bg-amber-300 min-h-screen">
+    <section className="pt-24 sm:pt-32 div [view-transition-name:main-content]  min-h-screen">
       <div>
         <h1 className="text-center mb-8">What&apos;s in the gaiwan?</h1>
         <h5 className="text-center mb-16 sm:mb-24">
@@ -52,10 +43,7 @@ function PostsIndexComponent() {
           Error loading blog content. Please try again later.
         </div>
       ) : (
-        <BlogPostsList
-          posts={postsData || []}
-          teaCategories={categoriesData || []}
-        />
+        <BlogPostsList posts={posts} teaCategories={teaCategories} />
       )}
     </section>
   );
