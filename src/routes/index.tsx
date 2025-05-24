@@ -12,6 +12,7 @@ import WebProjectsSection from "~/components/ui/studio/web/WebSection";
 import BrandingSection from "~/components/ui/studio/branding/BrandingSection";
 import GallerySection from "~/components/ui/studio/gallery/GallerySection";
 import CallBookingSection from "~/components/ui/studio/CallBookingSection";
+import SmoothScroll from "~/components/SmoothScroll";
 
 export const Route = createFileRoute("/")({
   component: Work,
@@ -19,20 +20,22 @@ export const Route = createFileRoute("/")({
 
 function Work() {
   return (
-    <div className="[view-transition-name:main-content]">
-      <HeroSection />
-      <MembershipBenefitsSection />
-      <SubscriptionSection />
-      <TestimonialsSection />
-      <FaqSection />
-      <ServicesOffered />
-      <SkillsSection />
-      <ExperienceTimelineSection />
-      <WebProjectsSection />
-      <BrandingSection />
-      <GallerySection type="photos" />
-      <GallerySection type="posters" />
-      <CallBookingSection />
-    </div>
+    <SmoothScroll>
+      <div className="[view-transition-name:main-content]">
+        <HeroSection />
+        <MembershipBenefitsSection />
+        <SubscriptionSection />
+        <TestimonialsSection />
+        <FaqSection />
+        <ServicesOffered />
+        <SkillsSection />
+        <ExperienceTimelineSection />
+        <WebProjectsSection />
+        <BrandingSection />
+        <GallerySection type="photos" />
+        <GallerySection type="posters" />
+        <CallBookingSection />
+      </div>
+    </SmoothScroll>
   );
 }
