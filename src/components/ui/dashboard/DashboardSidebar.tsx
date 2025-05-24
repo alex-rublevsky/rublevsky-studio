@@ -7,16 +7,14 @@ import {
   IconFileAi,
   IconFileDescription,
   IconFileWord,
-  IconHelp,
   IconReport,
-  IconSearch,
-  IconSettings,
   IconBox,
   IconArticle,
   IconCategory,
   IconBadgeTm,
   IconPackage,
 } from "@tabler/icons-react";
+import { ArrowLeftFromLine } from "lucide-react";
 
 import { NavDocuments } from "~/components/nav-documents";
 import { NavMain } from "~/components/nav-main";
@@ -35,8 +33,8 @@ import { Image } from "~/components/ui/shared/Image";
 
 export const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
+    name: "Alexander",
+    email: "alexander.rublevskii@gmail.com",
     avatar: "me.jpg",
   },
   navMain: [
@@ -126,19 +124,9 @@ export const data = {
   ],
   navSecondary: [
     {
-      title: "Settings",
-      url: "#",
-      icon: IconSettings,
-    },
-    {
-      title: "Get Help",
-      url: "#",
-      icon: IconHelp,
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: IconSearch,
+      title: "Back to Website",
+      url: "/",
+      icon: ArrowLeftFromLine,
     },
   ],
   documents: [

@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { DEPLOY_URL } from "~/utils/store";
+import { Plus } from "lucide-react";
+
 import {
   Product,
   Category,
@@ -498,12 +500,11 @@ function RouteComponent() {
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-end items-center">
-        <div className="flex space-x-2">
-          <Button onClick={() => setShowCreateForm(!showCreateForm)}>
-            {showCreateForm ? "Hide Form" : "Add New Product"}
-          </Button>
-        </div>
+      <div className="fixed bottom-0 right-2 z-50">
+        <Button onClick={() => setShowCreateForm(!showCreateForm)} size="lg">
+          <Plus />
+          {showCreateForm ? "Hide Form" : "Add New Product"}
+        </Button>
       </div>
 
       {/* Create Product Form */}
@@ -788,7 +789,7 @@ function RouteComponent() {
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-border">
-              <thead className="bg-muted">
+              <thead>
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Product
@@ -864,7 +865,7 @@ function RouteComponent() {
                         Edit
                       </Button>
                       <Button
-                        variant="invertedDestructive"
+                        variant="destructive"
                         size="sm"
                         onClick={() => handleDeleteClick(product)}
                       >

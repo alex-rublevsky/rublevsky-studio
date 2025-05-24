@@ -7,7 +7,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "~/components/ui/dashboard/sidebar";
-import { type Icon } from "@tabler/icons-react";
+
+import { type LucideIcon } from "lucide-react";
 
 export function NavSecondary({
   items,
@@ -16,7 +17,7 @@ export function NavSecondary({
   items: {
     title: string;
     url: string;
-    icon: Icon;
+    icon: LucideIcon;
   }[];
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
   return (

@@ -4,6 +4,7 @@ import { useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { BlogPost, BlogPostFormData, TeaCategory } from "~/types";
 import { DEPLOY_URL } from "~/utils/store";
+import { Plus } from "lucide-react";
 
 import DeleteConfirmationDialog from "~/components/ui/dashboard/ConfirmationDialog";
 import { toast } from "sonner";
@@ -312,6 +313,7 @@ function RouteComponent() {
       <div className="flex justify-between items-center">
         <div className="flex space-x-2">
           <Button onClick={() => setShowCreateForm(!showCreateForm)}>
+            <Plus />
             {showCreateForm ? "Hide Form" : "Add New Blog Post"}
           </Button>
         </div>

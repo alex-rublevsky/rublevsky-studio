@@ -49,7 +49,7 @@ export function NavUser({
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
                 <AvatarImage
-                  src={`${DEPLOY_URL}/${user.avatar}`}
+                  src={`https://assets.rublevsky.studio/${user.avatar}`}
                   alt={user.name}
                 />
                 <AvatarFallback className="rounded-lg">RA</AvatarFallback>

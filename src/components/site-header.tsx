@@ -6,12 +6,14 @@ import { useRouter, useRouterState } from "@tanstack/react-router";
 export function SiteHeader() {
   const router = useRouter();
   const routerState = useRouterState();
+  const path = router.state.location.pathname;
   const currentPage =
-    router.state.location.pathname
-      .replace("/dashboard/", "")
-      .charAt(0)
-      .toUpperCase() +
-    router.state.location.pathname.replace("/dashboard/", "").slice(1);
+    path === "/dashboard"
+      ? "Dashboard"
+      : path
+          .replace("/dashboard/", "")
+          .charAt(0)
+          .toUpperCase() + path.replace("/dashboard/", "").slice(1);
 
   return (
     <header className="group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear">
@@ -21,9 +23,7 @@ export function SiteHeader() {
           orientation="vertical"
           className="mx-2 data-[orientation=vertical]:h-4"
         />
-        <h1 className="!text-base !font-medium">
-          {currentPage ? currentPage : "Dashboard"}
-        </h1>
+        <h1 className="!text-base !font-medium">{currentPage}</h1>
       </div>
     </header>
   );
