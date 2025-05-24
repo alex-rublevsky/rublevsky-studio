@@ -254,7 +254,7 @@ export function NavBar({ className }: Omit<NavBarProps, "items">) {
   const showGoBackButton =
     routerState.location.pathname.startsWith("/branding/");
 
-  const showOther = !routerState.location.pathname.startsWith("/dashboard/");
+  const showOther = !routerState.location.pathname.startsWith("/dashboard");
 
   // Check if we should show the work sections (on homepage or branding detail pages)
   const showWorkSections =

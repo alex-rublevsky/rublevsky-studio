@@ -14,7 +14,7 @@ const buttonVariants = cva(
         inverted:
           "bg-white text-black border border-white hover:bg-transparent hover:text-white",
         destructive:
-          "bg-destructive text-destructive-foreground shadow-2xs hover:bg-destructive/90",
+          "bg-backgorund text-destructive border border-destructive shadow-2xs hover:bg-destructive/90 hover:text-destructive-foreground",
         invertedDestructive:
           "bg-destructive text-destructive-foreground border border-destructive hover:bg-transparent",
         greenInverted:
