@@ -2,7 +2,7 @@ import { BrandingProject } from '~/components/ui/studio/branding/brandingTypes';
 
 export const brandingProjects: BrandingProject[] = [
   {
-    id:1,
+    id: 'yin-yan-graffiti',
     name: 'Yin Yan Graffiti',
     type: 'image',
     images: [
@@ -16,7 +16,7 @@ export const brandingProjects: BrandingProject[] = [
     description: 'Screen Printing a Custom Design',
   },
     {
-    id:2,
+    id: 'chick-fil-a',
     name: 'Chick-fil-A',
     type: 'image',
     images: [
@@ -30,7 +30,7 @@ export const brandingProjects: BrandingProject[] = [
     logo: 'logos/mohawk-icon.svg'
   },
   {
-    id:3,
+    id: 'adobe',
     name: 'Adobe',
     type: 'image',
     images: ['1-adobe.jpg', '2-adobe.jpg', '3-adobe.jpg'],
@@ -38,7 +38,7 @@ export const brandingProjects: BrandingProject[] = [
     logo: 'logos/mohawk-icon.svg'
   },
   {
-    id:4,
+    id: 'chrysalis',
     name: 'Chrysalis',
     type: 'image',
     images: ['1-chrysalis.jpg', '2-chrysalis.jpg'],
@@ -46,7 +46,7 @@ export const brandingProjects: BrandingProject[] = [
     logo: 'hpl.svg'
   },
   {
-    id:5,
+    id: 'cayuga',
     name: 'Cayuga',
     type: 'image',
     images: ['1-cayuga.jpg', '2-cayuga.jpg', '3-cayuga.jpg'],
@@ -54,7 +54,7 @@ export const brandingProjects: BrandingProject[] = [
     logo: 'logos/mohawk-icon.svg'
   },
   {
-    id:6,
+    id: 'nutrition-box',
     name: 'Nutrition Box',
     type: 'image',
     images: [
@@ -69,7 +69,7 @@ export const brandingProjects: BrandingProject[] = [
     logo: 'logos/mohawk-icon.svg'
   },
   {
-    id:7,
+    id: 'emmanuel',
     name: 'Emmanuel',
     type: 'image',
     images: ['1-emmanuel.jpg', '2-emmanuel.jpg'],
@@ -77,7 +77,7 @@ export const brandingProjects: BrandingProject[] = [
     logo: 'logos/mohawk-icon.svg'
   },
   {
-    id:8,
+    id: 'hpl',
     name: 'HPL',
     type: 'video',
     preview: 'hpl-animation-preview.jpg',
@@ -86,7 +86,7 @@ export const brandingProjects: BrandingProject[] = [
     logo: 'logos/hpl.svg'
   },
   {
-    id:9,
+    id: 'querido',
     name: 'Querido',
     type: 'image',
     images: ['1-querido.jpg', '2-querido.jpg', '3-querido.jpg', '4-querido.jpg'],
@@ -94,7 +94,7 @@ export const brandingProjects: BrandingProject[] = [
     logo: 'logos/mohawk-icon.svg'
   },
   {
-    id:10,
+    id: 'design-shirt',
     name: 'Design Shirt',
     type: 'image',
     images: ['1-design-shirt.jpg', '2-design-shirt.jpg'],

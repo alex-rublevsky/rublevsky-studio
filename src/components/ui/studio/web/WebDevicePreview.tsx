@@ -8,11 +8,13 @@ import Video from "~/components/ui/shared/Video";
 type DevicePreviewProps = {
   device: Device;
   websiteUrl: string;
+  projectId: string;
 };
 
 export default function DevicePreview({
   device,
   websiteUrl,
+  projectId,
 }: DevicePreviewProps) {
   const isPhone = device.type === "phone";
   const mockupFileName = isPhone ? "iphone-mockup.svg" : "ipad-mockup.svg";
@@ -25,6 +27,7 @@ export default function DevicePreview({
       }`}
       target="_blank"
       rel="noopener noreferrer"
+      id={projectId}
     >
       <Image
         src={`/${mockupFileName}`}

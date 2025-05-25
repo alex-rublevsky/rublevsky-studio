@@ -18,6 +18,7 @@ export type Tool = {
     | 'custom'; // For any special cases
   
   export type Project = {
+    id: string;
     title: string;
     description: string;
     tools: Tool[];

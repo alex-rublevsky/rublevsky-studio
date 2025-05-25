@@ -2,6 +2,7 @@ import { Project } from '~/components/ui/studio/web/webTypes';
 
 export const webProjects: Project[] = [
   {
+    id: 'africa-power-supply',
     title: 'Africa Power Supply',
     description: 'Website design and development for Africa Power Supply, a fresh Canadian startup planning to revolutionize the African clean energy industry.',
     tools: [
@@ -30,6 +31,7 @@ export const webProjects: Project[] = [
     ]
   },
   {
+    id: 'beautyfloor',
     title: 'BeautyFloor',
     description: 'Website design and development for BeautyFloor, a premium flooring company specializing in high-quality laminate and hardwood floors.',
     tools: [
@@ -76,6 +78,7 @@ export const webProjects: Project[] = [
     ]
   },
   {
+    id: 'karata-32',
     title: '32KARATA',
     description: 'Website design and development for a dentist clinic 32KARATA',
     tools: [
@@ -101,6 +104,7 @@ export const webProjects: Project[] = [
     ]
   },
   {
+    id: 'inksoul',
     title: 'InkSoul',
     description: 'Website design and development for InkSoul, a Tattoo studio with a grounded, personalized approach, specializing in graphical and ornamental styles',
     tools: [
@@ -133,6 +137,7 @@ export const webProjects: Project[] = [
     ]
   },
   {
+    id: 'femtech',
     title: 'FemTech',
     description: "Website design and development for FemTech, an innovative company focused on women's health technology solutions.",
     tools: [

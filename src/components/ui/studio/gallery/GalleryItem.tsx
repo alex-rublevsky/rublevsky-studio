@@ -1,4 +1,4 @@
-import type { GalleryItem } from "./galleryTypes.ts";
+import type { GalleryItem, GalleryType } from "./galleryTypes.ts";
 import { Button } from "~/components/ui/shared/Button";
 import { Link } from "@tanstack/react-router";
 import { Image } from "~/components/ui/shared/Image";
@@ -10,17 +10,19 @@ type GalleryItemProps = {
   item: GalleryItem;
   index: number;
   onOpenGallery: (index: number) => void;
+  galleryType: GalleryType;
 };
 
 export default function GalleryItem({
   item,
   index,
   onOpenGallery,
+  galleryType,
 }: GalleryItemProps) {
   return (
     <motion.div
       //shadow-[0_5px_6px_rgb(0,0,0,0.08)]
-
+      id={item.id}
       className="relative group transform-gpu rounded-lg overflow-hidden cursor-pointer mb-3"
       onClick={() => onOpenGallery(index)}
       whileHover={{
@@ -34,6 +36,7 @@ export default function GalleryItem({
       {/* TODO: does this solve the problem on ios which needed custom css in branding-photography module? */}
       <div>
         <Image
+          id={`${item.id}-main-image`}
           src={`/${item.images[0]}`}
           alt={`Photo ${index + 1}`}
           width={800}
@@ -44,6 +47,7 @@ export default function GalleryItem({
         />
         {item.images.length > 1 && (
           <Image
+            id={`${item.id}-hover-image`}
             src={`/${item.images[1]}`}
             alt={`Photo ${index + 1} (hover)`}
             width={800}
@@ -63,10 +67,9 @@ export default function GalleryItem({
           className="group-hover:opacity-100 opacity-0 backdrop-blur-md hover:bg-background/20 absolute top-2 right-2 transition-all duration-300 ease-in-out"
         >
           <Link
-            //to={`/store/$item.storeLink`}
-            to="/store/$itemId"
+            to="/store/$productId"
             params={{
-              itemId: item.storeLink,
+              productId: item.storeLink,
             }}
           >
             Buy

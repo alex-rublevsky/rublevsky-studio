@@ -16,8 +16,8 @@ export default function WebProjectsSection() {
           Web
         </h1>
 
-        {webProjects.map((project, index) => (
-          <WebProjectCard key={index} project={project} />
+        {webProjects.map((project) => (
+          <WebProjectCard key={project.id} project={project} />
         ))}
       </div>
     </section>

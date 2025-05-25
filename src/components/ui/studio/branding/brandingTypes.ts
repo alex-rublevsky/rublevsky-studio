@@ -1,5 +1,5 @@
 export type BrandingProject = { 
-    id: number;
+    id: string;
     name: string;
     type: 'image' | 'video';
     images?: string[];

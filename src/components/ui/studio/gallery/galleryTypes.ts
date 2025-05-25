@@ -1,4 +1,5 @@
 export type GalleryItem = {
+  id: string;
   images: string[];
   description?: string;
   logo?: string;

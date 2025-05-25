@@ -40,6 +40,7 @@ export default function WebProjectEntry({ project }: WebProjectEntryProps) {
                       href={project.websiteUrl}
                       target="_blank"
                       rel="noopener noreferrer"
+                      id={project.id}
                     >
                       <Image
                         src="/iphone-mockup.svg"
@@ -65,6 +66,7 @@ export default function WebProjectEntry({ project }: WebProjectEntryProps) {
                     <DevicePreview
                       device={tabletDevice}
                       websiteUrl={project.websiteUrl}
+                      projectId={project.id}
                     />
                   )}
                 </div>
@@ -81,6 +83,7 @@ export default function WebProjectEntry({ project }: WebProjectEntryProps) {
                   <DevicePreview
                     device={phoneDevice}
                     websiteUrl={project.websiteUrl}
+                    projectId={project.id}
                   />
                 )}
               </div>
@@ -91,6 +94,7 @@ export default function WebProjectEntry({ project }: WebProjectEntryProps) {
                   <DevicePreview
                     device={tabletDevice}
                     websiteUrl={project.websiteUrl}
+                    projectId={project.id}
                   />
                 )}
               </div>
@@ -106,6 +110,7 @@ export default function WebProjectEntry({ project }: WebProjectEntryProps) {
                 <DevicePreview
                   device={tabletDevice}
                   websiteUrl={project.websiteUrl}
+                  projectId={project.id}
                 />
               )}
             </div>
@@ -131,6 +136,7 @@ export default function WebProjectEntry({ project }: WebProjectEntryProps) {
                     <DevicePreview
                       device={device}
                       websiteUrl={project.websiteUrl}
+                      projectId={project.id}
                     />
                   ) : (
                     <Image
@@ -182,6 +188,7 @@ export default function WebProjectEntry({ project }: WebProjectEntryProps) {
               className="blurLink"
               target="_blank"
               rel="noopener noreferrer"
+              id={`${project.id}`}
             >
               Live website
             </a>

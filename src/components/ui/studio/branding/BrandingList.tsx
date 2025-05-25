@@ -23,11 +23,13 @@ const BrandingProjectCard = ({
         },
       }}
       className="w-full mb-2 group grid grid-cols-1 grid-rows-1"
+      id={`${project.id}`}
     >
       {project.type === "image" ? (
         <motion.img
           whileTap={{ scale: 0.95 }}
           layoutId={`card-${project.id}`}
+          id={`image-${project.id}`}
           src={`https://assets.rublevsky.studio/${project.images![0]}`}
           alt={project.name}
           width={800}
@@ -38,7 +40,8 @@ const BrandingProjectCard = ({
         />
       ) : (
         <motion.video
-          layoutId={`card-video-${project.id}`}
+          layoutId={`card-${project.id}`}
+          id={`video-${project.id}`}
           whileHover={{
             scale: 1.025,
             transition: {
@@ -86,9 +89,9 @@ const BrandingProjectCard = ({
 export default function BrandingList({ setSelected }: { setSelected: any }) {
   return (
     <div className="columns-2 md:columns-3 2xl:columns-4 gap-3">
-      {brandingProjects.map((project, index) => (
+      {brandingProjects.map((project) => (
         <BrandingProjectCard
-          key={index}
+          key={project.id}
           project={project}
           setSelected={setSelected}
         />
