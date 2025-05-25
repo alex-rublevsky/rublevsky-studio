@@ -104,7 +104,9 @@ const TimelineItem = ({ item }: { item: TimelineItem }) => {
             width={item.wideLogo ? 300 : 200}
             height={item.wideLogo ? 60 : 40}
             className={`mb-8 w-auto ${
-              item.wideLogo ? "h-[2rem] md:h-[4rem]" : "h-[5rem] md:h-[7rem]"
+              item.wideLogo
+                ? "h-auto w-auto max-h-[4.5rem]"
+                : "h-[5rem] md:h-[7rem]"
             }`}
           />
           <h5 className="font-semibold">{item.title}</h5>
