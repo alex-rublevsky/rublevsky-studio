@@ -45,10 +45,11 @@ export default function GallerySection({ type }: GallerySectionProps) {
       <div className="columns-2 md:columns-3 2xl:columns-4 gap-3">
         {galleryData.map((item, index) => (
           <GalleryItemComponent
-            key={index}
+            key={item.id}
             item={item}
             index={index}
             onOpenGallery={openGallery}
+            galleryType={type as GalleryType}
           />
         ))}
       </div>

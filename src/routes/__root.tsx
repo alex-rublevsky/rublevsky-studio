@@ -12,6 +12,7 @@ import { NotFound } from "~/components/NotFound";
 import appCss from "~/styles/app.css?url";
 import { seo } from "~/utils/seo";
 import { NavBar } from "~/components/ui/shared/NavBar";
+import { PostHogWrapper } from "~/components/PostHogWrapper";
 
 const queryClient = new QueryClient();
 
@@ -66,13 +67,15 @@ export const Route = createRootRoute({
 
 function RootComponent() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <RootDocument>
-        <div className="view-transition-group">
-          <Outlet />
-        </div>
-      </RootDocument>
-    </QueryClientProvider>
+    <PostHogWrapper>
+      <QueryClientProvider client={queryClient}>
+        <RootDocument>
+          <div className="view-transition-group">
+            <Outlet />
+          </div>
+        </RootDocument>
+      </QueryClientProvider>
+    </PostHogWrapper>
   );
 }
 

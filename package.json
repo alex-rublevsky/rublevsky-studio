@@ -65,6 +65,7 @@
     "motion": "^12.10.5",
     "next-themes": "^0.4.6",
     "nitro-cloudflare-dev": "^0.2.2",
+    "posthog-js": "^1.246.0",
     "react": "0.0.0-experimental-38ef6550-20250508",
     "react-dom": "0.0.0-experimental-38ef6550-20250508",
     "react-markdown": "^10.1.0",

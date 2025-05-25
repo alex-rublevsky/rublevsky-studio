@@ -130,7 +130,7 @@ function FaqSection() {
             </div>
             <h3>Book a 15-min intro call</h3>
             <Button asChild>
-              <Link to="/" hash="#booking">
+              <Link to="/" hash="#booking" id="booking">
                 Book a call
               </Link>
             </Button>
