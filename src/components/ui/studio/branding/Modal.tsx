@@ -110,12 +110,13 @@ export default function Modal({
               </div>
             ) : (
               <motion.video
-                layoutId={`card-video-${selected.id}`}
+                layoutId={`card-${selected.id}`}
                 src={`https://assets.rublevsky.studio/${selected.src}`}
                 className="w-full h-full overflow-hidden rounded-lg object-contain"
                 muted
                 autoPlay={true}
                 loop={true}
+                playsInline
               />
             )}
           </div>
