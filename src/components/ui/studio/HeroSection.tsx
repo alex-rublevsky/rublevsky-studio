@@ -2,8 +2,9 @@ import { Button } from "~/components/ui/shared/Button";
 import NeumorphismCard from "~/components/ui/shared/NeumorphismCard";
 import { TextEffect } from "~/components/motion_primitives/AnimatedText";
 import { AnimatedGroup } from "~/components/motion_primitives/AnimatedGroup";
-import { Link } from "@tanstack/react-router";
+import { Link as RouterLink } from "@tanstack/react-router";
 import { Image } from "~/components/ui/shared/Image";
+import { Link } from "~/components/ui/shared/Link";
 
 function HeroSection() {
   return (
@@ -11,14 +12,14 @@ function HeroSection() {
       <div className="sm:absolute sm:left-1/2 sm:-translate-x-1/2 flex top-2 mb-8 md:mb-12">
         <AnimatedGroup className="hidden sm:flex gap-4">
           <Button asChild variant="outline">
-            <Link to="/" hash="#booking">
+            <RouterLink to="/" hash="#booking">
               Book a call
-            </Link>
+            </RouterLink>
           </Button>
           <Button asChild variant="outline">
-            <Link to="/" hash="#subscription">
+            <RouterLink to="/" hash="#subscription">
               See pricing
-            </Link>
+            </RouterLink>
           </Button>
         </AnimatedGroup>
       </div>
@@ -44,9 +45,9 @@ function HeroSection() {
               <div>
                 <h3 className="max-w-[11ch] mb-4">Join Rublevsky Studio</h3>
                 <Button size="lg" asChild className="w-full text-lg">
-                  <Link to="/" hash="#subscription">
+                  <RouterLink to="/" hash="#subscription">
                     See pricing
-                  </Link>
+                  </RouterLink>
                 </Button>
               </div>
               <div className="flex gap-6">
@@ -65,34 +66,27 @@ function HeroSection() {
                 <div>
                   <div className="flex flex-col justify-center gap-2">
                     <h5>Book a 15-min call</h5>
-                    <Link
+                    <RouterLink
                       to="/"
                       hash="#booking"
                       className="blurLink text-muted-foreground"
                     >
                       Schedule now →
-                    </Link>
+                    </RouterLink>
                   </div>
                 </div>
               </div>
               <div>
                 <div className="flex gap-6">
                   <h5>
-                    <a
-                      href="mailto:alexander.rublevskii@gmail.com"
-                      className="blurLink"
-                    >
+                    <Link href="mailto:alexander.rublevskii@gmail.com">
                       Email
-                    </a>
+                    </Link>
                   </h5>
                   <h5>
-                    <a
-                      href="https://t.me/alexrublevsky"
-                      className="blurLink"
-                      target="_blank"
-                    >
+                    <Link href="https://t.me/alexrublevsky" target="_blank">
                       Telegram
-                    </a>
+                    </Link>
                   </h5>
                 </div>
               </div>

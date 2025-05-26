@@ -190,6 +190,7 @@ export default function Modal({
               onClick={() => setSelected(null)}
               size="lg"
               className="flex absolute right-4 top-4 z-30"
+              cursorType="default"
             >
               <X className="h-6 w-6" />
               <span className="sr-only">Close gallery</span>

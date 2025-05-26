@@ -2,6 +2,7 @@ import { Project } from "./webTypes";
 import { Image } from "~/components/ui/shared/Image";
 
 import DevicePreview from "./WebDevicePreview";
+import { Link } from "../../shared/Link";
 
 type WebProjectEntryProps = {
   project: Project;
@@ -36,11 +37,12 @@ export default function WebProjectEntry({ project }: WebProjectEntryProps) {
                     className="w-[90%] translate-y-[-10%] h-auto ml-0 rounded-lg"
                   />
                   <div className="w-[66%] mr-0 relative translate-y-[-20%]">
-                    <a
+                    <Link
                       href={project.websiteUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       id={project.id}
+                      blurOnHover={false}
                     >
                       <Image
                         src="/iphone-mockup.svg"
@@ -56,7 +58,7 @@ export default function WebProjectEntry({ project }: WebProjectEntryProps) {
                         height={812}
                         className="absolute inset-[3%] top-[2%] bottom-[3.75%] w-[94%] h-[96%] object-cover rounded-[12%]"
                       />
-                    </a>
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -183,7 +185,7 @@ export default function WebProjectEntry({ project }: WebProjectEntryProps) {
             ))}
           </div>
           <h3>
-            <a
+            <Link
               href={project.websiteUrl}
               className="blurLink"
               target="_blank"
@@ -191,7 +193,7 @@ export default function WebProjectEntry({ project }: WebProjectEntryProps) {
               id={`${project.id}`}
             >
               Live website
-            </a>
+            </Link>
           </h3>
         </div>
 

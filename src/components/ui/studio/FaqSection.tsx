@@ -5,7 +5,8 @@ import {
   AccordionContent,
 } from "~/components/ui/studio/Accordion";
 import { Button } from "~/components/ui/shared/Button";
-import { Link } from "@tanstack/react-router";
+import { Link as RouterLink } from "@tanstack/react-router";
+import { Link } from "~/components/ui/shared/Link";
 import { Image } from "~/components/ui/shared/Image";
 
 import NeumorphismCard from "~/components/ui/shared/NeumorphismCard";
@@ -130,28 +131,19 @@ function FaqSection() {
             </div>
             <h3>Book a 15-min intro call</h3>
             <Button asChild>
-              <Link to="/" hash="#booking" id="booking">
+              <RouterLink to="/" hash="#booking" id="booking">
                 Book a call
-              </Link>
+              </RouterLink>
             </Button>
 
             <div className="flex gap-6">
               <h5>
-                <a
-                  href="mailto:alexander.rublevskii@gmail.com"
-                  className="blurLink"
-                >
-                  Email
-                </a>
+                <Link href="mailto:alexander.rublevskii@gmail.com">Email</Link>
               </h5>
               <h5>
-                <a
-                  href="https://t.me/alexrublevsky"
-                  className="blurLink"
-                  target="_blank"
-                >
+                <Link href="https://t.me/alexrublevsky" target="_blank">
                   Telegram
-                </a>
+                </Link>
               </h5>
             </div>
           </NeumorphismCard>
