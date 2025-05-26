@@ -252,6 +252,14 @@
 } 
 
   /* Typography */
+  
+  /* fluid responsive */
+  html { font-size: calc(1rem + 0.20833333333333331vw); }
+  @media screen and (max-width:1920px) { html { font-size: calc(1rem + 0.20833333333333337vw); } }
+  @media screen and (max-width:1440px) { html { font-size: calc(1.0001951092611863rem + 0.20811654526534862vw); } }
+  @media screen and (max-width:479px) { html { font-size: calc(0.9372384937238494rem + 0.41841004184100417vw); } }
+
+
 h1 {
   font-size: 3.8rem;
   font-weight: 300;
