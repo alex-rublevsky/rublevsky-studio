@@ -13,6 +13,8 @@ import appCss from "~/styles/app.css?url";
 import { seo } from "~/utils/seo";
 import { NavBar } from "~/components/ui/shared/NavBar";
 import { PostHogWrapper } from "~/components/PostHogWrapper";
+import { CursorContextProvider } from "~/components/ui/shared/custom_cursor/CustomCursorContext";
+import CustomCursor from "~/components/ui/shared/custom_cursor/CustomCursor";
 
 const queryClient = new QueryClient();
 
@@ -69,11 +71,14 @@ function RootComponent() {
   return (
     <PostHogWrapper>
       <QueryClientProvider client={queryClient}>
-        <RootDocument>
-          <div className="view-transition-group">
-            <Outlet />
-          </div>
-        </RootDocument>
+        <CursorContextProvider>
+          <CustomCursor />
+          <RootDocument>
+            <div className="view-transition-group">
+              <Outlet />
+            </div>
+          </RootDocument>
+        </CursorContextProvider>
       </QueryClientProvider>
     </PostHogWrapper>
   );

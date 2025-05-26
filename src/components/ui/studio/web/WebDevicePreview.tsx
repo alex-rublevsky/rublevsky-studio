@@ -4,6 +4,7 @@ import { Device } from "./webTypes";
 import { Image } from "~/components/ui/shared/Image";
 
 import Video from "~/components/ui/shared/Video";
+import { Link } from "../../shared/Link";
 
 type DevicePreviewProps = {
   device: Device;
@@ -20,7 +21,8 @@ export default function DevicePreview({
   const mockupFileName = isPhone ? "iphone-mockup.svg" : "ipad-mockup.svg";
 
   return (
-    <a
+    <Link
+      blurOnHover={false}
       href={websiteUrl}
       className={`block w-full relative ${
         isPhone ? "aspect-[9/19.5]" : "aspect-4/3"
@@ -28,6 +30,7 @@ export default function DevicePreview({
       target="_blank"
       rel="noopener noreferrer"
       id={projectId}
+      cursorType="visitWebsite"
     >
       <Image
         src={`/${mockupFileName}`}
@@ -63,6 +66,6 @@ export default function DevicePreview({
           height={isPhone ? 812 : 768}
         />
       )}
-    </a>
+    </Link>
   );
 }
