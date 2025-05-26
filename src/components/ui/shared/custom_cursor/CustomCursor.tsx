@@ -1,5 +1,5 @@
 import { motion, useMotionValue } from "motion/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useCursorContext } from "./CustomCursorContext";
 import "./customCursor.css";
 
@@ -47,10 +47,17 @@ function Cursor() {
   const { animateCursorVariant, animateCursor } = useCursorContext();
   const cursorX = useMotionValue(0);
   const cursorY = useMotionValue(0);
+  const [isPressed, setIsPressed] = useState(false);
 
   // Shared animation config
   const animationConfig = {
     duration: 0.4,
+    ease: [0.215, 0.61, 0.355, 1],
+  };
+
+  // Press animation config (same bezier as sizing, but faster)
+  const pressAnimationConfig = {
+    duration: 0.15,
     ease: [0.215, 0.61, 0.355, 1],
   };
 
@@ -65,6 +72,9 @@ function Cursor() {
     isLinkHover ||
     isVisitWebsiteHover;
 
+  // Calculate scale factor for press animation (20% smaller = 0.8 scale)
+  const pressScale = isPressed ? 0.8 : 1;
+
   useEffect(() => {
     const body = document.body;
     const mouseMoveHandler = (e: MouseEvent) => {
@@ -78,13 +88,24 @@ function Cursor() {
     const mouseLeaveHandler = () => {
       animateCursor("cursorLeave");
     };
+    const mouseDownHandler = () => {
+      setIsPressed(true);
+    };
+    const mouseUpHandler = () => {
+      setIsPressed(false);
+    };
+
     window.addEventListener("mousemove", mouseMoveHandler);
+    window.addEventListener("mousedown", mouseDownHandler);
+    window.addEventListener("mouseup", mouseUpHandler);
     if (body) {
       body.addEventListener("mouseenter", mouseEnterHandler);
       body.addEventListener("mouseleave", mouseLeaveHandler);
     }
     return () => {
       window.removeEventListener("mousemove", mouseMoveHandler);
+      window.removeEventListener("mousedown", mouseDownHandler);
+      window.removeEventListener("mouseup", mouseUpHandler);
       if (body) {
         body.removeEventListener("mouseenter", mouseEnterHandler);
         body.removeEventListener("mouseleave", mouseLeaveHandler);
@@ -109,14 +130,14 @@ function Cursor() {
           initial={{ scale: 0, opacity: 0 }}
           animate={{
             scale:
-              isVisible && !isEnlargeHover && !isLinkHover && !isVisitWebsiteHover
+              (isVisible && !isEnlargeHover && !isLinkHover && !isVisitWebsiteHover
                 ? 2
-                : 0,
+                : 0) * pressScale,
             opacity:
               isVisible && !isEnlargeHover && !isLinkHover && !isVisitWebsiteHover
                 ? 0.12
                 : 0,
-            transition: animationConfig,
+            transition: isPressed ? pressAnimationConfig : animationConfig,
           }}
         />
 
@@ -125,9 +146,9 @@ function Cursor() {
           className="cursor-svg"
           initial={{ scale: 0, opacity: 0 }}
           animate={{
-            scale: isEnlargeHover ? 1 : 0,
+            scale: (isEnlargeHover ? 1 : 0) * pressScale,
             opacity: isEnlargeHover ? 1 : 0,
-            transition: animationConfig,
+            transition: isPressed ? pressAnimationConfig : animationConfig,
           }}
         >
           <EnlargeCursor />
@@ -138,9 +159,9 @@ function Cursor() {
           className="cursor-svg"
           initial={{ scale: 0, opacity: 0 }}
           animate={{
-            scale: isLinkHover ? 1 : 0,
+            scale: (isLinkHover ? 1 : 0) * pressScale,
             opacity: isLinkHover ? 1 : 0,
-            transition: animationConfig,
+            transition: isPressed ? pressAnimationConfig : animationConfig,
           }}
         >
           <LinkCursor />
@@ -160,9 +181,9 @@ function Cursor() {
           className="cursor-text"
           initial={{ scale: 0, opacity: 0 }}
           animate={{
-            scale: isVisitWebsiteHover ? 1 : 0,
+            scale: (isVisitWebsiteHover ? 1 : 0) * pressScale,
             opacity: isVisitWebsiteHover ? 1 : 0,
-            transition: animationConfig,
+            transition: isPressed ? pressAnimationConfig : animationConfig,
           }}
         >
           <VisitWebsiteCursor />
