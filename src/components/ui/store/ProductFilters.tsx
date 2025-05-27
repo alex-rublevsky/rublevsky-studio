@@ -4,6 +4,13 @@ import { Slider } from "~/components/ui/shared/Slider";
 import { FilterGroup } from "../shared/FilterGroup";
 import { AnimatedGroup } from "~/components/motion_primitives/AnimatedGroup";
 import { AnimatePresence, motion } from "motion/react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/dashboard/Select";
 
 interface ProductFiltersProps {
   categories: Category[];
@@ -17,6 +24,8 @@ interface ProductFiltersProps {
     max: number;
   };
   onPriceRangeChange?: (range: [number, number]) => void;
+  sortBy?: string;
+  onSortChange?: (sort: string) => void;
 }
 
 export default function ProductFilters({
@@ -28,6 +37,8 @@ export default function ProductFilters({
   onTeaCategoryChange,
   priceRange,
   onPriceRangeChange,
+  sortBy = "relevant",
+  onSortChange,
 }: ProductFiltersProps) {
   const [localPriceRange, setLocalPriceRange] = useState<[number, number]>([
     priceRange.min,
@@ -98,6 +109,26 @@ export default function ProductFilters({
             </output>
           }
         />
+      </motion.div>
+
+      {/* Sort By Filter */}
+      <motion.div
+        layout
+        transition={{ duration: 0.3, ease: "easeInOut" }}
+        className="flex flex-col gap-2"
+      >
+        <label className="text-sm font-medium text-foreground">Sort By</label>
+        <Select value={sortBy} onValueChange={onSortChange}>
+          <SelectTrigger className="w-full min-w-[160px]">
+            <SelectValue placeholder="Sort by..." />
+          </SelectTrigger>
+          <SelectContent className="bg-background">
+            <SelectItem value="relevant">Relevant</SelectItem>
+            <SelectItem value="price-asc">Price: Low to High</SelectItem>
+            <SelectItem value="price-desc">Price: High to Low</SelectItem>
+            <SelectItem value="newest">Newest First</SelectItem>
+          </SelectContent>
+        </Select>
       </motion.div>
     </AnimatedGroup>
   );
