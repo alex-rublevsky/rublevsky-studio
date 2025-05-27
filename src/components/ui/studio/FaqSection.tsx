@@ -87,9 +87,9 @@ const data = [
 
 function FaqSection() {
   return (
-    <section>
+    <section className="no-padding">
       <AnimatedGroup>
-        <TextEffect as="h2" className="mb-12">
+        <TextEffect as="h2" className="mb-12 ml-4 sm:ml-6">
           FAQ
         </TextEffect>
         <div className="grid grid-cols-1 lg:grid-cols-1 gap-16 md:gap-8">
@@ -100,11 +100,11 @@ function FaqSection() {
                 value={`item-${index + 1}`}
               >
                 <AccordionTrigger className="hover:no-underline text-left">
-                  <h4 className="md:!text-2xl">{item.question}</h4>
+                  <h4 className="md:!text-2xl ml-4 sm:ml-6">{item.question}</h4>
                 </AccordionTrigger>
                 <AccordionContent>
                   {item.answer.split("\n").map((paragraph, i) => (
-                    <p key={i} className="mb-4 last:mb-0">
+                    <p key={i} className="mb-4 last:mb-0 ml-4 sm:ml-6">
                       {paragraph}
                     </p>
                   ))}
