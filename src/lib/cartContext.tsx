@@ -1,7 +1,15 @@
+//TODO: rename this to store context, since it now includes all store data, even categories and tea categories
+
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { Product, ProductVariation, ProductWithVariations } from "~/types";
+import {
+  Product,
+  ProductVariation,
+  ProductWithVariations,
+  Category,
+  TeaCategory,
+} from "~/types";
 import { validateStock } from "~/utils/validateStock";
 import { setCookie, getCookie } from "~/lib/cookies";
 
@@ -32,6 +40,8 @@ interface CartContextType {
   cart: Cart;
   cartOpen: boolean;
   products: ProductWithVariations[]; // Make products directly accessible
+  categories: Category[];
+  teaCategories: TeaCategory[];
   setCartOpen: (open: boolean) => void;
   addToCart: (item: CartItem) => void;
   addProductToCart: (
@@ -61,14 +71,24 @@ const PRODUCTS_CACHE_DURATION = 1000 * 60 * 5; // 5 minutes
 interface CartProviderProps {
   children: React.ReactNode;
   initialProducts?: ProductWithVariations[];
+  initialCategories?: Category[];
+  initialTeaCategories?: TeaCategory[];
 }
 
-export function CartProvider({ children, initialProducts }: CartProviderProps) {
+export function CartProvider({
+  children,
+  initialProducts,
+  initialCategories = [],
+  initialTeaCategories = [],
+}: CartProviderProps) {
   const [cart, setCart] = useState<Cart>({
     items: [],
     lastUpdated: Date.now(),
   });
   const [products, setProducts] = useState<ProductWithVariations[]>([]);
+  const [categories, setCategories] = useState<Category[]>(initialCategories);
+  const [teaCategories, setTeaCategories] =
+    useState<TeaCategory[]>(initialTeaCategories);
   const [cartOpen, setCartOpen] = useState(false);
   const [initialized, setInitialized] = useState(false);
 
@@ -368,6 +388,8 @@ export function CartProvider({ children, initialProducts }: CartProviderProps) {
         cart,
         cartOpen,
         products, // Use products from state
+        categories,
+        teaCategories,
         setCartOpen,
         addToCart,
         addProductToCart,

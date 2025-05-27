@@ -30,7 +30,7 @@ interface CustomerInfo {
   shippingMethod?: string;
 }
 
-export const Route = createFileRoute("/checkout/")({
+export const Route = createFileRoute("/store/checkout")({
   component: CheckoutPage,
 });
 

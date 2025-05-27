@@ -9,7 +9,11 @@ import { useCart } from "~/lib/cartContext";
 import { QuantitySelector } from "~/components/ui/shared/QuantitySelector";
 import { getAttributeDisplayName } from "~/lib/productAttributes";
 import { FilterGroup } from "~/components/ui/shared/FilterGroup";
-import { ProductWithDetails, VariationAttribute } from "~/types";
+import {
+  ProductWithDetails,
+  VariationAttribute,
+  ProductWithVariations,
+} from "~/types";
 import { Badge } from "~/components/ui/shared/Badge";
 import { getAvailableQuantityForVariation } from "~/utils/validateStock";
 import { useVariationSelection } from "~/hooks/useVariationSelection";
@@ -31,6 +35,7 @@ function ProductPage() {
   const { productId } = Route.useLoaderData();
   const [quantity, setQuantity] = useState(1);
   const [product, setProduct] = useState<ProductWithDetails | null>(null);
+  const { addProductToCart, cart, products } = useCart();
 
   // Query product data
   const { isPending, error, data } = useQuery<ProductWithDetails>({
@@ -45,7 +50,80 @@ function ProductPage() {
       }),
   });
 
+  // Update product state when data changes
+  useEffect(() => {
+    if (data) {
+      setProduct(data);
+    }
+  }, [data]);
+
+  // Sync product data with cart context (similar to your Next.js version)
+  useEffect(() => {
+    if (!product) return;
+
+    // Find the product in the cart context cache
+    const cachedProduct = products.find((p) => p.id === product.id);
+    if (cachedProduct) {
+      // Update local product state with cached data for stock info
+      setProduct((prev) => ({
+        ...prev!,
+        stock: cachedProduct.stock,
+        unlimitedStock: cachedProduct.unlimitedStock,
+        variations: cachedProduct.variations,
+      }));
+    }
+  }, [product?.id, products]);
+
+  // Variation selection hook - always call but pass null product when not loaded
+  const {
+    selectedVariation,
+    selectedAttributes,
+    selectVariation,
+    isAttributeValueAvailable,
+  } = useVariationSelection({
+    product: product as ProductWithVariations | null,
+    cartItems: cart.items,
+    onVariationChange: () => setQuantity(1), // Reset quantity when variation changes
+  });
+
+  // Calculate current price based on selected variation
+  const currentPrice = useMemo(() => {
+    if (selectedVariation) {
+      return selectedVariation.price;
+    }
+    return product?.price || 0;
+  }, [selectedVariation, product?.price]);
+
+  // Calculate effective stock based on selected variation
+  const effectiveStock = useMemo(() => {
+    if (!product) return 0;
+
+    if (product.unlimitedStock) {
+      return Number.MAX_SAFE_INTEGER;
+    }
+
+    return getAvailableQuantityForVariation(
+      product as ProductWithVariations,
+      selectedVariation?.id,
+      cart.items
+    );
+  }, [product, selectedVariation, cart.items]);
+
+  // Check if product can be added to cart
+  const canAddToCart = useMemo(() => {
+    if (!product?.isActive) return false;
+    if (product.hasVariations && !selectedVariation) return false;
+    if (!product.unlimitedStock && effectiveStock <= 0) return false;
+    return true;
+  }, [product, selectedVariation, effectiveStock]);
+
   // Define all callbacks before any conditional returns
+  const incrementQuantity = useCallback(() => {
+    if (product?.unlimitedStock || quantity < effectiveStock) {
+      setQuantity((prev) => prev + 1);
+    }
+  }, [quantity, effectiveStock, product?.unlimitedStock]);
+
   const decrementQuantity = useCallback(() => {
     if (quantity > 1) {
       setQuantity((prev) => prev - 1);
@@ -74,6 +152,29 @@ function ProductPage() {
     },
     [product?.variations]
   );
+
+  // Handle add to cart
+  const handleAddToCart = useCallback(async () => {
+    if (!product || !canAddToCart) return;
+
+    const success = await addProductToCart(
+      product,
+      quantity,
+      selectedVariation,
+      selectedAttributes
+    );
+
+    if (success) {
+      setQuantity(1); // Reset quantity after successful add
+    }
+  }, [
+    product,
+    quantity,
+    selectedVariation,
+    selectedAttributes,
+    canAddToCart,
+    addProductToCart,
+  ]);
 
   // Update product state when data changes
   useEffect(() => {
@@ -179,24 +280,24 @@ function ProductPage() {
                     <div className="flex items-baseline gap-2">
                       <h4>
                         $
-                        {/* {(currentPrice * (1 - product.discount / 100)).toFixed(
+                        {(currentPrice * (1 - product.discount / 100)).toFixed(
                           2
-                        )}{" "} */}
+                        )}{" "}
                         CAD
                       </h4>
                       <span className="line-through text-muted-foreground">
-                        {/* ${currentPrice.toFixed(2)} */}
+                        ${currentPrice.toFixed(2)}
                       </span>
                     </div>
                   </div>
                 ) : (
-                  <h4>{/* ${currentPrice.toFixed(2)} CAD */}</h4>
+                  <h4>${currentPrice.toFixed(2)} CAD</h4>
                 )}
 
                 {/* Stock information - moved here and updated styling */}
                 {!product.unlimitedStock && (
                   <div>
-                    {/* {effectiveStock > 0 ? (
+                    {effectiveStock > 0 ? (
                       <Badge variant="outline">
                         <span className="text-muted-foreground">
                           In stock:{" "}
@@ -205,7 +306,7 @@ function ProductPage() {
                       </Badge>
                     ) : (
                       <Badge variant="outline">Out of stock</Badge>
-                    )} */}
+                    )}
                   </div>
                 )}
               </div>
@@ -213,7 +314,7 @@ function ProductPage() {
               {/* Variation selection */}
               {product.hasVariations && attributeNames.length > 0 && (
                 <div className="flex flex-wrap gap-4">
-                  {/* {attributeNames.map((attributeId) => (
+                  {attributeNames.map((attributeId) => (
                     <FilterGroup
                       key={attributeId}
                       title={getAttributeDisplayName(attributeId)}
@@ -232,13 +333,13 @@ function ProductPage() {
                       titleClassName=""
                       className=""
                     />
-                  ))} */}
+                  ))}
                 </div>
               )}
 
               {/* Quantity selector and Add to cart */}
               <div className="flex flex-wrap items-center gap-4">
-                {/* <QuantitySelector
+                <QuantitySelector
                   quantity={quantity}
                   onIncrement={incrementQuantity}
                   onDecrement={decrementQuantity}
@@ -248,14 +349,15 @@ function ProductPage() {
                   }
                   disabled={!canAddToCart}
                   size="default"
-                /> */}
-                {/* <Button
+                />
+                <Button
                   onClick={handleAddToCart}
                   size="lg"
                   disabled={!canAddToCart}
+                  cursorType={canAddToCart ? "add" : "disabled"}
                 >
                   {canAddToCart ? "Add to Cart" : "Out of Stock"}
-                </Button> */}
+                </Button>
               </div>
 
               {/* Blog post link */}
@@ -295,27 +397,25 @@ function ProductPage() {
                 {product.category && (
                   <div className="flex items-center gap-2">
                     <span className="text-muted-foreground">Category:</span>
-                    {/* <Link
-                      to="/product/$productId"
-                      params={{
-                        productId: product.category.slug,
-                      }}
+                    <Link
+                      to="/store"
+                      search={{ category: product.category.slug }}
+                      className="text-primary hover:underline"
                     >
                       {product.category.name}
-                    </Link> */}
+                    </Link>
                   </div>
                 )}
                 {product.brand && (
                   <div className="flex items-center gap-2">
                     <span className="text-muted-foreground">Brand:</span>
-                    {/* <Link
-                      to="/store?brand=$brandId"
-                      params={{
-                        brandId: product.brand.slug,
-                      }}
+                    <Link
+                      to="/store"
+                      search={{ brand: product.brand.slug }}
+                      className="text-primary hover:underline"
                     >
                       {product.brand.name}
-                    </Link> */}
+                    </Link>
                   </div>
                 )}
               </div>
