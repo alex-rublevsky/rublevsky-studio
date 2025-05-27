@@ -47,7 +47,13 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
-  cursorType?: "default" | "enlarge" | "link" | "visitWebsite" | "disabled";
+  cursorType?:
+    | "default"
+    | "enlarge"
+    | "link"
+    | "visitWebsite"
+    | "add"
+    | "disabled";
   disableCursor?: boolean;
 }
 
@@ -79,6 +85,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             break;
           case "visitWebsite":
             animateCursor("visitWebsite");
+            break;
+          case "add":
+            animateCursor("add");
             break;
           case "default":
             animateCursor("cursorEnter");

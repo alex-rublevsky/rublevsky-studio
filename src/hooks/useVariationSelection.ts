@@ -8,7 +8,7 @@ interface ProductVariationWithAttributes extends ProductVariation {
 }
 
 interface UseVariationSelectionProps {
-  product: ProductWithVariations;
+  product: ProductWithVariations | null;
   cartItems: CartItem[];
   onVariationChange?: () => void;
 }
@@ -31,7 +31,7 @@ export function useVariationSelection({
 
   // Find the first available variation considering stock
   const findFirstAvailableVariation = useCallback(() => {
-    if (!product.hasVariations || !product.variations || product.variations.length === 0) {
+    if (!product || !product.hasVariations || !product.variations || product.variations.length === 0) {
       return null;
     }
 
@@ -56,7 +56,7 @@ export function useVariationSelection({
   // Find a variation that matches all the selected attributes
   const findMatchingVariation = useCallback(
     (attributes: Record<string, string>) => {
-      if (!product.variations) return null;
+      if (!product || !product.variations) return null;
 
       return (
         product.variations.find((variation) => {
@@ -68,7 +68,7 @@ export function useVariationSelection({
         }) || null
       );
     },
-    [product.variations]
+    [product?.variations]
   );
 
   // Initialize selected variation when product loads
@@ -88,7 +88,7 @@ export function useVariationSelection({
 
   // Update selected variation when cart changes
   useEffect(() => {
-    if (!selectedVariation || !product.hasVariations) return;
+    if (!selectedVariation || !product || !product.hasVariations) return;
 
     const currentQuantity = getAvailableQuantityForVariation(
       product,
@@ -113,7 +113,7 @@ export function useVariationSelection({
   // Select a variation based on attribute ID and value
   const selectVariation = useCallback(
     (attributeId: string, attributeValue: string) => {
-      if (!product.variations) return;
+      if (!product || !product.variations) return;
 
       // Update selected attributes
       const newSelectedAttributes = {
@@ -131,13 +131,13 @@ export function useVariationSelection({
         onVariationChange?.();
       }
     },
-    [product.variations, selectedAttributes, findMatchingVariation, onVariationChange]
+    [product?.variations, selectedAttributes, findMatchingVariation, onVariationChange]
   );
 
   // Check if a specific attribute value is available with current selections
   const isAttributeValueAvailable = useCallback(
     (attributeId: string, attributeValue: string): boolean => {
-      if (!product.variations) return false;
+      if (!product || !product.variations) return false;
 
       // Get all other selected attributes except the one we're checking
       const otherAttributes = { ...selectedAttributes };
