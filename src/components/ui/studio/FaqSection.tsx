@@ -90,20 +90,19 @@ function FaqSection() {
     <section>
       <AnimatedGroup>
         <TextEffect as="h2" className="mb-12">
-          Frequently asked questions
+          FAQ
         </TextEffect>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 md:gap-8">
-          <Accordion type="single" collapsible className="max-w-lg col-span-1">
+        <div className="grid grid-cols-1 lg:grid-cols-1 gap-16 md:gap-8">
+          <Accordion type="single" collapsible className="w-full">
             {data.map((item, index) => (
               <AccordionItem
                 key={`item-${index + 1}`}
                 value={`item-${index + 1}`}
-                className="border-b border-b-slate-200"
               >
-                <AccordionTrigger className="hover:no-underline">
-                  {item.question}
+                <AccordionTrigger className="hover:no-underline text-left">
+                  <h4 className="md:!text-2xl">{item.question}</h4>
                 </AccordionTrigger>
-                <AccordionContent className="data-[state=closed]:animate-[var(--animate-accordion-up)] data-[state=open]:animate-[var(--animate-accordion-down)]">
+                <AccordionContent>
                   {item.answer.split("\n").map((paragraph, i) => (
                     <p key={i} className="mb-4 last:mb-0">
                       {paragraph}
@@ -113,7 +112,7 @@ function FaqSection() {
               </AccordionItem>
             ))}
           </Accordion>
-          <NeumorphismCard className="col-span-1 sticky top-10  size-fit lg:mx-auto flex flex-col gap-4">
+          {/* <NeumorphismCard className="col-span-1 sticky top-10  size-fit lg:mx-auto flex flex-col gap-4">
             <div
               className={
                 "relative w-24 h-24 inset-0 overflow-hidden rounded-full transition-all duration-500"
@@ -146,7 +145,7 @@ function FaqSection() {
                 </Link>
               </h5>
             </div>
-          </NeumorphismCard>
+          </NeumorphismCard> */}
         </div>
       </AnimatedGroup>
     </section>
