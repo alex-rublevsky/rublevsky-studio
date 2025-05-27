@@ -130,11 +130,17 @@ function Cursor() {
           initial={{ scale: 0, opacity: 0 }}
           animate={{
             scale:
-              (isVisible && !isEnlargeHover && !isLinkHover && !isVisitWebsiteHover
+              (isVisible &&
+              !isEnlargeHover &&
+              !isLinkHover &&
+              !isVisitWebsiteHover
                 ? 2
                 : 0) * pressScale,
             opacity:
-              isVisible && !isEnlargeHover && !isLinkHover && !isVisitWebsiteHover
+              isVisible &&
+              !isEnlargeHover &&
+              !isLinkHover &&
+              !isVisitWebsiteHover
                 ? 0.12
                 : 0,
             transition: isPressed ? pressAnimationConfig : animationConfig,
