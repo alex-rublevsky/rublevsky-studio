@@ -17,6 +17,7 @@ function PostsIndexComponent() {
   } = useQuery<{
     posts: BlogPostType[];
     teaCategories: TeaCategory[];
+    totalCount: number;
   }>({
     queryKey: ["blog"],
     queryFn: () => fetch(`${DEPLOY_URL}/api/blog`).then((res) => res.json()),
@@ -24,16 +25,23 @@ function PostsIndexComponent() {
 
   const posts = data?.posts || [];
   const teaCategories = data?.teaCategories || [];
+  const totalCount = data?.totalCount || 0;
 
   return (
+    //TODO: 2 column layout for desktop
     <section className="pt-24 sm:pt-32 div [view-transition-name:main-content]  min-h-screen">
-      <div>
-        <h1 className="text-center mb-8">What&apos;s in the gaiwan?</h1>
-        <h5 className="text-center mb-16 sm:mb-24">
-          <a className="blurLink" href="https://t.me/gaiwan_contents">
-            🇷🇺 RU blog version
-          </a>
-        </h5>
+      <div className="flex flex-col items-center ">
+        <div className="inline-block">
+          <h1 className="mb-8 text-center">What&apos;s in the gaiwan?</h1>
+          <div className="flex justify-between mb-4">
+            <h5 className="text-secondary-foreground">{totalCount} posts</h5>
+            <h5 className="mb-12 sm:mb-20">
+              <a className="blurLink" href="https://t.me/gaiwan_contents">
+                🇷🇺 RU blog version
+              </a>
+            </h5>
+          </div>
+        </div>
       </div>
 
       {isLoading ? (

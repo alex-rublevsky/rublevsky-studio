@@ -62,7 +62,8 @@ export const APIRoute = createAPIFileRoute('/api/blog')({
       if (!posts || posts.length === 0) {
         return json({ 
           posts: [],
-          teaCategories: allTeaCategories 
+          teaCategories: allTeaCategories,
+          totalCount: 0
         }, { 
           headers: corsHeaders
         });
@@ -70,7 +71,8 @@ export const APIRoute = createAPIFileRoute('/api/blog')({
       
       return json({
         posts,
-        teaCategories: allTeaCategories
+        teaCategories: allTeaCategories,
+        totalCount: posts.length
       }, { 
         headers: corsHeaders 
       });
