@@ -22,22 +22,22 @@ const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(
     },
     ref
   ) => {
-    const { animateCursor } = useCursorContext();
+    const { setVariant } = useCursorContext();
 
     const handleMouseEnter = (e: React.MouseEvent<HTMLAnchorElement>) => {
       if (!disableCursor) {
         switch (cursorType) {
           case "link":
-            animateCursor("link");
+            setVariant("link");
             break;
           case "enlarge":
-            animateCursor("enlarge");
+            setVariant("enlarge");
             break;
           case "visitWebsite":
-            animateCursor("visitWebsite");
+            setVariant("visitWebsite");
             break;
           case "default":
-            animateCursor("cursorEnter");
+            setVariant("default");
             break;
           case "disabled":
             // No cursor animation
@@ -49,7 +49,7 @@ const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(
 
     const handleMouseLeave = (e: React.MouseEvent<HTMLAnchorElement>) => {
       if (!disableCursor && cursorType !== "disabled") {
-        animateCursor("cursorEnter");
+        setVariant("default");
       }
       onMouseLeave?.(e);
     };

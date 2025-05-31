@@ -1,11 +1,18 @@
 import { createContext, useState, useContext, ReactNode } from "react";
 
+type CursorVariant =
+  | "default"
+  | "enlarge"
+  | "link"
+  | "add"
+  | "visitWebsite"
+  | "hidden";
+
 interface CursorContextType {
-  initialCursorVariant: string;
-  setInitialCursorVariant: (variant: string) => void;
-  animateCursorVariant: string;
-  setAnimateCursorVariant: (variant: string) => void;
-  animateCursor: (variant: string) => void;
+  variant: CursorVariant;
+  setVariant: (variant: CursorVariant) => void;
+  isVisible: boolean;
+  setIsVisible: (visible: boolean) => void;
 }
 
 interface CursorContextProviderProps {
@@ -17,28 +24,26 @@ const CursorContext = createContext<CursorContextType | undefined>(undefined);
 export const useCursorContext = (): CursorContextType => {
   const context = useContext(CursorContext);
   if (!context) {
-    throw new Error('useCursorContext must be used within a CursorContextProvider');
+    throw new Error(
+      "useCursorContext must be used within a CursorContextProvider"
+    );
   }
   return context;
 };
 
-export const CursorContextProvider = ({ children }: CursorContextProviderProps) => {
-  const [initialCursorVariant, setInitialCursorVariant] = useState<string>("cursorLeave");
-  const [animateCursorVariant, setAnimateCursorVariant] = useState<string>("cursorLeave");
-  
-  // This function allows for smooth transitions between cursor states
-  const animateCursor = (variant: string) => {
-    setInitialCursorVariant(animateCursorVariant);
-    setAnimateCursorVariant(variant);
-  };
+export const CursorContextProvider = ({
+  children,
+}: CursorContextProviderProps) => {
+  const [variant, setVariant] = useState<CursorVariant>("hidden");
+  const [isVisible, setIsVisible] = useState(false);
+
   return (
     <CursorContext.Provider
       value={{
-        initialCursorVariant,
-        setInitialCursorVariant,
-        animateCursorVariant,
-        setAnimateCursorVariant,
-        animateCursor,
+        variant,
+        setVariant,
+        isVisible,
+        setIsVisible,
       }}
     >
       {children}
