@@ -18,7 +18,7 @@
     "db:seed:prod": "tsx scripts/seedDatabase.ts --remote",
     "db:reset": "rm -rf .wrangler/state/v3/d1 drizzle && tsx src/scripts/resetDatabase.ts && pnpm db:generate && pnpm db:migrate:local",
     "db:reset:prod": "rm -rf drizzle && tsx scripts/resetDatabase.ts --remote && pnpm db:generate && pnpm db:migrate:prod",
-    "email": "email dev --dir emails"
+    "email": "email dev --dir src/components/emails"
   },
   "dependencies": {
     "@calcom/embed-react": "^1.5.3",
@@ -43,6 +43,7 @@
     "@radix-ui/react-toggle": "^1.1.8",
     "@radix-ui/react-toggle-group": "^1.1.9",
     "@radix-ui/react-tooltip": "^1.2.6",
+    "@react-email/components": "0.0.41",
     "@tabler/icons-react": "^3.33.0",
     "@tailwindcss/postcss": "^4.1.6",
     "@tanstack/react-query": "^5.75.7",
@@ -70,6 +71,7 @@
     "react-dom": "0.0.0-experimental-38ef6550-20250508",
     "react-markdown": "^10.1.0",
     "recharts": "^2.15.3",
+    "resend": "^4.5.1",
     "solid": "link:@heroicons/react/16/solid",
     "sonner": "^2.0.3",
     "swiper": "^11.2.6",
@@ -88,6 +90,7 @@
     "autoprefixer": "^10.4.21",
     "drizzle-kit": "^0.31.1",
     "postcss": "^8.5.3",
+    "react-email": "4.0.15",
     "tailwindcss": "^4.1.6",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3",
