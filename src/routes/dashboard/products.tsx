@@ -426,7 +426,19 @@ function RouteComponent() {
         variations: formattedVariations,
       };
 
-      // await updateProduct(editingProductId, submissionData);
+      const response = await fetch(`${DEPLOY_URL}/api/dashboard/products/${editingProductId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(submissionData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json() as { error?: string };
+        throw new Error(errorData.error || "Failed to update product");
+      }
+
       toast.success("Product updated successfully!");
 
       // Reset form state
