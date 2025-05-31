@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "~/components/ui/shared/Button";
-import { useSession, signIn } from "~/utils/auth-client";
+import { useSession, signIn, signOut } from "~/utils/auth-client";
 import NeumorphismCard from "~/components/ui/shared/NeumorphismCard";
 import { AnimatedGroup } from "~/components/motion_primitives/AnimatedGroup";
 import { TextEffect } from "~/components/motion_primitives/AnimatedText";
@@ -12,24 +12,56 @@ export const Route = createFileRoute("/login")({
 function RouteComponent() {
   const { data: session } = useSession();
 
+  // TODO: move to environment variable
+  const AUTHORIZED_EMAIL = "alexander.rublevskii@gmail.com";
+
   if (session) {
-    return (
-      <section className="relative min-h-[80dvh] flex items-center justify-center">
-        <AnimatedGroup>
-          <NeumorphismCard className="text-center max-w-md">
-            <TextEffect as="h2" className="mb-4">
-              Welcome back!
-            </TextEffect>
-            <p className="text-muted-foreground mb-6">
-              You're already signed in as {session.user.name}
-            </p>
-            <Button asChild size="lg" className="w-full">
-              <Link to="/dashboard">Go to Dashboard</Link>
-            </Button>
-          </NeumorphismCard>
-        </AnimatedGroup>
-      </section>
-    );
+    // Check if user is authorized
+    const isAuthorized = session.user.email === AUTHORIZED_EMAIL;
+
+    if (isAuthorized) {
+      return (
+        <section className="relative min-h-[80dvh] flex items-center justify-center">
+          <AnimatedGroup>
+            <NeumorphismCard className="text-center max-w-md">
+              <TextEffect as="h2" className="mb-4">
+                Welcome back!
+              </TextEffect>
+              <p className="text-muted-foreground mb-6">
+                You're already signed in as {session.user.name}
+              </p>
+              <Button asChild size="lg" className="w-full">
+                <Link to="/dashboard">Go to Dashboard</Link>
+              </Button>
+            </NeumorphismCard>
+          </AnimatedGroup>
+        </section>
+      );
+    } else {
+      return (
+        <section className="relative min-h-[80dvh] flex items-center justify-center">
+          <AnimatedGroup>
+            <NeumorphismCard className="text-center max-w-md">
+              <TextEffect as="h2" className="mb-4">
+                Access Restricted
+              </TextEffect>
+              <p className="text-muted-foreground mb-6">
+                You're signed in as {session.user.name} ({session.user.email}),
+                but this account doesn't have access to the dashboard.
+              </p>
+              <Button
+                onClick={() => signOut()}
+                variant="outline"
+                size="lg"
+                className="w-full"
+              >
+                Sign Out
+              </Button>
+            </NeumorphismCard>
+          </AnimatedGroup>
+        </section>
+      );
+    }
   }
 
   return (
