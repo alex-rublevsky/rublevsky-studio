@@ -16,9 +16,8 @@ import { ProductWithDetails } from "~/types";
 
 export const APIRoute = createAPIFileRoute("/api/store/$productId")({
   GET: async ({ request, params }) => {
-    // Add CORS headers to allow requests from localhost
     const corsHeaders = {
-      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Origin": "https://tanstack.rublevsky.studio",
     };
 
     try {

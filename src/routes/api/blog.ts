@@ -6,9 +6,8 @@ import { desc, eq } from 'drizzle-orm'
 
 export const APIRoute = createAPIFileRoute('/api/blog')({
   GET: async ({ request, params }) => {
-    // Add CORS headers to allow requests from localhost
     const corsHeaders = {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': 'https://tanstack.rublevsky.studio',
     };
 
     try {
