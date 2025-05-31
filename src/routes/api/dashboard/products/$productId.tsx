@@ -1,17 +1,132 @@
 import { json } from "@tanstack/react-start";
 import { createAPIFileRoute } from "@tanstack/react-start/api";
 import { getBindings } from "~/utils/bindings";
-import { drizzle } from 'drizzle-orm/d1';
-import { 
-  products, 
-  productVariations, 
-  variationAttributes, 
-  productTeaCategories 
+import { drizzle } from "drizzle-orm/d1";
+import {
+  products,
+  productVariations,
+  variationAttributes,
+  productTeaCategories,
 } from "~/schema";
 import { eq } from "drizzle-orm";
 import type { ProductFormData } from "~/types";
 
-export const APIRoute = createAPIFileRoute("/api/dashboard/products/$productId")({
+export const APIRoute = createAPIFileRoute(
+  "/api/dashboard/products/$productId"
+)({
+  GET: async ({ request, params }) => {
+    // Add CORS headers to allow requests only from the website domain
+    const corsHeaders = {
+      "Access-Control-Allow-Origin": "https://tanstack.rublevsky.studio",
+      "Access-Control-Allow-Methods": "GET, PUT, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+    };
+
+    try {
+      const productId = parseInt(params.productId);
+
+      if (isNaN(productId)) {
+        return json(
+          { error: "Invalid product ID" },
+          {
+            status: 400,
+            headers: corsHeaders,
+          }
+        );
+      }
+
+      // Get CloudFlare D1 database instance
+      const bindings = await getBindings();
+      const d1Database = bindings.DB;
+      const db = drizzle(d1Database);
+
+      // Fetch product with all its data
+      const [productResult, variationsResult, teaCategoriesResult] =
+        await Promise.all([
+          db.select().from(products).where(eq(products.id, productId)).limit(1),
+          db
+            .select({
+              id: productVariations.id,
+              sku: productVariations.sku,
+              price: productVariations.price,
+              stock: productVariations.stock,
+              sort: productVariations.sort,
+              attributeId: variationAttributes.attributeId,
+              attributeValue: variationAttributes.value,
+            })
+            .from(productVariations)
+            .leftJoin(
+              variationAttributes,
+              eq(variationAttributes.productVariationId, productVariations.id)
+            )
+            .where(eq(productVariations.productId, productId)),
+          db
+            .select({
+              teaCategorySlug: productTeaCategories.teaCategorySlug,
+            })
+            .from(productTeaCategories)
+            .where(eq(productTeaCategories.productId, productId)),
+        ]);
+
+      if (!productResult[0]) {
+        return json(
+          { error: "Product not found" },
+          {
+            status: 404,
+            headers: corsHeaders,
+          }
+        );
+      }
+
+      const product = productResult[0];
+
+      // Group variations with their attributes
+      const variationsMap = new Map();
+      for (const row of variationsResult) {
+        if (!variationsMap.has(row.id)) {
+          variationsMap.set(row.id, {
+            id: row.id.toString(),
+            sku: row.sku,
+            price: row.price,
+            stock: row.stock,
+            sort: row.sort,
+            attributes: [],
+          });
+        }
+
+        if (row.attributeId && row.attributeValue) {
+          variationsMap.get(row.id).attributes.push({
+            attributeId: row.attributeId,
+            value: row.attributeValue,
+          });
+        }
+      }
+
+      const variations = Array.from(variationsMap.values());
+      const teaCategories = teaCategoriesResult.map((tc) => tc.teaCategorySlug);
+
+      const productWithDetails = {
+        ...product,
+        variations,
+        teaCategories,
+      };
+
+      return json(productWithDetails, { headers: corsHeaders });
+    } catch (error) {
+      console.error("Error fetching product:", error);
+      return json(
+        {
+          error:
+            error instanceof Error ? error.message : "Failed to fetch product",
+        },
+        {
+          status: 500,
+          headers: corsHeaders,
+        }
+      );
+    }
+  },
+
   PUT: async ({ request, params }) => {
     // Add CORS headers to allow requests only from the website domain
     const corsHeaders = {
@@ -22,7 +137,7 @@ export const APIRoute = createAPIFileRoute("/api/dashboard/products/$productId")
 
     try {
       const productId = parseInt(params.productId);
-      
+
       if (isNaN(productId)) {
         return json(
           { error: "Invalid product ID" },
@@ -34,12 +149,20 @@ export const APIRoute = createAPIFileRoute("/api/dashboard/products/$productId")
       }
 
       const productData: ProductFormData = await request.json();
-      console.log("Updating product with ID:", productId, "Data:", JSON.stringify(productData, null, 2));
+      console.log(
+        "Updating product with ID:",
+        productId,
+        "Data:",
+        JSON.stringify(productData, null, 2)
+      );
 
       // Validate required fields
       if (!productData.name || !productData.slug || !productData.price) {
         return json(
-          { error: "Missing required fields: name, slug, and price are required" },
+          {
+            error:
+              "Missing required fields: name, slug, and price are required",
+          },
           {
             status: 400,
             headers: corsHeaders,
@@ -55,7 +178,11 @@ export const APIRoute = createAPIFileRoute("/api/dashboard/products/$productId")
       // Fetch existing product and check for duplicate slug
       const [existingProduct, duplicateSlug] = await Promise.all([
         db.select().from(products).where(eq(products.id, productId)).limit(1),
-        db.select().from(products).where(eq(products.slug, productData.slug)).limit(1)
+        db
+          .select()
+          .from(products)
+          .where(eq(products.slug, productData.slug))
+          .limit(1),
       ]);
 
       if (!existingProduct[0]) {
@@ -79,12 +206,14 @@ export const APIRoute = createAPIFileRoute("/api/dashboard/products/$productId")
       }
 
       // Process images
-      const imageString = productData.images?.trim() || existingProduct[0].images || "";
+      const imageString =
+        productData.images?.trim() || existingProduct[0].images || "";
 
       // Update product and related data
       await Promise.all([
         // Update main product
-        db.update(products)
+        db
+          .update(products)
           .set({
             name: productData.name,
             slug: productData.slug,
@@ -104,15 +233,17 @@ export const APIRoute = createAPIFileRoute("/api/dashboard/products/$productId")
 
         // Handle tea categories
         (async () => {
-          await db.delete(productTeaCategories)
+          await db
+            .delete(productTeaCategories)
             .where(eq(productTeaCategories.productId, productId));
 
           if (productData.teaCategories?.length) {
-            await db.insert(productTeaCategories)
-              .values(productData.teaCategories.map(slug => ({
+            await db.insert(productTeaCategories).values(
+              productData.teaCategories.map((slug) => ({
                 productId: productId,
-                teaCategorySlug: slug
-              })));
+                teaCategorySlug: slug,
+              }))
+            );
           }
         })(),
 
@@ -129,41 +260,51 @@ export const APIRoute = createAPIFileRoute("/api/dashboard/products/$productId")
             if (existingVariations.length > 0) {
               // Delete variation attributes for all variations
               for (const variation of existingVariations) {
-                await db.delete(variationAttributes)
-                  .where(eq(variationAttributes.productVariationId, variation.id));
+                await db
+                  .delete(variationAttributes)
+                  .where(
+                    eq(variationAttributes.productVariationId, variation.id)
+                  );
               }
-              
+
               // Delete variations
-              await db.delete(productVariations)
+              await db
+                .delete(productVariations)
                 .where(eq(productVariations.productId, productId));
             }
 
             // Insert new variations and get their IDs
-            const insertedVariations = await db.insert(productVariations)
-              .values(productData.variations.map(v => ({
-                productId: productId,
-                sku: v.sku,
-                price: parseFloat(v.price.toString()),
-                stock: parseInt(v.stock.toString()),
-                sort: v.sort || 0,
-                createdAt: new Date()
-              })))
+            const insertedVariations = await db
+              .insert(productVariations)
+              .values(
+                productData.variations.map((v) => ({
+                  productId: productId,
+                  sku: v.sku,
+                  price: parseFloat(v.price.toString()),
+                  stock: parseInt(v.stock.toString()),
+                  sort: v.sort || 0,
+                  createdAt: new Date(),
+                }))
+              )
               .returning();
 
             // Insert variation attributes if they exist
-            const attributesToInsert = productData.variations.flatMap((variation, index) => {
-              const insertedVariation = insertedVariations[index];
-              return variation.attributes?.map(attr => ({
-                productVariationId: insertedVariation.id,
-                attributeId: attr.attributeId,
-                value: attr.value,
-                createdAt: new Date()
-              })) || [];
-            });
+            const attributesToInsert = productData.variations.flatMap(
+              (variation, index) => {
+                const insertedVariation = insertedVariations[index];
+                return (
+                  variation.attributes?.map((attr) => ({
+                    productVariationId: insertedVariation.id,
+                    attributeId: attr.attributeId,
+                    value: attr.value,
+                    createdAt: new Date(),
+                  })) || []
+                );
+              }
+            );
 
             if (attributesToInsert.length > 0) {
-              await db.insert(variationAttributes)
-                .values(attributesToInsert);
+              await db.insert(variationAttributes).values(attributesToInsert);
             }
           } else {
             // If no variations, clean up any existing ones
@@ -175,15 +316,19 @@ export const APIRoute = createAPIFileRoute("/api/dashboard/products/$productId")
             if (existingVariations.length > 0) {
               // Delete variation attributes for all variations
               for (const variation of existingVariations) {
-                await db.delete(variationAttributes)
-                  .where(eq(variationAttributes.productVariationId, variation.id));
+                await db
+                  .delete(variationAttributes)
+                  .where(
+                    eq(variationAttributes.productVariationId, variation.id)
+                  );
               }
-              
-              await db.delete(productVariations)
+
+              await db
+                .delete(productVariations)
                 .where(eq(productVariations.productId, productId));
             }
           }
-        })()
+        })(),
       ]);
 
       // Fetch and return updated product
@@ -204,7 +349,8 @@ export const APIRoute = createAPIFileRoute("/api/dashboard/products/$productId")
       console.error("Error updating product:", error);
       return json(
         {
-          error: error instanceof Error ? error.message : "Failed to update product",
+          error:
+            error instanceof Error ? error.message : "Failed to update product",
         },
         {
           status: 500,
@@ -220,7 +366,7 @@ export const APIRoute = createAPIFileRoute("/api/dashboard/products/$productId")
       status: 200,
       headers: {
         "Access-Control-Allow-Origin": "https://tanstack.rublevsky.studio",
-        "Access-Control-Allow-Methods": "PUT, OPTIONS",
+        "Access-Control-Allow-Methods": "GET, PUT, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type",
       },
     });
