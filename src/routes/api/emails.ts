@@ -45,6 +45,13 @@ interface EmailRequestBody {
 
 export const APIRoute = createAPIFileRoute('/api/emails')({
   POST: async ({ request }) => {
+
+    const corsHeaders = {
+      'Access-Control-Allow-Origin': 'https://tanstack.rublevsky.studio',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    };
+
     try {
       // Parse the request body
       const body: EmailRequestBody = await request.json()
@@ -53,14 +60,14 @@ export const APIRoute = createAPIFileRoute('/api/emails')({
       if (!body.email || !body.firstName || !body.lastName) {
         return json(
           { success: false, error: 'Missing required fields: email, firstName, or lastName' },
-          { status: 400 }
+          { status: 400, headers: corsHeaders }
         )
       }
 
       if (!body.orderItems || body.orderItems.length === 0) {
         return json(
           { success: false, error: 'No order items provided' },
-          { status: 400 }
+          { status: 400, headers: corsHeaders }
         )
       }
 
@@ -116,7 +123,7 @@ export const APIRoute = createAPIFileRoute('/api/emails')({
         console.error('Client email error:', clientEmailResponse.error)
         return json(
           { success: false, error: 'Failed to send client confirmation email' },
-          { status: 500 }
+          { status: 500, headers: corsHeaders }
         )
       }
 
@@ -124,7 +131,7 @@ export const APIRoute = createAPIFileRoute('/api/emails')({
         console.error('Admin email error:', adminEmailResponse.error)
         return json(
           { success: false, error: 'Failed to send admin notification email' },
-          { status: 500 }
+          { status: 500, headers: corsHeaders }
         )
       }
 
@@ -133,7 +140,7 @@ export const APIRoute = createAPIFileRoute('/api/emails')({
         message: 'Email sent successfully',
         clientEmailId: clientEmailResponse.data?.id,
         adminEmailId: adminEmailResponse.data?.id
-      })
+      }, { headers: corsHeaders })
 
     } catch (error) {
       console.error('Email API error:', error)
@@ -142,8 +149,20 @@ export const APIRoute = createAPIFileRoute('/api/emails')({
           success: false, 
           error: error instanceof Error ? error.message : 'Unknown error occurred' 
         },
-        { status: 500 }
+        { status: 500, headers: corsHeaders }
       )
     }
-  }
+  },
+
+  OPTIONS: async () => {
+    // Handle preflight requests
+    return new Response(null, {
+      status: 200,
+      headers: {
+        'Access-Control-Allow-Origin': 'https://tanstack.rublevsky.studio',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
+    });
+  },
 })

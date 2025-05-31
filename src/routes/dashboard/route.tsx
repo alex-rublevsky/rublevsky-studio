@@ -9,6 +9,7 @@ import {
 } from "~/components/ui/dashboard/sidebar";
 
 import { Outlet } from "@tanstack/react-router";
+import { Toaster } from "~/components/ui/shared/Sonner";
 
 // TODO: move to environment variable
 const AUTHORIZED_EMAIL = "alexander.rublevskii@gmail.com";
@@ -47,6 +48,7 @@ function RouteComponent() {
           </div>
         </div>
       </SidebarInset>
+      <Toaster />
     </SidebarProvider>
   );
 }

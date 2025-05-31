@@ -4,6 +4,11 @@ import type { User } from '../../utils/store'
 
 export const APIRoute = createAPIFileRoute('/api/users/$id')({
   GET: async ({ request, params }) => {
+    // Add CORS headers to allow requests only from the website domain
+    const corsHeaders = {
+      'Access-Control-Allow-Origin': 'https://tanstack.rublevsky.studio',
+    };
+
     console.info(`Fetching users by id=${params.id}... @`, request.url)
     try {
       const res = await fetch(
@@ -19,10 +24,10 @@ export const APIRoute = createAPIFileRoute('/api/users/$id')({
         id: user.id,
         name: user.name,
         email: user.email,
-      })
+      }, { headers: corsHeaders })
     } catch (e) {
       console.error(e)
-      return json({ error: 'User not found' }, { status: 404 })
+      return json({ error: 'User not found' }, { status: 404, headers: corsHeaders })
     }
   },
 })

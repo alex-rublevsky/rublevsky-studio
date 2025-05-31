@@ -13,9 +13,9 @@ import type { ProductFormData } from "~/types";
 
 export const APIRoute = createAPIFileRoute("/api/dashboard/products/$productId")({
   PUT: async ({ request, params }) => {
-    // Add CORS headers to allow requests from localhost
+    // Add CORS headers to allow requests only from the website domain
     const corsHeaders = {
-      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Origin": "https://tanstack.rublevsky.studio",
       "Access-Control-Allow-Methods": "PUT, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     };
@@ -219,7 +219,7 @@ export const APIRoute = createAPIFileRoute("/api/dashboard/products/$productId")
     return new Response(null, {
       status: 200,
       headers: {
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": "https://tanstack.rublevsky.studio",
         "Access-Control-Allow-Methods": "PUT, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type",
       },

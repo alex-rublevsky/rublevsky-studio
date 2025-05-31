@@ -5,9 +5,8 @@ import { db } from "~/db";
 
 export const APIRoute = createAPIFileRoute("/api/dashboard/categories")({
   GET: async ({ request, params }) => {
-    // Add CORS headers to allow requests from localhost
     const corsHeaders = {
-      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Origin": "https://tanstack.rublevsky.studio",
     };
 
     try {
