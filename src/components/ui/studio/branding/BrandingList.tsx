@@ -16,8 +16,10 @@ const BrandingProjectCard = ({
 }: BrandingProjectCardProps) => {
   const { animateCursor } = useCursorContext();
 
-  const handleMouseEnter = () => animateCursor("enlarge");
-  const handleMouseLeave = () => animateCursor("cursorEnter");
+  const handleMouseEnter = () => {
+    setVariant("enlarge");
+  };
+  const handleMouseLeave = () => setVariant("default");
 
   return (
     <motion.div

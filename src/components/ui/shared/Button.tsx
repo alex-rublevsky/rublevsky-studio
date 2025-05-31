@@ -72,25 +72,25 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
-    const { animateCursor } = useCursorContext();
+    const { setVariant } = useCursorContext();
 
     const handleMouseEnter = (e: React.MouseEvent<HTMLButtonElement>) => {
       if (!disableCursor) {
         switch (cursorType) {
           case "enlarge":
-            animateCursor("enlarge");
+            setVariant("enlarge");
             break;
           case "link":
-            animateCursor("link");
+            setVariant("link");
             break;
           case "visitWebsite":
-            animateCursor("visitWebsite");
+            setVariant("visitWebsite");
             break;
           case "add":
-            animateCursor("add");
+            setVariant("add");
             break;
           case "default":
-            animateCursor("cursorEnter");
+            setVariant("default");
             break;
           case "disabled":
             // No cursor animation
@@ -102,7 +102,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const handleMouseLeave = (e: React.MouseEvent<HTMLButtonElement>) => {
       if (!disableCursor && cursorType !== "disabled") {
-        animateCursor("cursorEnter");
+        setVariant("default");
       }
       onMouseLeave?.(e);
     };

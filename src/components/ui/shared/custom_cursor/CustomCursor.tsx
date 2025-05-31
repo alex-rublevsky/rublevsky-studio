@@ -1,16 +1,16 @@
-import { motion, useMotionValue } from "motion/react";
+import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { useCursorContext } from "./CustomCursorContext";
-import "./customCursor.css";
 
-// Enlarge SVG Component
+// Cursor Icon Components (Sized properly for the cursor)
 const EnlargeCursor = () => (
   <svg
-    width="29"
-    height="29"
+    width="70"
+    height="70"
     viewBox="0 0 29 29"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
+    className="text-white"
   >
     <path
       fillRule="evenodd"
@@ -28,7 +28,7 @@ const LinkCursor = () => (
     viewBox="0 0 70 70"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
-    className="w-full h-full"
+    className="text-white"
   >
     <path
       d="M69.9951 5.71484L70 5.71973L69.9951 5.72461V69.9951H61.9189V13.8008L6.6582 69.0615L0.948242 63.3506L56.2227 8.07617H0V0H69.9951V5.71484Z"
@@ -44,160 +44,131 @@ const AddCursor = () => (
     viewBox="0 0 70 70"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
+    className="text-white"
   >
     <path d="M39 31H70V39H39V70H31V39H0V31H31V0H39V31Z" fill="currentColor" />
   </svg>
 );
 
-const VisitWebsiteCursor = () => (
-  <div className="px-7 py-4">
-    <p>Visit the website</p>
-  </div>
-);
-
 function Cursor() {
-  const { animateCursorVariant, animateCursor } = useCursorContext();
-  const cursorX = useMotionValue(0);
-  const cursorY = useMotionValue(0);
+  const { variant, isVisible, setVariant, setIsVisible } = useCursorContext();
   const [isPressed, setIsPressed] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
-  // Shared animation config
+  // Animation configs matching previous implementation
   const animationConfig = {
-    duration: 0.4,
+    duration: 0.2,
     ease: [0.215, 0.61, 0.355, 1],
   };
 
-  // Press animation config (same bezier as sizing, but faster)
   const pressAnimationConfig = {
-    duration: 0.15,
+    duration: 0.1,
     ease: [0.215, 0.61, 0.355, 1],
   };
 
-  // Simple state-based animations
-  const isEnlargeHover = animateCursorVariant === "enlarge";
-  const isLinkHover = animateCursorVariant === "link";
-  const isAddHover = animateCursorVariant === "add";
-  const isVisitWebsiteHover = animateCursorVariant === "visitWebsite";
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      // Center the cursor properly (13.5px offset for 27px cursor)
+      setMousePosition({
+        x: e.clientX - 13.5,
+        y: e.clientY - 13.5,
+      });
+    };
 
-  const isVisible =
-    animateCursorVariant === "cursorEnter" ||
-    isEnlargeHover ||
-    isLinkHover ||
-    isAddHover ||
-    isVisitWebsiteHover;
+    const handleMouseDown = () => setIsPressed(true);
+    const handleMouseUp = () => setIsPressed(false);
+
+    const handleMouseEnter = () => {
+      setIsVisible(true);
+      setVariant("default");
+    };
+
+    const handleMouseLeave = () => {
+      setIsVisible(false);
+      setVariant("hidden");
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("mouseup", handleMouseUp);
+    document.body.addEventListener("mouseenter", handleMouseEnter);
+    document.body.addEventListener("mouseleave", handleMouseLeave);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("mouseup", handleMouseUp);
+      document.body.removeEventListener("mouseenter", handleMouseEnter);
+      document.body.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, [setVariant, setIsVisible]);
+
+  if (!isVisible) return null;
 
   // Calculate scale factor for press animation (20% smaller = 0.8 scale)
   const pressScale = isPressed ? 0.8 : 1;
-
-  useEffect(() => {
-    const body = document.body;
-    const mouseMoveHandler = (e: MouseEvent) => {
-      // Center the cursor (3rem = 48px / 2 = 24px offset)
-      cursorX.set(e.clientX - 12.8);
-      cursorY.set(e.clientY - 12.8);
-    };
-    const mouseEnterHandler = () => {
-      animateCursor("cursorEnter");
-    };
-    const mouseLeaveHandler = () => {
-      animateCursor("cursorLeave");
-    };
-    const mouseDownHandler = () => {
-      setIsPressed(true);
-    };
-    const mouseUpHandler = () => {
-      setIsPressed(false);
-    };
-
-    window.addEventListener("mousemove", mouseMoveHandler);
-    window.addEventListener("mousedown", mouseDownHandler);
-    window.addEventListener("mouseup", mouseUpHandler);
-    if (body) {
-      body.addEventListener("mouseenter", mouseEnterHandler);
-      body.addEventListener("mouseleave", mouseLeaveHandler);
-    }
-    return () => {
-      window.removeEventListener("mousemove", mouseMoveHandler);
-      window.removeEventListener("mousedown", mouseDownHandler);
-      window.removeEventListener("mouseup", mouseUpHandler);
-      if (body) {
-        body.removeEventListener("mouseenter", mouseEnterHandler);
-        body.removeEventListener("mouseleave", mouseLeaveHandler);
-      }
-    };
-  }, [animateCursor, cursorX, cursorY]);
 
   return (
     <>
       {/* Main cursor with blend mode for circle and SVG cursors */}
       <motion.div
-        className="cursor"
+        className="fixed pointer-events-none w-7 h-7 flex items-center justify-center"
         style={{
-          translateX: cursorX,
-          translateY: cursorY,
-          transformOrigin: "center",
+          left: mousePosition.x,
+          top: mousePosition.y,
+          mixBlendMode: "difference",
+          zIndex: 10000000,
         }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.1 }}
       >
         {/* Default circle cursor */}
         <motion.div
-          className="cursor-circle"
+          className="absolute w-7 h-7 border border-white rounded-full"
           initial={{ scale: 0, opacity: 0 }}
           animate={{
-            scale:
-              (isVisible &&
-              !isEnlargeHover &&
-              !isLinkHover &&
-              !isAddHover &&
-              !isVisitWebsiteHover
-                ? 2
-                : 0) * pressScale,
-            opacity:
-              isVisible &&
-              !isEnlargeHover &&
-              !isLinkHover &&
-              !isAddHover &&
-              !isVisitWebsiteHover
-                ? 0.12
-                : 0,
-            transition: isPressed ? pressAnimationConfig : animationConfig,
+            scale: (variant === "default" ? 2 : 0) * pressScale,
+            opacity: variant === "default" ? 0.12 : 0,
           }}
+          transition={isPressed ? pressAnimationConfig : animationConfig}
         />
 
         {/* Enlarge SVG cursor */}
         <motion.div
-          className="cursor-svg"
+          className="absolute w-12 h-12 flex items-center justify-center"
           initial={{ scale: 0, opacity: 0 }}
           animate={{
-            scale: (isEnlargeHover ? 1 : 0) * pressScale,
-            opacity: isEnlargeHover ? 1 : 0,
-            transition: isPressed ? pressAnimationConfig : animationConfig,
+            scale: (variant === "enlarge" ? 1 : 0) * pressScale,
+            opacity: variant === "enlarge" ? 1 : 0,
           }}
+          transition={isPressed ? pressAnimationConfig : animationConfig}
         >
           <EnlargeCursor />
         </motion.div>
 
         {/* Link SVG cursor */}
         <motion.div
-          className="cursor-svg"
+          className="absolute w-12 h-12 flex items-center justify-center"
           initial={{ scale: 0, opacity: 0 }}
           animate={{
-            scale: (isLinkHover ? 1 : 0) * pressScale,
-            opacity: isLinkHover ? 1 : 0,
-            transition: isPressed ? pressAnimationConfig : animationConfig,
+            scale: (variant === "link" ? 1 : 0) * pressScale,
+            opacity: variant === "link" ? 1 : 0,
           }}
+          transition={isPressed ? pressAnimationConfig : animationConfig}
         >
           <LinkCursor />
         </motion.div>
 
         {/* Add SVG cursor */}
         <motion.div
-          className="cursor-svg"
+          className="absolute w-12 h-12 flex items-center justify-center"
           initial={{ scale: 0, opacity: 0 }}
           animate={{
-            scale: (isAddHover ? 1 : 0) * pressScale,
-            opacity: isAddHover ? 1 : 0,
-            transition: isPressed ? pressAnimationConfig : animationConfig,
+            scale: (variant === "add" ? 1 : 0) * pressScale,
+            opacity: variant === "add" ? 1 : 0,
           }}
+          transition={isPressed ? pressAnimationConfig : animationConfig}
         >
           <AddCursor />
         </motion.div>
@@ -205,23 +176,26 @@ function Cursor() {
 
       {/* Visit website cursor - separate from blend mode context */}
       <motion.div
-        className="cursor-text-container"
+        className="fixed pointer-events-none w-7 h-7 flex items-center justify-center"
         style={{
-          translateX: cursorX,
-          translateY: cursorY,
-          transformOrigin: "center",
+          left: mousePosition.x,
+          top: mousePosition.y,
+          zIndex: 10000000,
         }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.1 }}
       >
         <motion.div
-          className="cursor-text"
+          className="absolute flex items-center justify-center bg-black text-white rounded-3xl text-sm font-medium whitespace-nowrap px-7 py-4"
           initial={{ scale: 0, opacity: 0 }}
           animate={{
-            scale: (isVisitWebsiteHover ? 1 : 0) * pressScale,
-            opacity: isVisitWebsiteHover ? 1 : 0,
-            transition: isPressed ? pressAnimationConfig : animationConfig,
+            scale: (variant === "visitWebsite" ? 1 : 0) * pressScale,
+            opacity: variant === "visitWebsite" ? 1 : 0,
           }}
+          transition={isPressed ? pressAnimationConfig : animationConfig}
         >
-          <VisitWebsiteCursor />
+          <p>Visit the website</p>
         </motion.div>
       </motion.div>
     </>
