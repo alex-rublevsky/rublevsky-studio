@@ -46,9 +46,8 @@ function CheckoutScreen() {
   const { cart, clearCart, products } = useCart();
   const formRef = React.useRef<HTMLFormElement>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isCartLoaded, setIsCartLoaded] = useState(false);
-  const [isOrderComplete, setIsOrderComplete] = useState(false);
   const [useSeparateBilling, setUseSeparateBilling] = useState(false);
+  const [showFormError, setShowFormError] = useState(false);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
     shippingAddress: {
       firstName: "",
@@ -68,9 +67,70 @@ function CheckoutScreen() {
   // Wait for cart and products to be loaded
   useEffect(() => {
     if (cart.items.length > 0 && products.length > 0) {
-      setIsCartLoaded(true);
     }
   }, [cart.items.length, products.length]);
+
+  // Check if required fields are filled
+  const isFormValid = () => {
+    const requiredFields = [
+      "firstName",
+      "lastName",
+      "email",
+      "phone",
+      "streetAddress",
+      "city",
+      "country",
+      "zipCode",
+    ];
+
+    return requiredFields.every((field) =>
+      customerInfo.shippingAddress[field as keyof Address]?.trim()
+    );
+  };
+
+  // Reset form error state when fields are filled
+  useEffect(() => {
+    if (showFormError && isFormValid()) {
+      setShowFormError(false);
+    }
+  }, [customerInfo.shippingAddress, showFormError]);
+
+  // Handle button click with proper validation feedback
+  const handleButtonClick = () => {
+    if (!isFormValid()) {
+      setShowFormError(true);
+      // Reset error state after 3 seconds
+      setTimeout(() => setShowFormError(false), 3000);
+
+      // Use the existing form submit logic for validation and field focus
+      const formElement = formRef.current;
+      if (formElement) {
+        formElement.requestSubmit();
+      }
+    } else if (cart.items.length === 0) {
+      toast.error("Your cart is empty");
+    } else {
+      // If all validation passes, submit the form
+      const formElement = formRef.current;
+      if (formElement) {
+        formElement.requestSubmit();
+      }
+    }
+  };
+
+  // Get dynamic button text based on validation state
+  const getButtonText = () => {
+    if (isLoading) return "Processing...";
+    if (showFormError) return "Please fill up the form";
+    if (cart.items.length === 0) return "Cart is empty";
+    return "Place Order";
+  };
+
+  // Get dynamic button variant based on state
+  const getButtonVariant = () => {
+    if (showFormError || cart.items.length === 0) return "destructive";
+    return "default";
+  };
 
   // Only redirect if cart is empty AND cart has been loaded AND order is not complete
   //   useEffect(() => {
@@ -124,6 +184,9 @@ function CheckoutScreen() {
     );
 
     if (missingFields.length > 0) {
+      // Trigger button error state
+      setShowFormError(true);
+
       // Get the friendly names directly from the missingFields entries
       const missingFieldNames = missingFields.map(
         ([, displayName]) => displayName
@@ -148,20 +211,17 @@ function CheckoutScreen() {
           });
         }
       }
+
+      // Reset error state after 3 seconds
+      setTimeout(() => setShowFormError(false), 3000);
       return;
     }
 
+    // If form is valid but cart is empty
     if (cart.items.length === 0) {
       toast.error("Your cart is empty");
       return;
     }
-
-    // Validate that we have products data
-    // if (products.length === 0) {
-    //   toast.error("Unable to validate products. Please try again.");
-    //   router.push("/store");
-    //   return;
-    // }
 
     setIsLoading(true);
 
@@ -215,9 +275,6 @@ function CheckoutScreen() {
       //       }
       //     );
       //   }
-
-      // Set order as complete before clearing cart
-      setIsOrderComplete(true);
 
       // Show success toast
       toast.success("Order placed successfully!", {
@@ -277,7 +334,7 @@ function CheckoutScreen() {
                 </p>
               </div>
               <div className="mb-8">
-                <h2 className="text-xl font-bold mb-4">Shipping Address</h2>
+                <h2 className="!text-lg font-bold mb-4">Shipping Address</h2>
                 <AddressFields
                   values={customerInfo.shippingAddress}
                   onChange={handleAddressChange("shipping")}
@@ -402,11 +459,12 @@ function CheckoutScreen() {
                 <h3 className="">CA${total.toFixed(2)}</h3>
               </div>
               <Button
-                onClick={handleSubmit}
-                disabled={cart.items.length === 0 || isLoading}
-                className="w-full"
+                onClick={handleButtonClick}
+                disabled={isLoading || cart.items.length === 0}
+                variant={getButtonVariant()}
+                className="w-full transition-all duration-300 ease-in-out"
               >
-                {isLoading ? "Processing..." : "Place Order"}
+                {getButtonText()}
               </Button>
               <div className="mt-6 pt-4 border-t">
                 <h6>Order Items</h6>
