@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useCart } from "~/lib/cartContext";
 import { Button } from "~/components/ui/shared/Button";
-import { useRouter } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 
 export function CartSummary() {
   const { cart } = useCart();
@@ -50,7 +50,7 @@ export function CartSummary() {
 export function CartCheckoutButton() {
   const { cart, setCartOpen } = useCart();
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+  const navigate = useNavigate();
 
   // Calculate total with discounts
   const subtotal = cart.items.reduce(
@@ -77,8 +77,7 @@ export function CartCheckoutButton() {
       setCartOpen(false);
 
       // Redirect to checkout page
-      //TODO: fix
-      //router.redirect("/checkout");
+      navigate({ to: "/store/checkout" });
     } catch (error) {
       console.error("Checkout error:", error);
     } finally {
