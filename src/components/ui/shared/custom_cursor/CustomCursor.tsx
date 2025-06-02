@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { useCursorContext } from "./CustomCursorContext";
+import { useIsMobile } from "~/hooks/use-mobile";
 
 // Cursor Icon Components (Sized properly for the cursor)
 const EnlargeCursor = () => (
@@ -54,6 +55,10 @@ function Cursor() {
   const { variant, isVisible, setVariant, setIsVisible } = useCursorContext();
   const [isPressed, setIsPressed] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const isMobile = useIsMobile();
+
+  // Don't render cursor on mobile devices
+  if (isMobile) return null;
 
   // Animation configs matching previous implementation
   const animationConfig = {
