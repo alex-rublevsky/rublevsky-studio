@@ -14,7 +14,7 @@ const BrandingProjectCard = ({
   project,
   setSelected,
 }: BrandingProjectCardProps) => {
-  const { animateCursor } = useCursorContext();
+  const { setVariant } = useCursorContext();
 
   const handleMouseEnter = () => {
     setVariant("enlarge");
