@@ -99,14 +99,11 @@ function RootComponent() {
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="en"
-      //className="scroll-smooth"
-    >
+    <html lang="en" className="scroll-smooth">
       <head>
         <HeadContent />
       </head>
-      <body className="overscroll-none">
+      <body className="overscroll-none ">
         <NavBar />
 
         <hr />

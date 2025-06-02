@@ -66,13 +66,13 @@ function HeroSection() {
                 <div>
                   <div className="flex flex-col justify-center gap-2">
                     <h5>Book a 15-min call</h5>
-                    <RouterLink
-                      to="/"
-                      hash="#booking"
-                      className="blurLink text-muted-foreground"
+                    <Link
+                      href="#booking"
+                      className="blurLink text-muted-foreground "
+                      cursorType="small"
                     >
                       Schedule now →
-                    </RouterLink>
+                    </Link>
                   </div>
                 </div>
               </div>
