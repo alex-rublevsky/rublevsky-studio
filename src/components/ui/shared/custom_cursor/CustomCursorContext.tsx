@@ -5,6 +5,7 @@ type CursorVariant =
   | "enlarge"
   | "link"
   | "add"
+  | "block"
   | "visitWebsite"
   | "hidden";
 

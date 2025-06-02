@@ -15,6 +15,7 @@ import { NavBar } from "~/components/ui/shared/NavBar";
 import { PostHogWrapper } from "~/components/PostHogWrapper";
 import { CursorContextProvider } from "~/components/ui/shared/custom_cursor/CustomCursorContext";
 import CustomCursor from "~/components/ui/shared/custom_cursor/CustomCursor";
+import { useIsMobile } from "~/hooks/use-mobile";
 
 const queryClient = new QueryClient();
 
@@ -68,17 +69,29 @@ export const Route = createRootRoute({
 });
 
 function RootComponent() {
+  const isMobile = useIsMobile();
+
   return (
     <PostHogWrapper>
       <QueryClientProvider client={queryClient}>
-        <CursorContextProvider>
-          <CustomCursor />
+        {isMobile ? (
+          // Mobile layout - no cursor
           <RootDocument>
             <div className="view-transition-group">
               <Outlet />
             </div>
           </RootDocument>
-        </CursorContextProvider>
+        ) : (
+          // Desktop layout - with cursor
+          <CursorContextProvider>
+            <CustomCursor />
+            <RootDocument>
+              <div className="view-transition-group">
+                <Outlet />
+              </div>
+            </RootDocument>
+          </CursorContextProvider>
+        )}
       </QueryClientProvider>
     </PostHogWrapper>
   );
