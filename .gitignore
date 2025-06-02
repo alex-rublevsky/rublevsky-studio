@@ -26,5 +26,6 @@ wrangler.jsonc
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+/drizzle/
 
 /.vscode/
