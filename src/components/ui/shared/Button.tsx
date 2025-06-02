@@ -2,6 +2,7 @@ import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { useCursorContext } from "~/components/ui/shared/custom_cursor/CustomCursorContext";
+import { useIsMobile } from "~/hooks/use-mobile";
 
 import { cn } from "~/utils/utils";
 
@@ -49,6 +50,7 @@ export interface ButtonProps
   asChild?: boolean;
   cursorType?:
     | "default"
+    | "small"
     | "enlarge"
     | "link"
     | "visitWebsite"
@@ -64,7 +66,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       variant,
       size,
       asChild = false,
-      cursorType = "enlarge",
+      cursorType = "small",
       disableCursor = false,
       onMouseEnter,
       onMouseLeave,
@@ -77,6 +79,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const handleMouseEnter = (e: React.MouseEvent<HTMLButtonElement>) => {
       if (!disableCursor) {
         switch (cursorType) {
+          case "small":
+            setVariant("small");
+            break;
           case "enlarge":
             setVariant("enlarge");
             break;
@@ -111,7 +116,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <Comp
         className={cn(
-          cursorType === "disabled" ? "cursor-not-allowed" : "cursor-none",
+          useIsMobile()
+            ? "cursor-pointer"
+            : cursorType === "disabled"
+              ? "cursor-not-allowed"
+              : "cursor-pointer",
           buttonVariants({ variant, size, className })
         )}
         ref={ref}

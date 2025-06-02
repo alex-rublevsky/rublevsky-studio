@@ -1,10 +1,17 @@
 import * as React from "react";
 import { useCursorContext } from "~/components/ui/shared/custom_cursor/CustomCursorContext";
 import { cn } from "~/utils/utils";
+import { useIsMobile } from "~/hooks/use-mobile";
 
 export interface LinkProps
   extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
-  cursorType?: "default" | "enlarge" | "link" | "visitWebsite" | "disabled";
+  cursorType?:
+    | "default"
+    | "small"
+    | "enlarge"
+    | "link"
+    | "visitWebsite"
+    | "disabled";
   disableCursor?: boolean;
   blurOnHover?: boolean;
 }
@@ -29,6 +36,9 @@ const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(
         switch (cursorType) {
           case "link":
             setVariant("link");
+            break;
+          case "small":
+            setVariant("small");
             break;
           case "enlarge":
             setVariant("enlarge");
@@ -60,7 +70,7 @@ const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         className={cn(
-          "cursor-none",
+          useIsMobile() ? "cursor-pointer" : "cursor-none",
           blurOnHover ? "blurLink" : undefined,
           className
         )}
