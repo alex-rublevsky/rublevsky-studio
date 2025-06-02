@@ -1,7 +1,9 @@
 import { createContext, useState, useContext, ReactNode } from "react";
 
+// Custom cursor variants
 type CursorVariant =
   | "default"
+  | "small"
   | "enlarge"
   | "link"
   | "add"
@@ -9,6 +11,7 @@ type CursorVariant =
   | "visitWebsite"
   | "hidden";
 
+// Context type definition
 interface CursorContextType {
   variant: CursorVariant;
   setVariant: (variant: CursorVariant) => void;
@@ -22,12 +25,17 @@ interface CursorContextProviderProps {
 
 const CursorContext = createContext<CursorContextType | undefined>(undefined);
 
+// Safe hook that works even when not wrapped in a provider (for mobile)
 export const useCursorContext = (): CursorContextType => {
   const context = useContext(CursorContext);
   if (!context) {
-    throw new Error(
-      "useCursorContext must be used within a CursorContextProvider"
-    );
+    // Return a no-op implementation for mobile/cases without provider
+    return {
+      variant: "default",
+      setVariant: () => {}, // No-op function
+      isVisible: false,
+      setIsVisible: () => {}, // No-op function
+    };
   }
   return context;
 };

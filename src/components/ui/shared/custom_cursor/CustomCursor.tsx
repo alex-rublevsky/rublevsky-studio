@@ -1,7 +1,6 @@
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { useCursorContext } from "./CustomCursorContext";
-import { useIsMobile } from "~/hooks/use-mobile";
 
 // Cursor Icon Components (Sized properly for the cursor)
 const EnlargeCursor = () => (
@@ -55,10 +54,6 @@ function Cursor() {
   const { variant, isVisible, setVariant, setIsVisible } = useCursorContext();
   const [isPressed, setIsPressed] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const isMobile = useIsMobile();
-
-  // Don't render cursor on mobile devices
-  if (isMobile) return null;
 
   // Animation configs matching previous implementation
   const animationConfig = {
@@ -128,13 +123,15 @@ function Cursor() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.1 }}
       >
-        {/* Default circle cursor */}
+        {/* Circle cursor that smoothly transitions between default and small sizes */}
         <motion.div
           className="absolute w-7 h-7 border border-white rounded-full"
           initial={{ scale: 0, opacity: 0 }}
           animate={{
-            scale: (variant === "default" ? 2 : 0) * pressScale,
-            opacity: variant === "default" ? 0.12 : 0,
+            scale:
+              (variant === "default" ? 2 : variant === "small" ? 1.4 : 0) *
+              pressScale,
+            opacity: variant === "default" || variant === "small" ? 0.12 : 0,
           }}
           transition={isPressed ? pressAnimationConfig : animationConfig}
         />
