@@ -14,8 +14,10 @@ import {
   ProductWithVariations,
   VariationAttribute,
 } from "~/types";
-import { Image } from "~/components/ui/shared/Image";
+
 import ProductVariationForm from "~/components/ui/dashboard/ProductVariationForm";
+import { AdminProductCard } from "~/components/ui/dashboard/AdminProductCard";
+import { sortProductsByStockAndName } from "~/utils/validateStock";
 
 import DeleteConfirmationDialog from "~/components/ui/dashboard/ConfirmationDialog";
 import { toast } from "sonner";
@@ -30,7 +32,7 @@ import {
   SelectValue,
 } from "~/components/ui/dashboard/Select";
 import { Switch } from "~/components/ui/shared/Switch";
-import { Badge } from "~/components/ui/shared/Badge";
+
 import {
   Drawer,
   DrawerContent,
@@ -46,6 +48,7 @@ interface Variation {
   sku: string;
   price: number;
   stock: number;
+  discount?: number | null;
   sort: number;
   attributes: VariationAttribute[];
 }
@@ -64,7 +67,7 @@ function RouteComponent() {
     isError,
     refetch,
   } = useQuery<{
-    products: Product[];
+    products: ProductWithVariations[];
     categories: Category[];
     teaCategories: TeaCategory[];
     brands: Brand[];
@@ -112,6 +115,10 @@ function RouteComponent() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
+
+  // Search and filter state
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   // All useEffect hooks
   useEffect(() => {
@@ -181,6 +188,15 @@ function RouteComponent() {
     setEditVariations(newVariations);
   };
 
+  const closeCreateModal = () => {
+    setShowCreateForm(false);
+    setFormData(defaultFormData);
+    setVariations([]);
+    setIsAutoSlug(true);
+    setHasAttemptedSubmit(false);
+    setError("");
+  };
+
   const closeEditModal = () => {
     setShowEditModal(false);
     setEditingProductId(null);
@@ -229,6 +245,26 @@ function RouteComponent() {
   }
 
   const { products, categories, teaCategories, brands } = productsData;
+
+  // Filter and sort products based on search and status
+  const filteredProducts = products
+    .filter((product) => {
+      const matchesSearch =
+        searchTerm === "" ||
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.slug.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        getCategoryName(product.categorySlug)
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase());
+
+      const matchesStatus =
+        statusFilter === "all" ||
+        (statusFilter === "active" && product.isActive) ||
+        (statusFilter === "inactive" && !product.isActive);
+
+      return matchesSearch && matchesStatus;
+    })
+    .sort(sortProductsByStockAndName);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -377,11 +413,8 @@ function RouteComponent() {
       // await createProduct(submissionData);
       toast.success("Product added successfully!");
 
-      // Reset form state
-      setFormData(defaultFormData);
-      setVariations([]);
-      setIsAutoSlug(true);
-      setHasAttemptedSubmit(false);
+      // Reset form state and close modal
+      closeCreateModal();
 
       // Refresh data
       refetch();
@@ -426,16 +459,19 @@ function RouteComponent() {
         variations: formattedVariations,
       };
 
-      const response = await fetch(`${DEPLOY_URL}/api/dashboard/products/${editingProductId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(submissionData),
-      });
+      const response = await fetch(
+        `${DEPLOY_URL}/api/dashboard/products/${editingProductId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(submissionData),
+        }
+      );
 
       if (!response.ok) {
-        const errorData = await response.json() as { error?: string };
+        const errorData = (await response.json()) as { error?: string };
         throw new Error(errorData.error || "Failed to update product");
       }
 
@@ -456,7 +492,7 @@ function RouteComponent() {
     }
   };
 
-  const handleDeleteClick = (product: Product) => {
+  const handleDeleteClick = (product: ProductWithVariations) => {
     setDeletingProductId(product.id);
     setShowDeleteDialog(true);
   };
@@ -485,409 +521,162 @@ function RouteComponent() {
     setDeletingProductId(null);
   };
 
-  const handleEdit = async (product: Product) => {
+  const handleEdit = async (product: ProductWithVariations) => {
     setEditingProductId(product.id);
     setShowEditModal(true);
     setIsEditMode(true);
     setIsEditAutoSlug(false);
 
-    setEditFormData({
-      name: product.name,
-      slug: product.slug,
-      description: product.description || "",
-      price: product.price.toString(),
-      categorySlug: product.categorySlug || "",
-      brandSlug: product.brandSlug || "",
-      teaCategories: product.teaCategories || [],
-      stock: product.stock.toString(),
-      isActive: product.isActive,
-      isFeatured: product.isFeatured,
-      discount: product.discount,
-      hasVariations: product.hasVariations,
-      weight: product.weight || "",
-      images: product.images || "",
-      variations: [],
-    });
+    try {
+      // Fetch complete product data including variations and tea categories
+      const response = await fetch(
+        `${DEPLOY_URL}/api/dashboard/products/${product.id}`
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch product details: ${response.status}`);
+      }
+
+      const productWithDetails =
+        (await response.json()) as ProductWithVariations;
+
+      // Convert variations to the frontend format
+      const formattedVariations =
+        productWithDetails.variations?.map((variation) => ({
+          id: variation.id.toString(),
+          sku: variation.sku,
+          price: variation.price,
+          stock: variation.stock,
+          sort: variation.sort ?? 0, // Handle null sort values
+          attributes: variation.attributes || [],
+        })) || [];
+
+      setEditFormData({
+        name: productWithDetails.name,
+        slug: productWithDetails.slug,
+        description: productWithDetails.description || "",
+        price: productWithDetails.price.toString(),
+        categorySlug: productWithDetails.categorySlug || "",
+        brandSlug: productWithDetails.brandSlug || "",
+        teaCategories: productWithDetails.teaCategories || [],
+        stock: productWithDetails.stock.toString(),
+        isActive: productWithDetails.isActive,
+        isFeatured: productWithDetails.isFeatured,
+        discount: productWithDetails.discount,
+        hasVariations: productWithDetails.hasVariations,
+        weight: productWithDetails.weight || "",
+        images: productWithDetails.images || "",
+        variations: [],
+      });
+
+      // Set the variations separately
+      setEditVariations(formattedVariations);
+    } catch (error) {
+      console.error("Error fetching product details:", error);
+      toast.error("Failed to load product details");
+
+      // Fallback to basic product data from the list
+      setEditFormData({
+        name: product.name,
+        slug: product.slug,
+        description: product.description || "",
+        price: product.price.toString(),
+        categorySlug: product.categorySlug || "",
+        brandSlug: product.brandSlug || "",
+        teaCategories: product.teaCategories || [],
+        stock: product.stock.toString(),
+        isActive: product.isActive,
+        isFeatured: product.isFeatured,
+        discount: product.discount,
+        hasVariations: product.hasVariations,
+        weight: product.weight || "",
+        images: product.images || "",
+        variations: [],
+      });
+      setEditVariations([]);
+    }
   };
 
   return (
     <div className="space-y-8">
       <div className="fixed bottom-0 right-2 z-50">
-        <Button onClick={() => setShowCreateForm(!showCreateForm)} size="lg">
+        <Button onClick={() => setShowCreateForm(true)} size="lg">
           <Plus />
-          {showCreateForm ? "Hide Form" : "Add New Product"}
+          Add New Product
         </Button>
       </div>
 
-      {/* Create Product Form */}
-      {showCreateForm && (
-        <div className="bg-card rounded-lg shadow-sm border border-border p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4">Add New Product</h2>
-
-          {error && !isEditMode && (
-            <div className="bg-destructive/20 border border-destructive text-destructive-foreground px-4 py-3 rounded mb-4">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input
-                label="Product Name"
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                className={
-                  hasAttemptedSubmit && !formData.name ? "border-red-500" : ""
-                }
-              />
-
-              <div className="flex items-end">
-                <Input
-                  label="Slug (Auto-generated from name)"
-                  type="text"
-                  name="slug"
-                  value={formData.slug}
-                  onChange={handleChange}
-                  required
-                  className={
-                    hasAttemptedSubmit && !formData.slug ? "border-red-500" : ""
-                  }
-                />
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => {
-                    setIsAutoSlug(true);
-                    if (formData.name) {
-                      const slug = formData.name
-                        .toLowerCase()
-                        .replace(/[^\w\s-]/g, "")
-                        .replace(/\s+/g, "-")
-                        .replace(/-+/g, "-")
-                        .trim();
-
-                      setFormData((prev) => ({
-                        ...prev,
-                        slug,
-                      }));
-                    }
-                  }}
-                  className="ml-2 mt-2"
-                >
-                  Reset
-                </Button>
-              </div>
-
-              <div className="md:col-span-2">
-                <Textarea
-                  label="Description"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  rows={4}
-                />
-              </div>
-
-              <div className="relative">
-                <Input
-                  label="Price (CAD)"
-                  type="number"
-                  name="price"
-                  value={formData.price}
-                  onChange={handleChange}
-                  required
-                  step="0.01"
-                  min="0"
-                  className={cn(
-                    "pl-7",
-                    hasAttemptedSubmit && !formData.price
-                      ? "border-red-500"
-                      : ""
-                  )}
-                />
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none mt-7">
-                  <span className="text-muted-foreground">$</span>
-                </div>
-              </div>
-
-              <Input
-                label="Stock"
-                type="number"
-                name="stock"
-                value={formData.stock}
-                onChange={handleChange}
-                min="0"
-              />
-
-              <Select
-                //label="Category"
-                value={formData.categorySlug}
-                onValueChange={(value) => {
-                  setFormData({
-                    ...formData,
-                    categorySlug: value,
-                  });
-                }}
-                required
-              >
-                <SelectTrigger
-                  className={
-                    hasAttemptedSubmit && !formData.categorySlug
-                      ? "border-red-500"
-                      : ""
-                  }
-                >
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((category: Category) => (
-                    <SelectItem key={category.slug} value={category.slug}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select
-                //label="Brand (optional)"
-                value={formData.brandSlug || undefined}
-                onValueChange={(value) => {
-                  setFormData({
-                    ...formData,
-                    brandSlug: value || null,
-                  });
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a brand (optional)" />
-                </SelectTrigger>
-                <SelectContent>
-                  {brands.map((brand: Brand) => (
-                    <SelectItem key={brand.slug} value={brand.slug}>
-                      {brand.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Tea Categories
-                </label>
-                <div className="space-y-2 border border-input rounded-md p-3">
-                  {teaCategories.map((category) => (
-                    <label
-                      key={category.slug}
-                      className="flex items-center space-x-2"
-                    >
-                      <input
-                        type="checkbox"
-                        name={`teaCategory-${category.slug}`}
-                        checked={
-                          formData.teaCategories?.includes(category.slug) ||
-                          false
-                        }
-                        onChange={handleChange}
-                        className="h-4 w-4 border-input"
-                      />
-                      <span className="text-sm">{category.name}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <div className="md:col-span-2">
-                <Input
-                  label="Image Identifiers"
-                  type="text"
-                  name="images"
-                  value={formData.images}
-                  onChange={handleChange}
-                  placeholder="image1.jpg,image2.jpg,image3.jpg"
-                />
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Enter image identifiers separated by commas. These should
-                  match your R2 image filenames.
-                </p>
-              </div>
-
-              <div className="md:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="flex items-center">
-                  <Switch
-                    name="isActive"
-                    checked={formData.isActive}
-                    onChange={handleChange}
-                  />
-                  <label className="ml-2 text-sm">Active</label>
-                </div>
-
-                <div className="flex items-center">
-                  <Switch
-                    name="isFeatured"
-                    checked={formData.isFeatured}
-                    onChange={handleChange}
-                  />
-                  <label className="ml-2 text-sm">Featured</label>
-                </div>
-
-                <div className="flex items-center">
-                  <Input
-                    type="number"
-                    name="discount"
-                    value={formData.discount || ""}
-                    onChange={handleChange}
-                    placeholder="Discount %"
-                    min="0"
-                    max="100"
-                    className="w-24"
-                  />
-                  <label className="ml-2 text-sm">% Off</label>
-                </div>
-
-                <div className="flex items-center">
-                  <Switch
-                    name="hasVariations"
-                    checked={formData.hasVariations}
-                    onChange={handleChange}
-                  />
-                  <label className="ml-2 text-sm">Has Variations</label>
-                </div>
-              </div>
-
-              <Input
-                label="Weight (in grams)"
-                type="text"
-                name="weight"
-                value={formData.weight}
-                onChange={handleChange}
-                placeholder="Enter weight in grams"
-              />
-            </div>
-
-            {/* Add the variations form when hasVariations is checked */}
-            {formData.hasVariations && (
-              <div className="mt-6 md:col-span-2">
-                <ProductVariationForm
-                  variations={variations}
-                  onChange={handleVariationsChange}
-                />
-              </div>
-            )}
-
-            <div className="mt-6">
-              <Button
-                variant="greenInverted"
-                type="submit"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "Creating..." : "Create Product"}
-              </Button>
-            </div>
-          </form>
-        </div>
-      )}
-
       {/* Products List */}
-      <div>
+      <div className="space-y-6">
+        {/* Products Header with Search */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <p className="text-muted-foreground">
+            Manage your product catalog • {filteredProducts.length} of{" "}
+            {products.length} products
+          </p>
+
+          {/* Search and Filter */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <Input
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full sm:w-64"
+            />
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full sm:w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="inactive">Inactive</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
         {isPending ? (
-          <div className="text-center py-4">Loading products...</div>
-        ) : products.length === 0 ? (
-          <div className="text-center py-4 text-muted-foreground">
-            No products found
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center space-y-4">
+              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+              <p className="text-muted-foreground">Loading products...</p>
+            </div>
+          </div>
+        ) : filteredProducts.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            <div className="mb-4">
+              <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center">
+                <Plus className="w-8 h-8" />
+              </div>
+            </div>
+            <h3 className="text-lg font-medium mb-2">
+              {searchTerm || statusFilter !== "all"
+                ? "No products found"
+                : "No products yet"}
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              {searchTerm || statusFilter !== "all"
+                ? "Try adjusting your search or filters"
+                : "Get started by creating your first product"}
+            </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-border">
-              <thead>
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    Product
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    Price
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    Stock
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    Category
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    Tea Categories
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {products.map((product) => (
-                  <tr key={product.id}>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center">
-                        {product.images && (
-                          <div className="h-10 w-10 relative shrink-0 mr-3">
-                            <Image
-                              src={`/${product.images.split(",").map((img) => img.trim())[0]}`}
-                              alt={product.name}
-                              className="object-cover rounded"
-                              sizes="2rem"
-                            />
-                          </div>
-                        )}
-                        <div>
-                          <div className="font-medium">{product.name}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {product.slug}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {formatPrice(product.price)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {product.stock}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {getCategoryName(product.categorySlug) || "N/A"}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {getTeaCategoryNames(product.teaCategories)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <Badge
-                        variant={product.isActive ? "default" : "secondary"}
-                      >
-                        {product.isActive ? "Active" : "Inactive"}
-                      </Badge>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <Button
-                        size="sm"
-                        onClick={() => handleEdit(product)}
-                        className="mr-2"
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleDeleteClick(product)}
-                      >
-                        Delete
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 md:gap-6">
+            {filteredProducts.map((product) => (
+              <AdminProductCard
+                key={product.id}
+                product={product}
+                categories={categories}
+                teaCategories={teaCategories}
+                brands={brands}
+                onEdit={handleEdit}
+                onDelete={handleDeleteClick}
+                formatPrice={formatPrice}
+                getCategoryName={getCategoryName}
+                getTeaCategoryNames={getTeaCategoryNames}
+              />
+            ))}
           </div>
         )}
       </div>
@@ -1147,6 +936,313 @@ function RouteComponent() {
                 disabled={isSubmitting}
               >
                 {isSubmitting ? "Updating..." : "Update Product"}
+              </Button>
+            </div>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Create Product Drawer */}
+      <Drawer open={showCreateForm} onOpenChange={setShowCreateForm}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Add New Product</DrawerTitle>
+          </DrawerHeader>
+
+          <DrawerBody>
+            {error && !isEditMode && (
+              <div className="bg-destructive/20 border border-destructive text-destructive-foreground px-4 py-3 rounded mb-4">
+                {error}
+              </div>
+            )}
+
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-6"
+              id="createProductForm"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Input
+                  label="Product Name *"
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  className={
+                    hasAttemptedSubmit && !formData.name ? "border-red-500" : ""
+                  }
+                />
+
+                <div className="flex items-end">
+                  <Input
+                    label="Slug (Auto-generated from name) *"
+                    type="text"
+                    name="slug"
+                    value={formData.slug}
+                    onChange={handleChange}
+                    required
+                    className={cn(
+                      "flex-1",
+                      hasAttemptedSubmit && !formData.slug
+                        ? "border-red-500"
+                        : ""
+                    )}
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setIsAutoSlug(true);
+                      if (formData.name) {
+                        const slug = formData.name
+                          .toLowerCase()
+                          .replace(/[^\w\s-]/g, "")
+                          .replace(/\s+/g, "-")
+                          .replace(/-+/g, "-")
+                          .trim();
+
+                        setFormData((prev) => ({
+                          ...prev,
+                          slug,
+                        }));
+                      }
+                    }}
+                    className="ml-2"
+                  >
+                    Reset
+                  </Button>
+                </div>
+
+                <div className="md:col-span-2">
+                  <Textarea
+                    label="Description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    rows={3}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Price (CAD) *
+                  </label>
+                  <div className="relative">
+                    <Input
+                      type="number"
+                      name="price"
+                      value={formData.price}
+                      onChange={handleChange}
+                      required
+                      step="0.01"
+                      min="0"
+                      className={cn(
+                        "pl-7",
+                        hasAttemptedSubmit && !formData.price
+                          ? "border-red-500"
+                          : ""
+                      )}
+                    />
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <span className="text-muted-foreground">$</span>
+                    </div>
+                  </div>
+                </div>
+
+                <Input
+                  label="Stock"
+                  type="number"
+                  name="stock"
+                  value={formData.stock}
+                  onChange={handleChange}
+                  min="0"
+                />
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Category *
+                  </label>
+                  <Select
+                    value={formData.categorySlug}
+                    onValueChange={(value) => {
+                      setFormData({
+                        ...formData,
+                        categorySlug: value,
+                      });
+                    }}
+                    required
+                  >
+                    <SelectTrigger
+                      className={
+                        hasAttemptedSubmit && !formData.categorySlug
+                          ? "border-red-500"
+                          : ""
+                      }
+                    >
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((category: Category) => (
+                        <SelectItem key={category.slug} value={category.slug}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Brand (optional)
+                  </label>
+                  <Select
+                    value={formData.brandSlug || undefined}
+                    onValueChange={(value) => {
+                      setFormData({
+                        ...formData,
+                        brandSlug: value || null,
+                      });
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a brand (optional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {brands.map((brand: Brand) => (
+                        <SelectItem key={brand.slug} value={brand.slug}>
+                          {brand.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Tea Categories
+                  </label>
+                  <div className="space-y-2 border border-input rounded-md p-3 max-h-48 overflow-y-auto">
+                    {teaCategories.map((category) => (
+                      <label
+                        key={category.slug}
+                        className="flex items-center space-x-2"
+                      >
+                        <input
+                          type="checkbox"
+                          name={`teaCategory-${category.slug}`}
+                          checked={
+                            formData.teaCategories?.includes(category.slug) ||
+                            false
+                          }
+                          onChange={handleChange}
+                          className="h-4 w-4 border-input"
+                        />
+                        <span className="text-sm">{category.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Images (comma-separated)
+                  </label>
+                  <Input
+                    type="text"
+                    name="images"
+                    value={formData.images}
+                    onChange={handleChange}
+                    placeholder="image1.jpg, image2.jpg, image3.jpg"
+                  />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Enter image identifiers separated by commas. These should
+                    match your R2 image filenames.
+                  </p>
+                </div>
+
+                <div className="md:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="flex items-center">
+                    <Switch
+                      name="isActive"
+                      checked={formData.isActive}
+                      onChange={handleChange}
+                    />
+                    <label className="ml-2 text-sm">Active</label>
+                  </div>
+
+                  <div className="flex items-center">
+                    <Switch
+                      name="isFeatured"
+                      checked={formData.isFeatured}
+                      onChange={handleChange}
+                    />
+                    <label className="ml-2 text-sm">Featured</label>
+                  </div>
+
+                  <div className="flex items-center">
+                    <Input
+                      type="number"
+                      name="discount"
+                      value={formData.discount || ""}
+                      onChange={handleChange}
+                      placeholder="Discount %"
+                      min="0"
+                      max="100"
+                      className="w-24"
+                    />
+                    <label className="ml-2 text-sm">% Off</label>
+                  </div>
+
+                  <div className="flex items-center">
+                    <Switch
+                      name="hasVariations"
+                      checked={formData.hasVariations}
+                      onChange={handleChange}
+                    />
+                    <label className="ml-2 text-sm">Has Variations</label>
+                  </div>
+                </div>
+
+                <Input
+                  label="Weight (in grams)"
+                  type="text"
+                  name="weight"
+                  value={formData.weight}
+                  onChange={handleChange}
+                  placeholder="Enter weight in grams"
+                />
+              </div>
+
+              {/* Add the variations form when hasVariations is checked */}
+              {formData.hasVariations && (
+                <div className="mt-6">
+                  <ProductVariationForm
+                    variations={variations}
+                    onChange={handleVariationsChange}
+                  />
+                </div>
+              )}
+            </form>
+          </DrawerBody>
+
+          <DrawerFooter className="border-t border-border bg-background">
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="secondaryInverted"
+                type="button"
+                onClick={closeCreateModal}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="greenInverted"
+                type="submit"
+                form="createProductForm"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Creating..." : "Create Product"}
               </Button>
             </div>
           </DrawerFooter>
