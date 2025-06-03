@@ -78,6 +78,7 @@ export const APIRoute = createAPIFileRoute("/api/store/$productId")({
             price: row.product_variations.price,
             stock: row.product_variations.stock,
             sort: row.product_variations.sort || 0,
+            discount: row.product_variations.discount,
             createdAt: row.product_variations.createdAt,
             attributes: [],
           });
