@@ -51,6 +51,7 @@ export const APIRoute = createAPIFileRoute(
               price: productVariations.price,
               stock: productVariations.stock,
               sort: productVariations.sort,
+              discount: productVariations.discount,
               attributeId: variationAttributes.attributeId,
               attributeValue: variationAttributes.value,
             })
@@ -90,6 +91,7 @@ export const APIRoute = createAPIFileRoute(
             price: row.price,
             stock: row.stock,
             sort: row.sort,
+            discount: row.discount,
             attributes: [],
           });
         }
@@ -283,6 +285,7 @@ export const APIRoute = createAPIFileRoute(
                   price: parseFloat(v.price.toString()),
                   stock: parseInt(v.stock.toString()),
                   sort: v.sort || 0,
+                  discount: v.discount ? parseInt(v.discount.toString()) : null,
                   createdAt: new Date(),
                 }))
               )

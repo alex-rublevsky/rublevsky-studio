@@ -103,6 +103,7 @@ export interface ProductVariationFormData {
   sku: string;
   price: string;
   stock: string;
+  discount?: number | null; // Add discount field
   sort: number;
   attributes: VariationAttributeFormData[];
 }
