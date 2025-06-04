@@ -6,7 +6,7 @@ import { db } from "~/db";
 export const APIRoute = createAPIFileRoute("/api/dashboard/brands")({
   GET: async ({ request, params }) => {
     const corsHeaders = {
-      "Access-Control-Allow-Origin": "https://tanstack.rublevsky.studio",
+      "Access-Control-Allow-Origin": "https://rublevsky.studio",
     };
 
     try {

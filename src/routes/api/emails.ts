@@ -47,7 +47,7 @@ export const APIRoute = createAPIFileRoute('/api/emails')({
   POST: async ({ request }) => {
 
     const corsHeaders = {
-      'Access-Control-Allow-Origin': 'https://tanstack.rublevsky.studio',
+      'Access-Control-Allow-Origin': 'https://rublevsky.studio',
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
     };
@@ -159,7 +159,7 @@ export const APIRoute = createAPIFileRoute('/api/emails')({
     return new Response(null, {
       status: 200,
       headers: {
-        'Access-Control-Allow-Origin': 'https://tanstack.rublevsky.studio',
+        'Access-Control-Allow-Origin': 'https://rublevsky.studio',
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type',
       },

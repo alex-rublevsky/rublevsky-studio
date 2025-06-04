@@ -17,7 +17,7 @@ export const APIRoute = createAPIFileRoute(
   GET: async ({ request, params }) => {
     // Add CORS headers to allow requests only from the website domain
     const corsHeaders = {
-      "Access-Control-Allow-Origin": "https://tanstack.rublevsky.studio",
+      "Access-Control-Allow-Origin": "https://rublevsky.studio",
       "Access-Control-Allow-Methods": "GET, PUT, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     };
@@ -132,7 +132,7 @@ export const APIRoute = createAPIFileRoute(
   PUT: async ({ request, params }) => {
     // Add CORS headers to allow requests only from the website domain
     const corsHeaders = {
-      "Access-Control-Allow-Origin": "https://tanstack.rublevsky.studio",
+      "Access-Control-Allow-Origin": "https://rublevsky.studio",
       "Access-Control-Allow-Methods": "PUT, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     };
@@ -368,7 +368,7 @@ export const APIRoute = createAPIFileRoute(
     return new Response(null, {
       status: 200,
       headers: {
-        "Access-Control-Allow-Origin": "https://tanstack.rublevsky.studio",
+        "Access-Control-Allow-Origin": "https://rublevsky.studio",
         "Access-Control-Allow-Methods": "GET, PUT, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type",
       },

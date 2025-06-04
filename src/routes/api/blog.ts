@@ -7,7 +7,7 @@ import { desc, eq } from 'drizzle-orm'
 export const APIRoute = createAPIFileRoute('/api/blog')({
   GET: async ({ request, params }) => {
     const corsHeaders = {
-      'Access-Control-Allow-Origin': 'https://tanstack.rublevsky.studio',
+      'Access-Control-Allow-Origin': 'https://rublevsky.studio',
     };
 
     try {

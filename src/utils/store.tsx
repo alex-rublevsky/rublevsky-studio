@@ -4,4 +4,4 @@ export type User = {
   email: string;
 };
 
-export const DEPLOY_URL = "https://tanstack.rublevsky.studio";
+export const DEPLOY_URL = "https://rublevsky.studio";
