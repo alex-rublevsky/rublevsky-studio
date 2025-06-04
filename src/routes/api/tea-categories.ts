@@ -8,7 +8,7 @@ import { eq } from 'drizzle-orm'
 export const APIRoute = createAPIFileRoute('/api/tea-categories')({
   GET: async ({ request, params }) => {
     const corsHeaders = {
-      'Access-Control-Allow-Origin': 'https://tanstack.rublevsky.studio',
+      'Access-Control-Allow-Origin': 'https://rublevsky.studio',
     };
 
     try {

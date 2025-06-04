@@ -6,7 +6,7 @@ export const APIRoute = createAPIFileRoute('/api/users/$id')({
   GET: async ({ request, params }) => {
     // Add CORS headers to allow requests only from the website domain
     const corsHeaders = {
-      'Access-Control-Allow-Origin': 'https://tanstack.rublevsky.studio',
+      'Access-Control-Allow-Origin': 'https://rublevsky.studio',
     };
 
     console.info(`Fetching users by id=${params.id}... @`, request.url)
