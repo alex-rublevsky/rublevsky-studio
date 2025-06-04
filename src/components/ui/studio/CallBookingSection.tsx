@@ -50,9 +50,6 @@ function CallBookingSection() {
         <p className="text-muted-foreground">
           Headquartered in Hamilton, Ontario
         </p>
-        <p className="text-muted-foreground">
-          Rublevsky Studio was created using React, Next.js, and Tailwind CSS
-        </p>
       </AnimatedGroup>
     </section>
   );
