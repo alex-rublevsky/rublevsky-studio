@@ -30,7 +30,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "~/components/ui/dashboard/Select";
+} from "~/components/ui/shared/Select";
 
 // Define the Variation type since it's not exported from @/types
 interface Variation {
@@ -38,6 +38,7 @@ interface Variation {
   sku: string;
   price: number;
   stock: number;
+  discount?: number | null; // Add discount field
   sort: number;
   attributes: VariationAttribute[];
 }
@@ -67,7 +68,7 @@ function SortableVariationItem({
   onUpdate: (
     id: string,
     field: keyof Variation,
-    value: string | number
+    value: string | number | null
   ) => void;
   onAddAttribute: (variationId: string, attributeId: string) => void;
   onRemoveAttribute: (variationId: string, attributeId: string) => void;
@@ -119,7 +120,7 @@ function SortableVariationItem({
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">
             SKU
@@ -152,6 +153,25 @@ function SortableVariationItem({
             onChange={(e) =>
               onUpdate(variation.id, "stock", parseInt(e.target.value) || 0)
             }
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">
+            Discount %
+          </label>
+          <Input
+            type="number"
+            value={variation.discount || ""}
+            onChange={(e) =>
+              onUpdate(
+                variation.id,
+                "discount",
+                parseInt(e.target.value) || null
+              )
+            }
+            placeholder="0"
+            min="0"
+            max="100"
           />
         </div>
       </div>
@@ -277,6 +297,7 @@ export default function ProductVariationForm({
       sku: "",
       price: 0,
       stock: 0,
+      discount: null,
       sort: variations.length,
       attributes: [],
     };
@@ -290,7 +311,7 @@ export default function ProductVariationForm({
   const handleUpdateVariation = (
     id: string,
     field: keyof Variation,
-    value: string | number
+    value: string | number | null
   ) => {
     onChange(
       variations.map((variation) =>

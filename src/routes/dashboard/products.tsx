@@ -30,7 +30,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "~/components/ui/dashboard/Select";
+} from "~/components/ui/shared/Select";
 import { Switch } from "~/components/ui/shared/Switch";
 
 import {

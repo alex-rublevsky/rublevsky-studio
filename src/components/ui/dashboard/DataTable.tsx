@@ -69,7 +69,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
+} from "~/components/ui/DropdownMenu";
 import { Input } from "~/components/ui/shared/Input";
 import { Label } from "~/components/ui/shared/Label";
 import {
@@ -78,7 +78,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "~/components/ui/dashboard/Select";
+} from "~/components/ui/shared/Select";
 import { Separator } from "~/components/ui/dashboard/separator";
 import {
   Sheet,

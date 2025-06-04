@@ -21,7 +21,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "~/components/ui/dashboard/Select";
+} from "~/components/ui/shared/Select";
 import {
   ToggleGroup,
   ToggleGroupItem,
