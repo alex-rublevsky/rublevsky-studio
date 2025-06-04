@@ -1,6 +1,7 @@
 export type Tool = {
     name: string;
     icon: string;
+    largeIcon?: boolean;
   };
   
   export type Device = {
