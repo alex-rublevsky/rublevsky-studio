@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ChartAreaInteractive } from "~/components/chart-area-interactive";
-import { DataTable } from "~/components/data-table";
+import { DataTable } from "~/components/ui/dashboard/DataTable";
 import { SectionCards } from "~/components/section-cards";
 import data from "~/data/data.json";
 

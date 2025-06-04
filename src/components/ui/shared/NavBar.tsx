@@ -1,9 +1,14 @@
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { cn } from "~/utils/utils";
-import { Menu, Transition } from "@headlessui/react";
 import { motion } from "motion/react";
 import { Button } from "~/components/ui/shared/Button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/DropdownMenu";
 
 interface NavItem {
   name: string;
@@ -89,45 +94,40 @@ const mobileMenuItems: NavItem[] = [
 ];
 
 const DropdownNavMenu = ({ items }: { items: NavItem[] }) => {
-  return (
-    <Menu as="div" className="relative inline-block text-left">
-      <div>
-        <Menu.Button className="relative flex w-fit rounded-full border border-black bg-background hover:bg-black hover:text-white transition-all duration-300 p-[0.3rem]">
-          <span className="relative z-10 block cursor-pointer px-2.5 md:px-4 py-1.5 text-xs text-white mix-blend-difference md:py-2 md:text-sm">
-            Other
-          </span>
-        </Menu.Button>
-      </div>
+  const handleNavigation = (url: string) => {
+    if (url.startsWith("http")) {
+      window.open(url, "_blank");
+    } else {
+      // Use the router for internal navigation
+      window.location.href = url;
+    }
+  };
 
-      <Transition
-        enter="transition ease-out duration-100"
-        enterFrom="transform opacity-0 scale-95"
-        enterTo="transform opacity-100 scale-100"
-        leave="transition ease-in duration-75"
-        leaveFrom="transform opacity-100 scale-100"
-        leaveTo="transform opacity-0 scale-95"
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger className="relative flex rounded-full border border-black bg-background hover:bg-black hover:text-white transition-all duration-200 focus:outline-hidden focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
+        <span className="relative z-10 flex items-center justify-between w-full cursor-pointer px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium text-white mix-blend-difference">
+          <span className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-left">
+            Menu
+          </span>
+        </span>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        side="top"
+        align="start"
+        className="mb-2 rounded-2xl border border-black bg-background text-foreground"
       >
-        <Menu.Items className="absolute bottom-full left-0 z-10 mb-2 w-56 origin-bottom-left rounded-md bg-background shadow-lg ring-1 ring-black/5 focus:outline-none overflow-hidden">
-          <div className="overflow-hidden">
-            {items.map((item) => (
-              <Menu.Item key={item.url}>
-                {({ active }) => (
-                  <Link
-                    viewTransition={{ types: ["slide-out"] }}
-                    to={item.url}
-                    className={`${
-                      active ? "bg-primary text-primary-foreground" : ""
-                    } text-foreground block px-4 py-2 text-sm transition-colors duration-150 `}
-                  >
-                    {item.name}
-                  </Link>
-                )}
-              </Menu.Item>
-            ))}
-          </div>
-        </Menu.Items>
-      </Transition>
-    </Menu>
+        {items.map((item) => (
+          <DropdownMenuItem
+            key={item.url}
+            onClick={() => handleNavigation(item.url)}
+            className="relative flex w-full cursor-default select-none items-center py-2 px-3 text-sm outline-none focus:bg-black focus:text-white data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-black hover:text-white transition-colors duration-200"
+          >
+            {item.name}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 
