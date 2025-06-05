@@ -70,6 +70,24 @@ export default function Modal({
                   : null;
               return (
                 <div className="relative flex flex-col lg:flex-row h-auto gap-2">
+                  {/* Close button - positioned absolutely to top-right of modal */}
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3, delay: 0.1 }}
+                    className="absolute right-4 top-4 z-30"
+                  >
+                    <Button
+                      onClick={() => setSelected(null)}
+                      size="lg"
+                      className="flex"
+                      cursorType="default"
+                    >
+                      <X className="h-6 w-6" />
+                      <span className="sr-only">Close gallery</span>
+                    </Button>
+                  </motion.div>
+
                   {/* Thumbnails column - desktop only */}
                   {selected.type === "image" &&
                     selected.images &&
@@ -77,8 +95,15 @@ export default function Modal({
                       <motion.div className="hidden lg:block shrink-0 w-24 overflow-y-auto">
                         <div className="flex flex-col gap-2">
                           {selected.images.map((image, index) => (
-                            <div
+                            <motion.div
                               key={index}
+                              initial={{ opacity: 0, scale: 0.8 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{
+                                duration: 0.3,
+                                delay: 0.3 + index * 0.05,
+                                ease: "easeOut",
+                              }}
                               className="shrink-0 w-24 h-24 relative cursor-pointer"
                               onMouseEnter={() =>
                                 setSelectedGalleryImage(image)
@@ -87,19 +112,21 @@ export default function Modal({
                               <div
                                 className={`
                         absolute inset-0
-                        rounded-md
+                        rounded-sm
                         ${displayedImage === image ? "border-2 border-black" : "border border-transparent"}
                         transition-colors duration-200
+                        pointer-events-none
+                        z-10
                       `}
                               />
-                              <div className="absolute inset-[2px] rounded-sm overflow-hidden">
+                              <div className="absolute inset-0 rounded-sm overflow-hidden">
                                 <img
                                   src={`https://assets.rublevsky.studio/${image}`}
                                   alt={`${selected.name} thumbnail ${index + 1}`}
                                   className="object-cover h-full w-full"
                                 />
                               </div>
-                            </div>
+                            </motion.div>
                           ))}
                         </div>
                       </motion.div>
@@ -139,12 +166,24 @@ export default function Modal({
                   {selected.type === "image" &&
                     selected.images &&
                     selected.images.length > 1 && (
-                      <div className="mt-1 lg:hidden">
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.2 }}
+                        className="mt-1 lg:hidden"
+                      >
                         <div className="overflow-x-auto scrollbar-none">
                           <div className="flex gap-2 px-4 pb-2">
                             {selected.images.map((image, index) => (
-                              <div
+                              <motion.div
                                 key={index}
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{
+                                  duration: 0.3,
+                                  delay: 0.3 + index * 0.05,
+                                  ease: "easeOut",
+                                }}
                                 className="shrink-0 w-24 h-24 relative cursor-pointer"
                                 onMouseEnter={() =>
                                   setSelectedGalleryImage(image)
@@ -153,24 +192,25 @@ export default function Modal({
                                 <div
                                   className={`
                             absolute inset-0
-                            rounded-md
+                            rounded-sm
                             ${displayedImage === image ? "border-2 border-black" : "border border-transparent"}
                             transition-colors duration-200
+                            pointer-events-none
+                            z-10
                           `}
                                 />
-                                <div className="absolute inset-[2px] rounded-[6px] overflow-hidden">
+                                <div className="absolute inset-0 rounded-sm overflow-hidden">
                                   <Image
                                     src={`https://assets.rublevsky.studio/${image}`}
                                     alt={`${selected.name} thumbnail ${index + 1}`}
-                                    //fill
-                                    className="object-cover"
+                                    className="object-cover w-full h-full"
                                   />
                                 </div>
-                              </div>
+                              </motion.div>
                             ))}
                           </div>
                         </div>
-                      </div>
+                      </motion.div>
                     )}
 
                   {/* Details column */}
@@ -201,24 +241,6 @@ export default function Modal({
                         </div>
                       )}
                     </div>
-
-                    <Button
-                      onClick={() => setSelected(null)}
-                      size="lg"
-                      className="flex absolute right-4 top-4 z-30"
-                      cursorType="default"
-                    >
-                      <X className="h-6 w-6" />
-                      <span className="sr-only">Close gallery</span>
-                    </Button>
-
-                    <Button
-                      onClick={() => setSelected(null)}
-                      size="lg"
-                      className="mt-auto w-auto fixed bottom-4 left-4 right-4 lg:hidden z-30 rounded-lg"
-                    >
-                      Back to gallery
-                    </Button>
                   </motion.div>
                 </div>
               );
