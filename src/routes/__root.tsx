@@ -35,10 +35,7 @@ export const Route = createRootRoute({
       }),
     ],
     scripts: [
-      {
-        type: "module",
-        src: "https://unpkg.com/@splinetool/viewer@1.10.2/build/spline-viewer.js",
-      },
+      // Spline viewer script is now loaded dynamically based on device type
     ],
     links: [
       { rel: "stylesheet", href: appCss },
