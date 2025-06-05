@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
-import { useCursorContext } from "~/components/ui/shared/custom_cursor/CustomCursorContext";
+import { useCursorHoverAdvanced } from "~/components/ui/shared/custom_cursor/CustomCursorContext";
 import { useIsMobile } from "~/hooks/use-mobile";
 
 import { cn } from "~/utils/utils";
@@ -53,10 +53,11 @@ export interface ButtonProps
     | "small"
     | "enlarge"
     | "link"
-    | "visitWebsite"
     | "add"
-    | "disabled";
-  disableCursor?: boolean;
+    | "block"
+    | "visitWebsite"
+    | "shrink"
+    | "hidden";
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -67,65 +68,33 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       size,
       asChild = false,
       cursorType = "small",
-      disableCursor = false,
+      disabled = false,
       onMouseEnter,
       onMouseLeave,
       ...props
     },
     ref
   ) => {
-    const { setVariant } = useCursorContext();
+    // Determine effective cursor behavior - disabled buttons use "block" cursor
+    const effectiveCursorType = disabled ? "block" : cursorType;
 
-    const handleMouseEnter = (e: React.MouseEvent<HTMLButtonElement>) => {
-      if (!disableCursor) {
-        switch (cursorType) {
-          case "small":
-            setVariant("small");
-            break;
-          case "enlarge":
-            setVariant("enlarge");
-            break;
-          case "link":
-            setVariant("link");
-            break;
-          case "visitWebsite":
-            setVariant("visitWebsite");
-            break;
-          case "add":
-            setVariant("add");
-            break;
-          case "default":
-            setVariant("default");
-            break;
-          case "disabled":
-            setVariant("default");
-            break;
-        }
-      }
-      onMouseEnter?.(e);
-    };
-
-    const handleMouseLeave = (e: React.MouseEvent<HTMLButtonElement>) => {
-      if (!disableCursor && cursorType !== "disabled") {
-        setVariant("default");
-      }
-      onMouseLeave?.(e);
-    };
+    const { handleMouseEnter, handleMouseLeave: handleMouseLeaveHook } =
+      useCursorHoverAdvanced(effectiveCursorType, disabled);
 
     const Comp = asChild ? Slot : "button";
     return (
       <Comp
         className={cn(
-          useIsMobile()
-            ? "cursor-pointer"
-            : cursorType === "disabled"
-              ? "cursor-not-allowed"
-              : "cursor-pointer",
+          // Use cursor-not-allowed for disabled buttons, cursor-default for enabled buttons
+          disabled ? "cursor-not-allowed" : "cursor-pointer",
           buttonVariants({ variant, size, className })
         )}
         ref={ref}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
+        disabled={disabled}
+        onMouseEnter={disabled ? onMouseEnter : handleMouseEnter(onMouseEnter)}
+        onMouseLeave={
+          disabled ? onMouseLeave : handleMouseLeaveHook(onMouseLeave)
+        }
         {...props}
       />
     );
