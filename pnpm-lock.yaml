@@ -186,8 +186,8 @@ importers:
         specifier: 0.5.3
         version: 0.5.3(@libsql/client@0.15.4)(@types/node@22.15.17)(better-sqlite3@11.10.0)(db0@0.3.2(@libsql/client@0.15.4)(better-sqlite3@11.10.0)(drizzle-orm@0.43.1(@libsql/client@0.15.4)(@types/better-sqlite3@7.6.13)(better-sqlite3@11.10.0)(kysely@0.27.6)))(drizzle-orm@0.43.1(@libsql/client@0.15.4)(@types/better-sqlite3@7.6.13)(better-sqlite3@11.10.0)(kysely@0.27.6))(ioredis@5.6.1)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       zod:
-        specifier: ^3.24.4
-        version: 3.24.4
+        specifier: ^3.25.51
+        version: 3.25.51
     devDependencies:
       '@types/better-sqlite3':
         specifier: ^7.6.13
@@ -6941,6 +6941,9 @@ packages:
   zod@3.24.4:
     resolution: {integrity: sha512-OdqJE9UDRPwWsrHjLN2F8bPxvwJBK22EHLWtanu0LSYr5YqzsaaW3RMgmjwr8Rypg5k+meEJdSPXJZXE/yqOMg==}
 
+  zod@3.25.51:
+    resolution: {integrity: sha512-TQSnBldh+XSGL+opiSIq0575wvDPqu09AqWe1F7JhUMKY+M91/aGlK4MhpVNO7MgYfHcVCB1ffwAUTJzllKJqg==}
+
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
@@ -8016,7 +8019,7 @@ snapshots:
       unixify: 1.0.0
       urlpattern-polyfill: 8.0.2
       yargs: 17.7.2
-      zod: 3.24.4
+      zod: 3.25.51
     transitivePeerDependencies:
       - encoding
       - rollup
@@ -9289,7 +9292,7 @@ snapshots:
       react-dom: 0.0.0-experimental-38ef6550-20250508(react@0.0.0-experimental-38ef6550-20250508)
       vinxi: 0.5.3(@libsql/client@0.15.4)(@types/node@22.15.17)(better-sqlite3@11.10.0)(db0@0.3.2(@libsql/client@0.15.4)(better-sqlite3@11.10.0)(drizzle-orm@0.43.1(@libsql/client@0.15.4)(@types/better-sqlite3@7.6.13)(better-sqlite3@11.10.0)(kysely@0.27.6)))(drizzle-orm@0.43.1(@libsql/client@0.15.4)(@types/better-sqlite3@7.6.13)(better-sqlite3@11.10.0)(kysely@0.27.6))(ioredis@5.6.1)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vite: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
-      zod: 3.24.4
+      zod: 3.25.51
     transitivePeerDependencies:
       - '@azure/app-configuration'
       - '@azure/cosmos'
@@ -9527,7 +9530,7 @@ snapshots:
       '@tanstack/virtual-file-routes': 1.115.0
       prettier: 3.5.3
       tsx: 4.19.4
-      zod: 3.24.4
+      zod: 3.25.51
     optionalDependencies:
       '@tanstack/react-router': 1.120.3(react-dom@0.0.0-experimental-38ef6550-20250508(react@0.0.0-experimental-38ef6550-20250508))(react@0.0.0-experimental-38ef6550-20250508)
 
@@ -9549,7 +9552,7 @@ snapshots:
       babel-dead-code-elimination: 1.0.10
       chokidar: 3.6.0
       unplugin: 2.3.2
-      zod: 3.24.4
+      zod: 3.25.51
     optionalDependencies:
       '@tanstack/react-router': 1.120.3(react-dom@0.0.0-experimental-38ef6550-20250508(react@0.0.0-experimental-38ef6550-20250508))(react@0.0.0-experimental-38ef6550-20250508)
       vite: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
@@ -9661,7 +9664,7 @@ snapshots:
       react-dom: 0.0.0-experimental-38ef6550-20250508(react@0.0.0-experimental-38ef6550-20250508)
       vinxi: 0.5.3(@libsql/client@0.15.4)(@types/node@22.15.17)(better-sqlite3@11.10.0)(db0@0.3.2(@libsql/client@0.15.4)(better-sqlite3@11.10.0)(drizzle-orm@0.43.1(@libsql/client@0.15.4)(@types/better-sqlite3@7.6.13)(better-sqlite3@11.10.0)(kysely@0.27.6)))(drizzle-orm@0.43.1(@libsql/client@0.15.4)(@types/better-sqlite3@7.6.13)(better-sqlite3@11.10.0)(kysely@0.27.6))(ioredis@5.6.1)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
       vite: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
-      zod: 3.24.4
+      zod: 3.25.51
     transitivePeerDependencies:
       - '@azure/app-configuration'
       - '@azure/cosmos'
@@ -10291,7 +10294,7 @@ snapshots:
       jose: 5.10.0
       kysely: 0.27.6
       nanostores: 0.11.4
-      zod: 3.24.4
+      zod: 3.25.51
 
   better-call@1.0.9:
     dependencies:
@@ -11061,8 +11064,8 @@ snapshots:
       '@babel/plugin-transform-private-methods': 7.27.1(@babel/core@7.27.1)
       eslint: 9.26.0(jiti@2.4.2)
       hermes-parser: 0.25.1
-      zod: 3.24.4
-      zod-validation-error: 3.4.1(zod@3.24.4)
+      zod: 3.25.51
+      zod-validation-error: 3.4.1(zod@3.25.51)
     transitivePeerDependencies:
       - supports-color
 
@@ -14042,7 +14045,7 @@ snapshots:
       unenv: 1.10.0
       unstorage: 1.16.0(db0@0.3.2(@libsql/client@0.15.4)(better-sqlite3@11.10.0)(drizzle-orm@0.43.1(@libsql/client@0.15.4)(@types/better-sqlite3@7.6.13)(better-sqlite3@11.10.0)(kysely@0.27.6)))(ioredis@5.6.1)
       vite: 6.3.5(@types/node@22.15.17)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)(tsx@4.19.4)(yaml@2.7.1)
-      zod: 3.24.4
+      zod: 3.25.51
     transitivePeerDependencies:
       - '@azure/app-configuration'
       - '@azure/cosmos'
@@ -14296,12 +14299,14 @@ snapshots:
     dependencies:
       zod: 3.24.4
 
-  zod-validation-error@3.4.1(zod@3.24.4):
+  zod-validation-error@3.4.1(zod@3.25.51):
     dependencies:
-      zod: 3.24.4
+      zod: 3.25.51
 
   zod@3.22.3: {}
 
   zod@3.24.4: {}
+
+  zod@3.25.51: {}
 
   zwitch@2.0.4: {}

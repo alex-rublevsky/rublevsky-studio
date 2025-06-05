@@ -1,5 +1,5 @@
 {
-  "name": "rublevsky-studio-tanstack",
+  "name": "Rublevsky Studio",
   "private": true,
   "sideEffects": false,
   "type": "module",
@@ -80,7 +80,7 @@
     "unenv": "^1.10.0",
     "vaul": "^1.1.2",
     "vinxi": "0.5.3",
-    "zod": "^3.24.4"
+    "zod": "^3.25.51"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
