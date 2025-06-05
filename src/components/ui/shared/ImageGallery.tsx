@@ -209,20 +209,22 @@ export default function ImageGallery({
                 }
               }}
             >
-              <div
-                className={`
-                absolute inset-0
-                rounded-md
-                ${selectedImage === image ? "border-2 border-black" : "border border-transparent"}
-                transition-colors duration-200
-              `}
-              />
-              <div className="absolute inset-[2px] rounded-sm overflow-hidden">
+              <div className="absolute inset-0 rounded-sm overflow-hidden">
+                <div
+                  className={`
+                    absolute inset-0
+                    rounded-sm
+                    ${selectedImage === image ? "border-2 border-black" : "border border-transparent"}
+                    transition-colors duration-200
+                    pointer-events-none
+                    z-10
+                  `}
+                />
                 <Image
                   src={`/${image}`}
                   alt={`${alt} thumbnail ${index + 1}`}
                   //fill
-                  className="object-cover"
+                  className="object-cover w-full h-full"
                 />
               </div>
             </div>
