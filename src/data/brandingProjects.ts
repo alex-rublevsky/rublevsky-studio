@@ -20,11 +20,11 @@ export const brandingProjects: BrandingProject[] = [
     name: 'Chick-fil-A',
     type: 'image',
     images: [
-      '1-chickfila.jpg',
-      '2-chickfila.jpg',
-      '3-chickfila.jpg',
-      '4-chickfila.jpg',
-      '5-chickfila.jpg'
+      'branding/chickfila/chickfila-1.webp',
+      'branding/chickfila/chickfila-2.webp',
+     'branding/chickfila/chickfila-3.webp',
+    'branding/chickfila/chickfila-4.webp',
+     'branding/chickfila/chickfila-5.webp',
     ],
     description: 'Branding project for Chick-fil-A',
     logo: 'logos/mohawk-icon.svg'
@@ -33,7 +33,7 @@ export const brandingProjects: BrandingProject[] = [
     id: 'adobe',
     name: 'Adobe',
     type: 'image',
-    images: ['1-adobe.jpg', '2-adobe.jpg', '3-adobe.jpg'],
+    images: ['branding/adobe/adobe-1.webp', 'branding/adobe/adobe-2.webp', 'branding/adobe/adobe-3.webp'],
     description: 'Design work for Adobe',
     logo: 'logos/mohawk-icon.svg'
   },
@@ -41,7 +41,7 @@ export const brandingProjects: BrandingProject[] = [
     id: 'chrysalis',
     name: 'Chrysalis',
     type: 'image',
-    images: ['1-chrysalis.jpg', '2-chrysalis.jpg'],
+    images: ['branding/chrysalis/chrysalis-1.webp', 'branding/chrysalis/chrysalis-2.webp'],
     description: 'Branding for Chrysalis',
     logo: 'hpl.svg'
   },
@@ -49,7 +49,7 @@ export const brandingProjects: BrandingProject[] = [
     id: 'cayuga',
     name: 'Cayuga',
     type: 'image',
-    images: ['1-cayuga.jpg', '2-cayuga.jpg', '3-cayuga.jpg'],
+    images: ['branding/cayuga/cayuga-1.webp', 'branding/cayuga/cayuga-2.webp', 'branding/cayuga/cayuga-3.webp'],
     description: 'Cayuga project',
     logo: 'logos/mohawk-icon.svg'
   },
@@ -58,12 +58,13 @@ export const brandingProjects: BrandingProject[] = [
     name: 'Nutrition Box',
     type: 'image',
     images: [
-      '1-nutrition-box.jpg',
-      '2-nutrition-box.jpg',
-      '3-nutrition-box.jpg',
-      '4-nutrition-box.jpg',
-      '5-nutrition-box.jpg',
-      '6-nutrition-box.jpg'
+      'branding/nutrition-box/nutrition-box-1.webp',
+            'branding/nutrition-box/nutrition-box-2.webp',
+      'branding/nutrition-box/nutrition-box-3.webp',
+      'branding/nutrition-box/nutrition-box-4.webp',
+      'branding/nutrition-box/nutrition-box-5.webp',
+      'branding/nutrition-box/nutrition-box-6.webp',
+
     ],
     description: 'Nutrition Box branding',
     logo: 'logos/mohawk-icon.svg'
@@ -72,7 +73,7 @@ export const brandingProjects: BrandingProject[] = [
     id: 'emmanuel',
     name: 'Emmanuel',
     type: 'image',
-    images: ['1-emmanuel.jpg', '2-emmanuel.jpg'],
+    images: ['branding/emmanuel/emmanuel-1.webp', 'branding/emmanuel/emmanuel-2.webp'],
     description: 'Emmanuel project',
     logo: 'logos/mohawk-icon.svg'
   },
@@ -89,7 +90,7 @@ export const brandingProjects: BrandingProject[] = [
     id: 'querido',
     name: 'Querido',
     type: 'image',
-    images: ['1-querido.jpg', '2-querido.jpg', '3-querido.jpg', '4-querido.jpg'],
+    images: ['branding/querido/querido-1.webp', 'branding/querido/querido-2.webp', 'branding/querido/querido-3.webp', 'branding/querido/querido-4.webp'],
     description: 'Querido branding project',
     logo: 'logos/mohawk-icon.svg'
   },
@@ -97,7 +98,7 @@ export const brandingProjects: BrandingProject[] = [
     id: 'design-shirt',
     name: 'Design Shirt',
     type: 'image',
-    images: ['1-design-shirt.jpg', '2-design-shirt.jpg'],
+    images: ['branding/design-shirt/design-shirt-1.webp', 'branding/design-shirt/design-shirt-2.webp'],
     description: 'Design Shirt project',
     logo: 'logos/mohawk-icon.svg'
   }
