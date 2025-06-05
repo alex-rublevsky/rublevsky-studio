@@ -217,7 +217,7 @@ export default function ImageGallery({
                 transition-colors duration-200
               `}
               />
-              <div className="absolute inset-[2px] rounded-[6px] overflow-hidden">
+              <div className="absolute inset-[2px] rounded-sm overflow-hidden">
                 <Image
                   src={`/${image}`}
                   alt={`${alt} thumbnail ${index + 1}`}
