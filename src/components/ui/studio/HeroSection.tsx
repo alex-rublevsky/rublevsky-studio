@@ -3,25 +3,53 @@ import NeumorphismCard from "~/components/ui/shared/NeumorphismCard";
 import { TextEffect } from "~/components/motion_primitives/AnimatedText";
 import { AnimatedGroup } from "~/components/motion_primitives/AnimatedGroup";
 import { Link as RouterLink } from "@tanstack/react-router";
+import { motion } from "motion/react";
 import { Image } from "~/components/ui/shared/Image";
 import { Link } from "~/components/ui/shared/Link";
-import SplineScene from "~/components/ui/shared/SplineScene";
+import { z } from "zod";
 
 function HeroSection() {
   return (
     <section className="relative pb-20 lg:pb-0 min-h-screen md:min-h-[calc(100vh+5rem)] overflow-hidden">
       {/* Spline 3D Background */}
-      <div className="absolute inset-0 w-full h-full z-0">
-        <SplineScene
-          scene="https://prod.spline.design/XRydKQhqfpYOjapX/scene.splinecode"
-          className="w-full h-full"
+      <motion.div
+        className="absolute inset-0 w-full h-full z-0"
+        initial={{ opacity: 0, filter: "blur(12px)" }}
+        animate={{ opacity: 1, filter: "blur(0px)" }}
+        transition={{
+          delay: 1.75,
+          duration: 2,
+          type: "spring",
+          bounce: 0.3,
+          filter: { duration: 0.01, ease: "linear" },
+        }}
+      >
+        {/* @ts-ignore */}
+        <spline-viewer
+          loading-anim-type="spinner-big-dark"
+          url="https://prod.spline.design/XRydKQhqfpYOjapX/scene.splinecode"
+          style={{
+            width: "100%",
+            height: "100%",
+            zIndex: -1,
+          }}
         />
-      </div>
+
+        {/* Bottom gradient overlay */}
+        <div
+          className="absolute bottom-0 left-0 right-0 pointer-events-none"
+          style={{
+            height: "9rem",
+            background:
+              "linear-gradient(to top, #F1F1F3 0%, #F1F1F3 44.44%, transparent 100%)",
+          }}
+        />
+      </motion.div>
 
       {/* Content overlay */}
       <div className="relative z-10">
         <div className="sm:absolute sm:left-1/2 sm:-translate-x-1/2 flex top-2 mb-8 md:mb-12">
-          <AnimatedGroup className="hidden sm:flex gap-4">
+          <AnimatedGroup className="hidden md:flex gap-4">
             <Button asChild variant="outline">
               <RouterLink to="/" hash="#booking">
                 Book a call
