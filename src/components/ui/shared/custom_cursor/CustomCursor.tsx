@@ -66,6 +66,12 @@ function Cursor() {
     ease: [0.215, 0.61, 0.355, 1],
   };
 
+  // Longer, smoother animation specifically for shrink transition
+  const shrinkAnimationConfig = {
+    duration: 0.6,
+    ease: [0.4, 0, 0.2, 1], // Smooth cubic-bezier curve
+  };
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       // Center the cursor properly (13.5px offset for 27px cursor)
@@ -123,17 +129,33 @@ function Cursor() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.1 }}
       >
-        {/* Circle cursor that smoothly transitions between default and small sizes */}
+        {/* Circle cursor that smoothly transitions between default, small, and shrink sizes */}
         <motion.div
           className="absolute w-7 h-7 border border-white rounded-full"
           initial={{ scale: 0, opacity: 0 }}
           animate={{
             scale:
-              (variant === "default" ? 2 : variant === "small" ? 1.4 : 0) *
-              pressScale,
-            opacity: variant === "default" || variant === "small" ? 0.12 : 0,
+              (variant === "default"
+                ? 2
+                : variant === "small"
+                  ? 1.4
+                  : variant === "shrink"
+                    ? 0
+                    : 0) * pressScale,
+            opacity:
+              variant === "default" ||
+              variant === "small" ||
+              variant === "shrink"
+                ? 0.12
+                : 0,
           }}
-          transition={isPressed ? pressAnimationConfig : animationConfig}
+          transition={
+            isPressed
+              ? pressAnimationConfig
+              : variant === "shrink"
+                ? shrinkAnimationConfig
+                : animationConfig
+          }
         />
 
         {/* Enlarge SVG cursor */}

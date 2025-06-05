@@ -9,6 +9,7 @@ type CursorVariant =
   | "add"
   | "block"
   | "visitWebsite"
+  | "shrink"
   | "hidden";
 
 // Context type definition

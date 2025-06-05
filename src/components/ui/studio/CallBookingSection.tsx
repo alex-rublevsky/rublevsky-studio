@@ -1,8 +1,19 @@
 import { AnimatedGroup } from "~/components/motion_primitives/AnimatedGroup";
 import Cal, { getCalApi } from "@calcom/embed-react";
 import { useEffect } from "react";
+import { useCursorContext } from "~/components/ui/shared/custom_cursor/CustomCursorContext";
 
 function CallBookingSection() {
+  const { setVariant } = useCursorContext();
+
+  const handleCalendarMouseEnter = () => {
+    setVariant("shrink");
+  };
+
+  const handleCalendarMouseLeave = () => {
+    setVariant("default");
+  };
+
   useEffect(() => {
     (async function () {
       const cal = await getCalApi();
@@ -29,7 +40,11 @@ function CallBookingSection() {
         </p>
       </AnimatedGroup>
 
-      <div className="[grid-area:calendar] md:min-w-[30rem]">
+      <div
+        className="[grid-area:calendar] md:min-w-[30rem]"
+        onMouseEnter={handleCalendarMouseEnter}
+        onMouseLeave={handleCalendarMouseLeave}
+      >
         <Cal
           calLink="rublevsky/virtual-meeting"
           style={{
