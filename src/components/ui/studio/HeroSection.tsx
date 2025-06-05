@@ -23,16 +23,29 @@ function HeroSection() {
         return;
       }
 
-      // Dynamically import the script
-      import(
-        "https://unpkg.com/@splinetool/viewer@1.10.2/build/spline-viewer.js"
-      )
-        .then(() => {
-          setIsSplineLoaded(true);
-        })
-        .catch((error) => {
-          console.error("Failed to load Spline viewer:", error);
-        });
+      // Create and load the script element
+      const script = document.createElement("script");
+      script.src =
+        "https://unpkg.com/@splinetool/viewer@1.10.2/build/spline-viewer.js";
+      script.type = "module";
+      script.onload = () => {
+        setIsSplineLoaded(true);
+      };
+      script.onerror = (error) => {
+        console.error("Failed to load Spline viewer:", error);
+      };
+
+      document.head.appendChild(script);
+
+      // Cleanup function to remove script if component unmounts
+      return () => {
+        const existingScript = document.querySelector(
+          'script[src*="splinetool/viewer"]'
+        );
+        if (existingScript && existingScript.parentNode) {
+          existingScript.parentNode.removeChild(existingScript);
+        }
+      };
     }
   }, [isMobile]);
   return (
