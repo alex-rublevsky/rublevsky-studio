@@ -49,7 +49,7 @@ export default function Modal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
+          transition={{ duration: 0.3, delay: 0 }}
           className="p-2 lg:p-4 not-first:fixed inset-0 h-auto z-50 cursor-pointer flex items-center justify-center bg-background/40 backdrop-blur-2xl"
           onClick={() => setSelected(null)}
         >
