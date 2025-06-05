@@ -6,45 +6,84 @@ import { Link as RouterLink } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { Image } from "~/components/ui/shared/Image";
 import { Link } from "~/components/ui/shared/Link";
+import { useIsMobile } from "~/hooks/use-mobile";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 
 function HeroSection() {
+  const isMobile = useIsMobile();
+  const [isSplineLoaded, setIsSplineLoaded] = useState(false);
+
+  useEffect(() => {
+    // Only load Spline on desktop
+    if (!isMobile) {
+      // Check if script is already loaded
+      if (document.querySelector('script[src*="splinetool/viewer"]')) {
+        setIsSplineLoaded(true);
+        return;
+      }
+
+      // Dynamically import the script
+      import(
+        "https://unpkg.com/@splinetool/viewer@1.10.2/build/spline-viewer.js"
+      )
+        .then(() => {
+          setIsSplineLoaded(true);
+        })
+        .catch((error) => {
+          console.error("Failed to load Spline viewer:", error);
+        });
+    }
+  }, [isMobile]);
   return (
     <section className="relative pb-20 lg:pb-0 min-h-screen md:min-h-[calc(100vh+5rem)] overflow-hidden">
-      {/* Spline 3D Background */}
-      <motion.div
-        className="absolute inset-0 w-full h-full z-0"
-        initial={{ opacity: 0, filter: "blur(12px)" }}
-        animate={{ opacity: 1, filter: "blur(0px)" }}
-        transition={{
-          delay: 1.75,
-          duration: 2,
-          type: "spring",
-          bounce: 0.3,
-          filter: { duration: 0.01, ease: "linear" },
-        }}
-      >
-        {/* @ts-ignore */}
-        <spline-viewer
-          loading-anim-type="spinner-big-dark"
-          url="https://prod.spline.design/XRydKQhqfpYOjapX/scene.splinecode"
-          style={{
-            width: "100%",
-            height: "100%",
-            zIndex: -1,
+      {/* Spline 3D Background - Only on desktop and when script is loaded */}
+      {!isMobile && isSplineLoaded && (
+        <motion.div
+          className="absolute inset-0 w-full h-full z-0"
+          initial={{ opacity: 0, filter: "blur(12px)" }}
+          animate={{ opacity: 1, filter: "blur(0px)" }}
+          transition={{
+            delay: 1.75,
+            duration: 2,
+            type: "spring",
+            bounce: 0.3,
+            filter: { duration: 0.01, ease: "linear" },
           }}
-        />
+        >
+          {/* @ts-ignore */}
+          <spline-viewer
+            loading-anim-type="spinner-big-dark"
+            url="https://prod.spline.design/XRydKQhqfpYOjapX/scene.splinecode"
+            style={{
+              width: "100%",
+              height: "100%",
+              zIndex: -1,
+            }}
+          />
 
-        {/* Bottom gradient overlay */}
+          {/* Bottom gradient overlay */}
+          <div
+            className="absolute bottom-0 left-0 right-0 pointer-events-none"
+            style={{
+              height: "9rem",
+              background:
+                "linear-gradient(to top, #F1F1F3 0%, #F1F1F3 44.44%, transparent 100%)",
+            }}
+          />
+        </motion.div>
+      )}
+
+      {/* Fallback Background - For mobile or when Spline isn't loaded */}
+      {(isMobile || !isSplineLoaded) && (
         <div
-          className="absolute bottom-0 left-0 right-0 pointer-events-none"
+          className="absolute inset-0 w-full h-full z-0"
           style={{
-            height: "9rem",
             background:
-              "linear-gradient(to top, #F1F1F3 0%, #F1F1F3 44.44%, transparent 100%)",
+              "linear-gradient(135deg, #F1F1F3 0%, #E8E8EA 50%, #F1F1F3 100%)",
           }}
         />
-      </motion.div>
+      )}
 
       {/* Content overlay */}
       <div className="relative z-10">
