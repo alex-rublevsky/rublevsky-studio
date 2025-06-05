@@ -34,6 +34,12 @@ export const Route = createRootRoute({
         description: `TanStack Start is a type-safe, client-first, full-stack React framework. `,
       }),
     ],
+    scripts: [
+      {
+        type: "module",
+        src: "https://unpkg.com/@splinetool/viewer@1.10.2/build/spline-viewer.js",
+      },
+    ],
     links: [
       { rel: "stylesheet", href: appCss },
       {
@@ -74,24 +80,14 @@ function RootComponent() {
   return (
     <PostHogWrapper>
       <QueryClientProvider client={queryClient}>
-        {isMobile ? (
-          // Mobile layout - no cursor
+        <CursorContextProvider>
+          {!isMobile && <CustomCursor />}
           <RootDocument>
             <div className="view-transition-group">
               <Outlet />
             </div>
           </RootDocument>
-        ) : (
-          // Desktop layout - with cursor
-          <CursorContextProvider>
-            <CustomCursor />
-            <RootDocument>
-              <div className="view-transition-group">
-                <Outlet />
-              </div>
-            </RootDocument>
-          </CursorContextProvider>
-        )}
+        </CursorContextProvider>
       </QueryClientProvider>
     </PostHogWrapper>
   );
