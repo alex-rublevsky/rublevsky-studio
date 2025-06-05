@@ -304,9 +304,7 @@ function ProductPage() {
                         </span>
                         <span>{effectiveStock}</span>
                       </Badge>
-                    ) : (
-                      <Badge variant="outline">Out of stock</Badge>
-                    )}
+                    ) : null}
                   </div>
                 )}
               </div>
