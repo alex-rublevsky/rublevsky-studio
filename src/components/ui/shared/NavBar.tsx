@@ -105,11 +105,9 @@ const DropdownNavMenu = ({ items }: { items: NavItem[] }) => {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="relative flex rounded-full border border-black bg-background hover:bg-black hover:text-white transition-all duration-200 focus:outline-hidden focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
-        <span className="relative z-10 flex items-center justify-between w-full cursor-pointer px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium text-white mix-blend-difference">
-          <span className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-left">
-            Menu
-          </span>
+      <DropdownMenuTrigger className="relative flex w-fit rounded-full border border-black bg-background hover:bg-black hover:text-white transition-all duration-300 p-[0.3rem] focus:outline-hidden focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
+        <span className="relative z-10 block cursor-pointer px-3 py-1.5 text-xs text-white mix-blend-difference md:px-4 md:py-2 md:text-sm">
+          Menu
         </span>
       </DropdownMenuTrigger>
       <DropdownMenuContent
