@@ -4,6 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { DEPLOY_URL } from "~/utils/store";
 import { ProductWithVariations, Category, TeaCategory } from "~/types";
 import { CartNav } from "~/components/ui/store/CartNav";
+import { StoreSkeleton } from "~/components/ui/store/skeletons/StoreSkeleton";
+import { CartNavSkeleton } from "~/components/ui/store/skeletons/CartNavSkeleton";
 
 interface StoreData {
   products: ProductWithVariations[];
@@ -28,7 +30,12 @@ function StoreLayout() {
   });
 
   if (isPending) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen bg-background">
+        <StoreSkeleton />
+        <CartNavSkeleton />
+      </div>
+    );
   }
 
   if (error) {
