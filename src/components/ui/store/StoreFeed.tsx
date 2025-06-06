@@ -70,16 +70,16 @@ export default function StoreFeed({
 
   const effectivePriceRange = priceRange || dynamicPriceRange;
 
-  // Initialize price range state
+  // Simple state for user's price range selection
   const [localPriceRange, setLocalPriceRange] = useState<[number, number]>([
     effectivePriceRange.min,
     effectivePriceRange.max,
   ]);
 
-  // Update local price range when effective range changes
+  // Reset price range when data bounds change (e.g., new products loaded)
   useEffect(() => {
     setLocalPriceRange([effectivePriceRange.min, effectivePriceRange.max]);
-  }, [effectivePriceRange]);
+  }, [effectivePriceRange.min, effectivePriceRange.max]);
 
   // Filter tea categories based on available products
   const filteredTeaCategories = useMemo(() => {
