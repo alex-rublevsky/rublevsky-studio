@@ -409,16 +409,6 @@ nav {
   }
 }
 
-/* Skeleton loading animations */
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
-
 /* Accordion animations */
 @keyframes accordion-down {
   from {
@@ -441,7 +431,6 @@ nav {
 @theme {
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
-  --animate-shimmer: shimmer 2s infinite;
 }
 
 .animate-accordion-down {
@@ -450,20 +439,6 @@ nav {
 
 .animate-accordion-up {
   animation: var(--animate-accordion-up);
-}
-
-.animate-shimmer {
-  animation: var(--animate-shimmer);
-}
-
-/* Skeleton loading animations */
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
 }
 
 
