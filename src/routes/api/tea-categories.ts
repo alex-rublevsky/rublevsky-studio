@@ -7,9 +7,13 @@ import { eq } from 'drizzle-orm'
 
 export const APIRoute = createAPIFileRoute('/api/tea-categories')({
   GET: async ({ request, params }) => {
-    const corsHeaders = {
-      'Access-Control-Allow-Origin': 'https://rublevsky.studio',
-    };
+
+     // TODO: remove
+         const corsHeaders = {
+           "Access-Control-Allow-Origin": "*",
+         
+         };
+ 
 
     try {
       // Try to get bindings from our utility

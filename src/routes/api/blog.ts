@@ -6,9 +6,12 @@ import { desc, eq } from 'drizzle-orm'
 
 export const APIRoute = createAPIFileRoute('/api/blog')({
   GET: async ({ request, params }) => {
-    const corsHeaders = {
-      'Access-Control-Allow-Origin': 'https://rublevsky.studio',
-    };
+    // TODO: remove
+        const corsHeaders = {
+          "Access-Control-Allow-Origin": "*",
+        
+        };
+ 
 
     try {
       // Get blog posts with their tea categories using a cleaner approach

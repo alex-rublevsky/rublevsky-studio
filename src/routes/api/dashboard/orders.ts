@@ -5,10 +5,12 @@ import { db } from "~/db";
 
 export const APIRoute = createAPIFileRoute("/api/dashboard/orders")({
   GET: async ({ request, params }) => {
-    const corsHeaders = {
-      "Access-Control-Allow-Origin": "https://rublevsky.studio",
-    };
-
+     // TODO: remove
+         const corsHeaders = {
+           "Access-Control-Allow-Origin": "*",
+         
+         };
+         
     try {
       const ordersResult = await db.select().from(orders).all();
 

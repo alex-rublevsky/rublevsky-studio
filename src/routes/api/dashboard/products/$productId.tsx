@@ -15,9 +15,9 @@ export const APIRoute = createAPIFileRoute(
   "/api/dashboard/products/$productId"
 )({
   GET: async ({ request, params }) => {
-    // Add CORS headers to allow requests only from the website domain
+    // TODO: remove
     const corsHeaders = {
-      "Access-Control-Allow-Origin": "https://rublevsky.studio",
+      "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, PUT, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     };
@@ -130,9 +130,9 @@ export const APIRoute = createAPIFileRoute(
   },
 
   PUT: async ({ request, params }) => {
-    // Add CORS headers to allow requests only from the website domain
+    // TODO: remove
     const corsHeaders = {
-      "Access-Control-Allow-Origin": "https://rublevsky.studio",
+      "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "PUT, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     };
@@ -363,12 +363,12 @@ export const APIRoute = createAPIFileRoute(
     }
   },
 
-  OPTIONS: async () => {
-    // Handle preflight requests
+  OPTIONS: async ({ request }) => {
+    // TODO: remove
     return new Response(null, {
       status: 200,
       headers: {
-        "Access-Control-Allow-Origin": "https://rublevsky.studio",
+        "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, PUT, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type",
       },
