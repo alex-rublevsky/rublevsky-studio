@@ -2,10 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { Category, TeaCategory, ProductWithVariations } from "~/types";
 import ProductList from "./ProductList";
 import ProductFilters from "./ProductFilters";
-import {
-  sortProductsByStockAndName,
-  isProductAvailable,
-} from "~/utils/validateStock";
+import { isProductAvailable } from "~/utils/validateStock";
 import { useCart } from "~/lib/cartContext";
 
 interface StoreFeedProps {

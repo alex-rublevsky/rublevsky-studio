@@ -91,7 +91,7 @@ const ProductFilters = memo(function ProductFilters({
         hidden: isMobileOrTablet ? { y: "-91%" } : { y: "-86%" },
         visible: { y: "0%" },
       }}
-      className={`fixed top-0 mt-3 z-10 w-full ${isMobileOrTablet ? "px-2" : ""}`}
+      className={`sticky top-3 mt-0 z-10 w-full ${isMobileOrTablet ? "px-2" : ""}`}
     >
       <div
         className={`flex flex-col gap-3 px-6 sm:px-6 backdrop-blur-md bg-background/60 py-3 rounded-3xl ${isMobileOrTablet ? "w-full max-w-screen-sm mx-auto" : "w-max mx-auto"}`}
