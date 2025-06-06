@@ -1,16 +1,22 @@
 import { Category, TeaCategory } from "~/types";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, memo, useRef } from "react";
 import { Slider } from "~/components/ui/shared/Slider";
 import { FilterGroup } from "../shared/FilterGroup";
 import { AnimatedGroup } from "~/components/motion_primitives/AnimatedGroup";
-import { AnimatePresence, motion } from "motion/react";
+import {
+  AnimatePresence,
+  motion,
+  useMotionValueEvent,
+  useScroll,
+} from "motion/react";
+import { useDeviceType } from "~/hooks/use-mobile";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "~/components/ui/dashboard/Select";
+} from "~/components/ui/shared/Select";
 
 interface ProductFiltersProps {
   categories: Category[];
@@ -28,7 +34,7 @@ interface ProductFiltersProps {
   onSortChange?: (sort: string) => void;
 }
 
-export default function ProductFilters({
+const ProductFilters = memo(function ProductFilters({
   categories,
   teaCategories,
   selectedCategory,
@@ -45,91 +51,207 @@ export default function ProductFilters({
     priceRange.max,
   ]);
 
+  const { isMobileOrTablet } = useDeviceType();
+
   // Update local price range when priceRange prop changes
   useEffect(() => {
     setLocalPriceRange([priceRange.min, priceRange.max]);
   }, [priceRange]);
 
-  const handlePriceRangeChange = (newValue: number[]) => {
-    const range: [number, number] = [newValue[0], newValue[1]];
-    setLocalPriceRange(range);
-    onPriceRangeChange?.(range);
-  };
+  const handlePriceRangeChange = useCallback(
+    (newValue: number[]) => {
+      const range: [number, number] = [newValue[0], newValue[1]];
+      setLocalPriceRange(range);
+      onPriceRangeChange?.(range);
+    },
+    [onPriceRangeChange]
+  );
 
-  const handleMainCategoryChange = (category: string | null) => {
-    onCategoryChange(category);
-    // Clear tea category when switching to non-tea category
-    if (category !== "tea") {
-      onTeaCategoryChange(null);
+  const handleMainCategoryChange = useCallback(
+    (category: string | null) => {
+      onCategoryChange(category);
+      // Clear tea category when switching to non-tea category
+      if (category !== "tea") {
+        onTeaCategoryChange(null);
+      }
+    },
+    [onCategoryChange, onTeaCategoryChange]
+  );
+
+  const [isHidden, setIsHidden] = useState(false);
+  const { scrollY } = useScroll();
+  const lastYRef = useRef(0);
+
+  useMotionValueEvent(scrollY, "change", (y) => {
+    const difference = y - lastYRef.current;
+    if (Math.abs(difference) > 50) {
+      setIsHidden(difference > 0);
+      lastYRef.current = y;
     }
-  };
+  });
 
   return (
-    <AnimatedGroup
-      delay={0.9}
-      className="md:sticky top-0 z-10 backdrop-blur-md bg-background/60 flex flex-col flex-wrap  md:flex-row gap-6 md:gap-10 p-4"
+    <motion.div
+      animate={isHidden ? "hidden" : "visible"}
+      whileHover="visible"
+      onFocusCapture={() => setIsHidden(false)}
+      transition={{ duration: 0.3 }}
+      variants={{
+        hidden: isMobileOrTablet ? { y: "-91%" } : { y: "-86%" },
+        visible: { y: "0%" },
+      }}
+      className={`fixed top-0 mt-3 z-10 w-full ${isMobileOrTablet ? "px-2" : ""}`}
     >
-      {/* Main Categories */}
-      <FilterGroup
-        title="Categories"
-        options={categories}
-        selectedOptions={selectedCategory}
-        onOptionChange={handleMainCategoryChange}
-      />
+      <div
+        className={`flex flex-col gap-3 px-6 sm:px-6 backdrop-blur-md bg-background/60 py-3 rounded-3xl ${isMobileOrTablet ? "w-full max-w-screen-sm mx-auto" : "w-max mx-auto"}`}
+      >
+        {isMobileOrTablet ? (
+          /* Mobile Layout */
+          <AnimatedGroup delay={0} staggerChildren={0.1}>
+            {/* First Row: Categories and Sort By */}
+            <div className="flex gap-4 ">
+              {/* Categories section - takes most space */}
+              <div className="flex flex-col gap-4 flex-1">
+                <FilterGroup
+                  title="Categories"
+                  options={categories}
+                  selectedOptions={selectedCategory}
+                  onOptionChange={handleMainCategoryChange}
+                />
+              </div>
 
-      {/* Tea Categories - Only show when Tea category is selected */}
-      <AnimatePresence mode="wait">
-        {selectedCategory === "tea" && (
-          <AnimatedGroup delay={0} staggerChildren={0.07}>
-            <FilterGroup
-              title="Tea Types"
-              options={teaCategories}
-              selectedOptions={selectedTeaCategory}
-              onOptionChange={onTeaCategoryChange}
-              allOptionLabel="All Tea"
+              {/* Sort By Filter - Right side, compact */}
+              <div className="flex flex-col gap-2 self-start">
+                <label className="text-xs font-medium text-foreground">
+                  Sort By
+                </label>
+                <Select value={sortBy} onValueChange={onSortChange}>
+                  <SelectTrigger className="w-[15ch]">
+                    <SelectValue placeholder="Sort by..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background">
+                    <SelectItem value="relevant">Relevant</SelectItem>
+                    <SelectItem value="price-asc">$ Low to High</SelectItem>
+                    <SelectItem value="price-desc">$ High to Low</SelectItem>
+                    <SelectItem value="newest">Newest First</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Tea Categories - Only show when Tea category is selected */}
+            <AnimatePresence mode="wait">
+              {selectedCategory === "tea" && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <FilterGroup
+                    title="Tea Types"
+                    options={teaCategories}
+                    selectedOptions={selectedTeaCategory}
+                    onOptionChange={onTeaCategoryChange}
+                    allOptionLabel="All Tea"
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Price Range Filter - Full width */}
+            <Slider
+              className="pt-3 pb-5 md:pt-0"
+              value={localPriceRange}
+              min={priceRange.min}
+              max={priceRange.max}
+              step={1}
+              onValueChange={handlePriceRangeChange}
+              showTooltip
+              tooltipContent={(value) => `$${value}`}
+              label="Price Range"
+              valueDisplay={
+                <output className="text-sm font-medium tabular-nums">
+                  ${localPriceRange[0]} - ${localPriceRange[1]}
+                </output>
+              }
             />
           </AnimatedGroup>
+        ) : (
+          /* Desktop Layout*/
+          <AnimatedGroup
+            delay={0}
+            staggerChildren={0.1}
+            className="flex gap-10"
+          >
+            {/* Main Categories */}
+            <FilterGroup
+              title="Categories"
+              options={categories}
+              selectedOptions={selectedCategory}
+              onOptionChange={handleMainCategoryChange}
+            />
+
+            {/* Tea Categories - Only show when Tea category is selected */}
+            <AnimatePresence mode="wait">
+              {selectedCategory === "tea" && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <FilterGroup
+                    title="Tea Types"
+                    options={teaCategories}
+                    selectedOptions={selectedTeaCategory}
+                    onOptionChange={onTeaCategoryChange}
+                    allOptionLabel="All Tea"
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Price Range Filter */}
+            <Slider
+              value={localPriceRange}
+              min={priceRange.min}
+              max={priceRange.max}
+              step={1}
+              onValueChange={handlePriceRangeChange}
+              showTooltip
+              tooltipContent={(value) => `$${value}`}
+              label="Price Range"
+              valueDisplay={
+                <output className="text-sm font-medium tabular-nums">
+                  ${localPriceRange[0]} - ${localPriceRange[1]}
+                </output>
+              }
+            />
+
+            {/* Sort By Filter */}
+            <div className="flex flex-col gap-2 self-start">
+              <label className="text-xs font-medium text-foreground">
+                Sort By
+              </label>
+              <Select value={sortBy} onValueChange={onSortChange}>
+                <SelectTrigger className="w-[15ch]">
+                  <SelectValue placeholder="Sort by..." />
+                </SelectTrigger>
+                <SelectContent className="bg-background">
+                  <SelectItem value="relevant">Relevant</SelectItem>
+                  <SelectItem value="price-asc">$ Low to High</SelectItem>
+                  <SelectItem value="price-desc">$ High to Low</SelectItem>
+                  <SelectItem value="newest">Newest First</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </AnimatedGroup>
         )}
-      </AnimatePresence>
-
-      {/* Price Range Filter */}
-      <motion.div layout transition={{ duration: 0.3, ease: "easeInOut" }}>
-        <Slider
-          value={localPriceRange}
-          min={priceRange.min}
-          max={priceRange.max}
-          step={1}
-          onValueChange={handlePriceRangeChange}
-          showTooltip
-          tooltipContent={(value) => `$${value}`}
-          label="Price Range"
-          valueDisplay={
-            <output className="text-sm font-medium tabular-nums">
-              ${localPriceRange[0]} - ${localPriceRange[1]}
-            </output>
-          }
-        />
-      </motion.div>
-
-      {/* Sort By Filter */}
-      <motion.div
-        layout
-        transition={{ duration: 0.3, ease: "easeInOut" }}
-        className="flex flex-col gap-2"
-      >
-        <label className="text-sm font-medium text-foreground">Sort By</label>
-        <Select value={sortBy} onValueChange={onSortChange}>
-          <SelectTrigger className="w-full min-w-[160px]">
-            <SelectValue placeholder="Sort by..." />
-          </SelectTrigger>
-          <SelectContent className="bg-background">
-            <SelectItem value="relevant">Relevant</SelectItem>
-            <SelectItem value="price-asc">Price: Low to High</SelectItem>
-            <SelectItem value="price-desc">Price: High to Low</SelectItem>
-            <SelectItem value="newest">Newest First</SelectItem>
-          </SelectContent>
-        </Select>
-      </motion.div>
-    </AnimatedGroup>
+        <div className="mx-auto h-1.5 w-[5rem] rounded-full bg-secondary shrink-0" />
+      </div>
+    </motion.div>
   );
-}
+});
+
+export default ProductFilters;
