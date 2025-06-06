@@ -1,14 +1,30 @@
-"use client";
-
 import * as React from "react";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { Check, ChevronRight, Circle } from "lucide-react";
+import { useCursorHover } from "~/components/ui/shared/custom_cursor/CustomCursorContext";
 
 import { cn } from "~/lib/utils";
 
 const DropdownMenu = DropdownMenuPrimitive.Root;
 
-const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
+const DropdownMenuTrigger = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Trigger>
+>(({ className, onMouseEnter, onMouseLeave, ...props }, ref) => {
+  const { handleMouseEnter, handleMouseLeave: handleMouseLeaveHook } =
+    useCursorHover("small");
+
+  return (
+    <DropdownMenuPrimitive.Trigger
+      ref={ref}
+      className={cn("cursor-pointer", className)}
+      onMouseEnter={handleMouseEnter(onMouseEnter)}
+      onMouseLeave={handleMouseLeaveHook(onMouseLeave)}
+      {...props}
+    />
+  );
+});
+DropdownMenuTrigger.displayName = DropdownMenuPrimitive.Trigger.displayName;
 
 const DropdownMenuGroup = DropdownMenuPrimitive.Group;
 
@@ -23,20 +39,32 @@ const DropdownMenuSubTrigger = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubTrigger> & {
     inset?: boolean;
   }
->(({ className, inset, children, ...props }, ref) => (
-  <DropdownMenuPrimitive.SubTrigger
-    ref={ref}
-    className={cn(
-      "flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden focus:bg-accent data-[state=open]:bg-accent [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
-      inset && "pl-8",
-      className
-    )}
-    {...props}
-  >
-    {children}
-    <ChevronRight className="ml-auto" />
-  </DropdownMenuPrimitive.SubTrigger>
-));
+>(
+  (
+    { className, inset, children, onMouseEnter, onMouseLeave, ...props },
+    ref
+  ) => {
+    const { handleMouseEnter, handleMouseLeave: handleMouseLeaveHook } =
+      useCursorHover("small");
+
+    return (
+      <DropdownMenuPrimitive.SubTrigger
+        ref={ref}
+        className={cn(
+          "flex select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden focus:bg-accent data-[state=open]:bg-accent [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 cursor-pointer",
+          inset && "pl-8",
+          className
+        )}
+        onMouseEnter={handleMouseEnter(onMouseEnter)}
+        onMouseLeave={handleMouseLeaveHook(onMouseLeave)}
+        {...props}
+      >
+        {children}
+        <ChevronRight className="ml-auto" />
+      </DropdownMenuPrimitive.SubTrigger>
+    );
+  }
+);
 DropdownMenuSubTrigger.displayName =
   DropdownMenuPrimitive.SubTrigger.displayName;
 
@@ -79,17 +107,26 @@ const DropdownMenuItem = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & {
     inset?: boolean;
   }
->(({ className, inset, ...props }, ref) => (
-  <DropdownMenuPrimitive.Item
-    ref={ref}
-    className={cn(
-      "relative flex w-full cursor-default select-none items-center py-2 px-3 text-sm outline-none focus:bg-black focus:text-white data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-black hover:text-white transition-colors duration-200",
-      inset && "pl-8",
-      className
-    )}
-    {...props}
-  />
-));
+>(({ className, inset, onMouseEnter, onMouseLeave, ...props }, ref) => {
+  const { handleMouseEnter, handleMouseLeave: handleMouseLeaveHook } =
+    useCursorHover("small");
+
+  return (
+    <DropdownMenuPrimitive.Item
+      ref={ref}
+      className={cn(
+        "relative flex w-full cursor-default select-none items-center py-2 px-3 text-sm outline-none focus:bg-black focus:text-white data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-black hover:text-white active:bg-black active:text-white transition-colors duration-200",
+        // Custom cursor styles - always cursor-pointer
+        "cursor-pointer",
+        inset && "pl-8",
+        className
+      )}
+      onMouseEnter={handleMouseEnter(onMouseEnter)}
+      onMouseLeave={handleMouseLeaveHook(onMouseLeave)}
+      {...props}
+    />
+  );
+});
 DropdownMenuItem.displayName = DropdownMenuPrimitive.Item.displayName;
 
 const DropdownMenuCheckboxItem = React.forwardRef<
