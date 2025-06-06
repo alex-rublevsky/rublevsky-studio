@@ -223,7 +223,6 @@ export default function ImageGallery({
                 <Image
                   src={`/${image}`}
                   alt={`${alt} thumbnail ${index + 1}`}
-                  //fill
                   className="object-cover w-full h-full"
                 />
               </div>
