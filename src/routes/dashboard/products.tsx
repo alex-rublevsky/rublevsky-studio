@@ -598,8 +598,8 @@ function RouteComponent() {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="fixed bottom-0 right-2 z-50">
+    <div>
+      <div className="fixed bottom-3 right-3 z-50">
         <Button onClick={() => setShowCreateForm(true)} size="lg">
           <Plus />
           Add New Product
