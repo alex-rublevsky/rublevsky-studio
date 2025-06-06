@@ -1,36 +1,49 @@
 import { Image } from "~/components/ui/shared/Image";
+import { ReactNode } from "react";
+
 function skillLogo({
   name,
   alt,
   link,
+  svg,
   wideLogo = false,
 }: {
   name: string;
-  alt: string;
-  link: string;
+  alt?: string;
+  link?: string;
+  svg?: ReactNode;
   wideLogo?: boolean;
 }) {
+  const altText = alt || `${name} Logo`;
+
   return (
-    <div className="flex flex-col gap-6 group transition-all">
-      <div className="flex-1 w-full flex items-center justify-center">
+    <div className="flex flex-col gap-6 group transition-all h-full">
+      <div className="w-full flex items-center justify-center h-16 md:h-20">
         <div
           className={`relative flex items-center justify-center ${
             wideLogo ? "w-24 md:w-28 h-12 md:h-14" : "w-14 h-14 md:h-22"
           }`}
         >
-          <Image
-            src={link}
-            alt={alt}
-            width={100}
-            height={100}
-            className="group-hover:opacity-70 transition-opacity md:scale-125 object-contain"
-          />
+          {svg ? (
+            <div className="group-hover:opacity-70 transition-opacity md:scale-125 flex items-center justify-center">
+              {svg}
+            </div>
+          ) : link ? (
+            <Image
+              src={link}
+              alt={altText}
+              width={100}
+              height={100}
+              className="group-hover:opacity-70 transition-opacity md:scale-125 object-contain"
+            />
+          ) : null}
         </div>
       </div>
-      <p className="text-center text-sm md:text-base font-medium whitespace-nowrap text-muted-foreground">
+      <p className="text-center text-sm md:text-base font-medium whitespace-nowrap text-muted-foreground mt-auto">
         {name}
       </p>
     </div>
   );
 }
+
 export default skillLogo;
