@@ -47,7 +47,7 @@ function RouteComponent() {
   const teaCategories = data?.teaCategories || [];
   const errorMessage = isError;
 
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showCreateDrawer, setShowCreateDrawer] = useState(false);
 
   // Form data states
   const [createFormData, setCreateFormData] = useState<BlogPostFormData>({
@@ -76,7 +76,7 @@ function RouteComponent() {
   const [isCreateAutoSlug, setIsCreateAutoSlug] = useState(true);
   const [isEditAutoSlug, setIsEditAutoSlug] = useState(false);
   const [editingPostId, setEditingPostId] = useState<number | null>(null);
-  const [showEditModal, setShowEditModal] = useState(false);
+  const [showEditDrawer, setShowEditDrawer] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deletingPostId, setDeletingPostId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -188,16 +188,7 @@ function RouteComponent() {
 
       toast.success("Blog post added successfully!");
 
-      setCreateFormData({
-        title: "",
-        slug: "",
-        body: "",
-        teaCategories: [],
-        productSlug: "",
-        images: "",
-        publishedAt: Date.now(),
-      });
-      setIsCreateAutoSlug(true);
+      closeCreateDrawer();
       refetchBlog();
     } catch (err) {
       const errorMessage =
@@ -209,9 +200,24 @@ function RouteComponent() {
     }
   };
 
+  const closeCreateDrawer = () => {
+    setShowCreateDrawer(false);
+    setCreateFormData({
+      title: "",
+      slug: "",
+      body: "",
+      teaCategories: [],
+      productSlug: "",
+      images: "",
+      publishedAt: Date.now(),
+    });
+    setIsCreateAutoSlug(true);
+    setError("");
+  };
+
   const handleEdit = async (post: BlogPost) => {
     setEditingPostId(post.id);
-    setShowEditModal(true);
+    setShowEditDrawer(true);
     setIsEditAutoSlug(false);
     setEditFormData({
       title: post.title || "",
@@ -241,7 +247,7 @@ function RouteComponent() {
       });
 
       toast.success("Blog post updated successfully!");
-      closeEditModal();
+      closeEditDrawer();
       refetchBlog();
     } catch (err) {
       const errorMessage =
@@ -283,8 +289,8 @@ function RouteComponent() {
     }
   };
 
-  const closeEditModal = () => {
-    setShowEditModal(false);
+  const closeEditDrawer = () => {
+    setShowEditDrawer(false);
     setEditingPostId(null);
     setEditFormData({
       title: "",
@@ -309,28 +315,45 @@ function RouteComponent() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-center">
-        <div className="flex space-x-2">
-          <Button onClick={() => setShowCreateForm(!showCreateForm)}>
-            <Plus />
-            {showCreateForm ? "Hide Form" : "Add New Blog Post"}
-          </Button>
-        </div>
+    <div>
+      {/* Fixed Create Button */}
+      <div className="fixed bottom-3 right-3 z-50">
+        <Button
+          onClick={() => setShowCreateDrawer(true)}
+          size="lg"
+          className="hover:backdrop-blur-sm"
+        >
+          <Plus />
+          Add New Blog Post
+        </Button>
       </div>
 
-      {/* Create Form */}
-      {showCreateForm && (
-        <div className="bg-card rounded-lg shadow-sm border border-border">
-          <div className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Create New Blog Post</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Blog Posts List */}
+      <Drawer open={showCreateDrawer} onOpenChange={setShowCreateDrawer}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Create New Blog Post</DrawerTitle>
+          </DrawerHeader>
+
+          <DrawerBody>
+            {error && (
+              <div className="bg-destructive/20 border border-destructive text-destructive-foreground px-4 py-3 rounded mb-4">
+                {error}
+              </div>
+            )}
+
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-4"
+              id="createBlogForm"
+            >
               <Input
                 label="Title"
                 id="title"
                 name="title"
                 value={createFormData.title}
                 onChange={handleCreateChange}
+                required
               />
 
               <Input
@@ -346,7 +369,7 @@ function RouteComponent() {
                 <label className="block text-sm font-medium mb-2">
                   Tea Categories
                 </label>
-                <div className="space-y-2">
+                <div className="space-y-2 border border-input rounded-md p-3 max-h-40 overflow-y-auto">
                   {teaCategories.map((category) => (
                     <label
                       key={category.slug}
@@ -391,70 +414,65 @@ function RouteComponent() {
                 />
               </div>
 
-              <div>
-                <label
-                  htmlFor="body"
-                  className="block text-sm font-medium mb-1"
-                >
-                  Content
-                </label>
-                <Textarea
-                  id="body"
-                  name="body"
-                  value={createFormData.body}
-                  onChange={handleCreateChange}
-                  required
-                  rows={10}
-                />
-              </div>
+              <Textarea
+                label="Content"
+                id="body"
+                name="body"
+                value={createFormData.body}
+                onChange={handleCreateChange}
+                required
+                rows={10}
+              />
 
-              <div>
-                <label
-                  htmlFor="images"
-                  className="block text-sm font-medium mb-1"
-                >
-                  Images (comma-separated URLs)
-                </label>
-                <Input
-                  id="images"
-                  name="images"
-                  value={createFormData.images}
-                  onChange={handleCreateChange}
-                />
-              </div>
+              <Input
+                label="Images (comma-separated URLs)"
+                id="images"
+                name="images"
+                value={createFormData.images}
+                onChange={handleCreateChange}
+              />
 
-              <div>
-                <label
-                  htmlFor="publishedAt"
-                  className="block text-sm font-medium mb-1"
-                >
-                  Published At
-                </label>
-                <Input
-                  id="publishedAt"
-                  name="publishedAt"
-                  type="datetime-local"
-                  value={new Date(createFormData.publishedAt)
-                    .toISOString()
-                    .slice(0, 16)}
-                  onChange={(e) => {
-                    const date = new Date(e.target.value);
-                    setCreateFormData((prev) => ({
-                      ...prev,
-                      publishedAt: date.getTime(),
-                    }));
-                  }}
-                  required
-                />
-              </div>
+              <Input
+                label="Published At"
+                id="publishedAt"
+                name="publishedAt"
+                type="datetime-local"
+                value={new Date(createFormData.publishedAt)
+                  .toISOString()
+                  .slice(0, 16)}
+                onChange={(e) => {
+                  const date = new Date(e.target.value);
+                  setCreateFormData((prev) => ({
+                    ...prev,
+                    publishedAt: date.getTime(),
+                  }));
+                }}
+                required
+              />
+            </form>
+          </DrawerBody>
 
-              <Button type="submit" disabled={isSubmitting}>
+          <DrawerFooter className="border-t border-border bg-background">
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="secondaryInverted"
+                type="button"
+                onClick={closeCreateDrawer}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="greenInverted"
+                type="submit"
+                form="createBlogForm"
+                disabled={isSubmitting}
+              >
                 {isSubmitting ? "Creating..." : "Create Post"}
               </Button>
-            </form>
-          </div>
-        </div>
-      )}
+            </div>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
 
       {/* Blog Posts List */}
       <div className="bg-card rounded-lg shadow-sm border border-border">
@@ -517,8 +535,8 @@ function RouteComponent() {
         </div>
       </div>
 
-      {/* Replace Edit Modal with Drawer */}
-      <Drawer open={showEditModal} onOpenChange={setShowEditModal}>
+      {/* Edit Drawer */}
+      <Drawer open={showEditDrawer} onOpenChange={setShowEditDrawer}>
         <DrawerContent>
           <DrawerHeader>
             <DrawerTitle>Edit Blog Post</DrawerTitle>
@@ -637,7 +655,7 @@ function RouteComponent() {
               />
               <Input
                 id="editPublishedAt"
-                label="Publisehd at"
+                label="Published at"
                 name="publishedAt"
                 type="datetime-local"
                 value={new Date(editFormData.publishedAt)
@@ -660,7 +678,7 @@ function RouteComponent() {
               <Button
                 variant="secondaryInverted"
                 type="button"
-                onClick={closeEditModal}
+                onClick={closeEditDrawer}
               >
                 Cancel
               </Button>
