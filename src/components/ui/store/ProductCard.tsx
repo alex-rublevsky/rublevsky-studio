@@ -1,16 +1,20 @@
 import { Product, ProductVariation, VariationAttribute } from "~/types";
 import { Link } from "@tanstack/react-router";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, memo } from "react";
 import { Image } from "~/components/ui/shared/Image";
 import styles from "./productCard.module.css";
 import { useCart } from "~/lib/cartContext";
 import { useCallback, useRef } from "react";
-import { getAttributeDisplayName } from "~/utils/productAttributes";
+import { getAttributeDisplayName } from "~/lib/productAttributes";
 import { Badge } from "../shared/Badge";
 import { FilterGroup } from "../shared/FilterGroup";
-import { getAvailableQuantityForVariation } from "~/utils/validateStock";
+import {
+  getAvailableQuantityForVariation,
+  isProductAvailable,
+} from "~/utils/validateStock";
 import { useVariationSelection } from "~/hooks/useVariationSelection";
+import { cn } from "~/lib/utils";
 
 // Extended product interface with variations
 interface ProductWithVariations extends Product {
@@ -21,21 +25,68 @@ interface ProductVariationWithAttributes extends ProductVariation {
   attributes: VariationAttribute[];
 }
 
-function ProductCard({ product }: { product: ProductWithVariations }) {
+// Memoize expensive calculations outside component
+const calculateImageArray = (images: string | null): string[] => {
+  return images?.split(",").map((img) => img.trim()) ?? [];
+};
+
+const calculateUniqueAttributeValues = (
+  variations: ProductVariationWithAttributes[] | undefined,
+  attributeId: string
+): string[] => {
+  if (!variations) return [];
+
+  const sortedVariations = [...variations].sort(
+    (a, b) => (b.sort ?? 0) - (a.sort ?? 0)
+  );
+
+  const values = new Set<string>();
+  sortedVariations.forEach((variation) => {
+    const attribute = variation.attributes.find(
+      (attr) => attr.attributeId === attributeId
+    );
+    if (attribute) {
+      values.add(attribute.value);
+    }
+  });
+
+  return Array.from(values);
+};
+
+const calculateAttributeNames = (
+  variations: ProductVariationWithAttributes[] | undefined
+): string[] => {
+  if (!variations) return [];
+
+  const attributeNames = new Set<string>();
+  variations.forEach((variation) => {
+    variation.attributes.forEach((attr: VariationAttribute) => {
+      attributeNames.add(attr.attributeId);
+    });
+  });
+
+  return Array.from(attributeNames);
+};
+
+const ProductCard = memo(function ProductCard({
+  product,
+}: {
+  product: ProductWithVariations;
+}) {
   const [isHovering, setIsHovering] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
-  //const { addProductToCart, cart } = useCart();
+  const { addProductToCart, cart } = useCart();
 
   // Use the variation selection hook
-  // const {
-  //   selectedVariation,
-  //   selectedAttributes,
-  //   selectVariation,
-  //   isAttributeValueAvailable,
-  // } = useVariationSelection({
-  //   product,
-  //   cartItems: cart.items,
-  // });
+  const {
+    selectedVariation,
+    selectedAttributes,
+    selectVariation,
+    isAttributeValueAvailable,
+  } = useVariationSelection({
+    product,
+    cartItems: cart.items,
+  });
 
   // Ref for debouncing hover state
   const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -43,104 +94,91 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
   // Add a ref for the variations container
   const variationsRef = useRef<HTMLDivElement>(null);
 
-  // Convert comma-separated string to array, or empty array if null
+  // Memoize expensive calculations
   const imageArray = useMemo(
-    () => product.images?.split(",").map((img) => img.trim()) ?? [],
+    () => calculateImageArray(product.images),
     [product.images]
   );
 
-  // Get unique attribute values for a specific attribute ID
+  // Get unique attribute values for a specific attribute ID - memoized
   const getUniqueAttributeValues = useCallback(
     (attributeId: string): string[] => {
-      if (!product.variations) return [];
-
-      // Sort variations by sort property (descending order)
-      const sortedVariations = [...product.variations].sort(
-        (a, b) => (b.sort ?? 0) - (a.sort ?? 0)
-      );
-
-      const values = new Set<string>();
-      sortedVariations.forEach((variation) => {
-        const attribute = variation.attributes.find(
-          (attr) => attr.attributeId === attributeId
-        );
-        if (attribute) {
-          values.add(attribute.value);
-        }
-      });
-
-      return Array.from(values);
+      return calculateUniqueAttributeValues(product.variations, attributeId);
     },
     [product.variations]
   );
 
-  const isAvailable = true;
-  // // Calculate effective stock by subtracting cart quantities
-  // const getEffectiveStock = useMemo(() => {
-  //   if (!product) return 0;
+  // Calculate effective stock by subtracting cart quantities
+  const getEffectiveStock = useMemo(() => {
+    if (!product) return 0;
 
-  //   return getAvailableQuantityForVariation(
-  //     product,
-  //     selectedVariation?.id,
-  //     cart.items
-  //   );
-  // }, [product, selectedVariation, cart.items]);
+    return getAvailableQuantityForVariation(
+      product,
+      selectedVariation?.id,
+      cart.items
+    );
+  }, [product, selectedVariation, cart.items]);
 
-  // // Calculate if the product is available to add to cart
-  // const isAvailable = useMemo(() => {
-  //   return (
-  //     product.isActive && (product.unlimitedStock || getEffectiveStock > 0)
-  //   );
-  // }, [product.isActive, product.unlimitedStock, getEffectiveStock]);
+  // Calculate if the product is available to add to cart
+  const isAvailable = useMemo(() => {
+    return (
+      product.isActive && (product.unlimitedStock || getEffectiveStock > 0)
+    );
+  }, [product.isActive, product.unlimitedStock, getEffectiveStock]);
 
-  // // Calculate current price based on selected variation
-  // const currentPrice = useMemo(() => {
-  //   return selectedVariation ? selectedVariation.price : product.price;
-  // }, [selectedVariation, product.price]);
+  // Check if ANY variation has stock (for image graying out)
+  const hasAnyStock = useMemo(() => {
+    return isProductAvailable(product, cart.items);
+  }, [product, cart.items]);
 
-  // Get attribute names to display in the card
-  const attributeNames = useMemo(() => {
-    if (!product.variations) return [];
+  // Calculate current price based on selected variation
+  const currentPrice = useMemo(() => {
+    // If product has variations, always use variation price
+    if (product.hasVariations) {
+      return selectedVariation?.price || 0;
+    }
+    // If product price is zero, use variation price (if available)
+    if (product.price === 0 && selectedVariation) {
+      return selectedVariation.price;
+    }
+    return selectedVariation ? selectedVariation.price : product.price;
+  }, [selectedVariation, product.price, product.hasVariations]);
 
-    const attributeNames = new Set<string>();
-    product.variations.forEach((variation) => {
-      variation.attributes.forEach((attr: VariationAttribute) => {
-        attributeNames.add(attr.attributeId);
-      });
-    });
+  // Get attribute names to display in the card - memoized
+  const attributeNames = useMemo(
+    () => calculateAttributeNames(product.variations),
+    [product.variations]
+  );
 
-    return Array.from(attributeNames);
-  }, [product.variations]);
+  const handleAddToCart = useCallback(
+    async (e: React.MouseEvent) => {
+      e.preventDefault();
+      if (!isAvailable) return;
 
-  // const handleAddToCart = useCallback(
-  //   async (e: React.MouseEvent) => {
-  //     e.preventDefault();
-  //     if (!isAvailable) return;
+      setIsAddingToCart(true);
 
-  //     setIsAddingToCart(true);
-
-  //     try {
-  //       // Use the context function directly
-  //       await addProductToCart(
-  //         product,
-  //         1, // Default quantity of 1 when adding from product card
-  //         selectedVariation,
-  //         selectedAttributes
-  //       );
-  //     } catch (error) {
-  //       console.error("Error adding to cart:", error);
-  //     } finally {
-  //       setIsAddingToCart(false);
-  //     }
-  //   },
-  //   [
-  //     isAvailable,
-  //     addProductToCart,
-  //     product,
-  //     selectedVariation,
-  //     selectedAttributes,
-  //   ]
-  // );
+      try {
+        // Use the context function directly
+        await addProductToCart(
+          product,
+          1, // Default quantity of 1 when adding from product card
+          selectedVariation,
+          selectedAttributes
+        );
+      } catch (error) {
+        console.error("Error adding to cart:", error);
+      } finally {
+        setIsAddingToCart(false);
+      }
+    },
+    [
+      isAvailable,
+      addProductToCart,
+      product,
+      selectedVariation,
+      selectedAttributes,
+    ]
+  );
 
   // Check if product is coming soon (not in the type, so we'll use a placeholder)
   const isComingSoon = false; // Replace with actual logic when available
@@ -197,7 +235,10 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
                     src={`/${imageArray[0]}`}
                     alt={product.name}
                     //fill
-                    className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 ease-in-out"
+                    className={cn(
+                      "absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 ease-in-out",
+                      !hasAnyStock && "grayscale opacity-60"
+                    )}
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
                 ) : (
@@ -214,9 +255,11 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
                     src={`/${imageArray[1]}`}
                     alt={product.name}
                     //fill
-                    className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-500 ease-in-out ${
-                      isHovering ? "opacity-100" : "opacity-0"
-                    }`}
+                    className={cn(
+                      "absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-500 ease-in-out",
+                      isHovering ? "opacity-100" : "opacity-0",
+                      !hasAnyStock && "grayscale"
+                    )}
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
                 </div>
@@ -225,7 +268,7 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
 
             {/* Desktop Add to Cart button */}
             <button
-              //onClick={handleAddToCart}
+              onClick={handleAddToCart}
               className={`absolute bottom-0 left-0 right-0 hidden md:flex items-center justify-center space-x-2 bg-muted/70 backdrop-blur-xs text-black hover:bg-black  transition-all duration-500 py-2 opacity-0 group-hover:opacity-100 ${
                 !isAvailable
                   ? "cursor-not-allowed hover:bg-muted/70 opacity-50"
@@ -277,42 +320,36 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
                       <>
                         <h5 className="whitespace-nowrap">
                           $
-                          {/* {(currentPrice * (1 - product.discount / 100)).toFixed(
-                          2
-                        )}{" "} */}
+                          {(
+                            currentPrice *
+                            (1 - product.discount / 100)
+                          ).toFixed(2)}{" "}
                           CAD
                         </h5>
                         <div className="flex items-center gap-1">
                           <h6 className=" line-through text-muted-foreground">
-                            {/* ${currentPrice?.toFixed(2)} */}
+                            ${currentPrice?.toFixed(2)}
                           </h6>
                           <Badge variant="green">{product.discount}% OFF</Badge>
                         </div>
                       </>
                     ) : (
                       <h5 className="whitespace-nowrap">
-                        {/* ${currentPrice?.toFixed(2)} CAD */}
+                        ${currentPrice?.toFixed(2)} CAD
                       </h5>
                     )}
                   </div>
 
                   {!product.unlimitedStock && (
                     <div className="mt-1 text-xs">
-                      {/* {getEffectiveStock > 0 ? (
-                      <Badge variant="outline">
-                        <span className="text-muted-foreground">
-                          In stock:{" "}
-                        </span>
-                        <span>{getEffectiveStock}</span>
-                      </Badge>
-                    ) : (
-                      <Badge
-                        variant="outline"
-                        className="text-muted-foreground"
-                      >
-                        Out of stock
-                      </Badge>
-                    )} */}
+                      {getEffectiveStock > 0 ? (
+                        <Badge variant="outline">
+                          <span className="text-muted-foreground">
+                            In stock:{" "}
+                          </span>
+                          <span>{getEffectiveStock}</span>
+                        </Badge>
+                      ) : null}
                     </div>
                   )}
                 </div>
@@ -337,24 +374,26 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
                 product.variations &&
                 product.variations.length > 0 && (
                   <div ref={variationsRef} className="space-y-2">
-                    {/* {attributeNames.map((attributeId: string) => (
-                    // <FilterGroup
-                    //   key={attributeId}
-                    //   title={getAttributeDisplayName(attributeId)}
-                    //   options={getUniqueAttributeValues(attributeId)}
-                    //   selectedOptions={selectedAttributes[attributeId] || null}
-                    //   onOptionChange={(value) => {
-                    //     if (value) {
-                    //       selectVariation(attributeId, value);
-                    //     }
-                    //   }}
-                    //   showAllOption={false}
-                    //   variant="product"
-                    //   getOptionAvailability={(value) =>
-                    //     isAttributeValueAvailable(attributeId, value)
-                    //   }
-                    // />
-                  ))} */}
+                    {attributeNames.map((attributeId: string) => (
+                      <FilterGroup
+                        key={attributeId}
+                        title={getAttributeDisplayName(attributeId)}
+                        options={getUniqueAttributeValues(attributeId)}
+                        selectedOptions={
+                          selectedAttributes[attributeId] || null
+                        }
+                        onOptionChange={(value) => {
+                          if (value) {
+                            selectVariation(attributeId, value);
+                          }
+                        }}
+                        showAllOption={false}
+                        variant="product"
+                        getOptionAvailability={(value) =>
+                          isAttributeValueAvailable(attributeId, value)
+                        }
+                      />
+                    ))}
                   </div>
                 )}
             </div>
@@ -362,7 +401,7 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
             {/* Mobile Add to Cart button */}
             <div className="md:hidden mt-auto">
               <button
-                //onClick={handleAddToCart}
+                onClick={handleAddToCart}
                 className={`w-full flex items-center justify-center space-x-2 bg-muted backdrop-blur-xs text-black hover:bg-black  transition-all duration-500 py-2 px-4 ${
                   !isAvailable
                     ? "opacity-50 cursor-not-allowed hover:bg-muted/70 hover:text-black"
@@ -416,6 +455,6 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
       </div>
     </Link>
   );
-}
+});
 
 export default ProductCard;
