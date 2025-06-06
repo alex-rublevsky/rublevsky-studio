@@ -86,9 +86,6 @@ export function CartProvider({
     lastUpdated: Date.now(),
   });
   const [products, setProducts] = useState<ProductWithVariations[]>([]);
-  const [categories, setCategories] = useState<Category[]>(initialCategories);
-  const [teaCategories, setTeaCategories] =
-    useState<TeaCategory[]>(initialTeaCategories);
   const [cartOpen, setCartOpen] = useState(false);
   const [initialized, setInitialized] = useState(false);
 
@@ -266,13 +263,26 @@ export function CartProvider({
         }
       }
 
+      // Check if item already exists in cart to determine proper validation
+      const existingCartItem = cart.items.find(
+        (item) =>
+          item.productId === product.id &&
+          item.variationId === selectedVariation?.id
+      );
+
+      // If item exists, validate the new total quantity (existing + new)
+      const totalQuantityAfterAdd = existingCartItem
+        ? existingCartItem.quantity + quantity
+        : quantity;
+
       // Validate stock using client-side validation
       const result = validateStock(
         products,
         cart.items,
         product.id,
-        quantity,
-        selectedVariation?.id
+        totalQuantityAfterAdd,
+        selectedVariation?.id,
+        !!existingCartItem // Exclude existing item from calculation if it exists
       );
 
       if (!result.isAvailable && !result.unlimitedStock) {
@@ -286,11 +296,23 @@ export function CartProvider({
         productName: product.name,
         productSlug: product.slug,
         variationId: selectedVariation?.id,
-        price: selectedVariation ? selectedVariation.price : product.price,
+        price: (() => {
+          // If product has variations, always use variation price
+          if (product.hasVariations && selectedVariation) {
+            return selectedVariation.price;
+          }
+          // If product price is zero, use variation price (if available)
+          if (product.price === 0 && selectedVariation) {
+            return selectedVariation.price;
+          }
+          return selectedVariation ? selectedVariation.price : product.price;
+        })(),
         quantity: quantity,
-        maxStock: result.availableStock,
+        maxStock: result.unlimitedStock
+          ? Number.MAX_SAFE_INTEGER
+          : result.availableStock,
         unlimitedStock: result.unlimitedStock,
-        discount: product.discount,
+        discount: selectedVariation?.discount || product.discount,
         image: product.images?.split(",")[0].trim(),
         attributes: selectedAttributes,
         ...(product.weight
@@ -388,8 +410,8 @@ export function CartProvider({
         cart,
         cartOpen,
         products, // Use products from state
-        categories,
-        teaCategories,
+        categories: initialCategories,
+        teaCategories: initialTeaCategories,
         setCartOpen,
         addToCart,
         addProductToCart,
