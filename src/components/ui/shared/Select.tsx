@@ -1,6 +1,7 @@
 import * as React from "react";
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { Check, ChevronDown } from "lucide-react";
+import { useCursorHover } from "~/components/ui/shared/custom_cursor/CustomCursorContext";
 
 import { cn } from "~/utils/utils";
 
@@ -21,30 +22,50 @@ const SelectTrigger = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> & {
     variant?: "default" | "navbar";
   }
->(({ className, variant = "default", children, ...props }, ref) => (
-  <SelectPrimitive.Trigger
-    ref={ref}
-    className={cn(
-      "relative flex rounded-full border border-border bg-background hover:bg-black hover:text-white transition-all duration-200",
+>(
+  (
+    {
+      className,
+      variant = "default",
+      children,
+      onMouseEnter,
+      onMouseLeave,
+      ...props
+    },
+    ref
+  ) => {
+    const { handleMouseEnter, handleMouseLeave: handleMouseLeaveHook } =
+      useCursorHover("small");
 
-      "focus:outline-hidden focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
-      // Responsive width - larger for default (Sort By), smaller for navbar (Other)
-      "w-[18ch]",
-      variant === "navbar" && "w-[10ch]",
-      className
-    )}
-    {...props}
-  >
-    <span className="relative z-10 flex items-center justify-between w-full cursor-pointer px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium text-white mix-blend-difference">
-      <span className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-left">
-        {children}
-      </span>
-      <SelectPrimitive.Icon asChild>
-        <ChevronDown className="h-3 w-3 md:h-4 md:w-4 ml-2 opacity-50 flex-shrink-0" />
-      </SelectPrimitive.Icon>
-    </span>
-  </SelectPrimitive.Trigger>
-));
+    return (
+      <SelectPrimitive.Trigger
+        ref={ref}
+        className={cn(
+          "relative flex rounded-full border border-border bg-background hover:bg-black hover:text-white transition-all duration-200",
+          "focus:outline-hidden focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
+          // Responsive width - larger for default (Sort By), smaller for navbar (Other)
+          "w-[18ch]",
+          variant === "navbar" && "w-[10ch]",
+          // Custom cursor styles - always cursor-pointer
+          "cursor-pointer",
+          className
+        )}
+        onMouseEnter={handleMouseEnter(onMouseEnter)}
+        onMouseLeave={handleMouseLeaveHook(onMouseLeave)}
+        {...props}
+      >
+        <span className="relative z-10 flex items-center justify-between w-full cursor-pointer px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium text-white mix-blend-difference">
+          <span className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-left">
+            {children}
+          </span>
+          <SelectPrimitive.Icon asChild>
+            <ChevronDown className="h-3 w-3 md:h-4 md:w-4 ml-2 opacity-50 flex-shrink-0" />
+          </SelectPrimitive.Icon>
+        </span>
+      </SelectPrimitive.Trigger>
+    );
+  }
+);
 SelectTrigger.displayName = SelectPrimitive.Trigger.displayName;
 
 const SelectContent = React.forwardRef<
@@ -92,26 +113,35 @@ SelectLabel.displayName = SelectPrimitive.Label.displayName;
 const SelectItem = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
->(({ className, children, ...props }, ref) => (
-  <SelectPrimitive.Item
-    ref={ref}
-    className={cn(
-      "relative flex w-full cursor-default select-none items-center py-2 px-3 text-sm outline-none focus:bg-black focus:text-white data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-black hover:text-white transition-colors duration-200",
-      className
-    )}
-    {...props}
-  >
-    <span className="absolute right-2 flex h-3.5 w-3.5 items-center justify-center">
-      <SelectPrimitive.ItemIndicator>
-        <Check className="h-3 w-3" />
-      </SelectPrimitive.ItemIndicator>
-    </span>
+>(({ className, children, onMouseEnter, onMouseLeave, ...props }, ref) => {
+  const { handleMouseEnter, handleMouseLeave: handleMouseLeaveHook } =
+    useCursorHover("small");
 
-    <SelectPrimitive.ItemText className="pr-6">
-      {children}
-    </SelectPrimitive.ItemText>
-  </SelectPrimitive.Item>
-));
+  return (
+    <SelectPrimitive.Item
+      ref={ref}
+      className={cn(
+        "relative flex w-full cursor-default select-none items-center py-2 px-3 text-sm outline-none focus:bg-black focus:text-white data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-black hover:text-white transition-colors duration-200",
+        // Custom cursor styles - always cursor-pointer
+        "cursor-pointer",
+        className
+      )}
+      onMouseEnter={handleMouseEnter(onMouseEnter)}
+      onMouseLeave={handleMouseLeaveHook(onMouseLeave)}
+      {...props}
+    >
+      <span className="absolute right-2 flex h-3.5 w-3.5 items-center justify-center">
+        <SelectPrimitive.ItemIndicator>
+          <Check className="h-3 w-3" />
+        </SelectPrimitive.ItemIndicator>
+      </span>
+
+      <SelectPrimitive.ItemText className="pr-6">
+        {children}
+      </SelectPrimitive.ItemText>
+    </SelectPrimitive.Item>
+  );
+});
 SelectItem.displayName = SelectPrimitive.Item.displayName;
 
 const SelectSeparator = React.forwardRef<
