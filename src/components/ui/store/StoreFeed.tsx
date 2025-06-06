@@ -49,24 +49,31 @@ export default function StoreFeed({
 
   const { cart } = useCart();
 
-  // Calculate dynamic price range from all products
+  // Pre-calculate price ranges for all products (eliminates redundant calculations)
+  const productsWithPriceRanges = useMemo(() => {
+    return products.map((product) => ({
+      ...product,
+      priceRange: getProductPriceRange(product),
+    }));
+  }, [products]);
+
+  // Calculate dynamic price range from pre-calculated ranges
   const dynamicPriceRange = useMemo(() => {
-    if (!products.length) return { min: 0, max: 100 };
+    if (!productsWithPriceRanges.length) return { min: 0, max: 100 };
 
     let minPrice = Infinity;
     let maxPrice = -Infinity;
 
-    products.forEach((product) => {
-      const { min, max } = getProductPriceRange(product);
-      minPrice = Math.min(minPrice, min);
-      maxPrice = Math.max(maxPrice, max);
+    productsWithPriceRanges.forEach(({ priceRange }) => {
+      minPrice = Math.min(minPrice, priceRange.min);
+      maxPrice = Math.max(maxPrice, priceRange.max);
     });
 
     return {
       min: Math.floor(minPrice),
       max: Math.ceil(maxPrice),
     };
-  }, [products]);
+  }, [productsWithPriceRanges]);
 
   const effectivePriceRange = priceRange || dynamicPriceRange;
 
@@ -92,9 +99,9 @@ export default function StoreFeed({
     );
   }, [products, teaCategories]);
 
-  // Apply filters and sorting
+  // Apply filters and sorting using pre-calculated price ranges
   const filteredAndSortedProducts = useMemo(() => {
-    let filtered = [...products];
+    let filtered = [...productsWithPriceRanges];
 
     // Apply category filter
     if (selectedCategory) {
@@ -110,10 +117,10 @@ export default function StoreFeed({
       );
     }
 
-    // Apply price range filter
+    // Apply price range filter using pre-calculated ranges
     const [minPrice, maxPrice] = localPriceRange;
     filtered = filtered.filter((product) => {
-      const { min, max } = getProductPriceRange(product);
+      const { min, max } = product.priceRange;
       return max >= minPrice && min <= maxPrice;
     });
 
@@ -128,16 +135,16 @@ export default function StoreFeed({
         return aAvailable ? -1 : 1;
       }
 
-      // Second priority: Apply the selected sorting method
+      // Second priority: Apply the selected sorting method using pre-calculated ranges
       if (sortBy === "price-asc") {
-        const aPriceMin = getProductPriceRange(a).min;
-        const bPriceMin = getProductPriceRange(b).min;
+        const aPriceMin = a.priceRange.min;
+        const bPriceMin = b.priceRange.min;
         if (aPriceMin !== bPriceMin) {
           return aPriceMin - bPriceMin;
         }
       } else if (sortBy === "price-desc") {
-        const aPriceMax = getProductPriceRange(a).max;
-        const bPriceMax = getProductPriceRange(b).max;
+        const aPriceMax = a.priceRange.max;
+        const bPriceMax = b.priceRange.max;
         if (aPriceMax !== bPriceMax) {
           return bPriceMax - aPriceMax;
         }
@@ -173,7 +180,7 @@ export default function StoreFeed({
 
     return filtered;
   }, [
-    products,
+    productsWithPriceRanges,
     selectedCategory,
     selectedTeaCategory,
     localPriceRange,
