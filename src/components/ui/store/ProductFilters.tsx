@@ -29,6 +29,7 @@ interface ProductFiltersProps {
     min: number;
     max: number;
   };
+  currentPriceRange: [number, number];
   onPriceRangeChange?: (range: [number, number]) => void;
   sortBy?: string;
   onSortChange?: (sort: string) => void;
@@ -42,26 +43,16 @@ const ProductFilters = memo(function ProductFilters({
   onCategoryChange,
   onTeaCategoryChange,
   priceRange,
+  currentPriceRange,
   onPriceRangeChange,
   sortBy = "relevant",
   onSortChange,
 }: ProductFiltersProps) {
-  const [localPriceRange, setLocalPriceRange] = useState<[number, number]>([
-    priceRange.min,
-    priceRange.max,
-  ]);
-
   const { isMobileOrTablet } = useDeviceType();
-
-  // Update local price range when priceRange prop changes
-  useEffect(() => {
-    setLocalPriceRange([priceRange.min, priceRange.max]);
-  }, [priceRange]);
 
   const handlePriceRangeChange = useCallback(
     (newValue: number[]) => {
       const range: [number, number] = [newValue[0], newValue[1]];
-      setLocalPriceRange(range);
       onPriceRangeChange?.(range);
     },
     [onPriceRangeChange]
@@ -162,7 +153,7 @@ const ProductFilters = memo(function ProductFilters({
             {/* Price Range Filter - Full width */}
             <Slider
               className="pt-3 pb-5 md:pt-0"
-              value={localPriceRange}
+              value={currentPriceRange}
               min={priceRange.min}
               max={priceRange.max}
               step={1}
@@ -172,7 +163,7 @@ const ProductFilters = memo(function ProductFilters({
               label="Price Range"
               valueDisplay={
                 <output className="text-sm font-medium tabular-nums">
-                  ${localPriceRange[0]} - ${localPriceRange[1]}
+                  ${currentPriceRange[0]} - ${currentPriceRange[1]}
                 </output>
               }
             />
@@ -214,7 +205,7 @@ const ProductFilters = memo(function ProductFilters({
 
             {/* Price Range Filter */}
             <Slider
-              value={localPriceRange}
+              value={currentPriceRange}
               min={priceRange.min}
               max={priceRange.max}
               step={1}
@@ -224,7 +215,7 @@ const ProductFilters = memo(function ProductFilters({
               label="Price Range"
               valueDisplay={
                 <output className="text-sm font-medium tabular-nums">
-                  ${localPriceRange[0]} - ${localPriceRange[1]}
+                  ${currentPriceRange[0]} - ${currentPriceRange[1]}
                 </output>
               }
             />
