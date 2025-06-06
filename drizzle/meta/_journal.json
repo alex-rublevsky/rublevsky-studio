@@ -8,6 +8,13 @@
       "when": 1746819420106,
       "tag": "0000_careless_red_ghost",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1748836178267,
+      "tag": "0001_swift_black_widow",
+      "breakpoints": true
     }
   ]
 }

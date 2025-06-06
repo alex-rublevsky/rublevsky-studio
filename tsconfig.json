@@ -1,5 +1,5 @@
 {
-  "include": ["**/*.ts", "**/*.tsx", "src/components/ui/studio/gallery/galleryTypes.ts"],
+  "include": ["**/*.ts", "**/*.tsx", "src/components/ui/studio/gallery/galleryTypes.ts", "globals.d.ts"],
   "compilerOptions": {
     "strict": true,
     "esModuleInterop": true,

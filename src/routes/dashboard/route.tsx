@@ -22,16 +22,13 @@ export const Route = createFileRoute("/dashboard")({
     return { userID, userEmail };
   },
   loader: async ({ context }) => {
-    // Check if user is logged in
     if (!context.userID) {
       throw redirect({ to: "/login" });
     }
-
     // Check if user email matches authorized email
     if (context.userEmail !== AUTHORIZED_EMAIL) {
       throw redirect({ to: "/login" });
     }
-
     return { userID: context.userID, userEmail: context.userEmail };
   },
 });
