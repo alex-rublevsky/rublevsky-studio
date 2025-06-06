@@ -5,50 +5,50 @@ import { GalleryItem } from '~/components/ui/studio/gallery/galleryTypes';
 export const photos: GalleryItem[] = [
   {
     id: 'staff-photography',
-    images: ['blue-shirt-guy-1.jpg', 'blue-shirt-guy-2.jpg'],
+    images: ['photography/blue-shirt-guy-1.webp', 'photography/blue-shirt-guy-2.webp'],
     description: 'Staff photography',
-    logo: 'hpl.svg',
+    logo: 'logos/hpl.svg',
   },
   {
     id: 'eclipse',
-    images: ['eclipse.jpg'],
+    images: ['photography/eclipse.webp'],
     description: 'Eclipse'
   },
   {
     id: 'mobile-zoo-program',
-    images: ['girl-and-goat.jpg'],
+    images: ['photography/girl-and-goat.webp'],
     description: 'March Break Mobile Zoo Program',
-    logo: 'hpl.svg'
+    logo: 'logos/hpl.svg'
   },
   {
     id: 'squirrel-with-nut',
-    images: ['squirrel-with-a-nut.jpg'],
+    images: ['photography/squirrel-with-a-nut.webp'],
     storeLink: 'squirrel-sticker'
   },
   {
     id: 'dinner-3-people',
-    images: ['dinner-3-people.jpg']
+    images: ['photography/dinner-3-people.webp']
   },
   {
     id: 'squirrel-photos',
-    images: ['squirrel-on-box.jpg', 'squirrel-fence.jpg']
+    images: ['photography/squirrel-on-box.webp', 'photography/squirrel-fence.webp']
   },
   {
     id: 'goose-water',
-    images: ['goose-water.jpg'],
+    images: ['photography/goose-water.webp'],
   
   },
   {
     id: 'bird',
-    images: ['bird.jpg']
+    images: ['photography/bird.webp']
   },
   {
     id: 'bebra',
-    images: ['bebra.jpg'],
+    images: ['photography/bebra.webp'],
     
   },
   {
     id: 'rabbit-photos',
-    images: ['zaiika.jpg', 'rabbit-yellow.jpg']
+    images: ['photography/zaiika.webp', 'photography/rabbit-yellow.webp']
   }
 ]; 
