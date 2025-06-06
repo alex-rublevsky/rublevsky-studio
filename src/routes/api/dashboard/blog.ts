@@ -5,8 +5,10 @@ import { db } from '~/db'
 
 export const APIRoute = createAPIFileRoute('/api/dashboard/blog')({
   GET: async ({ request, params }) => {
+ // TODO: remove
     const corsHeaders = {
-      'Access-Control-Allow-Origin': 'https://rublevsky.studio',
+      "Access-Control-Allow-Origin": "*",
+    
     };
 
     try {

@@ -45,9 +45,9 @@ interface EmailRequestBody {
 
 export const APIRoute = createAPIFileRoute('/api/emails')({
   POST: async ({ request }) => {
-
-    const corsHeaders = {
-      'Access-Control-Allow-Origin': 'https://rublevsky.studio',
+//TODO: remove 
+       const corsHeaders = {
+         "Access-Control-Allow-Origin": "*",
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
     };

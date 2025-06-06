@@ -14,8 +14,9 @@ import type { ProductWithVariations } from "~/types";
 
 export const APIRoute = createAPIFileRoute("/api/store")({
   GET: async ({ request, params }) => {
+    // TODO: remove
     const corsHeaders = {
-      "Access-Control-Allow-Origin": "https://tanstack.rublevsky.studio",
+      "Access-Control-Allow-Origin": "*",
     };
 
     try {
@@ -136,8 +137,11 @@ export const APIRoute = createAPIFileRoute("/api/store")({
         product.variations!.sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0));
       }
 
+      // Convert to array
+      const productsArray = Array.from(productMap.values());
+
       const result = {
-        products: Array.from(productMap.values()),
+        products: productsArray,
         categories: categoriesResult,
         teaCategories: teaCategoriesResult,
       };

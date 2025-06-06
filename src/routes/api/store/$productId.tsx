@@ -16,8 +16,9 @@ import { ProductWithDetails } from "~/types";
 
 export const APIRoute = createAPIFileRoute("/api/store/$productId")({
   GET: async ({ request, params }) => {
+    // TODO: remove
     const corsHeaders = {
-      "Access-Control-Allow-Origin": "https://rublevsky.studio",
+      "Access-Control-Allow-Origin": "*",
     };
 
     try {
