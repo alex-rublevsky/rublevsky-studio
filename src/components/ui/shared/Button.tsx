@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
-import { useCursorHoverAdvanced } from "~/components/ui/shared/custom_cursor/CustomCursorContext";
+import { useCursorHover } from "~/components/ui/shared/custom_cursor/CustomCursorContext";
 import { useIsMobile } from "~/hooks/use-mobile";
 
 import { cn } from "~/utils/utils";
@@ -79,7 +79,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const effectiveCursorType = disabled ? "block" : cursorType;
 
     const { handleMouseEnter, handleMouseLeave: handleMouseLeaveHook } =
-      useCursorHoverAdvanced(effectiveCursorType, disabled);
+      useCursorHover(effectiveCursorType, disabled);
 
     const Comp = asChild ? Slot : "button";
     return (

@@ -2,6 +2,7 @@ import type { GalleryItem, GalleryType } from "./galleryTypes.ts";
 import { Button } from "~/components/ui/shared/Button";
 import { Link } from "@tanstack/react-router";
 import { Image } from "~/components/ui/shared/Image";
+import { useCursorHover } from "~/components/ui/shared/custom_cursor/CustomCursorContext";
 
 import { motion } from "motion/react";
 //import styles from "./branding-photography.module.css";
@@ -19,12 +20,16 @@ export default function GalleryItem({
   onOpenGallery,
   galleryType,
 }: GalleryItemProps) {
+  const { handleMouseEnter, handleMouseLeave } = useCursorHover("enlarge");
+
   return (
     <motion.div
       //shadow-[0_5px_6px_rgb(0,0,0,0.08)]
       id={item.id}
-      className="relative group transform-gpu rounded-lg overflow-hidden cursor-pointer mb-3"
+      className="relative group transform-gpu rounded-lg overflow-hidden cursor-none mb-3"
       onClick={() => onOpenGallery(index)}
+      onMouseEnter={handleMouseEnter()}
+      onMouseLeave={handleMouseLeave()}
       whileHover={{
         scale: 1.025,
       }}

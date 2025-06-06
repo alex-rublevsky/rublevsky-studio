@@ -1,4 +1,10 @@
-import { createContext, useState, useContext, ReactNode } from "react";
+import {
+  createContext,
+  useState,
+  useContext,
+  ReactNode,
+  useCallback,
+} from "react";
 
 // Custom cursor variants
 type CursorVariant =
@@ -59,4 +65,36 @@ export const CursorContextProvider = ({
       {children}
     </CursorContext.Provider>
   );
+};
+
+// Unified cursor hover hook that handles all cursor interaction scenarios
+export const useCursorHover = (
+  cursorType: CursorVariant = "small",
+  disableCursor: boolean = false
+) => {
+  const { setVariant } = useCursorContext();
+
+  const handleMouseEnter = useCallback(
+    <T extends React.MouseEvent<any>>(originalHandler?: (e: T) => void) =>
+      (e: T) => {
+        if (!disableCursor) {
+          setVariant(cursorType);
+        }
+        originalHandler?.(e);
+      },
+    [disableCursor, setVariant, cursorType]
+  );
+
+  const handleMouseLeave = useCallback(
+    <T extends React.MouseEvent<any>>(originalHandler?: (e: T) => void) =>
+      (e: T) => {
+        if (!disableCursor) {
+          setVariant("default");
+        }
+        originalHandler?.(e);
+      },
+    [disableCursor, setVariant]
+  );
+
+  return { handleMouseEnter, handleMouseLeave };
 };
