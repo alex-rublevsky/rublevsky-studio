@@ -19,6 +19,7 @@ import {
 import { Badge } from "~/components/ui/shared/Badge";
 import { useQuery } from "@tanstack/react-query";
 import { DEPLOY_URL } from "~/utils/store";
+import { Plus } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard/categories")({
   component: RouteComponent,
@@ -52,6 +53,7 @@ function RouteComponent() {
   const [editingCategoryId, setEditingCategoryId] = useState<number | null>(
     null
   );
+  const [showCreateDrawer, setShowCreateDrawer] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deletingCategoryId, setDeletingCategoryId] = useState<number | null>(
@@ -142,13 +144,7 @@ function RouteComponent() {
 
       toast.success("Category added successfully!");
 
-      setCreateFormData({
-        name: "",
-        slug: "",
-        image: "",
-        isActive: true,
-      });
-      setIsCreateAutoSlug(true);
+      closeCreateDrawer();
       // router.refresh();
       // fetchCategories();
     } catch (err) {
@@ -157,6 +153,18 @@ function RouteComponent() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const closeCreateDrawer = () => {
+    setShowCreateDrawer(false);
+    setCreateFormData({
+      name: "",
+      slug: "",
+      image: "",
+      isActive: true,
+    });
+    setIsCreateAutoSlug(true);
+    setError("");
   };
 
   const handleEdit = (category: Category) => {
@@ -256,105 +264,16 @@ function RouteComponent() {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="bg-card rounded-lg shadow-sm border border-border p-6 mb-8">
-        <h2 className="!text-xl font-semibold mb-4">Add New Category</h2>
-
-        {error && !showEditModal && (
-          <div className="bg-destructive/20 border border-destructive text-destructive-foreground px-4 py-3 rounded mb-4">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Category Name *
-              </label>
-              <Input
-                type="text"
-                name="name"
-                value={createFormData.name}
-                onChange={handleCreateChange}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Slug *{" "}
-                <span className="text-xs text-muted-foreground">
-                  (Auto-generated from name)
-                </span>
-              </label>
-              <div className="flex">
-                <Input
-                  type="text"
-                  name="slug"
-                  value={createFormData.slug}
-                  onChange={handleCreateChange}
-                  required
-                />
-                <Button
-                  type="button"
-                  className="ml-2"
-                  size="sm"
-                  onClick={() => {
-                    setIsCreateAutoSlug(true);
-                    if (createFormData.name) {
-                      const slug = createFormData.name
-                        .toLowerCase()
-                        .replace(/[^\w\s-]/g, "")
-                        .replace(/\s+/g, "-")
-                        .replace(/-+/g, "-")
-                        .trim();
-
-                      setCreateFormData((prev) => ({
-                        ...prev,
-                        slug,
-                      }));
-                    }
-                  }}
-                >
-                  Reset
-                </Button>
-              </div>
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium mb-1">
-                Image URL
-              </label>
-              <Input
-                type="text"
-                name="image"
-                value={createFormData.image}
-                onChange={handleCreateChange}
-                placeholder="https://example.com/image.jpg"
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <div className="flex items-center">
-                <Switch
-                  name="isActive"
-                  checked={createFormData.isActive}
-                  onChange={handleCreateChange}
-                />
-                <label className="ml-2 text-sm">Active</label>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-6">
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Creating..." : "Create Category"}
-            </Button>
-          </div>
-        </form>
+    <div>
+      {/* Fixed Create Button */}
+      <div className="fixed bottom-3 right-3 z-50">
+        <Button onClick={() => setShowCreateDrawer(true)} size="lg">
+          <Plus />
+          Add New Category
+        </Button>
       </div>
 
+      {/* Categories List */}
       <div>
         {isPending ? (
           <div className="text-center py-4">Loading categories...</div>
@@ -436,6 +355,125 @@ function RouteComponent() {
           </div>
         )}
       </div>
+
+      {/* Create Category Drawer */}
+      <Drawer open={showCreateDrawer} onOpenChange={setShowCreateDrawer}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Add New Category</DrawerTitle>
+          </DrawerHeader>
+
+          <DrawerBody>
+            {error && !showEditModal && (
+              <div className="bg-destructive/20 border border-destructive text-destructive-foreground px-4 py-3 rounded mb-4">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} id="createCategoryForm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Category Name *
+                  </label>
+                  <Input
+                    type="text"
+                    name="name"
+                    value={createFormData.name}
+                    onChange={handleCreateChange}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Slug *{" "}
+                    <span className="text-xs text-muted-foreground">
+                      (Auto-generated from name)
+                    </span>
+                  </label>
+                  <div className="flex">
+                    <Input
+                      type="text"
+                      name="slug"
+                      value={createFormData.slug}
+                      onChange={handleCreateChange}
+                      required
+                    />
+                    <Button
+                      type="button"
+                      className="ml-2"
+                      size="sm"
+                      onClick={() => {
+                        setIsCreateAutoSlug(true);
+                        if (createFormData.name) {
+                          const slug = createFormData.name
+                            .toLowerCase()
+                            .replace(/[^\w\s-]/g, "")
+                            .replace(/\s+/g, "-")
+                            .replace(/-+/g, "-")
+                            .trim();
+
+                          setCreateFormData((prev) => ({
+                            ...prev,
+                            slug,
+                          }));
+                        }
+                      }}
+                    >
+                      Reset
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium mb-1">
+                    Image URL
+                  </label>
+                  <Input
+                    type="text"
+                    name="image"
+                    value={createFormData.image}
+                    onChange={handleCreateChange}
+                    placeholder="https://example.com/image.jpg"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <div className="flex items-center">
+                    <Switch
+                      name="isActive"
+                      checked={createFormData.isActive}
+                      onChange={handleCreateChange}
+                    />
+                    <label className="ml-2 text-sm">Active</label>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </DrawerBody>
+
+          <DrawerFooter className="border-t border-border bg-background">
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="secondaryInverted"
+                type="button"
+                onClick={closeCreateDrawer}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="greenInverted"
+                type="submit"
+                form="createCategoryForm"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Creating..." : "Create Category"}
+              </Button>
+            </div>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
 
       <Drawer open={showEditModal} onOpenChange={setShowEditModal}>
         <DrawerContent>
