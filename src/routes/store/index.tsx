@@ -7,7 +7,7 @@ export const Route = createFileRoute("/store/")({
 });
 
 function StorePage() {
-  // Get store data from cart context (which now includes all store data)
+  // Get store data from cart context (which is now available since we're inside CartProvider)
   const { products, categories, teaCategories } = useCart();
 
   return (
