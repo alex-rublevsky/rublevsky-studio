@@ -1,43 +1,43 @@
 import { Project } from '~/components/ui/studio/web/webTypes';
 
 export const webProjects: Project[] = [
-  {
-    id: 'abalych',
-    title: 'Abalych WorldWide',
-    description: 'Website design and development for a street artist Kristina, known as Abalych, who blends traditional with modern, east with west, void with form.',
-    tools: [
-       {
-        name: 'Figma',
-        icon: 'logos/figma-text.svg'
-      },
-        {
-        name: 'Tanstack',
-        icon: 'logos/tanstack.png',
-        largeIcon: true
-      },
-       {
-        name: 'React',
-        icon: 'logos/react.svg',
-         largeIcon: true
-      },
-       {
-        name: 'Cloudflare',
-        icon: 'logos/cloudflare.png'
-      },
+  // {
+  //   id: 'abalych',
+  //   title: 'Abalych WorldWide',
+  //   description: 'Website design and development for a street artist Kristina, known as Abalych, who blends traditional with modern, east with west, void with form.',
+  //   tools: [
+  //      {
+  //       name: 'Figma',
+  //       icon: 'logos/figma-text.svg'
+  //     },
+  //       {
+  //       name: 'Tanstack',
+  //       icon: 'logos/tanstack.png',
+  //       largeIcon: true
+  //     },
+  //      {
+  //       name: 'React',
+  //       icon: 'logos/react.svg',
+  //        largeIcon: true
+  //     },
+  //      {
+  //       name: 'Cloudflare',
+  //       icon: 'logos/cloudflare.png'
+  //     },
 
-    ],
-    websiteUrl: 'https://abaly.ch/',
-    layout: 'full',
-    devices: [
-      {
-        type: 'tablet',
-        content: {
-          type: 'video',
-          url: 'web-videos/abalych-tablet.mp4'
-        }
-      }
-    ]
-  },
+  //   ],
+  //   websiteUrl: 'https://abaly.ch/',
+  //   layout: 'full',
+  //   devices: [
+  //     {
+  //       type: 'tablet',
+  //       content: {
+  //         type: 'video',
+  //         url: 'web-videos/abalych-tablet.mp4'
+  //       }
+  //     }
+  //   ]
+  // },
   {
     id: 'africa-power-supply',
     title: 'Africa Power Supply',
