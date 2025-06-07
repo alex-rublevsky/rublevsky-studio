@@ -145,8 +145,8 @@ const ProductFilters = memo(function ProductFilters({
                   </SelectTrigger>
                   <SelectContent className="bg-background">
                     <SelectItem value="relevant">Relevant</SelectItem>
-                    <SelectItem value="price-asc">$ Low to High</SelectItem>
-                    <SelectItem value="price-desc">$ High to Low</SelectItem>
+                    <SelectItem value="price-asc">Low to Hig $</SelectItem>
+                    <SelectItem value="price-desc">High to Low $</SelectItem>
                     <SelectItem value="newest">Newest First</SelectItem>
                   </SelectContent>
                 </Select>
@@ -254,8 +254,8 @@ const ProductFilters = memo(function ProductFilters({
                 </SelectTrigger>
                 <SelectContent className="bg-background">
                   <SelectItem value="relevant">Relevant</SelectItem>
-                  <SelectItem value="price-asc">$ Low to High</SelectItem>
-                  <SelectItem value="price-desc">$ High to Low</SelectItem>
+                  <SelectItem value="price-asc">Low to High $</SelectItem>
+                  <SelectItem value="price-desc">High to Low $</SelectItem>
                   <SelectItem value="newest">Newest First</SelectItem>
                 </SelectContent>
               </Select>
