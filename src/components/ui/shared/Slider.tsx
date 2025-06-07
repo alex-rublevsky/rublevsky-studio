@@ -73,7 +73,7 @@ const Slider = React.forwardRef<
       const thumb = (
         <SliderPrimitive.Thumb
           className="block h-5 w-5 rounded-full border-2 border-primary bg-background transition-colors focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-ring/40 data-disabled:cursor-not-allowed cursor-grab"
-          onPointerDown={handlePointerDown}
+                      onPointerDown={handlePointerDown}
         />
       );
 
@@ -98,7 +98,7 @@ const Slider = React.forwardRef<
     return (
       <div
         className={cn(
-          "space-y-4 min-w-[20rem] w-full sm:max-w-[20rem]",
+          "space-y-4 min-w-[13rem] w-full sm:max-w-[20rem]",
           className
         )}
       >
@@ -111,12 +111,12 @@ const Slider = React.forwardRef<
         <SliderPrimitive.Root
           ref={ref}
           className={cn(
-            "relative flex w-full touch-none select-none items-center data-[orientation=vertical]:h-full data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col data-disabled:opacity-50"
+            "relative flex pt-1.5 w-full touch-none select-none items-center data-[orientation=vertical]:h-full data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col data-disabled:opacity-50"
           )}
           onValueChange={handleValueChange}
           {...props}
         >
-          <SliderPrimitive.Track className="relative grow overflow-hidden rounded-full bg-secondary data-[orientation=horizontal]:h-2 data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-2">
+          <SliderPrimitive.Track className="relative grow overflow-hidden rounded-full bg-secondary data-[orientation=horizontal]:h-0.5 data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-2">
             <SliderPrimitive.Range className="absolute bg-primary data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full" />
           </SliderPrimitive.Track>
           {internalValue?.map((value, index) => (
