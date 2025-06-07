@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { useRouter } from "@tanstack/react-router";
 import type { Brand, BrandFormData } from "~/types";
 import DeleteConfirmationDialog from "~/components/ui/dashboard/ConfirmationDialog";
 import { toast } from "sonner";
@@ -17,20 +16,21 @@ import {
   DrawerBody,
   DrawerFooter,
 } from "~/components/ui/shared/Drawer";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { DEPLOY_URL } from "~/utils/store";
+import { Plus } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard/brands")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  const { isPending, data, isError } = useQuery<Brand[]>({
+  const queryClient = useQueryClient();
+  const { isPending, data } = useQuery<Brand[]>({
     queryKey: ["dashboard-brands"],
     queryFn: () =>
       fetch(`${DEPLOY_URL}/api/dashboard/brands`).then((res) => res.json()),
   });
-  const router = useRouter();
   // Separate form data for creating and editing
   const [createFormData, setCreateFormData] = useState<BrandFormData>({
     name: "",
@@ -49,6 +49,7 @@ function RouteComponent() {
   const [isCreateAutoSlug, setIsCreateAutoSlug] = useState(true);
   const [isEditAutoSlug, setIsEditAutoSlug] = useState(false);
   const [editingBrandId, setEditingBrandId] = useState<number | null>(null);
+  const [showCreateDrawer, setShowCreateDrawer] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deletingBrandId, setDeletingBrandId] = useState<number | null>(null);
@@ -87,19 +88,6 @@ function RouteComponent() {
       }));
     }
   }, [editFormData.name, isEditAutoSlug]);
-
-  const fetchBrands = async () => {
-    // setIsLoading(true);
-    // try {
-    //   // Use the server action instead of the API
-    //   const brandsData = await getAllBrands();
-    //   setBrands(brandsData || []);
-    // } catch (err) {
-    //   console.error("Error fetching brands:", err);
-    // } finally {
-    //   setIsLoading(false);
-    // }
-  };
 
   const handleCreateChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -140,7 +128,7 @@ function RouteComponent() {
     setError("");
 
     try {
-      // Use the server action instead of the API
+      // TODO: Implement API call to create brand
       // await createBrand({
       //   name: createFormData.name,
       //   slug: createFormData.slug,
@@ -150,21 +138,26 @@ function RouteComponent() {
 
       toast.success("Brand added successfully!");
 
-      setCreateFormData({
-        name: "",
-        slug: "",
-        logo: "",
-        isActive: true,
-      });
-      setIsCreateAutoSlug(true);
-      // router.refresh();
-      fetchBrands();
+      closeCreateDrawer();
+      queryClient.invalidateQueries({ queryKey: ["dashboard-brands"] });
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
       toast.error(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const closeCreateDrawer = () => {
+    setShowCreateDrawer(false);
+    setCreateFormData({
+      name: "",
+      slug: "",
+      logo: "",
+      isActive: true,
+    });
+    setIsCreateAutoSlug(true);
+    setError("");
   };
 
   const handleEdit = (brand: Brand) => {
@@ -188,7 +181,7 @@ function RouteComponent() {
     setError("");
 
     try {
-      // Use the server action instead of the API
+      // TODO: Implement API call to update brand
       // await updateBrand(editingBrandId, {
       //   name: editFormData.name,
       //   slug: editFormData.slug,
@@ -207,8 +200,7 @@ function RouteComponent() {
         isActive: true,
       });
       setIsEditAutoSlug(false);
-      // router.refresh();
-      fetchBrands();
+      queryClient.invalidateQueries({ queryKey: ["dashboard-brands"] });
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
       toast.error(err instanceof Error ? err.message : "An error occurred");
@@ -242,14 +234,14 @@ function RouteComponent() {
     setError("");
 
     try {
+      // TODO: Implement API call to delete brand
       // await deleteBrand(deletingBrandId);
 
       toast.success("Brand deleted successfully!");
 
       setShowDeleteDialog(false);
       setDeletingBrandId(null);
-      // router.refresh();
-      fetchBrands();
+      queryClient.invalidateQueries({ queryKey: ["dashboard-brands"] });
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
       toast.error(err instanceof Error ? err.message : "An error occurred");
@@ -265,102 +257,6 @@ function RouteComponent() {
 
   return (
     <div className="space-y-8">
-      <div className="">
-        <h2 className="!text-xl font-semibold mb-4">Add New Brand</h2>
-
-        {error && !showEditModal && (
-          <div className="bg-destructive/20 border border-destructive text-destructive-foreground px-4 py-3 rounded mb-4">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Brand Name *
-              </label>
-              <Input
-                type="text"
-                name="name"
-                value={createFormData.name}
-                onChange={handleCreateChange}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Slug *{" "}
-                <span className="text-xs text-muted-foreground">
-                  (Auto-generated from name)
-                </span>
-              </label>
-              <div className="flex">
-                <Input
-                  type="text"
-                  name="slug"
-                  value={createFormData.slug}
-                  onChange={handleCreateChange}
-                  required
-                />
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => {
-                    setIsCreateAutoSlug(true);
-                    if (createFormData.name) {
-                      const slug = createFormData.name
-                        .toLowerCase()
-                        .replace(/[^\w\s-]/g, "")
-                        .replace(/\s+/g, "-")
-                        .replace(/-+/g, "-")
-                        .trim();
-
-                      setCreateFormData((prev) => ({
-                        ...prev,
-                        slug,
-                      }));
-                    }
-                  }}
-                  className="ml-2"
-                >
-                  Reset
-                </Button>
-              </div>
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium mb-1">Logo URL</label>
-              <Input
-                type="text"
-                name="logo"
-                value={createFormData.logo}
-                onChange={handleCreateChange}
-                placeholder="https://example.com/logo.jpg"
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <div className="flex items-center">
-                <Switch
-                  name="isActive"
-                  checked={createFormData.isActive}
-                  onChange={handleCreateChange}
-                />
-                <label className="ml-2 text-sm">Active</label>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-6">
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Creating..." : "Create Brand"}
-            </Button>
-          </div>
-        </form>
-      </div>
-
       <div>
         {isPending ? (
           <div className="text-center py-4">Loading brands...</div>
@@ -440,6 +336,124 @@ function RouteComponent() {
           </div>
         )}
       </div>
+
+      {/* Create Brand Drawer */}
+      <Drawer open={showCreateDrawer} onOpenChange={setShowCreateDrawer}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Add New Brand</DrawerTitle>
+          </DrawerHeader>
+
+          <DrawerBody>
+            {error && !showEditModal && (
+              <div className="bg-destructive/20 border border-destructive text-destructive-foreground px-4 py-3 rounded mb-4">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} id="createBrandForm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Brand Name *
+                  </label>
+                  <Input
+                    type="text"
+                    name="name"
+                    value={createFormData.name}
+                    onChange={handleCreateChange}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Slug *{" "}
+                    <span className="text-xs text-muted-foreground">
+                      (Auto-generated from name)
+                    </span>
+                  </label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="text"
+                      name="slug"
+                      value={createFormData.slug}
+                      onChange={handleCreateChange}
+                      required
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => {
+                        setIsCreateAutoSlug(true);
+                        if (createFormData.name) {
+                          const slug = createFormData.name
+                            .toLowerCase()
+                            .replace(/[^\w\s-]/g, "")
+                            .replace(/\s+/g, "-")
+                            .replace(/-+/g, "-")
+                            .trim();
+
+                          setCreateFormData((prev) => ({
+                            ...prev,
+                            slug,
+                          }));
+                        }
+                      }}
+                    >
+                      Reset
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium mb-1">
+                    Logo URL
+                  </label>
+                  <Input
+                    type="text"
+                    name="logo"
+                    value={createFormData.logo}
+                    onChange={handleCreateChange}
+                    placeholder="https://example.com/logo.jpg"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <div className="flex items-center">
+                    <Switch
+                      name="isActive"
+                      checked={createFormData.isActive}
+                      onChange={handleCreateChange}
+                    />
+                    <label className="ml-2 text-sm">Active</label>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </DrawerBody>
+
+          <DrawerFooter>
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="secondaryInverted"
+                type="button"
+                onClick={closeCreateDrawer}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="greenInverted"
+                type="submit"
+                form="createBrandForm"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Creating..." : "Create Brand"}
+              </Button>
+            </div>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
 
       <Drawer open={showEditModal} onOpenChange={setShowEditModal}>
         <DrawerContent>
@@ -569,6 +583,16 @@ function RouteComponent() {
           isDeleting={isDeleting}
         />
       )}
+
+      {/* Floating Action Button */}
+      <Button
+        onClick={() => setShowCreateDrawer(true)}
+        className="fixed bottom-3 right-3 z-50 "
+        size="lg"
+        aria-label="Add new brand"
+      >
+        <Plus size={24} /> Add New Brand
+      </Button>
     </div>
   );
 }
