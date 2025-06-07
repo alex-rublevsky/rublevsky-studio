@@ -15,6 +15,7 @@ import {
 } from "~/utils/validateStock";
 import { useVariationSelection } from "~/hooks/useVariationSelection";
 import { cn } from "~/lib/utils";
+import { useCursorHover } from "../shared/custom_cursor/CustomCursorContext";
 
 // Extended product interface with variations
 interface ProductWithVariations extends Product {
@@ -126,6 +127,12 @@ const ProductCard = memo(function ProductCard({
     );
   }, [product.isActive, product.unlimitedStock, getEffectiveStock]);
 
+  // Custom cursor hover for Add to Cart button
+  const { handleMouseEnter: handleAddToCartMouseEnter, handleMouseLeave: handleAddToCartMouseLeave } = useCursorHover(
+    "add",
+    !isAvailable // Disable cursor when product is not available
+  );
+
   // Check if ANY variation has stock (for image graying out)
   const hasAnyStock = useMemo(() => {
     return isProductAvailable(product, cart.items);
@@ -180,6 +187,9 @@ const ProductCard = memo(function ProductCard({
     ]
   );
 
+
+
+  
   // Check if product is coming soon (not in the type, so we'll use a placeholder)
   const isComingSoon = false; // Replace with actual logic when available
 
@@ -269,10 +279,12 @@ const ProductCard = memo(function ProductCard({
             {/* Desktop Add to Cart button */}
             <button
               onClick={handleAddToCart}
+              onMouseEnter={handleAddToCartMouseEnter()}
+              onMouseLeave={handleAddToCartMouseLeave()}
               className={`absolute bottom-0 left-0 right-0 hidden md:flex items-center justify-center space-x-2 bg-muted/70 backdrop-blur-xs text-black hover:bg-black  transition-all duration-500 py-2 opacity-0 group-hover:opacity-100 ${
                 !isAvailable
                   ? "cursor-not-allowed hover:bg-muted/70 opacity-50"
-                  : "hover:text-white"
+                  : "cursor-none hover:text-white"
               }`}
               disabled={!isAvailable}
             >
