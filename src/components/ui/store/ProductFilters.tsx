@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/shared/Select";
+import styles from "./ProductFilters.module.css";
 
 interface ProductFiltersProps {
   categories: Category[];
@@ -85,34 +86,56 @@ const ProductFilters = memo(function ProductFilters({
     <motion.div
       animate={isHidden ? "hidden" : "visible"}
       whileHover="visible"
+      onClick={() => setIsHidden(false)}
       onFocusCapture={() => setIsHidden(false)}
       transition={{ duration: 0.3 }}
       variants={{
         hidden: isMobileOrTablet ? { y: "-91%" } : { y: "-86%" },
         visible: { y: "0%" },
       }}
-      className={`sticky top-3 mt-0 z-10 w-full ${isMobileOrTablet ? "px-2" : ""}`}
+      className={`sticky overflow-hidden top-3 mt-0 z-10 w-full ${isMobileOrTablet ? "px-2" : ""}`}
     >
-      <div
-        className={`flex flex-col gap-3 px-6 sm:px-6 backdrop-blur-md bg-background/60 py-3 rounded-3xl ${isMobileOrTablet ? "w-full max-w-screen-sm mx-auto" : "w-max mx-auto"}`}
-      >
+     
+        <div className={`relative ${isMobileOrTablet ? "w-full max-w-screen-sm mx-auto" : "w-max mx-auto"}`}>
+          <div className={`${styles.backdrop} bg-background/50 rounded-3xl`} />
+         
+          <svg
+            className="absolute inset-0"
+            width="100%"
+            height="100%"
+            preserveAspectRatio="none"
+          >
+            <mask id="frostyGlassMask">
+              <rect
+                width="100%"
+                height="100%"
+                fill="white"
+                rx="24"
+                ry="24"
+              />
+            </mask>
+          </svg>
+          <div
+            className={`relative flex flex-col gap-3 ${isMobileOrTablet ? "px-4 sm:px-6" : "px-6"} py-3`}
+          >
         {isMobileOrTablet ? (
           /* Mobile Layout */
           <AnimatedGroup delay={0} staggerChildren={0.1}>
             {/* First Row: Categories and Sort By */}
-            <div className="flex gap-4 ">
-              {/* Categories section - takes most space */}
-              <div className="flex flex-col gap-4 flex-1">
+            <div className="flex gap-4 items-start">
+              {/* Categories section - takes most space with proper wrapping */}
+              <div className="flex-1 min-w-0 overflow-hidden">
                 <FilterGroup
                   title="Categories"
                   options={categories}
                   selectedOptions={selectedCategory}
                   onOptionChange={handleMainCategoryChange}
+                  className="flex-wrap"
                 />
               </div>
 
               {/* Sort By Filter - Right side, compact */}
-              <div className="flex flex-col gap-2 self-start">
+              <div className="flex flex-col gap-2 flex-shrink-0">
                 <label className="text-xs font-medium text-foreground">
                   Sort By
                 </label>
@@ -240,7 +263,9 @@ const ProductFilters = memo(function ProductFilters({
           </AnimatedGroup>
         )}
         <div className="mx-auto h-1.5 w-[5rem] rounded-full bg-secondary shrink-0" />
-      </div>
+          </div>
+        </div>
+   
     </motion.div>
   );
 });
