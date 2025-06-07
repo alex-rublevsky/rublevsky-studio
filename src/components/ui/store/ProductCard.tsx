@@ -222,7 +222,7 @@ const ProductCard = memo(function ProductCard({
       onClick={handleCardClick}
     >
       <div
-        className="w-full product-card overflow-hidden rounded-lg group"
+        className="w-full product-card overflow-hidden  group"
         id={styles.productCard}
       >
         <div className="bg-background flex flex-col">
