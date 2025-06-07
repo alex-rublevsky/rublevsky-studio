@@ -136,7 +136,7 @@ const ProductFilters = memo(function ProductFilters({
 
               {/* Sort By Filter - Right side, compact */}
               <div className="flex flex-col gap-2 flex-shrink-0">
-                <label className="text-xs font-medium text-foreground">
+                <label className="text-sm font-medium text-foreground">
                   Sort By
                 </label>
                 <Select value={sortBy} onValueChange={onSortChange}>
@@ -175,7 +175,7 @@ const ProductFilters = memo(function ProductFilters({
 
             {/* Price Range Filter - Full width */}
             <Slider
-              className="pt-3 pb-5 md:pt-0"
+              className="pt-3 pb-5 lg:pt-0"
               value={currentPriceRange}
               min={priceRange.min}
               max={priceRange.max}
@@ -245,7 +245,7 @@ const ProductFilters = memo(function ProductFilters({
 
             {/* Sort By Filter */}
             <div className="flex flex-col gap-2 self-start">
-              <label className="text-xs font-medium text-foreground">
+              <label className="text-sm font-medium text-foreground">
                 Sort By
               </label>
               <Select value={sortBy} onValueChange={onSortChange}>
