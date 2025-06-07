@@ -73,7 +73,7 @@ function Cursor() {
   };
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
+    const updateCursorPosition = (e: MouseEvent | PointerEvent) => {
       // Center the cursor properly (13.5px offset for 27px cursor)
       setMousePosition({
         x: e.clientX - 13.5,
@@ -94,16 +94,23 @@ function Cursor() {
       setVariant("hidden");
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
+    // Listen to both mouse and pointer events for better drag support
+    window.addEventListener("mousemove", updateCursorPosition);
+    window.addEventListener("pointermove", updateCursorPosition);
     window.addEventListener("mousedown", handleMouseDown);
     window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("pointerdown", handleMouseDown);
+    window.addEventListener("pointerup", handleMouseUp);
     document.body.addEventListener("mouseenter", handleMouseEnter);
     document.body.addEventListener("mouseleave", handleMouseLeave);
 
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mousemove", updateCursorPosition);
+      window.removeEventListener("pointermove", updateCursorPosition);
       window.removeEventListener("mousedown", handleMouseDown);
       window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("pointerdown", handleMouseDown);
+      window.removeEventListener("pointerup", handleMouseUp);
       document.body.removeEventListener("mouseenter", handleMouseEnter);
       document.body.removeEventListener("mouseleave", handleMouseLeave);
     };
