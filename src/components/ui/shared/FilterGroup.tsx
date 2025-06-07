@@ -1,5 +1,6 @@
 import { cn } from "~/utils/utils";
 import { cva } from "class-variance-authority";
+import { useCursorHover } from "~/components/ui/shared/custom_cursor/CustomCursorContext";
 
 interface FilterOption {
   slug: string;
@@ -15,30 +16,28 @@ interface FilterButtonProps {
   title?: string;
 }
 
-const buttonVariants = cva(
-  "transition-all duration-200 border cursor-pointer",
-  {
-    variants: {
-      variant: {
-        default:
-          "px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium rounded-full",
-        product: "px-2 py-1 text-xs rounded-full",
-      },
-      state: {
-        selected: "border-black bg-black text-white",
-        unselected:
-          "border-border hover:border-black hover:bg-black/5 active:scale-95",
-        disabled: "border-border hover:border-black text-muted-foreground",
-        "selected-disabled":
-          "border-muted-foreground bg-muted/50 text-muted-foreground",
-      },
+const buttonVariants = cva("transition-all duration-200 border", {
+  variants: {
+    variant: {
+      default:
+        "px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium rounded-full",
+      product: "px-2 py-1 text-xs rounded-full",
     },
-    defaultVariants: {
-      variant: "default",
-      state: "unselected",
+    state: {
+      selected: "border-black bg-black text-white",
+      unselected:
+        "border-border bg-background/80 hover:border-black hover:bg-black/5 active:scale-95",
+      disabled:
+        "border-border bg-muted hover:border-black text-muted-foreground",
+      "selected-disabled":
+        "border-muted-foreground bg-muted/50 text-muted-foreground",
     },
-  }
-);
+  },
+  defaultVariants: {
+    variant: "default",
+    state: "unselected",
+  },
+});
 
 function FilterButton({
   onClick,
@@ -57,11 +56,26 @@ function FilterButton({
       ? "selected"
       : "unselected";
 
+  // Determine effective cursor behavior - disabled buttons use "block" cursor
+  const effectiveCursorType = isDisabled ? "block" : "small";
+
+  const { handleMouseEnter, handleMouseLeave } = useCursorHover(
+    effectiveCursorType,
+    isDisabled
+  );
+
   return (
     <button
       onClick={onClick}
-      className={cn(buttonVariants({ variant, state }), className)}
+      className={cn(
+        // Use cursor-not-allowed for disabled buttons, cursor-pointer for enabled buttons
+        isDisabled ? "cursor-not-allowed" : "cursor-pointer",
+        buttonVariants({ variant, state }),
+        className
+      )}
       title={title}
+      onMouseEnter={handleMouseEnter()}
+      onMouseLeave={handleMouseLeave()}
     >
       {children}
     </button>
