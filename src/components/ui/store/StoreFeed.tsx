@@ -200,7 +200,7 @@ export default function StoreFeed({
         sortBy={sortBy}
         onSortChange={setSortBy}
       />
-      <div className="px-4 sm:px-6">
+      <div className="px-0 sm:px-6">
         <ProductList data={filteredAndSortedProducts} />
       </div>
     </section>
