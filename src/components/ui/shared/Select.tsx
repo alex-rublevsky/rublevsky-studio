@@ -54,7 +54,7 @@ const SelectTrigger = React.forwardRef<
         onMouseLeave={handleMouseLeaveHook(onMouseLeave)}
         {...props}
       >
-        <span className="relative z-10 flex items-center justify-between w-full cursor-pointer px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium text-white mix-blend-difference">
+        <span className="relative z-10 flex items-center justify-between w-full cursor-pointer px-2 md:px-4 py-1.5 md:py-2 text-sm md:text-sm font-medium text-white mix-blend-difference">
           <span className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-left">
             {children}
           </span>
