@@ -64,6 +64,7 @@ const BrandingProjectCard = ({
           className="overflow-hidden rounded-lg cursor-none w-full h-auto col-start-1 row-start-1"
           muted
           autoPlay={true}
+          playsInline={true}
           loop={true}
           onClick={() => setSelected(project)}
         />
