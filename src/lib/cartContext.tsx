@@ -42,6 +42,7 @@ interface CartContextType {
   products: ProductWithVariations[]; // Make products directly accessible
   categories: Category[];
   teaCategories: TeaCategory[];
+  isLoading: boolean;
   setCartOpen: (open: boolean) => void;
   addToCart: (item: CartItem) => void;
   addProductToCart: (
@@ -73,6 +74,7 @@ interface CartProviderProps {
   initialProducts?: ProductWithVariations[];
   initialCategories?: Category[];
   initialTeaCategories?: TeaCategory[];
+  isLoading?: boolean;
 }
 
 export function CartProvider({
@@ -80,6 +82,7 @@ export function CartProvider({
   initialProducts,
   initialCategories = [],
   initialTeaCategories = [],
+  isLoading = false,
 }: CartProviderProps) {
   const [cart, setCart] = useState<Cart>({
     items: [],
@@ -412,6 +415,7 @@ export function CartProvider({
         products, // Use products from state
         categories: initialCategories,
         teaCategories: initialTeaCategories,
+        isLoading,
         setCartOpen,
         addToCart,
         addProductToCart,
