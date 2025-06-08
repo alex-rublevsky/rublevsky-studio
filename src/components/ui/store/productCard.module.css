@@ -2,25 +2,28 @@
   transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
 }
 
-#productCard:hover {
-  transform: scale(1.02) translateZ(1rem);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+/* Only enable hover effects on desktop */
+@media (min-width: 768px) and (hover: hover) {
+  #productCard:hover {
+    transform: scale(1.02) translateZ(1rem);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  #productCard:hover img {
+    transform: scale(1.05);
+  }
+
+  #productCard:hover img:first-child {
+    opacity: 0;
+  }
+
+  #productCard:hover img:last-child {
+    opacity: 1;
+  }
 }
 
 #productCard img {
   transition: transform 0.5s ease-out, opacity 0.5s ease-out;
-}
-
-#productCard:hover img {
-  transform: scale(1.05);
-}
-
-#productCard:hover img:first-child {
-  opacity: 0;
-}
-
-#productCard:hover img:last-child {
-  opacity: 1;
 }
 
 /* Desktop Add to Cart button */
