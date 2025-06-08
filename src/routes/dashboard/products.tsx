@@ -32,6 +32,7 @@ import {
   SelectValue,
 } from "~/components/ui/shared/Select";
 import { Switch } from "~/components/ui/shared/Switch";
+import { Checkbox } from "~/components/ui/shared/Checkbox";
 
 import {
   Drawer,
@@ -821,16 +822,24 @@ function RouteComponent() {
                         key={category.slug}
                         className="flex items-center space-x-2"
                       >
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           name={`teaCategory-${category.slug}`}
                           checked={
                             editFormData.teaCategories?.includes(
                               category.slug
                             ) || false
                           }
-                          onChange={handleEditChange}
-                          className="h-4 w-4 border-input"
+                          onCheckedChange={(checked) => {
+                            const newCategories = checked
+                              ? [...(editFormData.teaCategories || []), category.slug]
+                              : (editFormData.teaCategories || []).filter(
+                                  (slug) => slug !== category.slug
+                                );
+                            setEditFormData({
+                              ...editFormData,
+                              teaCategories: newCategories,
+                            });
+                          }}
                         />
                         <span className="text-sm">{category.name}</span>
                       </label>
@@ -1129,15 +1138,23 @@ function RouteComponent() {
                         key={category.slug}
                         className="flex items-center space-x-2"
                       >
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           name={`teaCategory-${category.slug}`}
                           checked={
                             formData.teaCategories?.includes(category.slug) ||
                             false
                           }
-                          onChange={handleChange}
-                          className="h-4 w-4 border-input"
+                          onCheckedChange={(checked) => {
+                            const newCategories = checked
+                              ? [...(formData.teaCategories || []), category.slug]
+                              : (formData.teaCategories || []).filter(
+                                  (slug) => slug !== category.slug
+                                );
+                            setFormData({
+                              ...formData,
+                              teaCategories: newCategories,
+                            });
+                          }}
                         />
                         <span className="text-sm">{category.name}</span>
                       </label>
