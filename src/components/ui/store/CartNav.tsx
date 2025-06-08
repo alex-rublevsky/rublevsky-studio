@@ -5,9 +5,15 @@ import {
   DrawerTrigger,
 } from "~/components/ui/shared/Drawer";
 import { CartDrawerContent } from "./CartDrawerContent";
+import { CartNavSkeleton } from "./skeletons/CartNavSkeleton";
 
 export function CartNav() {
-  const { cartOpen, setCartOpen, itemCount } = useCart();
+  const { cartOpen, setCartOpen, itemCount, isLoading } = useCart();
+
+  // Show skeleton while loading
+  if (isLoading) {
+    return <CartNavSkeleton />;
+  }
 
   return (
     <div className="fixed bottom-2 right-2 z-50">

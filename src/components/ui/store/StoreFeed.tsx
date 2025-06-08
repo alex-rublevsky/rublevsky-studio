@@ -4,6 +4,7 @@ import ProductList from "./ProductList";
 import ProductFilters from "./ProductFilters";
 import { isProductAvailable } from "~/utils/validateStock";
 import { useCart } from "~/lib/cartContext";
+import { ProductFiltersSkeleton } from "./skeletons/ProductFiltersSkeleton";
 
 interface StoreFeedProps {
   products: ProductWithVariations[];
@@ -44,7 +45,7 @@ export default function StoreFeed({
   );
   const [sortBy, setSortBy] = useState<string>("relevant");
 
-  const { cart } = useCart();
+  const { cart, isLoading } = useCart();
 
   // Pre-calculate price ranges for all products (eliminates redundant calculations)
   const productsWithPriceRanges = useMemo(() => {
@@ -187,21 +188,25 @@ export default function StoreFeed({
 
   return (
     <section className="no-padding space-y-8 [view-transition-name:main-content]">
-      <ProductFilters
-        categories={categories}
-        teaCategories={filteredTeaCategories}
-        selectedCategory={selectedCategory}
-        selectedTeaCategory={selectedTeaCategory}
-        onCategoryChange={setSelectedCategory}
-        onTeaCategoryChange={setSelectedTeaCategory}
-        priceRange={effectivePriceRange}
-        currentPriceRange={localPriceRange}
-        onPriceRangeChange={setLocalPriceRange}
-        sortBy={sortBy}
-        onSortChange={setSortBy}
-      />
+      {isLoading ? (
+        <ProductFiltersSkeleton />
+      ) : (
+        <ProductFilters
+          categories={categories}
+          teaCategories={filteredTeaCategories}
+          selectedCategory={selectedCategory}
+          selectedTeaCategory={selectedTeaCategory}
+          onCategoryChange={setSelectedCategory}
+          onTeaCategoryChange={setSelectedTeaCategory}
+          priceRange={effectivePriceRange}
+          currentPriceRange={localPriceRange}
+          onPriceRangeChange={setLocalPriceRange}
+          sortBy={sortBy}
+          onSortChange={setSortBy}
+        />
+      )}
       <div className="px-0 sm:px-6">
-        <ProductList data={filteredAndSortedProducts} />
+        <ProductList data={filteredAndSortedProducts} isLoading={isLoading} />
       </div>
     </section>
   );
