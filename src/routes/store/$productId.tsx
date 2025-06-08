@@ -7,7 +7,10 @@ import { Button } from "~/components/ui/shared/Button";
 import { Link } from "@tanstack/react-router";
 import { useCart } from "~/lib/cartContext";
 import { QuantitySelector } from "~/components/ui/shared/QuantitySelector";
-import { getAttributeDisplayName } from "~/lib/productAttributes";
+import {
+  getAttributeDisplayName,
+  PRODUCT_ATTRIBUTES,
+} from "~/lib/productAttributes";
 import { FilterGroup } from "~/components/ui/shared/FilterGroup";
 import {
   ProductWithDetails,
@@ -19,23 +22,56 @@ import { getAvailableQuantityForVariation } from "~/utils/validateStock";
 import { useVariationSelection } from "~/hooks/useVariationSelection";
 import { useQuery } from "@tanstack/react-query";
 import { DEPLOY_URL } from "~/utils/store";
+import { z } from "zod";
+import { ProductPageSkeleton } from "~/components/ui/store/skeletons/ProductPageSkeleton";
+
+// Create search params schema based on actual product attributes
+const createProductSearchSchema = () => {
+  const schemaObject: Record<string, z.ZodOptional<z.ZodString>> = {};
+
+  // Add all known product attributes as optional string fields
+  Object.keys(PRODUCT_ATTRIBUTES).forEach((attributeId) => {
+    // Convert attribute IDs to lowercase for URL params (e.g., SIZE_CM -> size_cm)
+    const paramName = attributeId.toLowerCase();
+    schemaObject[paramName] = z.string().optional();
+  });
+
+  return z.object(schemaObject);
+};
+
+const productSearchSchema = createProductSearchSchema();
 
 export const Route = createFileRoute("/store/$productId")({
   component: ProductPage,
+  validateSearch: productSearchSchema,
   loader: async ({ params }) => {
     return {
       productId: params.productId,
     };
   },
-  pendingComponent: () => <div>Loading...</div>,
+  pendingComponent: () => <ProductPageSkeleton />,
   errorComponent: ({ error }) => <div>Error: {error.message}</div>,
 });
 
 function ProductPage() {
   const { productId } = Route.useLoaderData();
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
   const [quantity, setQuantity] = useState(1);
   const [product, setProduct] = useState<ProductWithDetails | null>(null);
   const { addProductToCart, cart, products } = useCart();
+
+  // Disable body scroll on desktop
+  useEffect(() => {
+    const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
+    if (isDesktop) {
+      document.body.style.overflow = "hidden";
+    }
+    
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, []);
 
   // Query product data
   const { isPending, error, data } = useQuery<ProductWithDetails>({
@@ -74,7 +110,7 @@ function ProductPage() {
     }
   }, [product?.id, products]);
 
-  // Variation selection hook - always call but pass null product when not loaded
+  // Variation selection hook using URL search params
   const {
     selectedVariation,
     selectedAttributes,
@@ -83,16 +119,59 @@ function ProductPage() {
   } = useVariationSelection({
     product: product as ProductWithVariations | null,
     cartItems: cart.items,
+    search,
     onVariationChange: () => setQuantity(1), // Reset quantity when variation changes
   });
 
+  // Find variation for pricing (regardless of stock status)
+  const variationForPricing = useMemo(() => {
+    if (!product?.hasVariations || !product.variations || !selectedAttributes) {
+      return null;
+    }
+
+    // Find variation that matches all selected attributes, regardless of stock
+    return (
+      product.variations.find((variation) => {
+        return Object.entries(selectedAttributes).every(([attrId, value]) =>
+          variation.attributes.some(
+            (attr: VariationAttribute) =>
+              attr.attributeId === attrId && attr.value === value
+          )
+        );
+      }) || null
+    );
+  }, [product, selectedAttributes]);
+
   // Calculate current price based on selected variation
   const currentPrice = useMemo(() => {
-    if (selectedVariation) {
-      return selectedVariation.price;
+    // If product has variations, always use variation price
+    if (product?.hasVariations) {
+      // Use selectedVariation for available stock, or variationForPricing for out-of-stock items
+      const relevantVariation = selectedVariation || variationForPricing;
+      return relevantVariation?.price || 0;
+    }
+    // If product price is zero, use variation price (if available)
+    if (product?.price === 0 && (selectedVariation || variationForPricing)) {
+      const relevantVariation = selectedVariation || variationForPricing;
+      return relevantVariation?.price || 0;
     }
     return product?.price || 0;
-  }, [selectedVariation, product?.price]);
+  }, [
+    selectedVariation,
+    variationForPricing,
+    product?.price,
+    product?.hasVariations,
+  ]);
+
+  // Calculate current discount based on selected variation
+  const currentDiscount = useMemo(() => {
+    // Use selectedVariation for available stock, or variationForPricing for out-of-stock items
+    const relevantVariation = selectedVariation || variationForPricing;
+    if (relevantVariation && relevantVariation.discount) {
+      return relevantVariation.discount;
+    }
+    return product?.discount || null;
+  }, [selectedVariation, variationForPricing, product?.discount]);
 
   // Calculate effective stock based on selected variation
   const effectiveStock = useMemo(() => {
@@ -184,12 +263,7 @@ function ProductPage() {
   }, [data]);
 
   // Wait for data to be loaded before rendering
-  if (isPending)
-    return (
-      <div className="flex items-center justify-center h-screen">
-        Loading product...
-      </div>
-    );
+  if (isPending) return <ProductPageSkeleton />;
   if (error)
     return (
       <div className="flex items-center justify-center h-screen text-red-500">
@@ -274,13 +348,13 @@ function ProductPage() {
 
               {/* Price */}
               <div className="flex gap-4 items-center">
-                {product.discount ? (
+                {currentDiscount ? (
                   <div className="flex items-center gap-2">
-                    <Badge variant="green">{product.discount}% OFF</Badge>
+                    <Badge variant="green">{currentDiscount}% OFF</Badge>
                     <div className="flex items-baseline gap-2">
                       <h4>
                         $
-                        {(currentPrice * (1 - product.discount / 100)).toFixed(
+                        {(currentPrice * (1 - currentDiscount / 100)).toFixed(
                           2
                         )}{" "}
                         CAD
@@ -352,7 +426,7 @@ function ProductPage() {
                   onClick={handleAddToCart}
                   size="lg"
                   disabled={!canAddToCart}
-                  cursorType={canAddToCart ? "add" : "disabled"}
+                  cursorType={canAddToCart ? "add" : "default"}
                 >
                   {canAddToCart ? "Add to Cart" : "Out of Stock"}
                 </Button>
