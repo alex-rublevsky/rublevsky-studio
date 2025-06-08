@@ -435,7 +435,7 @@ function CheckoutScreen() {
             </form>
           </div>
           {/* Order Summary - Right Side */}
-          <div className="lg:w-[27rem]">
+          <div className="lg:w-[27rem] lg:sticky lg:top-4 lg:self-start">
             <NeumorphismCard className="">
               <h5>Summary</h5>
               <div className="flex justify-between items-baseline my-2">
