@@ -5,6 +5,7 @@ import { DEPLOY_URL } from "~/utils/store";
 import { ProductWithVariations, Category, TeaCategory } from "~/types";
 import { CartNav } from "~/components/ui/store/CartNav";
 
+
 interface StoreData {
   products: ProductWithVariations[];
   categories: Category[];
@@ -38,13 +39,9 @@ function StoreLayout() {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-red-600 mb-2">
-            Failed to load store
-          </h2>
-          <p className="text-gray-600">{error.message}</p>
-        </div>
+//TODO: style this, then apply to all errors
+      <div className="min-h-screen bg-background">
+      Failed to load products!
       </div>
     );
   }
