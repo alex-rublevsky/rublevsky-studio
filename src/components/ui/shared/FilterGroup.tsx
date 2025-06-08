@@ -66,7 +66,11 @@ function FilterButton({
 
   return (
     <button
-      onClick={onClick}
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        onClick();
+      }}
       className={cn(
         // Use cursor-not-allowed for disabled buttons, cursor-pointer for enabled buttons
         "cursor-pointer",
