@@ -3,12 +3,27 @@ import BlogPostsList from "~/components/ui/blog/BlogPostsList";
 import { BlogPost as BlogPostType, TeaCategory } from "~/types/index";
 import { useQuery } from "@tanstack/react-query";
 import { DEPLOY_URL } from "~/utils/store";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/blog")({
   component: PostsIndexComponent,
+  loader: async () => {
+    // Preload blog data
+    const response = await fetch(`${DEPLOY_URL}/api/blog`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch blog data: ${response.status}`);
+    }
+    return response.json() as Promise<{
+      posts: BlogPostType[];
+      teaCategories: TeaCategory[];
+      totalCount: number;
+    }>;
+  },
 });
 
 function PostsIndexComponent() {
+  const loaderData = Route.useLoaderData();
+  
   // Fetch blog posts and tea categories in a single API call
   const {
     isPending: isLoading,
@@ -21,11 +36,28 @@ function PostsIndexComponent() {
   }>({
     queryKey: ["blog"],
     queryFn: () => fetch(`${DEPLOY_URL}/api/blog`).then((res) => res.json()),
+    initialData: loaderData,
   });
 
   const posts = data?.posts || [];
   const teaCategories = data?.teaCategories || [];
   const totalCount = data?.totalCount || 0;
+
+  // Handle anchor scrolling after data loads
+  useEffect(() => {
+    // Only scroll to anchor if we have posts loaded and there's a hash in the URL
+    if (posts.length > 0 && window.location.hash) {
+      const hash = window.location.hash.substring(1); // Remove the # character
+      
+      // Use a small delay to ensure the DOM is rendered
+      setTimeout(() => {
+        const element = document.getElementById(hash);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  }, [posts]);
 
   return (
     //TODO: 2 column layout for desktop
