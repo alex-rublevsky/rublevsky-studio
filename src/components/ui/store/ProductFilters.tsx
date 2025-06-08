@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/shared/Select";
+import { useCart } from "~/lib/cartContext";
 import styles from "./ProductFilters.module.css";
 
 interface ProductFiltersProps {
@@ -48,8 +49,9 @@ const ProductFilters = memo(function ProductFilters({
   onPriceRangeChange,
   sortBy = "relevant",
   onSortChange,
-}: ProductFiltersProps) {
-  const { isMobileOrTablet } = useDeviceType();
+  }: ProductFiltersProps) {
+    const { isMobileOrTablet } = useDeviceType();
+    const { cartOpen } = useCart();
 
   const handlePriceRangeChange = useCallback(
     (newValue: number[]) => {
@@ -76,7 +78,8 @@ const ProductFilters = memo(function ProductFilters({
 
   useMotionValueEvent(scrollY, "change", (y) => {
     const difference = y - lastYRef.current;
-    if (Math.abs(difference) > 50) {
+    // Don't hide filters when cart is open or when scrolling is minimal
+    if (Math.abs(difference) > 50 && !cartOpen) {
       setIsHidden(difference > 0);
       lastYRef.current = y;
     }
