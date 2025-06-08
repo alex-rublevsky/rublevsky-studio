@@ -69,7 +69,7 @@ function FilterButton({
       onClick={onClick}
       className={cn(
         // Use cursor-not-allowed for disabled buttons, cursor-pointer for enabled buttons
-        isDisabled ? "cursor-not-allowed" : "cursor-pointer",
+        "cursor-pointer",
         buttonVariants({ variant, state }),
         className
       )}
