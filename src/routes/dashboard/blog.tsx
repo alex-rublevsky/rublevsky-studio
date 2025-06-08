@@ -12,6 +12,7 @@ import ProductSelector from "~/components/ui/dashboard/ProductSelector";
 import { Button } from "~/components/ui/shared/Button";
 import { Input } from "~/components/ui/shared/Input";
 import { Textarea } from "~/components/ui/shared/TextArea";
+import { Checkbox } from "~/components/ui/shared/Checkbox";
 import {
   Drawer,
   DrawerContent,
@@ -375,15 +376,14 @@ function RouteComponent() {
                       key={category.slug}
                       className="flex items-center space-x-2"
                     >
-                      <input
-                        type="checkbox"
+                      <Checkbox
                         checked={
                           createFormData.teaCategories?.includes(
                             category.slug
                           ) ?? false
                         }
-                        onChange={(e) => {
-                          const newCategories = e.target.checked
+                        onCheckedChange={(checked) => {
+                          const newCategories = checked
                             ? [
                                 ...(createFormData.teaCategories || []),
                                 category.slug,
@@ -393,7 +393,6 @@ function RouteComponent() {
                               );
                           handleCategoryChange(newCategories);
                         }}
-                        className="h-4 w-4 rounded border-gray-300"
                       />
                       <span>{category.name}</span>
                     </label>
@@ -595,14 +594,13 @@ function RouteComponent() {
                       key={category.slug}
                       className="flex items-center space-x-2"
                     >
-                      <input
-                        type="checkbox"
+                      <Checkbox
                         checked={
                           editFormData.teaCategories?.includes(category.slug) ??
                           false
                         }
-                        onChange={(e) => {
-                          const newCategories = e.target.checked
+                        onCheckedChange={(checked) => {
+                          const newCategories = checked
                             ? [
                                 ...(editFormData.teaCategories || []),
                                 category.slug,
@@ -615,7 +613,6 @@ function RouteComponent() {
                             teaCategories: newCategories,
                           }));
                         }}
-                        className="h-4 w-4 rounded border-gray-300"
                       />
                       <span>{category.name}</span>
                     </label>
