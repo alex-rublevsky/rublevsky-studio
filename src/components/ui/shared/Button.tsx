@@ -87,6 +87,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         className={cn(
           // Use cursor-not-allowed for disabled buttons, cursor-default for enabled buttons
           disabled ? "cursor-not-allowed" : "cursor-pointer",
+          cursorType === "add" ? "cursor-none" : "cursor-pointer",
           buttonVariants({ variant, size, className })
         )}
         ref={ref}
