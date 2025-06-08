@@ -246,9 +246,9 @@ const ProductCard = memo(function ProductCard({
                 )}
               </div>
 
-              {/* Secondary Image (if exists) */}
+              {/* Secondary Image (if exists) - Only on desktop devices with hover capability */}
               {imageArray.length > 1 && (
-                <div className="absolute inset-0 flex items-center justify-center">
+                <div className="absolute inset-0  items-center justify-center hidden md:block">
                   <Image
                     src={`/${imageArray[1]}`}
                     alt={product.name}
