@@ -4,8 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { DEPLOY_URL } from "~/utils/store";
 import { ProductWithVariations, Category, TeaCategory } from "~/types";
 import { CartNav } from "~/components/ui/store/CartNav";
-import { StoreSkeleton } from "~/components/ui/store/skeletons/StoreSkeleton";
-import { CartNavSkeleton } from "~/components/ui/store/skeletons/CartNavSkeleton";
 
 interface StoreData {
   products: ProductWithVariations[];
@@ -18,35 +16,47 @@ export const Route = createFileRoute("/store")({
 });
 
 function StoreLayout() {
-  // Fetch complete store data for both cart context and child routes
+  // Use TanStack Query for better caching and data management
   const {
     isPending,
     error,
     data: storeData,
   } = useQuery<StoreData>({
     queryKey: ["storeData"],
-    staleTime: 1000 * 60 * 60 * 3, // 3 hour
-    queryFn: () => fetch(`${DEPLOY_URL}/api/store`).then((res) => res.json()),
+    queryFn: async () => {
+      const response = await fetch(`${DEPLOY_URL}/api/store`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch store data: ${response.statusText}`);
+      }
+      return response.json();
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 30, // 30 minutes (formerly cacheTime)
+    retry: 3,
+    refetchOnWindowFocus: false,
   });
 
-  if (isPending) {
+  if (error) {
     return (
-      <div className="min-h-screen bg-background">
-        <StoreSkeleton />
-        <CartNavSkeleton />
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-red-600 mb-2">
+            Failed to load store
+          </h2>
+          <p className="text-gray-600">{error.message}</p>
+        </div>
       </div>
     );
   }
 
-  if (error) {
-    return <div>Error: {error.message}</div>;
-  }
-
+  // Always render CartProvider, even while loading
+  // This prevents the mobile navigation hanging issue
   return (
     <CartProvider
-      initialProducts={storeData?.products}
-      initialCategories={storeData?.categories}
-      initialTeaCategories={storeData?.teaCategories}
+      initialProducts={storeData?.products || []}
+      initialCategories={storeData?.categories || []}
+      initialTeaCategories={storeData?.teaCategories || []}
+      isLoading={isPending}
     >
       <Outlet />
       <CartNav />
