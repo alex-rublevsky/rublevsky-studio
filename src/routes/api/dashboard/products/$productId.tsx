@@ -363,13 +363,105 @@ export const APIRoute = createAPIFileRoute(
     }
   },
 
+  DELETE: async ({ request, params }) => {
+    // TODO: remove
+    const corsHeaders = {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "DELETE, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+    };
+
+    try {
+      const productId = parseInt(params.productId);
+
+      if (isNaN(productId)) {
+        return json(
+          { error: "Invalid product ID" },
+          {
+            status: 400,
+            headers: corsHeaders,
+          }
+        );
+      }
+
+      // Get CloudFlare D1 database instance
+      const bindings = await getBindings();
+      const d1Database = bindings.DB;
+      const db = drizzle(d1Database);
+
+      // Check if product exists
+      const existingProduct = await db
+        .select()
+        .from(products)
+        .where(eq(products.id, productId))
+        .limit(1);
+
+      if (!existingProduct[0]) {
+        return json(
+          { error: "Product not found" },
+          {
+            status: 404,
+            headers: corsHeaders,
+          }
+        );
+      }
+
+      // Delete related data first (foreign key constraints)
+      
+      // Get all variations for this product
+      const existingVariations = await db
+        .select()
+        .from(productVariations)
+        .where(eq(productVariations.productId, productId));
+
+      // Delete variation attributes for all variations
+      if (existingVariations.length > 0) {
+        for (const variation of existingVariations) {
+          await db
+            .delete(variationAttributes)
+            .where(eq(variationAttributes.productVariationId, variation.id));
+        }
+
+        // Delete variations
+        await db
+          .delete(productVariations)
+          .where(eq(productVariations.productId, productId));
+      }
+
+      // Delete tea category associations
+      await db
+        .delete(productTeaCategories)
+        .where(eq(productTeaCategories.productId, productId));
+
+      // Finally delete the product
+      await db.delete(products).where(eq(products.id, productId));
+
+      return json(
+        { message: "Product deleted successfully" },
+        { headers: corsHeaders }
+      );
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      return json(
+        {
+          error:
+            error instanceof Error ? error.message : "Failed to delete product",
+        },
+        {
+          status: 500,
+          headers: corsHeaders,
+        }
+      );
+    }
+  },
+
   OPTIONS: async ({ request }) => {
     // TODO: remove
     return new Response(null, {
       status: 200,
       headers: {
         "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, PUT, OPTIONS",
+        "Access-Control-Allow-Methods": "GET, PUT, DELETE, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type",
       },
     });

@@ -411,7 +411,19 @@ function RouteComponent() {
         teaCategories: formData.teaCategories || undefined,
       };
 
-      // await createProduct(submissionData);
+      const response = await fetch(`${DEPLOY_URL}/api/dashboard/products`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(submissionData),
+      });
+
+      if (!response.ok) {
+        const errorData = (await response.json()) as { error?: string };
+        throw new Error(errorData.error || "Failed to create product");
+      }
+
       toast.success("Product added successfully!");
 
       // Reset form state and close modal
@@ -505,10 +517,24 @@ function RouteComponent() {
     setError("");
 
     try {
-      // await deleteProduct(deletingProductId);
+      const response = await fetch(
+        `${DEPLOY_URL}/api/dashboard/products/${deletingProductId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = (await response.json()) as { error?: string };
+        throw new Error(errorData.error || "Failed to delete product");
+      }
+
       toast.success("Product deleted successfully!");
       setShowDeleteDialog(false);
       setDeletingProductId(null);
+      
+      // Refresh data
+      refetch();
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
       toast.error(err instanceof Error ? err.message : "An error occurred");
