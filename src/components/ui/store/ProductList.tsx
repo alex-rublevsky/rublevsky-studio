@@ -1,7 +1,7 @@
 import { Product } from "~/types";
 import { motion, AnimatePresence } from "motion/react";
 import ProductCard from "./ProductCard";
-import { memo, useMemo, useRef, useEffect } from "react";
+import { memo, useMemo } from "react";
 import { ProductCardSkeleton } from "./skeletons/ProductCardSkeleton";
 
 interface ProductListProps {
@@ -14,19 +14,6 @@ const MemoizedProductCard = memo(ProductCard);
 
 // Memoize the entire ProductList component
 const ProductList = memo(function ProductList({ data, isLoading = false }: ProductListProps) {
-  const animationInitialized = useRef(false);
-  const previousDataLength = useRef(0);
-
-  // Check if this is a data change vs initial load
-  const isDataChange = data.length !== previousDataLength.current;
-
-  useEffect(() => {
-    previousDataLength.current = data.length;
-    if (!animationInitialized.current && data.length > 0) {
-      animationInitialized.current = true;
-    }
-  }, [data.length]);
-
   // Memoize the motion variants to prevent recreation
   const itemVariants = useMemo(
     () => ({
@@ -39,12 +26,11 @@ const ProductList = memo(function ProductList({ data, isLoading = false }: Produ
           type: "spring",
           bounce: 0.4,
           duration: 0.5,
-          delay:
-            animationInitialized.current && !isDataChange ? 0 : index * 0.05,
+          delay: index * 0.05, // Always apply stagger delay
         },
       }),
     }),
-    [isDataChange]
+    []
   );
 
   const containerVariants = useMemo(
@@ -55,14 +41,12 @@ const ProductList = memo(function ProductList({ data, isLoading = false }: Produ
       visible: {
         opacity: 1,
         transition: {
-          staggerChildren:
-            animationInitialized.current && !isDataChange ? 0 : 0.05,
-          delayChildren:
-            animationInitialized.current && !isDataChange ? 0 : 0.1,
+          staggerChildren: 0.05, // Always apply stagger
+          delayChildren: 0.1, // Always apply initial delay
         },
       },
     }),
-    [isDataChange]
+    []
   );
 
   // Show skeleton cards when loading
