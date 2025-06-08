@@ -43,7 +43,7 @@ export const brandingProjects: BrandingProject[] = [
     type: 'image',
     images: ['branding/chrysalis/chrysalis-1.webp', 'branding/chrysalis/chrysalis-2.webp'],
     description: 'Branding for Chrysalis',
-    logo: 'hpl.svg'
+    logo: 'logos/hpl.svg'
   },
   {
     id: 'cayuga',
