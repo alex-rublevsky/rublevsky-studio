@@ -92,9 +92,6 @@ const ProductCard = memo(function ProductCard({
   // Ref for debouncing hover state
   const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  // Add a ref for the variations container
-  const variationsRef = useRef<HTMLDivElement>(null);
-
   // Memoize expensive calculations
   const imageArray = useMemo(
     () => calculateImageArray(product.images),
@@ -193,7 +190,7 @@ const ProductCard = memo(function ProductCard({
   // Check if product is coming soon (not in the type, so we'll use a placeholder)
   const isComingSoon = false; // Replace with actual logic when available
 
-  // Debounced handlers for hovering
+  // Simple hover handlers - only work on desktop
   const handleMouseEnter = useCallback(() => {
     if (hoverTimeout.current) {
       clearTimeout(hoverTimeout.current);
@@ -212,14 +209,6 @@ const ProductCard = memo(function ProductCard({
     }, 100);
   }, []);
 
-  // Handle card click
-  const handleCardClick = useCallback((e: React.MouseEvent) => {
-    // If the click originated from within the variations container, prevent navigation
-    if (variationsRef.current?.contains(e.target as Node)) {
-      e.preventDefault();
-    }
-  }, []);
-
   return (
     <Link
       to="/store/$productId"
@@ -229,7 +218,6 @@ const ProductCard = memo(function ProductCard({
       className="block h-full relative"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onClick={handleCardClick}
     >
       <div
         className="w-full product-card overflow-hidden  group"
@@ -278,7 +266,10 @@ const ProductCard = memo(function ProductCard({
 
             {/* Desktop Add to Cart button */}
             <button
-              onClick={handleAddToCart}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleAddToCart(e);
+              }}
               onMouseEnter={handleAddToCartMouseEnter()}
               onMouseLeave={handleAddToCartMouseLeave()}
               className={`absolute bottom-0 left-0 right-0 hidden md:flex items-center justify-center space-x-2 bg-muted/70 backdrop-blur-xs text-black hover:bg-black  transition-all duration-500 py-2 opacity-0 group-hover:opacity-100 ${
@@ -385,7 +376,10 @@ const ProductCard = memo(function ProductCard({
               {product.hasVariations &&
                 product.variations &&
                 product.variations.length > 0 && (
-                  <div ref={variationsRef} className="space-y-2">
+                  <div 
+                    className="space-y-2"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     {attributeNames.map((attributeId: string) => (
                       <FilterGroup
                         key={attributeId}
@@ -413,7 +407,10 @@ const ProductCard = memo(function ProductCard({
             {/* Mobile Add to Cart button */}
             <div className="md:hidden mt-auto">
               <button
-                onClick={handleAddToCart}
+                              onClick={(e) => {
+                e.stopPropagation();
+                handleAddToCart(e);
+              }}
                 className={`w-full flex items-center justify-center space-x-2 bg-muted backdrop-blur-xs text-black hover:bg-black  transition-all duration-500 py-2 px-4 ${
                   !isAvailable
                     ? "opacity-50 cursor-not-allowed hover:bg-muted/70 hover:text-black"
