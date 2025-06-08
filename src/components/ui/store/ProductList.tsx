@@ -17,7 +17,7 @@ const ProductList = memo(function ProductList({ data, isLoading = false }: Produ
   // Memoize the motion variants to prevent recreation
   const itemVariants = useMemo(
     () => ({
-      hidden: { opacity: 0, filter: "blur(8px)", y: 20 },
+      hidden: { opacity: 0, filter: "blur(48px)", y: 0 },
       visible: (index: number) => ({
         opacity: 1,
         filter: "blur(0px)",
@@ -25,8 +25,8 @@ const ProductList = memo(function ProductList({ data, isLoading = false }: Produ
         transition: {
           type: "spring",
           bounce: 0.4,
-          duration: 0.5,
-          delay: index * 0.05, // Always apply stagger delay
+          duration: 1,
+          delay: index * 0.06, // Always apply stagger delay
         },
       }),
     }),
