@@ -209,7 +209,7 @@ const ProductCard = memo(function ProductCard({
     }, 100);
   }, []);
 
-  return (
+    return (
     <Link
       to="/store/$productId"
       params={{
@@ -376,10 +376,7 @@ const ProductCard = memo(function ProductCard({
               {product.hasVariations &&
                 product.variations &&
                 product.variations.length > 0 && (
-                  <div 
-                    className="space-y-2"
-                    onClick={(e) => e.stopPropagation()}
-                  >
+                  <div className="space-y-2">
                     {attributeNames.map((attributeId: string) => (
                       <FilterGroup
                         key={attributeId}
