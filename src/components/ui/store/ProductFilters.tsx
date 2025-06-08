@@ -91,7 +91,10 @@ const ProductFilters = memo(function ProductFilters({
       whileHover="visible"
       onClick={() => setIsHidden(false)}
       onFocusCapture={() => setIsHidden(false)}
-      transition={{ duration: 0.3 }}
+      transition={{ 
+        duration: 0.5,
+        ease: [0.215, 0.61, 0.355, 1]
+      }}
       variants={{
         hidden: isMobileOrTablet ? { y: "-91%" } : { y: "-86%" },
         visible: { y: "0%" },
@@ -123,7 +126,7 @@ const ProductFilters = memo(function ProductFilters({
           >
         {isMobileOrTablet ? (
           /* Mobile Layout */
-          <AnimatedGroup delay={0} staggerChildren={0.1}>
+          <AnimatedGroup delay={0.1} staggerChildren={0.1}>
             {/* First Row: Categories and Sort By */}
             <div className="flex gap-4 items-start">
               {/* Categories section - takes most space with proper wrapping */}
@@ -197,7 +200,7 @@ const ProductFilters = memo(function ProductFilters({
         ) : (
           /* Desktop Layout*/
           <AnimatedGroup
-            delay={0}
+            delay={0.1}
             staggerChildren={0.1}
             className="flex gap-10"
           >
