@@ -94,15 +94,6 @@ const mobileMenuItems: NavItem[] = [
 ];
 
 const DropdownNavMenu = ({ items }: { items: NavItem[] }) => {
-  const handleNavigation = (url: string) => {
-    if (url.startsWith("http")) {
-      window.open(url, "_blank");
-    } else {
-      // Use the router for internal navigation
-      window.location.href = url;
-    }
-  };
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="relative flex w-fit rounded-full border border-black bg-background hover:bg-black hover:text-white transition-all duration-300 p-[0.3rem] focus:outline-hidden focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
@@ -116,12 +107,24 @@ const DropdownNavMenu = ({ items }: { items: NavItem[] }) => {
         className="mb-2 rounded-2xl border border-black bg-background text-foreground"
       >
         {items.map((item) => (
-          <DropdownMenuItem
-            key={item.url}
-            onClick={() => handleNavigation(item.url)}
-            className="relative flex w-full cursor-default select-none items-center py-2 px-3 text-sm outline-none focus:bg-black focus:text-white data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-black hover:text-white transition-colors duration-200"
-          >
-            {item.name}
+          <DropdownMenuItem key={item.url} asChild>
+            {item.url.startsWith("http") ? (
+              <a
+                href={item.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative flex w-full cursor-default select-none items-center py-2 px-3 text-sm outline-none focus:bg-black focus:text-white data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-black hover:text-white transition-colors duration-200"
+              >
+                {item.name}
+              </a>
+            ) : (
+              <Link
+                to={item.url}
+                className="relative flex w-full cursor-default select-none items-center py-2 px-3 text-sm outline-none focus:bg-black focus:text-white data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-black hover:text-white transition-colors duration-200"
+              >
+                {item.name}
+              </Link>
+            )}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
