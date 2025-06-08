@@ -189,7 +189,7 @@ export default function ImageGallery({
         {/* Scrollable container */}
         <div
           ref={thumbnailsContainerRef}
-          className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-y-auto px-4 lg:px-0 scroll-smooth scrollbar-none"
+          className="no-scrollbar flex lg:flex-col gap-2 overflow-x-auto lg:overflow-y-auto px-4 lg:px-0 scroll-smooth"
         >
           {images.map((image, index) => (
             <div
@@ -235,7 +235,7 @@ export default function ImageGallery({
       <div className="flex items-center justify-center lg:items-start lg:justify-start order-1 grow relative">
         <div
           ref={mainImageContainerRef}
-          className="relative w-full h-[60vh] lg:h-auto overflow-x-auto lg:overflow-x-hidden overflow-y-hidden scroll-smooth snap-x snap-mandatory scrollbar-none lg:snap-none [scroll-behavior:200ms_ease-in-out]"
+          className="no-scrollbar relative w-full h-[60vh] lg:h-auto overflow-x-auto lg:overflow-x-hidden overflow-y-hidden scroll-smooth snap-x snap-mandatory lg:snap-none [scroll-behavior:200ms_ease-in-out]"
         >
           {/* Mobile sliding images */}
           <div className="flex lg:hidden h-full">{memoizedImages}</div>
