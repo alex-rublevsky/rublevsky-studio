@@ -18,7 +18,7 @@ export default function DevicePreview({
   projectId,
 }: DevicePreviewProps) {
   const isPhone = device.type === "phone";
-  const mockupFileName = isPhone ? "iphone-mockup.svg" : "ipad-mockup.svg";
+  const mockupFileName = isPhone ? "web/iphone-mockup.svg" : "web/ipad-mockup.svg";
 
   return (
     <Link
