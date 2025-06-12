@@ -16,10 +16,21 @@ import {
 import { useVariationSelection } from "~/hooks/useVariationSelection";
 import { cn } from "~/lib/utils";
 import { useCursorHover } from "../shared/custom_cursor/CustomCursorContext";
+import {unstable_ViewTransition as ViewTransition} from 'react';
 
 // Extended product interface with variations
 interface ProductWithVariations extends Product {
   variations?: ProductVariationWithAttributes[];
+  stockDisplay?: {
+    label: string;
+    showValues: boolean;
+    countries: {
+      countryCode: string;
+      stock: number;
+      emoji: string;
+      displayValue: string | null;
+    }[];
+  };
 }
 
 interface ProductVariationWithAttributes extends ProductVariation {
@@ -209,6 +220,8 @@ const ProductCard = memo(function ProductCard({
     }, 100);
   }, []);
 
+
+
     return (
     <Link
       to="/store/$productId"
@@ -229,39 +242,40 @@ const ProductCard = memo(function ProductCard({
               {/* Primary Image */}
               <div className="relative aspect-square flex items-center justify-center overflow-hidden">
                 {imageArray.length > 0 ? (
-                  <Image
-                    src={`/${imageArray[0]}`}
-                    alt={product.name}
-                    //fill
-                    className={cn(
-                      "absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 ease-in-out",
-                      !hasAnyStock && "grayscale opacity-60"
-                    )}
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  />
+                  <ViewTransition name={`product-image-${product.slug}`}>
+                    <div className="relative w-full h-full">
+                      <Image
+                        src={`/${imageArray[0]}`}
+                        alt={product.name}
+                        //fill
+                        className={cn(
+                          "absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 ease-in-out",
+                          !hasAnyStock && "grayscale opacity-60"
+                        )}
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      />
+                      {/* Secondary Image (if exists) - Only on desktop devices with hover capability */}
+                      {imageArray.length > 1 && (
+                        <Image
+                          src={`/${imageArray[1]}`}
+                          alt={product.name}
+                          //fill
+                          className={cn(
+                            "absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-500 ease-in-out hidden md:block",
+                            isHovering ? "opacity-100" : "opacity-0",
+                            !hasAnyStock && "grayscale"
+                          )}
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        />
+                      )}
+                    </div>
+                  </ViewTransition>
                 ) : (
                   <div className="absolute inset-0 bg-muted flex items-center justify-center">
                     <span className="text-muted-foreground">No image</span>
                   </div>
                 )}
               </div>
-
-              {/* Secondary Image (if exists) - Only on desktop devices with hover capability */}
-              {imageArray.length > 1 && (
-                <div className="absolute inset-0  items-center justify-center hidden md:block">
-                  <Image
-                    src={`/${imageArray[1]}`}
-                    alt={product.name}
-                    //fill
-                    className={cn(
-                      "absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-500 ease-in-out",
-                      isHovering ? "opacity-100" : "opacity-0",
-                      !hasAnyStock && "grayscale"
-                    )}
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  />
-                </div>
-              )}
             </div>
 
             {/* Desktop Add to Cart button */}
@@ -317,7 +331,7 @@ const ProductCard = memo(function ProductCard({
             <div className="p-4 flex flex-col h-auto md:h-full">
               {/* Price and Stock */}
               <div className="flex flex-col mb-2">
-                <div className="flex flex-wrap items-baseline justify-between w-full gap-x-2">
+                <div className="flex flex-wrap items-center justify-between w-full gap-x-2">
                   <div className="flex flex-col items-baseline gap-1">
                     {product.discount ? (
                       <>
@@ -343,16 +357,21 @@ const ProductCard = memo(function ProductCard({
                     )}
                   </div>
 
-                  {!product.unlimitedStock && (
-                    <div className="mt-1 text-xs">
-                      {getEffectiveStock > 0 ? (
-                        <Badge variant="outline">
-                          <span className="text-muted-foreground">
-                            In stock:{" "}
+                  {product.stockDisplay && product.stockDisplay.countries.length > 0 && (
+                    <div className="flex flex-col items-end text-xs">
+                      <span className="text-muted-foreground mb-1">
+                        {product.stockDisplay.label}
+                      </span>
+                      <div className="flex items-center gap-2 text-sm">
+                        {product.stockDisplay.countries.map((country) => (
+                          <span key={country.countryCode} className="flex items-center">
+                            <span className="text-lg">{country.emoji}</span>
+                            {country.displayValue && (
+                              <span className="ml-1 font-medium">{country.displayValue}</span>
+                            )}
                           </span>
-                          <span>{getEffectiveStock}</span>
-                        </Badge>
-                      ) : null}
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>

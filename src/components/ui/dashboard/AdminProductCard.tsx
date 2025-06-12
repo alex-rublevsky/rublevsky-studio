@@ -6,6 +6,7 @@ import { Badge } from "~/components/ui/shared/Badge";
 import { cn } from "~/lib/utils";
 import { Edit, Trash2 } from "lucide-react";
 import { isProductAvailable, getStockDisplayText } from "~/utils/validateStock";
+import { getCountryByCode } from "~/constants/countries";
 
 interface AdminProductCardProps {
   product: ProductWithVariations;
@@ -49,6 +50,29 @@ export function AdminProductCard({
     }
     return product.price;
   })();
+
+  // Get all shipping locations (product + variations)
+  const getAllShippingLocations = () => {
+    const locations = new Set<string>();
+
+    // Add product-level shipping if available
+    if (product.shippingFrom) {
+      locations.add(product.shippingFrom);
+    }
+
+    // Add variation-level shipping if available
+    if (product.hasVariations && product.variations && product.variations.length > 0) {
+      product.variations.forEach((variation) => {
+        if (variation.shippingFrom) {
+          locations.add(variation.shippingFrom);
+        }
+      });
+    }
+
+    return Array.from(locations);
+  };
+
+  const allShippingLocations = getAllShippingLocations();
 
   return (
     <div
@@ -159,6 +183,29 @@ export function AdminProductCard({
           <div className="text-sm">
             <span className="text-muted-foreground">Weight: </span>
             <span className="font-medium">{product.weight}</span>
+          </div>
+        )}
+
+        {/* Shipping */}
+        {allShippingLocations.filter(code => code !== '' && code !== 'NONE').length > 0 && (
+          <div className="text-sm">
+            <span className="text-muted-foreground">Ships from: </span>
+            <div className="flex items-center gap-1 mt-1">
+              {allShippingLocations
+                .filter(code => code !== '' && code !== 'NONE') // Filter out empty values and NONE
+                .map((countryCode) => {
+                  const country = getCountryByCode(countryCode);
+                  return (
+                    <span
+                      key={countryCode}
+                      className="text-lg"
+                      title={country?.name || countryCode}
+                    >
+                      {country?.name?.split(' ')[0] || countryCode}
+                    </span>
+                  );
+                })}
+            </div>
           </div>
         )}
 

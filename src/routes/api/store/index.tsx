@@ -10,151 +10,150 @@ import {
   productTeaCategories,
 } from "~/schema";
 import { db } from "~/db";
-import type { ProductWithVariations } from "~/types";
+
 
 export const APIRoute = createAPIFileRoute("/api/store")({
   GET: async ({ request, params }) => {
-    // TODO: remove
     const corsHeaders = {
       "Access-Control-Allow-Origin": "*",
     };
 
     try {
-      // Fetch all base data
-      const categoriesResult = await db.select().from(categories).all();
-      const teaCategoriesResult = await db.select().from(teaCategories).all();
+      // Execute base queries in parallel - keeping this optimization
+      const [categoriesResult, teaCategoriesResult, productsResult] = await Promise.all([
+        db.select().from(categories),
+        db.select().from(teaCategories),
+        db.select().from(products).where(eq(products.isActive, true))
+      ]);
 
-      // Fetch products with variations in a single complex query
-      const rows = await db
-        .select()
-        .from(products)
-        .leftJoin(
-          productVariations,
-          eq(productVariations.productId, products.id)
-        )
-        .leftJoin(
-          variationAttributes,
-          eq(variationAttributes.productVariationId, productVariations.id)
-        )
-        .leftJoin(
-          productTeaCategories,
-          eq(productTeaCategories.productId, products.id)
-        )
-        .leftJoin(
-          teaCategories,
-          eq(teaCategories.slug, productTeaCategories.teaCategorySlug)
-        )
-        .all();
-
-      if (!rows || rows.length === 0) {
+      if (!productsResult.length) {
         return json(
           { message: "No products found" },
-          {
-            status: 404,
-            headers: corsHeaders,
-          }
+          { status: 404, headers: corsHeaders }
         );
       }
 
-      // Group products and build variations
-      const productMap = new Map<number, ProductWithVariations>();
-      const variationMap = new Map<number, any>();
+      // Get all related data with simple queries - avoiding inArray issues
+      const [variationsResult, teaCategoryLinksResult, attributesResult] = await Promise.all([
+        db.select().from(productVariations),
+        db.select().from(productTeaCategories),
+        db.select().from(variationAttributes)
+      ]);
 
-      for (const row of rows) {
-        const product = row.products;
-        const variation = row.product_variations;
-        const attribute = row.variation_attributes;
-        const teaCategory = row.tea_categories;
+      // Filter results to only active products - keeping performance optimization
+      const activeProductIds = new Set(productsResult.map(p => p.id));
+      const filteredVariations = variationsResult.filter(v => v.productId && activeProductIds.has(v.productId));
+      const filteredTeaCategoryLinks = teaCategoryLinksResult.filter(link => activeProductIds.has(link.productId));
+      
+      // Filter attributes to only variations from active products
+      const activeVariationIds = new Set(filteredVariations.map(v => v.id));
+      const filteredAttributes = attributesResult.filter(attr => attr.productVariationId && activeVariationIds.has(attr.productVariationId));
 
-        // Initialize product if not exists
-        if (!productMap.has(product.id)) {
-          productMap.set(product.id, {
-            ...product,
-            teaCategories: [],
-            variations: [],
-          });
+      // Build efficient O(1) lookup maps - keeping this major optimization
+      const teaCategoryMap = new Map<number, string[]>();
+      filteredTeaCategoryLinks.forEach(link => {
+        if (!teaCategoryMap.has(link.productId)) {
+          teaCategoryMap.set(link.productId, []);
         }
+        teaCategoryMap.get(link.productId)!.push(link.teaCategorySlug);
+      });
 
-        const currentProduct = productMap.get(product.id)!;
-
-        // Add tea category if exists and not already added
-        if (
-          teaCategory &&
-          !currentProduct.teaCategories!.includes(teaCategory.slug)
-        ) {
-          currentProduct.teaCategories!.push(teaCategory.slug);
-        }
-
-        // Process variations if product has them
-        if (variation) {
-          // Initialize variation if not exists
-          if (!variationMap.has(variation.id)) {
-            variationMap.set(variation.id, {
-              id: variation.id,
-              sku: variation.sku,
-              price: variation.price,
-              stock: variation.stock,
-              sort: variation.sort,
-              attributes: [],
-            });
+      const variationsByProduct = new Map<number, any[]>();
+      filteredVariations.forEach(variation => {
+        if (variation.productId) {
+          if (!variationsByProduct.has(variation.productId)) {
+            variationsByProduct.set(variation.productId, []);
           }
-
-          // Add attribute to variation if exists
-          if (attribute) {
-            const currentVariation = variationMap.get(variation.id)!;
-            const existingAttribute = currentVariation.attributes.find(
-              (attr: any) => attr.attributeId === attribute.attributeId
-            );
-
-            if (!existingAttribute) {
-              currentVariation.attributes.push({
-                attributeId: attribute.attributeId,
-                value: attribute.value,
-              });
-            }
-          }
+          variationsByProduct.get(variation.productId)!.push(variation);
         }
-      }
+      });
 
-      // Assign variations to products
-      for (const variation of variationMap.values()) {
-        const productId = rows.find(
-          (row) => row.product_variations?.id === variation.id
-        )?.products.id;
-        if (productId) {
-          const product = productMap.get(productId);
-          if (
-            product &&
-            !product.variations!.find((v) => v.id === variation.id)
-          ) {
-            product.variations!.push(variation);
+      const attributesByVariation = new Map<number, any[]>();
+      filteredAttributes.forEach(attr => {
+        if (attr.productVariationId) {
+          if (!attributesByVariation.has(attr.productVariationId)) {
+            attributesByVariation.set(attr.productVariationId, []);
           }
+          attributesByVariation.get(attr.productVariationId)!.push(attr);
         }
-      }
+      });
 
-      // Sort variations by sort field
-      for (const product of productMap.values()) {
-        product.variations!.sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0));
-      }
+      // Build final products array with all optimizations intact
+      const productsArray = productsResult.map(product => {
+        const variations = variationsByProduct.get(product.id) || [];
+        const teaCategories = teaCategoryMap.get(product.id) || [];
 
-      // Convert to array
-      const productsArray = Array.from(productMap.values());
+        // Add attributes to variations and sort efficiently
+        const variationsWithAttributes = variations.map(variation => ({
+          ...variation,
+          attributes: attributesByVariation.get(variation.id) || []
+        })).sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0));
 
-      const result = {
+        // Pre-calculate country stock on server for performance
+        const countryStockMap = new Map<string, number>();
+        
+        // Add product country and stock
+        if (product.shippingFrom && product.shippingFrom !== '' && product.shippingFrom !== 'NONE') {
+          countryStockMap.set(product.shippingFrom, product.stock || 0);
+        }
+        
+        // Add variation countries and their stock
+        variationsWithAttributes.forEach(variation => {
+          const countryCode = variation.shippingFrom || product.shippingFrom;
+          if (countryCode && countryCode !== '' && countryCode !== 'NONE') {
+            const currentStock = countryStockMap.get(countryCode) || 0;
+            const variationStock = variation.stock || 0;
+            countryStockMap.set(countryCode, currentStock + variationStock);
+          }
+        });
+
+        // Convert to structured format with pre-calculated display data
+        const countryStock = Array.from(countryStockMap.entries()).map(([countryCode, stock]) => {
+          // Pre-calculate emoji on server
+          let emoji = "🌍";
+          if (countryCode === 'CA') emoji = "🇨🇦";
+          else if (countryCode === 'RU') emoji = "🇷🇺";
+          else if (countryCode === 'CA_OR_RU') emoji = "🇨🇦 & 🇷🇺";
+          
+          return { countryCode, stock, emoji };
+        });
+
+        // Pre-calculate display logic
+        const hasWeight = product.weight && product.weight !== '' && product.weight !== '0';
+        const totalStock = countryStock.reduce((sum, country) => sum + country.stock, 0);
+        const showInStock = hasWeight || (!product.unlimitedStock && totalStock > 0);
+        
+        // Pre-calculate display text and values
+        const stockDisplay = {
+          label: showInStock ? "In stock: " : "Shipping from: ",
+          showValues: showInStock,
+          countries: countryStock.map(country => ({
+            ...country,
+            displayValue: showInStock 
+              ? (hasWeight ? `${product.weight}g` : (country.stock > 0 ? country.stock.toString() : '0'))
+              : null
+          }))
+        };
+
+        return {
+          ...product,
+          variations: variationsWithAttributes,
+          teaCategories,
+          stockDisplay,
+        };
+      });
+
+      return json({
         products: productsArray,
         categories: categoriesResult,
         teaCategories: teaCategoriesResult,
-      };
+      }, { headers: corsHeaders });
 
-      return json(result, { headers: corsHeaders });
     } catch (error) {
       console.error("Error fetching store data:", error);
       return json(
         { error: "Failed to fetch store data" },
-        {
-          status: 500,
-          headers: corsHeaders,
-        }
+        { status: 500, headers: corsHeaders }
       );
     }
   },

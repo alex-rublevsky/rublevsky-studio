@@ -24,6 +24,8 @@ import { useQuery } from "@tanstack/react-query";
 import { DEPLOY_URL } from "~/utils/store";
 import { z } from "zod";
 import { ProductPageSkeleton } from "~/components/ui/store/skeletons/ProductPageSkeleton";
+import { getCountryByCode } from "~/constants/countries";
+import { useDeviceType } from "~/hooks/use-mobile";
 
 // Create search params schema based on actual product attributes
 const createProductSearchSchema = () => {
@@ -60,18 +62,20 @@ function ProductPage() {
   const [quantity, setQuantity] = useState(1);
   const [product, setProduct] = useState<ProductWithDetails | null>(null);
   const { addProductToCart, cart, products } = useCart();
+  const isMobileOrTablet = useDeviceType().isMobileOrTablet;
 
-  // Disable body scroll on desktop
+  // Disable body scroll on desktop, enable on mobile
   useEffect(() => {
-    const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
-    if (isDesktop) {
+    if (!isMobileOrTablet) {
       document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
     }
-    
+
     return () => {
       document.body.style.overflow = "";
     };
-  }, []);
+  }, [isMobileOrTablet]);
 
   // Query product data
   const { isPending, error, data } = useQuery<ProductWithDetails>({
@@ -172,6 +176,17 @@ function ProductPage() {
     }
     return product?.discount || null;
   }, [selectedVariation, variationForPricing, product?.discount]);
+
+  // Calculate current shipping location based on variation/product hierarchy
+  const currentShippingFrom = useMemo(() => {
+    // Priority 1: Selected variation's shipping location
+    const relevantVariation = selectedVariation || variationForPricing;
+    if (relevantVariation && relevantVariation.shippingFrom && relevantVariation.shippingFrom !== '' && relevantVariation.shippingFrom !== 'NONE') {
+      return relevantVariation.shippingFrom;
+    }
+    // Priority 2: Product's shipping location
+    return (product?.shippingFrom && product?.shippingFrom !== '' && product?.shippingFrom !== 'NONE') ? product?.shippingFrom : null;
+  }, [selectedVariation, variationForPricing, product?.shippingFrom]);
 
   // Calculate effective stock based on selected variation
   const effectiveStock = useMemo(() => {
@@ -337,6 +352,7 @@ function ProductPage() {
                   .map((img: string) => img.trim())}
                 alt={product.name}
                 className="lg:pl-4 lg:pt-4 lg:pb-4"
+                productSlug={product.slug}
               />
             )}
           </div>
@@ -432,6 +448,45 @@ function ProductPage() {
                 </Button>
               </div>
 
+              {/* Metadata */}
+              <div className="flex flex-wrap gap-6 text-sm">
+                {product.category && (
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground">Category</span>
+                    <Link
+                      to="/store"
+                      search={{ category: product.category.slug }}
+                      className="text-primary hover:underline"
+                    >
+                      {product.category.name}
+                    </Link>
+                  </div>
+                )}
+                {/* {product.brand && (
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground">Brand</span>
+                    <Link
+                      to="/store"
+                      search={{ brand: product.brand.slug }}
+                      className="text-primary hover:underline"
+                    >
+                      {product.brand.name}
+                    </Link>
+                  </div>
+                )} */}
+                {currentShippingFrom && (
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground">Ships from</span>
+                    <span className="text-foreground">
+                      {(() => {
+                        const country = getCountryByCode(currentShippingFrom);
+                        return country?.name || currentShippingFrom;
+                      })()}
+                    </span>
+                  </div>
+                )}
+              </div>
+
               {/* Blog post link */}
               {product?.blogPost && (
                 <div className="pt-4">
@@ -462,34 +517,6 @@ function ProductPage() {
                 <ReactMarkdown components={markdownComponents}>
                   {product.description || ""}
                 </ReactMarkdown>
-              </div>
-
-              {/* Metadata */}
-              <div className="space-y-2 text-sm text-muted-foreground">
-                {product.category && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground">Category:</span>
-                    <Link
-                      to="/store"
-                      search={{ category: product.category.slug }}
-                      className="text-primary hover:underline"
-                    >
-                      {product.category.name}
-                    </Link>
-                  </div>
-                )}
-                {product.brand && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground">Brand:</span>
-                    <Link
-                      to="/store"
-                      search={{ brand: product.brand.slug }}
-                      className="text-primary hover:underline"
-                    >
-                      {product.brand.name}
-                    </Link>
-                  </div>
-                )}
               </div>
             </div>
           </div>
