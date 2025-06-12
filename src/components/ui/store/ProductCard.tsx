@@ -359,7 +359,7 @@ const ProductCard = memo(function ProductCard({
 
                   {product.stockDisplay && product.stockDisplay.countries.length > 0 && (
                     <div className="flex flex-col items-end text-xs">
-                      <span className="text-muted-foreground mb-1">
+                      <span className="text-muted-foreground mb-0">
                         {product.stockDisplay.label}
                       </span>
                       <div className="flex items-center gap-2 text-sm">
