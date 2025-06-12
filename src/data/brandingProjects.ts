@@ -81,8 +81,8 @@ export const brandingProjects: BrandingProject[] = [
     id: 'hpl',
     name: 'HPL',
     type: 'video',
-    preview: 'hpl-animation-preview.jpg',
-    src: 'hpl-animation.mp4',
+    preview: 'branding/hpl-animation/hpl-animation-preview.jpg',
+    src: 'branding/hpl-animation/hpl-animation.mp4',
     description: 'HPL animation project',
     logo: 'logos/hpl.svg'
   },
