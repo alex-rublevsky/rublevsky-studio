@@ -427,7 +427,7 @@ const ProductCard = memo(function ProductCard({
                 e.stopPropagation();
                 handleAddToCart(e);
               }}
-                className={`w-full flex items-center justify-center space-x-2 bg-muted backdrop-blur-xs text-black hover:bg-black  transition-all duration-500 py-2 px-4 ${
+                className={`w-full cursor-pointer flex items-center justify-center space-x-2 bg-muted backdrop-blur-xs text-black hover:bg-black  transition-all duration-500 py-2 px-4 ${
                   !isAvailable
                     ? "opacity-50 cursor-not-allowed hover:bg-muted/70 hover:text-black"
                     : "hover:text-white"
