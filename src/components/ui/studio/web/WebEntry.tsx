@@ -45,7 +45,7 @@ export default function WebProjectEntry({ project }: WebProjectEntryProps) {
                       blurOnHover={false}
                     >
                       <Image
-                        src="/iphone-mockup.svg"
+                        src="/web/iphone-mockup.svg"
                         alt="iPhone Mockup"
                         width={375}
                         height={812}
