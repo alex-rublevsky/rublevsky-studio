@@ -3,58 +3,58 @@ import { GalleryItem } from '~/components/ui/studio/gallery/galleryTypes';
 export const posters: GalleryItem[] = [
   {
     id: 'artlab-poster',
-    images: ['artlab.jpg'],
+    images: ['posters/artlab.webp'],
     description: 'ArtLab poster'
   },
   {
     id: 'capybara-cave',
-    images: ['capybara-cave.jpg'],
+    images: ['posters/capybara-cave.webp'],
     description: 'Capybara in a cave'
   },
   {
     id: 'cyberpunk-capy',
-    images: ['cyberpunk-capy.jpg']
+    images: ['posters/cyberpunk-capy.webp']
   },
   {
     id: 'fencing',
-    images: ['fencing.jpg']
+    images: ['posters/fencing.webp']
   },
   {
     id: 'graffiti-bark-abalych',
-    images: ['graffiti-bark-abalych-second.jpg', 'graffiti-bark-abalych-second-preview.jpg'],
+    images: ['products/stickers/graffiti-bark-abalych-second/graffiti-bark-abalych-second.webp', 'products/stickers/graffiti-bark-abalych-second/graffiti-bark-abalych-second-preview.webp'],
     storeLink: 'graffiti-bark-sticker-20'
   },
   {
     id: 'graffiti-brak-abalych-green',
-    images: ['graffiti-brak-abalych-green.jpg']
+    images: ['posters/graffiti-brak-abalych-green.webp']
   },
   {
     id: 'ice-cold',
-    images: ['ice-cold.jpg']
+    images: ['posters/ice-cold.webp']
   },
   {
     id: 'madness',
-    images: ['madness.jpg']
+    images: ['posters/madness.webp']
   },
   {
     id: 'pelevin',
-    images: ['pelevin.jpg']
+    images: ['posters/pelevin.webp']
   },
   {
     id: 'quite',
-    images: ['quite.jpg']
+    images: ['posters/quite.webp']
   },
   {
     id: 'skate-contest',
-    images: ['skate-contest.jpg']
+    images: ['posters/skate-contest.webp']
   },
   {
     id: 'thin-and-fragile',
-    images: ['thin-and-fragile.jpg']
+    images: ['posters/thin-and-fragile.webp']
   },
   {
     id: 'painting',
-    images: ['painting.jpg'],
+    images: ['posters/painting.webp'],
     description: 'Painting'
   }
 ]; 
