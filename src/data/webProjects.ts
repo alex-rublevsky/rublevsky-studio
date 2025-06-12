@@ -55,14 +55,14 @@ export const webProjects: Project[] = [
         type: 'phone',
         content: {
           type: 'video',
-          url: 'aps_iphone.mp4'
+          url: 'web/aps/aps_iphone.mp4'
         }
       },
       {
         type: 'tablet',
         content: {
           type: 'video',
-          url: 'aps_tablet.mp4'
+          url: 'web/aps/aps_tablet.mp4'
         }
       }
     ]
@@ -88,28 +88,28 @@ export const webProjects: Project[] = [
         type: 'desktop',
         content: {
           type: 'image',
-          url: 'bfloor1.jpg'
+          url: 'web/bfloor/bfloor1.webp'
         }
       },
       {
         type: 'desktop',
         content: {
           type: 'image',
-          url: 'bfloor2.jpg'
+          url: 'web/bfloor/bfloor2.webp'
         }
       },
       {
         type: 'phone',
         content: {
           type: 'image',
-          url: 'bfloor3.jpg'
+          url: 'web/bfloor/bfloor3.webp'
         }
       },
       {
         type: 'tablet',
         content: {
           type: 'video',
-          url: 'bfloor_tablet.mp4'
+          url: 'web/bfloor/bfloor_tablet.mp4'
         }
       }
     ]
@@ -135,7 +135,7 @@ export const webProjects: Project[] = [
         type: 'tablet',
         content: {
           type: 'video',
-          url: '32karata_tablet.mp4'
+          url: 'web/32karata/32karata_tablet.mp4'
         }
       }
     ]
@@ -161,14 +161,14 @@ export const webProjects: Project[] = [
         type: 'phone',
         content: {
           type: 'video',
-          url: 'inksoul-iphone.mp4'
+          url: 'web/inksoul/inksoul-iphone.mp4'
         }
       },
       {
         type: 'tablet',
         content: {
           type: 'video',
-          url: 'inksoul-tablet.mp4'
+          url: 'web/inksoul/inksoul-tablet.mp4'
         }
       }
     ]
