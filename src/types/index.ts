@@ -27,6 +27,11 @@ export interface ProductVariationWithAttributes extends ProductVariation {
 export interface ProductWithVariations extends Product {
   variations?: ProductVariationWithAttributes[];
   teaCategories?: string[];
+  countryStock?: {
+    countryCode: string;
+    emoji: string;
+    stock: number;
+  }[];
 }
 
 // Categories
@@ -95,6 +100,7 @@ export interface ProductFormData {
   hasVariations: boolean;
   weight: string;
   images: string;
+  shippingFrom?: string; // Location where this product ships from
   variations: ProductVariationFormData[];
 }
 
@@ -105,6 +111,7 @@ export interface ProductVariationFormData {
   stock: string;
   discount?: number | null; // Add discount field
   sort: number;
+  shippingFrom?: string; // Country code for shipping origin
   attributes: VariationAttributeFormData[];
 }
 

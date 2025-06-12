@@ -93,6 +93,7 @@ export const APIRoute = createAPIFileRoute("/api/dashboard/products")({
           hasVariations: productData.hasVariations,
           weight: productData.weight || null,
           images: imageString,
+          shippingFrom: productData.shippingFrom || null,
           createdAt: new Date(),
         })
         .returning();
@@ -122,6 +123,7 @@ export const APIRoute = createAPIFileRoute("/api/dashboard/products")({
               stock: parseInt(v.stock.toString()),
               sort: v.sort || 0,
               discount: v.discount ? parseInt(v.discount.toString()) : null,
+              shippingFrom: v.shippingFrom || null,
               createdAt: new Date(),
             }))
           )
@@ -249,6 +251,7 @@ export const APIRoute = createAPIFileRoute("/api/dashboard/products")({
               stock: variation.stock,
               sort: variation.sort,
               discount: variation.discount,
+              shippingFrom: variation.shippingFrom,
               attributes: [],
             });
           }

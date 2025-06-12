@@ -19,6 +19,7 @@ export const products = sqliteTable('products', {
   weight: text('weight'),
   stock: integer('stock').notNull().default(0),
   unlimitedStock: integer('unlimited_stock', { mode: 'boolean' }).notNull().default(false),
+  shippingFrom: text('shipping_from'), // Location where this product ships from
   createdAt: integer('created_at', { mode: 'timestamp'}),
 });
 
@@ -30,6 +31,7 @@ export const productVariations = sqliteTable('product_variations', {
   stock: integer('stock').notNull().default(0),
   discount: integer('discount'), // Discount percentage for this variation
   sort: integer('sort'),
+  shippingFrom: text('shipping_from'), // Location where this variation ships from
   createdAt: integer('createdAt', { mode: 'timestamp' }).notNull(),
 });
 

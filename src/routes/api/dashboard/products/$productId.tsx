@@ -52,6 +52,7 @@ export const APIRoute = createAPIFileRoute(
               stock: productVariations.stock,
               sort: productVariations.sort,
               discount: productVariations.discount,
+              shippingFrom: productVariations.shippingFrom,
               attributeId: variationAttributes.attributeId,
               attributeValue: variationAttributes.value,
             })
@@ -92,6 +93,7 @@ export const APIRoute = createAPIFileRoute(
             stock: row.stock,
             sort: row.sort,
             discount: row.discount,
+            shippingFrom: row.shippingFrom,
             attributes: [],
           });
         }
@@ -230,6 +232,7 @@ export const APIRoute = createAPIFileRoute(
             hasVariations: productData.hasVariations,
             weight: productData.weight || null,
             images: imageString,
+            shippingFrom: productData.shippingFrom || null,
           })
           .where(eq(products.id, productId)),
 
@@ -286,6 +289,7 @@ export const APIRoute = createAPIFileRoute(
                   stock: parseInt(v.stock.toString()),
                   sort: v.sort || 0,
                   discount: v.discount ? parseInt(v.discount.toString()) : null,
+                  shippingFrom: v.shippingFrom || null,
                   createdAt: new Date(),
                 }))
               )

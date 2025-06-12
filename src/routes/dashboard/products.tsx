@@ -4,6 +4,7 @@ import { useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { DEPLOY_URL } from "~/utils/store";
 import { Plus } from "lucide-react";
+import { COUNTRY_OPTIONS } from "~/constants/countries";
 
 import {
   Product,
@@ -51,6 +52,7 @@ interface Variation {
   stock: number;
   discount?: number | null;
   sort: number;
+  shippingFrom?: string;
   attributes: VariationAttribute[];
 }
 
@@ -93,6 +95,7 @@ function RouteComponent() {
     hasVariations: false,
     weight: "",
     images: "",
+    shippingFrom: "",
     variations: [],
   };
 
@@ -155,6 +158,7 @@ function RouteComponent() {
         price: v.price.toString(),
         stock: v.stock.toString(),
         sort: v.sort,
+        shippingFrom: v.shippingFrom,
         attributes: v.attributes.map((attr) => ({
           attributeId: attr.attributeId,
           value: attr.value,
@@ -172,6 +176,7 @@ function RouteComponent() {
         price: v.price.toString(),
         stock: v.stock.toString(),
         sort: v.sort,
+        shippingFrom: v.shippingFrom,
         attributes: v.attributes.map((attr) => ({
           attributeId: attr.attributeId,
           value: attr.value,
@@ -311,6 +316,7 @@ function RouteComponent() {
         price: updatedFormData.price ? parseFloat(updatedFormData.price) : 0,
         stock: updatedFormData.stock ? parseInt(updatedFormData.stock) : 0,
         sort: 0,
+        shippingFrom: undefined,
         attributes: [],
       };
       setVariations([defaultVariation]);
@@ -363,6 +369,7 @@ function RouteComponent() {
         price: updatedFormData.price ? parseFloat(updatedFormData.price) : 0,
         stock: updatedFormData.stock ? parseInt(updatedFormData.stock) : 0,
         sort: 0,
+        shippingFrom: undefined,
         attributes: [],
       };
       setEditVariations([defaultVariation]);
@@ -399,6 +406,7 @@ function RouteComponent() {
         price: variation.price.toString(),
         stock: variation.stock.toString(),
         sort: variation.sort,
+        shippingFrom: variation.shippingFrom,
         attributes: variation.attributes.map((attr: VariationAttribute) => ({
           attributeId: attr.attributeId,
           value: attr.value,
@@ -460,6 +468,7 @@ function RouteComponent() {
           price: variation.price.toString(),
           stock: variation.stock.toString(),
           sort: variation.sort,
+          shippingFrom: variation.shippingFrom,
           attributes: variation.attributes.map((attr: VariationAttribute) => ({
             attributeId: attr.attributeId,
             value: attr.value,
@@ -575,6 +584,7 @@ function RouteComponent() {
           price: variation.price,
           stock: variation.stock,
           sort: variation.sort ?? 0, // Handle null sort values
+          shippingFrom: variation.shippingFrom || undefined,
           attributes: variation.attributes || [],
         })) || [];
 
@@ -593,6 +603,7 @@ function RouteComponent() {
         hasVariations: productWithDetails.hasVariations,
         weight: productWithDetails.weight || "",
         images: productWithDetails.images || "",
+        shippingFrom: productWithDetails.shippingFrom || "",
         variations: [],
       });
 
@@ -618,6 +629,7 @@ function RouteComponent() {
         hasVariations: product.hasVariations,
         weight: product.weight || "",
         images: product.images || "",
+        shippingFrom: product.shippingFrom || "",
         variations: [],
       });
       setEditVariations([]);
@@ -689,7 +701,7 @@ function RouteComponent() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 md:gap-6">
             {filteredProducts.map((product) => (
               <AdminProductCard
                 key={product.id}
@@ -729,7 +741,7 @@ function RouteComponent() {
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Input
-                  label="Name *"
+                  label="Name"
                   type="text"
                   name="name"
                   value={editFormData.name}
@@ -738,7 +750,7 @@ function RouteComponent() {
                 />
 
                 <Input
-                  label="Slug *"
+                  label="Slug"
                   type="text"
                   name="slug"
                   value={editFormData.slug}
@@ -757,7 +769,7 @@ function RouteComponent() {
 
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Price *
+                    Price
                   </label>
                   <Input
                     type="number"
@@ -771,7 +783,7 @@ function RouteComponent() {
 
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Stock *
+                    Stock
                   </label>
                   <Input
                     type="number"
@@ -784,7 +796,7 @@ function RouteComponent() {
 
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Category *
+                    Category
                   </label>
                   <Select
                     name="categorySlug"
@@ -941,6 +953,32 @@ function RouteComponent() {
                     placeholder="Enter weight in grams"
                   />
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Ships From
+                  </label>
+                  <Select
+                    name="shippingFrom"
+                    value={editFormData.shippingFrom || "NONE"}
+                    onValueChange={(value: string) =>
+                      handleEditChange({
+                        target: { name: "shippingFrom", value: value === "NONE" ? "" : value },
+                      } as React.ChangeEvent<HTMLSelectElement>)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose shipping location" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {COUNTRY_OPTIONS.map((country) => (
+                        <SelectItem key={country.code} value={country.code}>
+                          {country.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               {/* Add the variations form when hasVariations is checked */}
@@ -998,7 +1036,7 @@ function RouteComponent() {
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Input
-                  label="Product Name *"
+                  label="Product Name"
                   type="text"
                   name="name"
                   value={formData.name}
@@ -1011,7 +1049,7 @@ function RouteComponent() {
 
                 <div className="flex items-end">
                   <Input
-                    label="Slug (Auto-generated from name) *"
+                    label="Slug (Auto-generated from name)"
                     type="text"
                     name="slug"
                     value={formData.slug}
@@ -1062,7 +1100,7 @@ function RouteComponent() {
 
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Price (CAD) *
+                    Price (CAD)
                   </label>
                   <div className="relative">
                     <Input
@@ -1097,7 +1135,7 @@ function RouteComponent() {
 
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Category *
+                    Category
                   </label>
                   <Select
                     value={formData.categorySlug}
@@ -1256,6 +1294,32 @@ function RouteComponent() {
                   onChange={handleChange}
                   placeholder="Enter weight in grams"
                 />
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Ships From
+                  </label>
+                  <Select
+                    value={formData.shippingFrom || "NONE"}
+                    onValueChange={(value) => {
+                      setFormData({
+                        ...formData,
+                        shippingFrom: value === "NONE" ? "" : value,
+                      });
+                    }}
+                                      >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Shipping from..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {COUNTRY_OPTIONS.map((country) => (
+                          <SelectItem key={country.code} value={country.code}>
+                            {country.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               {/* Add the variations form when hasVariations is checked */}
