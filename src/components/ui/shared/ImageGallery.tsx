@@ -1,5 +1,5 @@
 import { Image } from "~/components/ui/shared/Image";
-import { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { VariantProps, cva } from "class-variance-authority";
 
 const mainImageVariants = cva(
@@ -21,6 +21,7 @@ interface ImageGalleryProps extends VariantProps<typeof mainImageVariants> {
   images: string[];
   alt: string;
   className?: string;
+  productSlug?: string;
 }
 
 export default function ImageGallery({
@@ -28,21 +29,17 @@ export default function ImageGallery({
   alt,
   className = "",
   size,
+  productSlug,
 }: ImageGalleryProps) {
-  const [selectedImage, setSelectedImage] = useState(images[0] || "");
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const mainImageContainerRef = useRef<HTMLDivElement>(null);
   const thumbnailsContainerRef = useRef<HTMLDivElement>(null);
   const isProgrammaticScrollRef = useRef(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const selectedIndex = images.indexOf(selectedImage);
 
-  // Debounced scroll handler to prevent rapid state updates
+  // Debounced scroll handler for mobile
   const handleScroll = useCallback(() => {
-    if (
-      isProgrammaticScrollRef.current ||
-      window.matchMedia("(min-width: 1024px)").matches
-    )
-      return;
+    if (isProgrammaticScrollRef.current || window.matchMedia("(min-width: 1024px)").matches) return;
 
     if (scrollTimeoutRef.current) {
       clearTimeout(scrollTimeoutRef.current);
@@ -54,55 +51,41 @@ export default function ImageGallery({
         const scrollLeft = mainImageContainerRef.current.scrollLeft;
         const newIndex = Math.round(scrollLeft / containerWidth);
 
-        if (
-          newIndex >= 0 &&
-          newIndex < images.length &&
-          newIndex !== selectedIndex
-        ) {
-          setSelectedImage(images[newIndex]);
+        if (newIndex >= 0 && newIndex < images.length && newIndex !== currentImageIndex) {
+          setCurrentImageIndex(newIndex);
         }
       }
-    }, 50); // Small delay to ensure smooth scrolling
-  }, [images, selectedIndex]);
+    }, 50);
+  }, [images, currentImageIndex]);
 
-  // Scroll to the selected image when thumbnail is clicked (mobile only)
-  useEffect(() => {
-    if (mainImageContainerRef.current) {
-      const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
-      if (!isDesktop) {
-        isProgrammaticScrollRef.current = true;
-        const containerWidth = mainImageContainerRef.current.clientWidth;
+  // Scroll to image on mobile
+  const scrollToImage = useCallback((index: number) => {
+    if (mainImageContainerRef.current && !window.matchMedia("(min-width: 1024px)").matches) {
+      isProgrammaticScrollRef.current = true;
+      const containerWidth = mainImageContainerRef.current.clientWidth;
 
-        // Use requestAnimationFrame for smoother animation
-        requestAnimationFrame(() => {
-          mainImageContainerRef.current?.scrollTo({
-            left: selectedIndex * containerWidth,
-            behavior: "smooth",
-          });
+      requestAnimationFrame(() => {
+        mainImageContainerRef.current?.scrollTo({
+          left: index * containerWidth,
+          behavior: "smooth",
         });
+      });
 
-        // Reset the flag after the scroll animation completes
-        const duration = 200; // Reduced from 300ms to 200ms for faster animation
-        setTimeout(() => {
-          isProgrammaticScrollRef.current = false;
-        }, duration);
-      }
+      setTimeout(() => {
+        isProgrammaticScrollRef.current = false;
+      }, 200);
     }
-  }, [selectedImage, selectedIndex]);
+    setCurrentImageIndex(index);
+  }, []);
 
-  // Center the active thumbnail in the container (mobile only)
+  // Center thumbnail on mobile
   useEffect(() => {
-    if (
-      thumbnailsContainerRef.current &&
-      !window.matchMedia("(min-width: 1024px)").matches
-    ) {
+    if (thumbnailsContainerRef.current && !window.matchMedia("(min-width: 1024px)").matches) {
       const container = thumbnailsContainerRef.current;
-      const thumbnailWidth = 96; // 24 * 4 (w-24 = 6rem = 96px)
+      const thumbnailWidth = 96;
       const containerWidth = container.clientWidth;
-      const scrollPosition =
-        selectedIndex * thumbnailWidth - (containerWidth - thumbnailWidth) / 2;
+      const scrollPosition = currentImageIndex * thumbnailWidth - (containerWidth - thumbnailWidth) / 2;
 
-      // Use requestAnimationFrame for smoother animation
       requestAnimationFrame(() => {
         container.scrollTo({
           left: Math.max(0, scrollPosition),
@@ -110,9 +93,9 @@ export default function ImageGallery({
         });
       });
     }
-  }, [selectedIndex]);
+  }, [currentImageIndex]);
 
-  // Add scroll event listener (mobile only)
+  // Add scroll event listener for mobile
   useEffect(() => {
     const container = mainImageContainerRef.current;
     if (container && !window.matchMedia("(min-width: 1024px)").matches) {
@@ -126,67 +109,23 @@ export default function ImageGallery({
     }
   }, [handleScroll]);
 
-  // Memoize the Image component to prevent unnecessary re-renders
-  const memoizedImages = useMemo(() => {
-    return images.map((image, index) => (
-      <div
-        key={index}
-        className="shrink-0 w-full lg:hidden snap-center flex items-center justify-center"
-      >
-        <div className="relative w-full h-full flex items-center justify-center">
-          <div className="relative w-auto h-full flex items-center justify-center">
-            <Image
-              src={`/${image}`}
-              alt={`${alt} main image ${index + 1}`}
-              width={3000}
-              height={3000}
-              //priority={index === 0}
-              className={mainImageVariants({ size })}
-              style={{
-                maxHeight: "100%",
-                width: "auto",
-                objectFit: "contain",
-              }}
-            />
-          </div>
-        </div>
-      </div>
-    ));
-  }, [images, alt, size]);
-
-  // Memoize the selected image for desktop
-  const selectedImageDesktop = useMemo(() => {
-    return (
-      <div className="hidden lg:block">
-        <Image
-          src={`/${selectedImage}`}
-          alt={`${alt} main image`}
-          width={3000}
-          height={3000}
-          loading="eager"
-          //priority
-          className={`${mainImageVariants({ size })}`}
-          style={{ viewTransitionName: `branding-image-${selectedImage}` }}
-        />
-      </div>
-    );
-  }, [selectedImage, alt, size]);
-
   if (!images.length) {
     return (
-      <div className="w-full h-[75vh] bg-muted flex items-center justify-center rounded-lg">
+      <div className="w-full h-[75vh] bg-muted flex items-center justify-center rounded-lg relative">
+        {/* Always render a view transition element even when no images */}
+        <div
+          style={{ viewTransitionName: `product-image-${productSlug}`, opacity: 0, position: 'absolute' }}
+          className="w-1 h-1"
+        />
         <p className="text-muted-foreground">No images available</p>
       </div>
     );
   }
 
   return (
-    <div
-      className={`gallery-stack flex flex-col lg:flex-row w-full gap-2 ${className}`}
-    >
+    <div className={`gallery-stack flex flex-col lg:flex-row w-full gap-2 ${className}`}>
       {/* Thumbnails */}
       <div className="order-2 lg:order-1 shrink-0 w-full lg:w-24 overflow-x-auto lg:overflow-x-hidden scrollbar-none">
-        {/* Scrollable container */}
         <div
           ref={thumbnailsContainerRef}
           className="no-scrollbar flex lg:flex-col gap-2 overflow-x-auto lg:overflow-y-auto px-4 lg:px-0 scroll-smooth"
@@ -194,30 +133,20 @@ export default function ImageGallery({
           {images.map((image, index) => (
             <div
               key={index}
-              className="
-                shrink-0
-                w-24 h-24
-                relative
-                cursor-pointer
-                last:mb-2
-              "
-              onClick={() => setSelectedImage(image)}
+              className="shrink-0 w-24 h-24 relative cursor-pointer last:mb-2"
+              onClick={() => scrollToImage(index)}
               onMouseEnter={() => {
-                // Only change image on hover for desktop
                 if (window.matchMedia("(min-width: 1024px)").matches) {
-                  setSelectedImage(image);
+                  setCurrentImageIndex(index);
                 }
               }}
             >
               <div className="absolute inset-0 rounded-sm overflow-hidden">
                 <div
                   className={`
-                    absolute inset-0
-                    rounded-sm
-                    ${selectedImage === image ? "border-2 border-black" : "border border-transparent"}
-                    transition-colors duration-200
-                    pointer-events-none
-                    z-10
+                    absolute inset-0 rounded-sm
+                    ${currentImageIndex === index ? "border-2 border-black" : "border border-transparent"}
+                    transition-colors duration-200 pointer-events-none z-10
                   `}
                 />
                 <Image
@@ -231,16 +160,62 @@ export default function ImageGallery({
         </div>
       </div>
 
-      {/* Main image */}
+      {/* Main image container */}
       <div className="flex items-center justify-center lg:items-start lg:justify-start order-1 grow relative">
+        
+        {/* ALWAYS VISIBLE: First image with view transition name - this is the key element for view transitions */}
+        <img
+          src={`https://assets.rublevsky.studio/${images[0]}`}
+          alt={`${alt} main image`}
+          width={3000}
+          height={3000}
+          loading="eager"
+          className={`${mainImageVariants({ size })} ${currentImageIndex === 0 ? 'block' : 'hidden lg:hidden'}`}
+          style={{ viewTransitionName: `product-image-${productSlug}` }}
+        />
+
+        {/* Desktop: Show selected image if not first image */}
+        {currentImageIndex !== 0 && (
+          <img
+            src={`https://assets.rublevsky.studio/${images[currentImageIndex]}`}
+            alt={`${alt} main image`}
+            width={3000}
+            height={3000}
+            loading="eager"
+            className={`${mainImageVariants({ size })} hidden lg:block`}
+          />
+        )}
+
+        {/* Mobile: Scrollable gallery (only for navigation, not view transitions) */}
         <div
           ref={mainImageContainerRef}
-          className="no-scrollbar relative w-full h-[60vh] lg:h-auto overflow-x-auto lg:overflow-x-hidden overflow-y-hidden scroll-smooth snap-x snap-mandatory lg:snap-none [scroll-behavior:200ms_ease-in-out]"
+          className="lg:hidden relative w-full h-[60vh] overflow-x-auto overflow-y-hidden scroll-smooth snap-x snap-mandatory"
         >
-          {/* Mobile sliding images */}
-          <div className="flex lg:hidden h-full">{memoizedImages}</div>
-          {/* Desktop selected image */}
-          {selectedImageDesktop}
+          <div className="flex h-full">
+            {images.map((image, index) => (
+              <div
+                key={index}
+                className="shrink-0 w-full snap-center flex items-center justify-center"
+              >
+                <div className="relative w-full h-full flex items-center justify-center">
+                  <div className="relative w-auto h-full flex items-center justify-center">
+                    <Image
+                      src={`/${image}`}
+                      alt={`${alt} main image ${index + 1}`}
+                      width={3000}
+                      height={3000}
+                      className={mainImageVariants({ size })}
+                      style={{
+                        maxHeight: "100%",
+                        width: "auto",
+                        objectFit: "contain",
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

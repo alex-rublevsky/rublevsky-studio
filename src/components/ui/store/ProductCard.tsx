@@ -1,7 +1,7 @@
 import { Product, ProductVariation, VariationAttribute } from "~/types";
 import { Link } from "@tanstack/react-router";
 
-import { useState, useMemo, memo } from "react";
+import { useState, useMemo } from "react";
 import { Image } from "~/components/ui/shared/Image";
 import styles from "./productCard.module.css";
 import { useCart } from "~/lib/cartContext";
@@ -80,7 +80,45 @@ const calculateAttributeNames = (
   return Array.from(attributeNames);
 };
 
-const ProductCard = memo(function ProductCard({
+// Helper function to get default variation for a product
+const getDefaultVariation = (
+  product: ProductWithVariations,
+  cartItems: any[]
+): ProductVariationWithAttributes | null => {
+  if (!product?.variations || !product.hasVariations) return null;
+
+  // Find the first available variation (preferably with stock)
+  const sortedVariations = [...product.variations].sort((a, b) => {
+    const aStock = getAvailableQuantityForVariation(product, a.id, cartItems);
+    const bStock = getAvailableQuantityForVariation(product, b.id, cartItems);
+    
+    // Prioritize variations with stock, then by sort order
+    if (product.unlimitedStock) {
+      return (b.sort ?? 0) - (a.sort ?? 0);
+    }
+    
+    if (aStock > 0 && bStock <= 0) return -1;
+    if (bStock > 0 && aStock <= 0) return 1;
+    return (b.sort ?? 0) - (a.sort ?? 0);
+  });
+
+  return sortedVariations[0] || null;
+};
+
+// Helper function to convert variation attributes to URL search params
+const getVariationSearchParams = (variation: ProductVariationWithAttributes | null): Record<string, string> => {
+  if (!variation) return {};
+
+  const params: Record<string, string> = {};
+  variation.attributes.forEach((attr: VariationAttribute) => {
+    const paramName = attr.attributeId.toLowerCase();
+    params[paramName] = attr.value;
+  });
+
+  return params;
+};
+
+function ProductCard({
   product,
 }: {
   product: ProductWithVariations;
@@ -99,6 +137,17 @@ const ProductCard = memo(function ProductCard({
     product,
     cartItems: cart.items,
   });
+
+  // Calculate default variation and search params for the Link
+  const defaultVariation = useMemo(() => 
+    getDefaultVariation(product, cart.items), 
+    [product, cart.items]
+  );
+
+  const linkSearchParams = useMemo(() => 
+    getVariationSearchParams(defaultVariation), 
+    [defaultVariation]
+  );
 
   // Ref for debouncing hover state
   const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -195,8 +244,6 @@ const ProductCard = memo(function ProductCard({
     ]
   );
 
-
-
   
   // Check if product is coming soon (not in the type, so we'll use a placeholder)
   const isComingSoon = false; // Replace with actual logic when available
@@ -228,13 +275,16 @@ const ProductCard = memo(function ProductCard({
       params={{
         productId: product.slug,
       }}
+      search={linkSearchParams}
       className="block h-full relative"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      preload="intent"
+      viewTransition={true}
     >
       <div
         className="w-full product-card overflow-hidden  group"
         id={styles.productCard}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
         <div className="bg-background flex flex-col">
           <div className="relative aspect-square overflow-hidden">
@@ -242,19 +292,24 @@ const ProductCard = memo(function ProductCard({
               {/* Primary Image */}
               <div className="relative aspect-square flex items-center justify-center overflow-hidden">
                 {imageArray.length > 0 ? (
-                  <ViewTransition name={`product-image-${product.slug}`}>
+                  
                     <div className="relative w-full h-full">
-                      <Image
-                        src={`/${imageArray[0]}`}
+                      <img
+                        src={`https://assets.rublevsky.studio/${imageArray[0]}`}
                         alt={product.name}
+                        loading="eager"
                         //fill
                         className={cn(
                           "absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 ease-in-out",
                           !hasAnyStock && "grayscale opacity-60"
                         )}
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        style={{
+                          viewTransitionName: `product-image-${product.slug}`
+                        }}
                       />
                       {/* Secondary Image (if exists) - Only on desktop devices with hover capability */}
+                      {/* COMMENTED OUT: Hover effect for second image - disabled for view transitions
                       {imageArray.length > 1 && (
                         <Image
                           src={`/${imageArray[1]}`}
@@ -268,8 +323,9 @@ const ProductCard = memo(function ProductCard({
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         />
                       )}
+                      */}
                     </div>
-                  </ViewTransition>
+                 
                 ) : (
                   <div className="absolute inset-0 bg-muted flex items-center justify-center">
                     <span className="text-muted-foreground">No image</span>
@@ -480,6 +536,6 @@ const ProductCard = memo(function ProductCard({
       </div>
     </Link>
   );
-});
+}
 
 export default ProductCard;

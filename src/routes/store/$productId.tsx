@@ -47,20 +47,25 @@ export const Route = createFileRoute("/store/$productId")({
   component: ProductPage,
   validateSearch: productSearchSchema,
   loader: async ({ params }) => {
-    return {
-      productId: params.productId,
-    };
+    // Fetch product data in the loader for immediate availability
+    const response = await fetch(`${DEPLOY_URL}/api/store/${params.productId}`);
+    if (!response.ok) {
+      throw new Error(`Product not found: ${response.status}`);
+    }
+    const product = await response.json();
+    return { product };
   },
-  pendingComponent: () => <ProductPageSkeleton />,
+  // Removed pendingComponent to allow view transitions to work
   errorComponent: ({ error }) => <div>Error: {error.message}</div>,
 });
 
 function ProductPage() {
-  const { productId } = Route.useLoaderData();
+  const { product: loaderProduct } = Route.useLoaderData();
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
   const [quantity, setQuantity] = useState(1);
-  const [product, setProduct] = useState<ProductWithDetails | null>(null);
+  // Use loader data directly - cast to proper type
+  const product = loaderProduct as ProductWithDetails;
   const { addProductToCart, cart, products } = useCart();
   const isMobileOrTablet = useDeviceType().isMobileOrTablet;
 
@@ -77,42 +82,23 @@ function ProductPage() {
     };
   }, [isMobileOrTablet]);
 
-  // Query product data
-  const { isPending, error, data } = useQuery<ProductWithDetails>({
-    queryKey: [`product`, productId],
-    staleTime: 1000 * 60 * 60 * 1, // 1 hour
-    queryFn: () =>
-      fetch(`${DEPLOY_URL}/api/store/${productId}`).then((res) => {
-        if (!res.ok) {
-          throw new Error(`API error: ${res.status}`);
-        }
-        return res.json();
-      }),
-  });
-
-  // Update product state when data changes
-  useEffect(() => {
-    if (data) {
-      setProduct(data);
-    }
-  }, [data]);
-
-  // Sync product data with cart context (similar to your Next.js version)
-  useEffect(() => {
-    if (!product) return;
+  // Sync product data with cart context for stock info
+  const syncedProduct = useMemo(() => {
+    if (!product) return product;
 
     // Find the product in the cart context cache
     const cachedProduct = products.find((p) => p.id === product.id);
     if (cachedProduct) {
-      // Update local product state with cached data for stock info
-      setProduct((prev) => ({
-        ...prev!,
+      // Merge loader data with cached stock info
+      return {
+        ...product,
         stock: cachedProduct.stock,
         unlimitedStock: cachedProduct.unlimitedStock,
         variations: cachedProduct.variations,
-      }));
+      };
     }
-  }, [product?.id, products]);
+    return product;
+  }, [product, products]);
 
   // Variation selection hook using URL search params
   const {
@@ -121,7 +107,7 @@ function ProductPage() {
     selectVariation,
     isAttributeValueAvailable,
   } = useVariationSelection({
-    product: product as ProductWithVariations | null,
+    product: syncedProduct as ProductWithVariations | null,
     cartItems: cart.items,
     search,
     onVariationChange: () => setQuantity(1), // Reset quantity when variation changes
@@ -129,13 +115,13 @@ function ProductPage() {
 
   // Find variation for pricing (regardless of stock status)
   const variationForPricing = useMemo(() => {
-    if (!product?.hasVariations || !product.variations || !selectedAttributes) {
+    if (!syncedProduct?.hasVariations || !syncedProduct.variations || !selectedAttributes) {
       return null;
     }
 
     // Find variation that matches all selected attributes, regardless of stock
     return (
-      product.variations.find((variation) => {
+      syncedProduct.variations.find((variation) => {
         return Object.entries(selectedAttributes).every(([attrId, value]) =>
           variation.attributes.some(
             (attr: VariationAttribute) =>
@@ -144,27 +130,27 @@ function ProductPage() {
         );
       }) || null
     );
-  }, [product, selectedAttributes]);
+  }, [syncedProduct, selectedAttributes]);
 
   // Calculate current price based on selected variation
   const currentPrice = useMemo(() => {
     // If product has variations, always use variation price
-    if (product?.hasVariations) {
+    if (syncedProduct?.hasVariations) {
       // Use selectedVariation for available stock, or variationForPricing for out-of-stock items
       const relevantVariation = selectedVariation || variationForPricing;
       return relevantVariation?.price || 0;
     }
     // If product price is zero, use variation price (if available)
-    if (product?.price === 0 && (selectedVariation || variationForPricing)) {
+    if (syncedProduct?.price === 0 && (selectedVariation || variationForPricing)) {
       const relevantVariation = selectedVariation || variationForPricing;
       return relevantVariation?.price || 0;
     }
-    return product?.price || 0;
+    return syncedProduct?.price || 0;
   }, [
     selectedVariation,
     variationForPricing,
-    product?.price,
-    product?.hasVariations,
+    syncedProduct?.price,
+    syncedProduct?.hasVariations,
   ]);
 
   // Calculate current discount based on selected variation
@@ -174,8 +160,8 @@ function ProductPage() {
     if (relevantVariation && relevantVariation.discount) {
       return relevantVariation.discount;
     }
-    return product?.discount || null;
-  }, [selectedVariation, variationForPricing, product?.discount]);
+    return syncedProduct?.discount || null;
+  }, [selectedVariation, variationForPricing, syncedProduct?.discount]);
 
   // Calculate current shipping location based on variation/product hierarchy
   const currentShippingFrom = useMemo(() => {
@@ -185,38 +171,38 @@ function ProductPage() {
       return relevantVariation.shippingFrom;
     }
     // Priority 2: Product's shipping location
-    return (product?.shippingFrom && product?.shippingFrom !== '' && product?.shippingFrom !== 'NONE') ? product?.shippingFrom : null;
-  }, [selectedVariation, variationForPricing, product?.shippingFrom]);
+    return (syncedProduct?.shippingFrom && syncedProduct?.shippingFrom !== '' && syncedProduct?.shippingFrom !== 'NONE') ? syncedProduct?.shippingFrom : null;
+  }, [selectedVariation, variationForPricing, syncedProduct?.shippingFrom]);
 
   // Calculate effective stock based on selected variation
   const effectiveStock = useMemo(() => {
-    if (!product) return 0;
+    if (!syncedProduct) return 0;
 
-    if (product.unlimitedStock) {
+    if (syncedProduct.unlimitedStock) {
       return Number.MAX_SAFE_INTEGER;
     }
 
     return getAvailableQuantityForVariation(
-      product as ProductWithVariations,
+      syncedProduct as ProductWithVariations,
       selectedVariation?.id,
       cart.items
     );
-  }, [product, selectedVariation, cart.items]);
+  }, [syncedProduct, selectedVariation, cart.items]);
 
   // Check if product can be added to cart
   const canAddToCart = useMemo(() => {
-    if (!product?.isActive) return false;
-    if (product.hasVariations && !selectedVariation) return false;
-    if (!product.unlimitedStock && effectiveStock <= 0) return false;
+    if (!syncedProduct?.isActive) return false;
+    if (syncedProduct.hasVariations && !selectedVariation) return false;
+    if (!syncedProduct.unlimitedStock && effectiveStock <= 0) return false;
     return true;
-  }, [product, selectedVariation, effectiveStock]);
+  }, [syncedProduct, selectedVariation, effectiveStock]);
 
   // Define all callbacks before any conditional returns
   const incrementQuantity = useCallback(() => {
-    if (product?.unlimitedStock || quantity < effectiveStock) {
+    if (syncedProduct?.unlimitedStock || quantity < effectiveStock) {
       setQuantity((prev) => prev + 1);
     }
-  }, [quantity, effectiveStock, product?.unlimitedStock]);
+  }, [quantity, effectiveStock, syncedProduct?.unlimitedStock]);
 
   const decrementQuantity = useCallback(() => {
     if (quantity > 1) {
@@ -226,9 +212,9 @@ function ProductPage() {
 
   const getUniqueAttributeValues = useCallback(
     (attributeId: string): string[] => {
-      if (!product?.variations) return [];
+      if (!syncedProduct?.variations) return [];
 
-      const sortedVariations = [...product.variations].sort(
+      const sortedVariations = [...syncedProduct.variations].sort(
         (a, b) => (b.sort ?? 0) - (a.sort ?? 0)
       );
 
@@ -244,15 +230,15 @@ function ProductPage() {
 
       return Array.from(values);
     },
-    [product?.variations]
+    [syncedProduct?.variations]
   );
 
   // Handle add to cart
   const handleAddToCart = useCallback(async () => {
-    if (!product || !canAddToCart) return;
+    if (!syncedProduct || !canAddToCart) return;
 
     const success = await addProductToCart(
-      product,
+      syncedProduct,
       quantity,
       selectedVariation,
       selectedAttributes
@@ -262,7 +248,7 @@ function ProductPage() {
       setQuantity(1); // Reset quantity after successful add
     }
   }, [
-    product,
+    syncedProduct,
     quantity,
     selectedVariation,
     selectedAttributes,
@@ -270,39 +256,17 @@ function ProductPage() {
     addProductToCart,
   ]);
 
-  // Update product state when data changes
-  useEffect(() => {
-    if (data) {
-      setProduct(data);
-    }
-  }, [data]);
-
-  // Wait for data to be loaded before rendering
-  if (isPending) return <ProductPageSkeleton />;
-  if (error)
-    return (
-      <div className="flex items-center justify-center h-screen text-red-500">
-        Error: {error.message}
-      </div>
-    );
-  if (!product)
-    return (
-      <div className="flex items-center justify-center h-screen">
-        Product not found
-      </div>
-    );
-
   // Helper functions that don't need to be memoized
   const getImages = (): string[] => {
-    if (!product || !product.images) return [];
-    return product.images.split(",").map((img: string) => img.trim());
+    if (!syncedProduct || !syncedProduct.images) return [];
+    return syncedProduct.images.split(",").map((img: string) => img.trim());
   };
 
   const getUniqueAttributeNames = (): string[] => {
-    if (!product?.variations) return [];
+    if (!syncedProduct?.variations) return [];
 
     const attributeNames = new Set<string>();
-    product.variations.forEach((variation) => {
+    syncedProduct.variations.forEach((variation) => {
       variation.attributes.forEach((attr: VariationAttribute) => {
         attributeNames.add(attr.attributeId);
       });
@@ -343,24 +307,20 @@ function ProductPage() {
     <main className="min-h-screen flex flex-col lg:h-screen lg:overflow-hidden">
       <div className="grow flex items-start justify-center">
         <div className="w-full h-full flex flex-col lg:flex-row gap-0 lg:gap-10 items-start">
-          {/* Image gallery */}
+          {/* Image gallery with view transitions */}
           <div className="w-full lg:w-3/5 xl:w-2/3 flex flex-col lg:flex-row gap-2 lg:h-full self-start">
-            {product.images!.length > 0 && (
-              <ImageGallery
-                images={product
-                  .images!.split(",")
-                  .map((img: string) => img.trim())}
-                alt={product.name}
-                className="lg:pl-4 lg:pt-4 lg:pb-4"
-                productSlug={product.slug}
-              />
-            )}
+            <ImageGallery
+              images={syncedProduct.images ? syncedProduct.images.split(",").map((img: string) => img.trim()) : []}
+              alt={syncedProduct.name}
+              className="lg:pl-4 lg:pt-4 lg:pb-4"
+              productSlug={syncedProduct.slug}
+            />
           </div>
 
           {/* Product information */}
           <div className="w-full lg:w-2/5 xl:w-1/3 px-4 lg:px-0 lg:h-[100dvh] lg:overflow-y-auto pt-4 pb-20 lg:pr-4 scrollbar-none">
             <div className="space-y-6 w-full ">
-              <h3>{product.name}</h3>
+              <h3>{syncedProduct.name}</h3>
 
               {/* Price */}
               <div className="flex gap-4 items-center">
@@ -385,7 +345,7 @@ function ProductPage() {
                 )}
 
                 {/* Stock information - moved here and updated styling */}
-                {!product.unlimitedStock && (
+                {!syncedProduct.unlimitedStock && (
                   <div>
                     {effectiveStock > 0 ? (
                       <Badge variant="outline">
@@ -400,7 +360,7 @@ function ProductPage() {
               </div>
 
               {/* Variation selection */}
-              {product.hasVariations && attributeNames.length > 0 && (
+              {syncedProduct.hasVariations && attributeNames.length > 0 && (
                 <div className="flex flex-wrap gap-4">
                   {attributeNames.map((attributeId) => (
                     <FilterGroup
@@ -433,7 +393,7 @@ function ProductPage() {
                   onDecrement={decrementQuantity}
                   minQuantity={1}
                   maxQuantity={
-                    product.unlimitedStock ? undefined : effectiveStock
+                    syncedProduct.unlimitedStock ? undefined : effectiveStock
                   }
                   disabled={!canAddToCart}
                   size="default"
@@ -450,15 +410,15 @@ function ProductPage() {
 
               {/* Metadata */}
               <div className="flex flex-wrap gap-6 text-sm">
-                {product.category && (
+                {syncedProduct.category && (
                   <div className="flex flex-col">
                     <span className="text-muted-foreground">Category</span>
                     <Link
                       to="/store"
-                      search={{ category: product.category.slug }}
+                      search={{ category: syncedProduct.category.slug }}
                       className="text-primary hover:underline"
                     >
-                      {product.category.name}
+                      {syncedProduct.category.name}
                     </Link>
                   </div>
                 )}
@@ -488,23 +448,23 @@ function ProductPage() {
               </div>
 
               {/* Blog post link */}
-              {product?.blogPost && (
+              {syncedProduct?.blogPost && (
                 <div className="pt-4">
                   <div className="mb-2">
-                    {product.blogPost.title ? (
+                    {syncedProduct.blogPost.title ? (
                       <>
                         <span className="text-muted-foreground">
                           From blog post:
                         </span>{" "}
                         <Link
-                          to={product.blogPost.blogUrl}
+                          to={syncedProduct.blogPost.blogUrl}
                           className="blurLink"
                         >
-                          {product.blogPost.title}
+                          {syncedProduct.blogPost.title}
                         </Link>
                       </>
                     ) : (
-                      <Link to={product.blogPost.blogUrl} className="blurLink">
+                      <Link to={syncedProduct.blogPost.blogUrl} className="blurLink">
                         From blog post
                       </Link>
                     )}
@@ -515,7 +475,7 @@ function ProductPage() {
               {/* Product description */}
               <div className="prose max-w-none">
                 <ReactMarkdown components={markdownComponents}>
-                  {product.description || ""}
+                  {syncedProduct.description || ""}
                 </ReactMarkdown>
               </div>
             </div>
