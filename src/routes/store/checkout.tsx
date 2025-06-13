@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Link } from "~/components/ui/shared/Link";
 import React, { useState, useEffect } from "react";
 import { useCart, CartProvider } from "~/lib/cartContext";
 import { Button } from "~/components/ui/shared/Button";
@@ -321,18 +322,17 @@ function CheckoutScreen() {
   return (
     <div className="w-full px-4 pt-10 pb-20">
       <div className="max-w-[2000px] mx-auto">
-        <h2 className="">Checkout</h2>
+        <h2 className="mb-4">Checkout</h2>
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Customer Information Form - Left Side */}
           <div className="flex-1">
             <form ref={formRef} onSubmit={handleSubmit}>
-              <div className="mb-8">
-                <h2 className="text-xl font-bold mb-4">Payment Information</h2>
-                <p>
+             
+                <p className="mb-8">
                   You will be contacted regarding payment options after placing
                   your order.
                 </p>
-              </div>
+             
               <div className="mb-8">
                 <h2 className="!text-lg font-bold mb-4">Shipping Address</h2>
                 <AddressFields
@@ -462,7 +462,7 @@ function CheckoutScreen() {
                 onClick={handleButtonClick}
                 disabled={isLoading || cart.items.length === 0}
                 variant={getButtonVariant()}
-                className="w-full transition-all duration-300 ease-in-out"
+                className="w-full transition-all duration-300 ease-in-out disabled:cursor-not-allowed"
               >
                 {getButtonText()}
               </Button>
@@ -489,7 +489,13 @@ function CheckoutScreen() {
                     </div>
                     {/* Product info */}
                     <div className="grow">
-                      <p className="font-medium">{item.productName}</p>
+                      <Link
+                        href={`/store/${item.productId}`}
+                        className="blurLink"
+                        id={`product-${item.productId}`}
+                      >
+                        {item.productName}
+                      </Link>
                       {item.attributes &&
                         Object.keys(item.attributes).length > 0 && (
                           <p className="text-sm text-muted-foreground">
