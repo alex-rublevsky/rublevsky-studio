@@ -16,7 +16,7 @@ export function CartNav() {
   }
 
   return (
-    <div className="fixed bottom-2 right-2 z-50">
+    <div className="fixed bottom-3 right-3 z-50">
       <Drawer open={cartOpen} onOpenChange={setCartOpen}>
         <DrawerTrigger asChild>
           <button
