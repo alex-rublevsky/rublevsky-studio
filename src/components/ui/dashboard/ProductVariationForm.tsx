@@ -22,6 +22,7 @@ import {
   PRODUCT_ATTRIBUTES,
   getAttributeDisplayName,
 } from "~/lib/productAttributes";
+import { COUNTRY_OPTIONS } from "~/constants/countries";
 import { Input } from "~/components/ui/shared/Input";
 import { Button } from "~/components/ui/shared/Button";
 import {
@@ -40,6 +41,7 @@ interface Variation {
   stock: number;
   discount?: number | null; // Add discount field
   sort: number;
+  shippingFrom?: string; // Country code for shipping origin
   attributes: VariationAttribute[];
 }
 
@@ -120,7 +122,7 @@ function SortableVariationItem({
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
         <div>
           <label className="block text-sm font-medium text-foreground mb-1">
             SKU
@@ -173,6 +175,26 @@ function SortableVariationItem({
             min="0"
             max="100"
           />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">
+            Ships From
+          </label>
+          <Select
+            value={variation.shippingFrom || "NONE"}
+            onValueChange={(value) => onUpdate(variation.id, "shippingFrom", value === "NONE" ? null : value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Shipping from..." />
+            </SelectTrigger>
+            <SelectContent>
+              {COUNTRY_OPTIONS.map((country) => (
+                <SelectItem key={country.code} value={country.code}>
+                  {country.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -299,6 +321,7 @@ export default function ProductVariationForm({
       stock: 0,
       discount: null,
       sort: variations.length,
+      shippingFrom: undefined,
       attributes: [],
     };
     onChange([...variations, newVariation]);
