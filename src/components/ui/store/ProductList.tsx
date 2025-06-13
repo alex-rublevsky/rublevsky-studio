@@ -1,56 +1,35 @@
 import { Product } from "~/types";
-import { motion, AnimatePresence } from "motion/react";
 import ProductCard from "./ProductCard";
-import { memo, useMemo } from "react";
 import { ProductCardSkeleton } from "./skeletons/ProductCardSkeleton";
+import { AnimatedGroup } from "~/components/motion_primitives/AnimatedGroup";
+import { useEffect, useState } from "react";
 
 interface ProductListProps {
   data: Product[];
   isLoading?: boolean;
 }
 
-// Memoize individual product items to prevent unnecessary re-renders
-const MemoizedProductCard = memo(ProductCard);
+const STORE_ANIMATION_KEY = 'store-products-animated';
 
-// Memoize the entire ProductList component
-const ProductList = memo(function ProductList({ data, isLoading = false }: ProductListProps) {
-  // Memoize the motion variants to prevent recreation
-  const itemVariants = useMemo(
-    () => ({
-      hidden: { opacity: 0, filter: "blur(48px)", y: 0 },
-      visible: (index: number) => ({
-        opacity: 1,
-        filter: "blur(0px)",
-        y: 0,
-        transition: {
-          type: "spring",
-          bounce: 0.4,
-          duration: 1,
-          delay: index * 0.06, // Always apply stagger delay
-        },
-      }),
-    }),
-    []
-  );
+function ProductList({ data, isLoading = false }: ProductListProps) {
+  const [shouldAnimate, setShouldAnimate] = useState<boolean | null>(null); // null = loading state
 
-  const containerVariants = useMemo(
-    () => ({
-      hidden: {
-        opacity: 1,
-      },
-      visible: {
-        opacity: 1,
-        transition: {
-          staggerChildren: 0.05, // Always apply stagger
-          delayChildren: 0.1, // Always apply initial delay
-        },
-      },
-    }),
-    []
-  );
+  useEffect(() => {
+    // Check if products have been animated in this browser session
+    const hasAnimated = sessionStorage.getItem(STORE_ANIMATION_KEY) === 'true';
+    
+    if (hasAnimated) {
+      // Already animated in this session - show immediately
+      setShouldAnimate(false);
+    } else {
+      // First time this session - animate and remember
+      setShouldAnimate(true);
+      sessionStorage.setItem(STORE_ANIMATION_KEY, 'true');
+    }
+  }, []); // Only run once on mount
 
-  // Show skeleton cards when loading
-  if (isLoading) {
+  // Show skeleton cards when loading OR when determining animation state
+  if (isLoading || shouldAnimate === null) {
     return (
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-6 gap-x-3 sm:gap-4 mb-20">
         {Array.from({ length: 8 }, (_, index) => (
@@ -60,41 +39,39 @@ const ProductList = memo(function ProductList({ data, isLoading = false }: Produ
     );
   }
 
-  return (
-    <AnimatePresence mode="popLayout">
-      <motion.div
-        key="product-grid"
+  if (data.length === 0) {
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-6 gap-x-3 sm:gap-4 mb-20">
+        <p className="text-center text-lg col-span-full">No products found.</p>
+      </div>
+    );
+  }
+
+  // Animate on first visit, show immediately on subsequent visits
+  if (shouldAnimate) {
+    return (
+      <AnimatedGroup
         className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-6 gap-x-3 sm:gap-4 mb-20"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
+        once={false}  // We handle the "once" logic ourselves
+        amount={0.1}   // Low threshold since we want it to trigger reliably
+        delay={0.1}
+        staggerChildren={0.06}
       >
-        {data.length === 0 ? (
-          <motion.p
-            variants={itemVariants}
-            initial="hidden"
-            animate="visible"
-            className="text-center text-lg col-span-full"
-          >
-            No products found.
-          </motion.p>
-        ) : (
-          data.map((product, index) => (
-            <motion.div
-              key={product.id}
-              layout
-              variants={itemVariants}
-              custom={index}
-              initial="hidden"
-              animate="visible"
-            >
-              <MemoizedProductCard product={product} />
-            </motion.div>
-          ))
-        )}
-      </motion.div>
-    </AnimatePresence>
+        {data.map((product) => (
+          <ProductCard key={product.id} product={product} />
+        ))}
+      </AnimatedGroup>
+    );
+  }
+
+  // No animation - show immediately
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-6 gap-x-3 sm:gap-4 mb-20">
+      {data.map((product) => (
+        <ProductCard key={product.id} product={product} />
+      ))}
+    </div>
   );
-});
+}
 
 export default ProductList;

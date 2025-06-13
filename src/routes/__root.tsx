@@ -3,6 +3,7 @@ import {
   Outlet,
   Scripts,
   createRootRoute,
+  useRouter,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -80,9 +81,7 @@ function RootComponent() {
         <CursorContextProvider>
           {!isMobile && <CustomCursor />}
           <RootDocument>
-            <div className="view-transition-group">
               <Outlet />
-            </div>
           </RootDocument>
         </CursorContextProvider>
       </QueryClientProvider>
@@ -91,8 +90,13 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const pathname = router.state.location.pathname;
+  
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" 
+    className={`${pathname === "/" ? "scroll-smooth" : ""}`}
+    >
       <head>
         <HeadContent />
       </head>

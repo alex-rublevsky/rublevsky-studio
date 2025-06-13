@@ -8,7 +8,7 @@ interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 }
 
 const Image = React.forwardRef<HTMLImageElement, ImageProps>(
-  ({ className, src, width, quality, alt, loading, ...props }, ref) => {
+  ({ className, src, width, quality, alt, loading, style, ...props }, ref) => {
     const imageSrc = src
       ? cloudflareLoader({ src, width: width || 0, quality })
       : "";
@@ -19,7 +19,9 @@ const Image = React.forwardRef<HTMLImageElement, ImageProps>(
         src={imageSrc}
         alt={alt}
         loading={loading}
+        style={style}
         className={cn("object-cover", className)}
+        
         {...props}
       />
     );

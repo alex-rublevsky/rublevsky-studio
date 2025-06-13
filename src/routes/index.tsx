@@ -21,9 +21,7 @@ export const Route = createFileRoute("/")({
 function Work() {
   return (
     <SmoothScroll>
-      <div
-      //className="[view-transition-name:main-content]"
-      >
+    
         <HeroSection />
         <MembershipBenefitsSection />
         <SubscriptionSection />
@@ -37,7 +35,7 @@ function Work() {
         <GallerySection type="photos" />
         <GallerySection type="posters" />
         <CallBookingSection />
-      </div>
+      
     </SmoothScroll>
   );
 }
