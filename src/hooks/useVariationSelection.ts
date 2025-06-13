@@ -95,6 +95,10 @@ export function useVariationSelection({
     const hasAnySelection = Object.keys(selectedAttributes).length > 0;
     if (hasAnySelection) return;
 
+    // CRITICAL FIX: Disable auto-selection for URL mode during initial load
+    // This prevents URL changes that interrupt view transitions
+    if (useUrlState) return;
+
     // Find the first available variation (preferably with stock)
     const sortedVariations = [...product.variations].sort((a, b) => {
       const aStock = getAvailableQuantityForVariation(product, a.id, cartItems);
