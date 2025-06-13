@@ -10,7 +10,8 @@ export function createRouter() {
     defaultErrorComponent: DefaultCatchBoundary,
     defaultNotFoundComponent: () => <NotFound />,
     scrollRestoration: true,
-    defaultViewTransition: true
+    defaultViewTransition: true,
+    scrollRestorationBehavior: 'instant',
   });
 
   return router;
