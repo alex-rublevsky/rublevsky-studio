@@ -30,9 +30,11 @@ function ProductList({ data, isLoading = false }: ProductListProps) {
 
   // Show skeleton cards when loading OR when determining animation state
   if (isLoading || shouldAnimate === null) {
+    // Show enough skeletons to maintain page height for proper scroll restoration
+    // 32 skeletons should be enough to cover most scroll positions
     return (
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-6 gap-x-3 sm:gap-4 mb-20">
-        {Array.from({ length: 8 }, (_, index) => (
+        {Array.from({ length: 32 }, (_, index) => (
           <ProductCardSkeleton key={`skeleton-${index}`} />
         ))}
       </div>
