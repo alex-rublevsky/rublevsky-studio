@@ -390,3 +390,48 @@ p {
 @utility no-scrollbar {
   @apply [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
 }
+
+
+
+
+/* View Transition Animations */
+.product-info-enter {
+  animation: slide-in-up 0.5s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+}
+
+.gallery-thumbnail-enter {
+  animation: gallery-thumb-in 0.3s ease-out forwards;
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+@keyframes slide-in-up {
+  from {
+    transform: translateY(60px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes gallery-thumb-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* View transition for elements that actually transition */
+::view-transition-old(root) {
+  animation: none;
+}
+
+::view-transition-new(root) {
+  animation: none;
+}
