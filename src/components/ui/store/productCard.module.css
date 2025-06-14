@@ -12,14 +12,6 @@
   #productCard:hover img {
     transform: scale(1.05);
   }
-
-  #productCard:hover img:first-child {
-    opacity: 0;
-  }
-
-  #productCard:hover img:last-child {
-    opacity: 1;
-  }
 }
 
 #productCard img {

@@ -133,7 +133,11 @@ export default function ImageGallery({
           {images.map((image, index) => (
             <div
               key={index}
-              className="shrink-0 w-24 h-24 relative cursor-pointer last:mb-2"
+              className="shrink-0 w-24 h-24 relative cursor-pointer last:mb-2 gallery-thumbnail-enter"
+              style={{
+                viewTransitionName: `gallery-thumb-${productSlug}-${index}`,
+                animationDelay: `${0.2 + index * 0.055}s`
+              }}
               onClick={() => scrollToImage(index)}
               onMouseEnter={() => {
                 if (window.matchMedia("(min-width: 1024px)").matches) {

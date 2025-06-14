@@ -298,14 +298,13 @@ function ProductCard({
                         src={`https://assets.rublevsky.studio/${imageArray[0]}`}
                         alt={product.name}
                         loading="eager"
-                        //fill
-                        className={cn(
-                          "absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 ease-in-out",
-                          !hasAnyStock && "grayscale opacity-60"
-                        )}
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="absolute inset-0 w-full h-full object-cover object-center"
+                        //TODO: update with srcset?
+                        //sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         style={{
-                          viewTransitionName: `product-image-${product.slug}`
+                          viewTransitionName: `product-image-${product.slug}`,
+                          filter: !hasAnyStock ? 'grayscale(100%)' : 'none',
+                          opacity: !hasAnyStock ? 0.6 : 1
                         }}
                       />
                       {/* Secondary Image (if exists) - Only on desktop devices with hover capability */}
@@ -334,7 +333,7 @@ function ProductCard({
               </div>
             </div>
 
-            {/* Desktop Add to Cart button */}
+            {/* Desktop Add to Cart button - TEMPORARILY REMOVED FOR TESTING
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -379,6 +378,7 @@ function ProductCard({
                 <span>{isComingSoon ? "Pre-ordering..." : "Adding..."}</span>
               )}
             </button>
+            */}
           </div>
 
           {/* Content Section */}
@@ -407,7 +407,11 @@ function ProductCard({
                         </div>
                       </>
                     ) : (
-                      <h5 className="whitespace-nowrap">
+                      <h5 className="whitespace-nowrap"
+                      style={{
+                        viewTransitionName: `product-price-${product.slug}`
+                      }}
+                      >
                         ${currentPrice?.toFixed(2)} CAD
                       </h5>
                     )}
@@ -445,7 +449,13 @@ function ProductCard({
               </div>
 
               {/* Product Name */}
-              <p className=" mb-3">{product.name}</p>
+              <p className=" mb-3" 
+                style={{
+                  viewTransitionName: `product-name-${product.slug}`
+                }}
+              >
+                {product.name}
+              </p>
 
               {/* Variations */}
               {product.hasVariations &&

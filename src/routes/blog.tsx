@@ -61,7 +61,7 @@ function PostsIndexComponent() {
 
   return (
     //TODO: 2 column layout for desktop
-    <section className="pt-24 sm:pt-32 div [view-transition-name:main-content]  min-h-screen">
+    <section className="pt-24 sm:pt-32 div min-h-screen">
       <div className="flex flex-col items-center ">
         <div className="inline-block">
           <h1 className="mb-8 text-center">What&apos;s in the gaiwan?</h1>

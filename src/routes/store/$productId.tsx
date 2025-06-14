@@ -318,7 +318,9 @@ function ProductPage() {
           </div>
 
           {/* Product information */}
-          <div className="w-full lg:w-2/5 xl:w-1/3 px-4 lg:px-0 lg:h-[100dvh] lg:overflow-y-auto pt-4 pb-20 lg:pr-4 scrollbar-none">
+          <div 
+            className="w-full lg:w-2/5 xl:w-1/3 px-4 lg:px-0 lg:h-[100dvh] lg:overflow-y-auto pt-4 pb-20 lg:pr-4 scrollbar-none product-info-enter"
+          >
             <div className="space-y-6 w-full ">
               <h3>{syncedProduct.name}</h3>
 

@@ -187,7 +187,7 @@ export default function StoreFeed({
   ]);
 
   return (
-    <section className="no-padding space-y-8 [view-transition-name:main-content]">
+    <section className="no-padding space-y-8">
       {isLoading ? (
         <ProductFiltersSkeleton />
       ) : (
