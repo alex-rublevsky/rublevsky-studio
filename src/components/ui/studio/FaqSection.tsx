@@ -4,31 +4,25 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "~/components/ui/studio/Accordion";
-import { Button } from "~/components/ui/shared/Button";
-import { Link as RouterLink } from "@tanstack/react-router";
-import { Link } from "~/components/ui/shared/Link";
-import { Image } from "~/components/ui/shared/Image";
-
-import NeumorphismCard from "~/components/ui/shared/NeumorphismCard";
 import { TextEffect } from "~/components/motion_primitives/AnimatedText";
 import { AnimatedGroup } from "~/components/motion_primitives/AnimatedGroup";
 
 const data = [
-  {
-    question: "How fast will I receive my designs?",
-    answer:
-      "On average, most requests are completed in just two days or less. However, more complex requests can take longer.",
-  },
+  // {
+  //   question: "How fast will I receive my designs?",
+  //   answer:
+  //     "On average, most requests are completed in just two days or less. However, more complex requests can take longer.",
+  // },
   {
     question: "How does onboarding work?",
     answer:
       "Subscribe to a plan and we'll quickly add you to your very own Trello board. This process usually takes about an hour to complete from the time you subscribe. Once you accept the invite to Trello, you're ready to rock. \nFurther instructions on how to use the Trello board to request designs can be found on the board itself.",
   },
-  {
-    question: "Who are the designers?",
-    answer:
-      "Rublevsky studio is a one-man agency, ran by Alexander, the founder. Rublevsky studio does not employ other designers, or outsource work to any other entity. You'll work directly with me through the entirety of your experience.",
-  },
+  // {
+  //   question: "Who are the designers?",
+  //   answer:
+  //     "Rublevsky studio is a one-man agency, ran by Alexander, the founder. Rublevsky studio does not employ other designers, or outsource work to any other entity. You'll work directly with me through the entirety of your experience.",
+  // },
   {
     question: "Is there a limit to how many requests I can make?",
     answer:
@@ -48,11 +42,11 @@ const data = [
     question: "What programs do you design in?",
     answer: "Most requests are designed using Photoshop and Figma.",
   },
-  {
-    question: "How does Webflow development work?",
-    answer:
-      "Webflow development is included with all subscriptions and is simply treated as a design request. As long as your website can be supported by the Webflow platform, Rublevsky Studio will take care of the development to ensure maximum fidelity when it comes to the final product. \nOnce the website is fully developed, the site will be transferred to your account, where you will own it from that point forward. Therefore, a Rublevsky Studio subscription is not necessary to maintain your website.",
-  },
+  // {
+  //   question: "How does Webflow development work?",
+  //   answer:
+  //     "Webflow development is included with all subscriptions and is simply treated as a design request. As long as your website can be supported by the Webflow platform, Rublevsky Studio will take care of the development to ensure maximum fidelity when it comes to the final product. \nOnce the website is fully developed, the site will be transferred to your account, where you will own it from that point forward. Therefore, a Rublevsky Studio subscription is not necessary to maintain your website.",
+  // },
   {
     question: "How will I request designs?",
     answer:
@@ -66,7 +60,7 @@ const data = [
   {
     question: "Are there any requests you don't support?",
     answer:
-      "Absolutely. Rublevsky Studio does not cover the following design work: 3D modeling, animated graphics (GIFS, etc.), document design (medical forms, etc.), complex packaging, and extensive print design (magazines, books, etc.).",
+      "Absolutely. Rublevsky Studio does not cover the following design work: complex 3D modeling, animated graphics (GIFS, etc.), document design (medical forms, etc.), complex packaging, and extensive print design (magazines, books, etc.).",
   },
   {
     question: "What if I only have a single request?",
