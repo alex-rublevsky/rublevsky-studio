@@ -18,7 +18,7 @@ const testimonials = [
     role: "CEO at BeautyFloor",
     content:
       "We initially faced challenges with our website's design and were unhappy with its look. We contacted Alexander for a redesign, and he exceeded our expectations. As the lead designer, he led the project with a developer he helped us to find, ensuring our vision was realized.",
-    avatar: "/testimonials/roman.jpg",
+    avatar: "/testimonials/roman.webp",
     link: "https://www.instagram.com/beautyfloor_vl/",
   },
   {
@@ -27,7 +27,7 @@ const testimonials = [
     role: "CEO at InkSoul",
     content:
       "In our interaction I liked Alexander's attentiveness to my requests, detailed analysis of my activity and his desire to find unusual and yet functional design solutions, suitable for the specifics of my work.",
-    avatar: "/testimonials/diana.jpg",
+    avatar: "/testimonials/diana.webp",
     link: "https://www.instagram.com/diana_inksoul/",
   },
   {
@@ -45,7 +45,7 @@ const testimonials = [
     role: "Music Artist",
     content:
       "Alexander did an outstanding job with pre-press editing and large-format printing of posters that brilliantly showcase my artistic vision. His attention to detail and expertise brought my ideas to life, delivering mind-blowing quality that was absolutely top-notch. Everything was fabulous—from the prints themselves to the entire experience—which has helped elevate my brand presence and supported my music journey immensely.",
-    avatar: "/testimonials/brighton.jpg",
+    avatar: "/testimonials/brighton.webp",
     link: "https://on.soundcloud.com/yBk5X3a4cWA4xnWdA",
   },
 ];
