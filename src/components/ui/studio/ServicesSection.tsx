@@ -1,44 +1,43 @@
 import styles from "./services.module.css";
 import { TextEffect } from "~/components/motion_primitives/AnimatedText";
+
 export default function ServicesSection() {
+  const services = [
+    "Accessibility audit & optimization",
+    "Web Animations",
+    "Logo & Branding",
+    "Custom Code/Scripting",
+    "Data and Analytics",
+    "E-commerce Development",
+    "Graphic Design",
+    "Photography",
+    "Web Design (UI/UX)",
+    "Web Development",
+    "3D & Motion Design",
+    "3rd Party Integrations"
+  ];
+
+  // Group services into pairs for rows
+  const serviceRows = [];
+  for (let i = 0; i < services.length; i += 2) {
+    serviceRows.push(services.slice(i, i + 2));
+  }
+
   return (
     <section>
       <TextEffect as="h2" className="mb-10">
         Services offered
       </TextEffect>
       <div className={styles.servicesGrid}>
-        <div className={styles.serviceRow}>
-          <div className={styles.serviceItem}>
-            Accessibility audit & optimization
+        {serviceRows.map((row, rowIndex) => (
+          <div key={rowIndex} className={styles.serviceRow}>
+            {row.map((service, serviceIndex) => (
+              <div key={serviceIndex} className={styles.serviceItem}>
+                {service}
+              </div>
+            ))}
           </div>
-          <div className={styles.serviceItem}>Animation</div>
-        </div>
-        <div className={styles.serviceRow}>
-          <div className={styles.serviceItem}>Branding & Strategy</div>
-          <div className={styles.serviceItem}>Custom Code/Scripting</div>
-        </div>
-        <div className={styles.serviceRow}>
-          <div className={styles.serviceItem}>Data and Analytics</div>
-          <div className={styles.serviceItem}>
-            Digital Marketing & Advertising
-          </div>
-        </div>
-        <div className={styles.serviceRow}>
-          <div className={styles.serviceItem}>E-commerce Development</div>
-          <div className={styles.serviceItem}>Graphic Design</div>
-        </div>
-        <div className={styles.serviceRow}>
-          <div className={styles.serviceItem}>Photography/Video</div>
-          <div className={styles.serviceItem}>Web Design (UI/UX)</div>
-        </div>
-        <div className={styles.serviceRow}>
-          <div className={styles.serviceItem}>Web Development</div>
-          <div className={styles.serviceItem}>3D Design</div>
-        </div>
-        <div className={styles.serviceRow}>
-          <div className={styles.serviceItem}>Logo</div>
-          <div className={styles.serviceItem}>3rd Party Integrations</div>
-        </div>
+        ))}
       </div>
     </section>
   );
