@@ -32,7 +32,7 @@ const timelineItems: TimelineItem[] = [
   },
   {
     date: "01/24 - 04/24",
-    logo: "/hpl.svg",
+    logo: "/logos/hpl.svg",
     title: "Government-funded public organization",
     description:
       "I was in charge of creating brand identities for the library events in various mediums from print materials to web and social media.",
