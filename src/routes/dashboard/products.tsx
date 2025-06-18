@@ -638,7 +638,7 @@ function RouteComponent() {
 
   return (
     <div>
-      <div className="fixed bottom-3 right-3 z-50">
+      <div className="fixed bottom-18 right-3 z-50">
         <Button onClick={() => setShowCreateForm(true)} size="lg">
           <Plus />
           Add New Product
@@ -854,7 +854,7 @@ function RouteComponent() {
                   <label className="block text-sm font-medium mb-1">
                     Tea Categories
                   </label>
-                  <div className="space-y-2 border border-input rounded-md p-3 max-h-48 overflow-y-auto">
+                  <div className="space-y-2 border border-input rounded-md p-3 h-48 overflow-y-auto">
                     {teaCategories.map((category) => (
                       <label
                         key={category.slug}
@@ -889,12 +889,13 @@ function RouteComponent() {
                   <label className="block text-sm font-medium mb-1">
                     Images (comma-separated)
                   </label>
-                  <Input
-                    type="text"
+                  <Textarea
                     name="images"
                     value={editFormData.images}
                     onChange={handleEditChange}
                     placeholder="image1.jpg, image2.jpg, image3.jpg"
+                    className="h-48 overflow-y-auto resize-none"
+                    rows={6}
                   />
                 </div>
 
@@ -1196,7 +1197,7 @@ function RouteComponent() {
                   <label className="block text-sm font-medium mb-1">
                     Tea Categories
                   </label>
-                  <div className="space-y-2 border border-input rounded-md p-3 max-h-48 overflow-y-auto">
+                  <div className="space-y-2 border border-input rounded-md p-3 h-48 overflow-y-auto">
                     {teaCategories.map((category) => (
                       <label
                         key={category.slug}
@@ -1230,12 +1231,13 @@ function RouteComponent() {
                   <label className="block text-sm font-medium mb-1">
                     Images (comma-separated)
                   </label>
-                  <Input
-                    type="text"
+                  <Textarea
                     name="images"
                     value={formData.images}
                     onChange={handleChange}
                     placeholder="image1.jpg, image2.jpg, image3.jpg"
+                    className="h-48 overflow-y-auto resize-none"
+                    rows={6}
                   />
                   <p className="mt-1 text-xs text-muted-foreground">
                     Enter image identifiers separated by commas. These should
