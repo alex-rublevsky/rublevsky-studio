@@ -9,10 +9,24 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/components/ui/DropdownMenu";
+import {
+  IconDashboard,
+  IconBox,
+  IconArticle,
+  IconCategory,
+  IconBadgeTm,
+  IconPackage,
+  IconChartBar,
+} from "@tabler/icons-react";
+import { ArrowLeftFromLine, LogOutIcon, UserCircleIcon, CreditCardIcon, BellIcon } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { signOut } from "~/utils/auth-client";
+import { useNavigate } from "@tanstack/react-router";
 
 interface NavItem {
   name: string;
   url: string;
+  icon?: React.ComponentType;
 }
 
 const useVisibleSection = (items: NavItem[]) => {
@@ -93,6 +107,27 @@ const mobileMenuItems: NavItem[] = [
   },
 ];
 
+// Dashboard navigation items
+const dashboardNavItems: NavItem[] = [
+  { name: "Dashboard", url: "/dashboard", icon: IconDashboard },
+  { name: "Products", url: "/dashboard/products", icon: IconBox },
+  { name: "Blog", url: "/dashboard/blog", icon: IconArticle },
+  { name: "Categories", url: "/dashboard/categories", icon: IconCategory },
+  { name: "Brands", url: "/dashboard/brands", icon: IconBadgeTm },
+  { name: "Orders", url: "/dashboard/orders", icon: IconPackage },
+  { name: "Analytics", url: "/dashboard/analytics", icon: IconChartBar },
+];
+
+const dashboardSecondaryItems: NavItem[] = [
+  { name: "Back to Website", url: "/", icon: ArrowLeftFromLine },
+];
+
+const userData = {
+  name: "Alexander",
+  email: "alexander.rublevskii@gmail.com",
+  avatar: "me.jpg",
+};
+
 const DropdownNavMenu = ({ items }: { items: NavItem[] }) => {
   return (
     <DropdownMenu>
@@ -127,6 +162,64 @@ const DropdownNavMenu = ({ items }: { items: NavItem[] }) => {
             )}
           </DropdownMenuItem>
         ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+const DashboardUserMenu = () => {
+  const navigate = useNavigate();
+  
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger className="relative flex w-fit rounded-full border border-black bg-background hover:bg-black hover:text-white transition-all duration-300 p-[0.3rem] focus:outline-hidden focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
+        <div className="relative z-10 flex items-center gap-2 cursor-pointer px-3 py-1.5 text-xs text-white mix-blend-difference md:px-4 md:py-2 md:text-sm">
+          <Avatar className="h-5 w-5 md:h-6 md:w-6 rounded-full grayscale">
+            <AvatarImage
+              src={`https://assets.rublevsky.studio/${userData.avatar}`}
+              alt={userData.name}
+            />
+            <AvatarFallback className="rounded-full text-xs">RA</AvatarFallback>
+          </Avatar>
+          <span className="hidden md:inline">{userData.name}</span>
+        </div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        side="top"
+        align="end"
+        className="mb-2 rounded-2xl border border-black bg-background text-foreground w-56"
+      >
+        <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-200">
+          <Avatar className="h-8 w-8 rounded-lg">
+            <AvatarImage src={`https://assets.rublevsky.studio/${userData.avatar}`} alt={userData.name} />
+            <AvatarFallback className="rounded-lg">RA</AvatarFallback>
+          </Avatar>
+          <div className="grid flex-1 text-left text-sm leading-tight">
+            <span className="truncate font-medium">{userData.name}</span>
+            <span className="truncate text-xs text-muted-foreground">
+              {userData.email}
+            </span>
+          </div>
+        </div>
+        <DropdownMenuItem className="flex items-center gap-2 py-2 px-3 text-sm hover:bg-black hover:text-white transition-colors duration-200">
+          <UserCircleIcon className="h-4 w-4" />
+          Account
+        </DropdownMenuItem>
+        <DropdownMenuItem className="flex items-center gap-2 py-2 px-3 text-sm hover:bg-black hover:text-white transition-colors duration-200">
+          <CreditCardIcon className="h-4 w-4" />
+          Billing
+        </DropdownMenuItem>
+        <DropdownMenuItem className="flex items-center gap-2 py-2 px-3 text-sm hover:bg-black hover:text-white transition-colors duration-200">
+          <BellIcon className="h-4 w-4" />
+          Notifications
+        </DropdownMenuItem>
+        <DropdownMenuItem 
+          onClick={() => signOut({}, { onSuccess: () => navigate({ to: "/" }) })}
+          className="flex items-center gap-2 py-2 px-3 text-sm hover:bg-black hover:text-white transition-colors duration-200 border-t border-gray-200"
+        >
+          <LogOutIcon className="h-4 w-4" />
+          Log out
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -255,12 +348,46 @@ export function NavBar({ className }: Omit<NavBarProps, "items">) {
   const showGoBackButton =
     routerState.location.pathname.startsWith("/branding/");
 
-  const showOther = !routerState.location.pathname.startsWith("/dashboard");
+  const isDashboard = routerState.location.pathname.startsWith("/dashboard");
+  const showOther = !isDashboard;
 
   // Check if we should show the work sections (on homepage or branding detail pages)
   const showWorkSections =
     pathname === "/" || routerState.location.pathname.startsWith("/branding/");
 
+  // Dashboard navigation layout
+  if (isDashboard) {
+    return (
+      <nav
+        className={cn(
+          "fixed bottom-0 left-0 right-0 z-[40] mb-3 flex justify-between items-center px-3 pointer-events-none",
+          className
+        )}
+      >
+        {/* Dashboard secondary actions + main nav (left - mobile only) */}
+        <div className="md:hidden pointer-events-auto">
+          <DropdownNavMenu items={[...dashboardSecondaryItems, ...dashboardNavItems]} />
+        </div>
+
+        {/* Dashboard secondary actions (left - desktop only) */}
+        <div className="hidden md:block pointer-events-auto">
+          <DropdownNavMenu items={dashboardSecondaryItems} />
+        </div>
+
+        {/* Main dashboard navigation (center - desktop only) */}
+        <div className="absolute left-1/2 -translate-x-1/2 hidden md:block pointer-events-auto">
+          <NavGroup items={dashboardNavItems} />
+        </div>
+
+        {/* User menu (right) */}
+        <div className="pointer-events-auto">
+          <DashboardUserMenu />
+        </div>
+      </nav>
+    );
+  }
+
+  // Client-side navigation layout (existing logic)
   return (
     <nav
       className={cn(

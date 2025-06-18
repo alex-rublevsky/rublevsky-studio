@@ -31,3 +31,5 @@ wrangler.jsonc
 /drizzle/
 
 /.vscode/
+
+/dist/

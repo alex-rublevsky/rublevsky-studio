@@ -102,13 +102,14 @@ function SortableVariationItem({
     <div
       ref={setNodeRef}
       style={style}
-      className="border border-border rounded-md p-4 bg-background"
+      className="border border-border rounded-md p-3 bg-background"
     >
-      <div className="flex justify-between items-center mb-4">
+      {/* Header with drag handle and remove button */}
+      <div className="flex justify-between items-center mb-3">
         <div
           {...attributes}
           {...listeners}
-          className="cursor-move p-2 bg-muted rounded"
+          className="cursor-move p-1 bg-muted rounded text-xs"
         >
           ≡
         </div>
@@ -122,19 +123,21 @@ function SortableVariationItem({
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
+      {/* Main fields in a compact grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 mb-3">
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1">
+          <label className="block text-xs font-medium text-foreground mb-1">
             SKU
           </label>
           <Input
             type="text"
             value={variation.sku}
             onChange={(e) => onUpdate(variation.id, "sku", e.target.value)}
+            className="text-sm"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1">
+          <label className="block text-xs font-medium text-foreground mb-1">
             Price
           </label>
           <Input
@@ -143,10 +146,11 @@ function SortableVariationItem({
             onChange={(e) =>
               onUpdate(variation.id, "price", parseFloat(e.target.value) || 0)
             }
+            className="text-sm"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1">
+          <label className="block text-xs font-medium text-foreground mb-1">
             Stock
           </label>
           <Input
@@ -155,10 +159,11 @@ function SortableVariationItem({
             onChange={(e) =>
               onUpdate(variation.id, "stock", parseInt(e.target.value) || 0)
             }
+            className="text-sm"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1">
+          <label className="block text-xs font-medium text-foreground mb-1">
             Discount %
           </label>
           <Input
@@ -174,17 +179,18 @@ function SortableVariationItem({
             placeholder="0"
             min="0"
             max="100"
+            className="text-sm"
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium text-foreground mb-1">
+        <div className="col-span-2 lg:col-span-2">
+          <label className="block text-xs font-medium text-foreground mb-1">
             Ships From
           </label>
           <Select
             value={variation.shippingFrom || "NONE"}
             onValueChange={(value) => onUpdate(variation.id, "shippingFrom", value === "NONE" ? null : value)}
           >
-            <SelectTrigger>
+            <SelectTrigger className="text-sm">
               <SelectValue placeholder="Shipping from..." />
             </SelectTrigger>
             <SelectContent>
@@ -198,17 +204,18 @@ function SortableVariationItem({
         </div>
       </div>
 
-      <div className="mb-4">
-        <h4 className="font-medium text-foreground mb-2">Attributes</h4>
+      {/* Attributes section - more compact */}
+      <div className="mb-3">
+        <h4 className="text-xs font-medium text-foreground mb-2">Attributes</h4>
         {variation.attributes.length > 0 ? (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {variation.attributes.map((attr) => (
               <div
                 key={attr.attributeId}
                 className="flex items-center space-x-2"
               >
-                <div className="grow grid grid-cols-2 gap-2">
-                  <div className="text-sm font-medium text-foreground">
+                <div className="flex-1 grid grid-cols-2 gap-2 items-center">
+                  <div className="text-xs font-medium text-foreground truncate">
                     {getAttributeDisplayName(attr.attributeId)}:
                   </div>
                   <Input
@@ -222,6 +229,7 @@ function SortableVariationItem({
                       )
                     }
                     placeholder="Value"
+                    className="text-sm"
                   />
                 </div>
                 <Button
@@ -231,6 +239,7 @@ function SortableVariationItem({
                   }
                   variant="invertedDestructive"
                   size="icon"
+                  className="h-6 w-6 text-xs"
                 >
                   ×
                 </Button>
@@ -238,23 +247,24 @@ function SortableVariationItem({
             ))}
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             No attributes added yet.
           </p>
         )}
       </div>
 
+      {/* Add attribute section - more compact */}
       {unusedAttributes.length > 0 && (
         <div className="flex items-end space-x-2">
-          <div className="grow max-w-md">
-            <label className="block text-sm font-medium text-foreground mb-1">
+          <div className="flex-1">
+            <label className="block text-xs font-medium text-foreground mb-1">
               Add Attribute
             </label>
             <Select
               value={selectedAttribute}
               onValueChange={setSelectedAttribute}
             >
-              <SelectTrigger>
+              <SelectTrigger className="text-sm">
                 <SelectValue placeholder="Select an attribute" />
               </SelectTrigger>
               <SelectContent>
@@ -411,7 +421,7 @@ export default function ProductVariationForm({
   };
 
   return (
-    <div className="space-y-6 pb-6">
+    <div className="space-y-4 pb-4">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -421,7 +431,8 @@ export default function ProductVariationForm({
           items={variations.map((item) => item.id)}
           strategy={verticalListSortingStrategy}
         >
-          <div className="space-y-4">
+          {/* Grid layout for variations */}
+          <div className="grid grid-cols-1 md:grid-cols-2  gap-3">
             {variations.map((variation) => (
               <SortableVariationItem
                 key={variation.id}

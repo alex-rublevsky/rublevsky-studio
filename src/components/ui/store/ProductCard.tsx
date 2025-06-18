@@ -333,7 +333,7 @@ function ProductCard({
               </div>
             </div>
 
-            {/* Desktop Add to Cart button - TEMPORARILY REMOVED FOR TESTING
+            {/* Desktop Add to Cart button */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -378,7 +378,7 @@ function ProductCard({
                 <span>{isComingSoon ? "Pre-ordering..." : "Adding..."}</span>
               )}
             </button>
-            */}
+            
           </div>
 
           {/* Content Section */}
