@@ -2,16 +2,18 @@ import { BrandingProject } from '~/components/ui/studio/branding/brandingTypes';
 
 export const brandingProjects: BrandingProject[] = [
   {
-    id: 'yin-yan-graffiti',
-    name: 'Yin Yan Graffiti',
+    id: 'yin-yang-graffiti',
+    name: 'Yin Yang Graffiti',
     type: 'image',
     images: [
-      'yin-yan-shirt-1.jpg',
-      'yin-yan-shirt-2.jpg',
-      'yin-yan-shirt-5.jpg',
-      'yin-yan-shirt-4.jpg',
-      'yin-yan-shirt-6.jpg',
-      'yin-yan-shirt-3.jpg',
+      'products/apparel/yin-yang-graffiti-blue/yin-yang-graffiti-blue-hoodie-and-shirt.webp',
+      'products/apparel/yin-yang-graffiti-blue/yin-yang-graffiti-blue-hoodie-1.webp',
+      'products/apparel/yin-yang-graffiti-blue/yin-yang-graffiti-blue-hoodie-2.webp',
+      'products/apparel/yin-yang-graffiti-blue/yin-yang-graffiti-blue-shirt-1.webp',
+      'products/apparel/yin-yang-graffiti-blue/yin-yang-graffiti-blue-shirt-2.webp',
+      'products/apparel/yin-yang-graffiti-blue/yin-yang-graffiti-blue-shirt-3.webp',
+      'products/apparel/yin-yang-graffiti-blue/yin-yang-graffiti-blue-shirt-4.webp',
+      'products/apparel/yin-yang-graffiti-blue/yin-yang-graffiti-blue-tank-top-back.webp'
     ],
     description: 'Screen Printing a Custom Design',
   },
