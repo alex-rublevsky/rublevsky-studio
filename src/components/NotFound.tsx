@@ -1,24 +1,33 @@
-import { Link } from '@tanstack/react-router'
+import { Button } from '~/components/ui/shared/Button'
+import { useNavigate } from '@tanstack/react-router'
 
+//TODO: where does the 1% scroll come from on such pages which should be exact hight of the screen?
 export function NotFound({ children }: { children?: any }) {
+  const navigate = useNavigate();
   return (
-    <div className="space-y-2 p-2">
-      <div className="text-gray-600 dark:text-gray-400">
-        {children || <p>The page you are looking for does not exist.</p>}
+    <div className="h-screen w-screen flex flex-col justify-center items-center gap-8">
+      <div className="">
+        {children || 
+       <div className="flex flex-col items-center gap-2"><h1>404</h1> <h4>Something is missing...</h4></div>
+        }
       </div>
-      <p className="flex items-center gap-2 flex-wrap">
-        <button
+      <p className="flex items-center gap-3 flex-wrap">
+        <Button
+          size="lg"
           onClick={() => window.history.back()}
-          className="bg-emerald-500 text-white px-2 py-1 rounded uppercase font-black text-sm"
+          className="px-2 py-1"
         >
           Go back
-        </button>
-        <Link
-          to="/"
-          className="bg-cyan-600 text-white px-2 py-1 rounded uppercase font-black text-sm"
+        </Button>
+        <Button
+          variant='outline'
+          size="lg"
+          onClick={() => navigate({ to: "/" }) }
+
+          className="px-2 py-1  "
         >
-          Start Over
-        </Link>
+          Home page
+        </Button>
       </p>
     </div>
   )
