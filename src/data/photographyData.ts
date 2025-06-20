@@ -1,6 +1,5 @@
 import { GalleryItem } from '~/components/ui/studio/gallery/galleryTypes';
 
-//TODO: update store links
 
 export const photos: GalleryItem[] = [
   {
@@ -12,18 +11,21 @@ export const photos: GalleryItem[] = [
   {
     id: 'eclipse',
     images: ['photography/eclipse.webp'],
-    description: 'Eclipse'
+    description: 'Eclipse over Hamilton, Ontario'
   },
   {
     id: 'mobile-zoo-program',
     images: ['photography/girl-and-goat.webp'],
-    description: 'March Break Mobile Zoo Program',
+    description: `"March Break" — a Mobile Zoo Program by Hamilton Public Library, where I have worked as an intern`,
     logo: 'logos/hpl.svg'
   },
   {
     id: 'squirrel-with-nut',
     images: ['photography/squirrel-with-a-nut.webp'],
-    storeLink: 'squirrel-sticker'
+    //TODO: update store link
+    storeLink: 'squirrel-sticker',
+    description: `I love squirrels more than anything else in this world`,
+
   },
   {
     id: 'dinner-3-people',
@@ -36,19 +38,25 @@ export const photos: GalleryItem[] = [
   {
     id: 'goose-water',
     images: ['photography/goose-water.webp'],
-  
+    description: `He kinda makes Canada worth living in`,
   },
   {
     id: 'bird',
-    images: ['photography/bird.webp']
+    images: ['photography/bird.webp'],
+    description: `His ability to hold breath underwater for minutes amazes me`,
+
   },
   {
     id: 'bebra',
     images: ['photography/bebra.webp'],
+    description: `My friend Abalych!`,
+
     
   },
   {
     id: 'rabbit-photos',
-    images: ['photography/zaiika.webp', 'photography/rabbit-yellow.webp']
+    images: ['photography/zaiika.webp', 'photography/rabbit-yellow.webp'],
+    description: `This baby is living in my garden rent free!`,
+
   }
 ]; 
