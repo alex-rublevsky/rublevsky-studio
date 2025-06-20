@@ -1,4 +1,4 @@
-import { brandingProjects } from "~/data/brandingProjects";
+import { brandingProjects } from "~/data/brandingData";
 import { Image } from "~/components/ui/shared/Image";
 import { useCursorContext } from "~/components/ui/shared/custom_cursor/CustomCursorContext";
 
