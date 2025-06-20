@@ -170,7 +170,7 @@ function HeroSection() {
                 <div>
                   <div className="flex gap-6">
                     <h5>
-                      <Link href="mailto:alexander.rublevskii@gmail.com">
+                      <Link href="mailto:alexander@rublevsky.studio">
                         Email
                       </Link>
                     </h5>
