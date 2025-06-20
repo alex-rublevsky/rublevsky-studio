@@ -124,7 +124,7 @@ const dashboardSecondaryItems: NavItem[] = [
 
 const userData = {
   name: "Alexander",
-  email: "alexander.rublevskii@gmail.com",
+  email: "alexander@rublevsky.studio",
   avatar: "me.jpg",
 };
 
