@@ -1,6 +1,4 @@
 import * as React from "react";
-//TODO: update input to include label
-
 import { cn } from "~/lib/utils";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
