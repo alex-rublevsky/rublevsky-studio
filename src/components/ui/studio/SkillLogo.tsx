@@ -25,8 +25,10 @@ function skillLogo({
           }`}
         >
           {svg ? (
-            <div className="group-hover:opacity-70 transition-opacity md:scale-125 flex items-center justify-center">
-              {svg}
+            <div className="group-hover:opacity-70 transition-opacity md:scale-125 flex items-center justify-center w-full h-full">
+              <div className="w-full h-full flex items-center justify-center [&>svg]:max-w-full [&>svg]:max-h-full [&>svg]:w-auto [&>svg]:h-auto">
+                {svg}
+              </div>
             </div>
           ) : link ? (
             <Image
