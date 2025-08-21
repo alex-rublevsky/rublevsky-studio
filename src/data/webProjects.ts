@@ -26,13 +26,14 @@ export const webProjects: Project[] = [
   //     },
 
   //   ],
-  //   websiteUrl: 'https://abaly.ch/',
+  //   websiteUrl: 'https://www.abaly.ch/',
   //   layout: 'full',
   //   devices: [
   //     {
   //       type: 'tablet',
   //       content: {
   //         type: 'video',
+  //         //TODO: upload video
   //         url: 'web-videos/abalych-tablet.mp4'
   //       }
   //     }
