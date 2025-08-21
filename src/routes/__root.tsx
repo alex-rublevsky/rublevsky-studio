@@ -106,7 +106,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <hr />
 
         {children}
-        <TanStackRouterDevtools position="bottom-right" />
+ {/* <TanStackRouterDevtools position="bottom-right" /> */}
         <Scripts />
       </body>
     </html>
