@@ -15,8 +15,6 @@ import {
   Tailwind,
   Text,
 } from "@react-email/components";
-import * as React from "react";
-
 interface AdminOrderConfirmationProps {
   userImage?: string;
   Name?: string;
@@ -285,7 +283,7 @@ AdminOrderConfirmation.PreviewProps = {
       name: "Red Graffiti Print",
       quantity: 1,
       price: "120.00",
-      image: "https://assets.rublevsky.studio/red-graffiti-1.jpg",
+      image: "https://assets.rublevsky.studio/red-graffiti-1.webp",
     },
     {
       name: "Blue Abstract Print",
@@ -293,7 +291,7 @@ AdminOrderConfirmation.PreviewProps = {
       price: "63.75",
       originalPrice: "75.00",
       discount: 15,
-      image: "https://assets.rublevsky.studio/yin-yan-shirt-7.jpg",
+      image: "https://assets.rublevsky.studio/yin-yang-shirt-7.webp",
     },
   ],
 } as AdminOrderConfirmationProps;
