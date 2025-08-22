@@ -82,6 +82,18 @@ export type BlogPost = Omit<InferSelectModel<typeof blogPosts>, 'publishedAt'> &
   teaCategories?: string[];
   publishedAt: number;
 };
+
+// Blog Post Preview (for index page)
+export type BlogPostPreview = {
+  id: number;
+  title: string | null;
+  slug: string;
+  excerpt: string | null; // Shortened body text
+  firstImage: string | null; // Only the first image
+  publishedAt: number;
+  teaCategories?: string[];
+};
+
 export type NewBlogPost = InferInsertModel<typeof blogPosts>;
 
 // Form data types for frontend components

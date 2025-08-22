@@ -55,11 +55,28 @@ export const APIRoute = createAPIFileRoute('/api/blog')({
         }
       }
 
-      // Convert Sets to arrays and get final posts
-      const posts = Array.from(postsWithCategories.values()).map(({ post, categories }) => ({
-        ...post,
-        teaCategories: Array.from(categories)
-      }));
+      // Convert Sets to arrays and get final posts with preview data only
+      const posts = Array.from(postsWithCategories.values()).map(({ post, categories }) => {
+        // Get first image only
+        const firstImage = post.images 
+          ? post.images.split(',').map((img: string) => img.trim()).filter((img: string) => img !== '')[0] || null
+          : null;
+        
+        // Create excerpt from body (first 150 characters)
+        const excerpt = post.body && post.body.length > 150 
+          ? post.body.substring(0, 150).trim() + '...'
+          : post.body;
+          
+        return {
+          id: post.id,
+          title: post.title,
+          slug: post.slug,
+          excerpt, // Only excerpt, not full body
+          firstImage, // Only first image, not all images
+          publishedAt: post.publishedAt,
+          teaCategories: Array.from(categories)
+        };
+      });
       
       if (!posts || posts.length === 0) {
         return json({ 
