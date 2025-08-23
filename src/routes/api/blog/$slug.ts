@@ -1,6 +1,6 @@
 import { json } from '@tanstack/react-start'
 import { createAPIFileRoute } from '@tanstack/react-start/api'
-import { blogPosts, teaCategories, blogTeaCategories } from '~/schema'
+import { blogPosts, teaCategories, blogTeaCategories, products } from '~/schema'
 import { db } from '~/db'
 import { eq } from 'drizzle-orm'
 
@@ -21,11 +21,12 @@ export const APIRoute = createAPIFileRoute('/api/blog/$slug')({
     }
 
     try {
-      // Get the specific blog post with its tea categories
+      // Get the specific blog post with its tea categories and product images (if linked)
       const blogResults = await db
         .select()
         .from(blogPosts)
         .leftJoin(blogTeaCategories, eq(blogTeaCategories.blogPostId, blogPosts.id))
+        .leftJoin(products, eq(products.slug, blogPosts.productSlug))
         .where(eq(blogPosts.slug, slug));
 
       if (!blogResults || blogResults.length === 0) {
@@ -37,12 +38,19 @@ export const APIRoute = createAPIFileRoute('/api/blog/$slug')({
 
       // Extract the blog post data and collect tea categories
       const post = blogResults[0].blog_posts;
+      const linkedProduct = blogResults[0].products;
       const teaCategorySlugs: string[] = [];
 
       for (const row of blogResults) {
         if (row.blog_tea_categories?.teaCategorySlug) {
           teaCategorySlugs.push(row.blog_tea_categories.teaCategorySlug);
         }
+      }
+
+      // Determine which images to use: blog images or product images as fallback
+      let finalImages = post.images;
+      if ((!post.images || post.images.trim() === '') && linkedProduct?.images) {
+        finalImages = linkedProduct.images;
       }
 
       // Format the response
@@ -52,7 +60,7 @@ export const APIRoute = createAPIFileRoute('/api/blog/$slug')({
         slug: post.slug,
         body: post.body,
         productSlug: post.productSlug,
-        images: post.images,
+        images: finalImages,
         publishedAt: post.publishedAt.getTime(),
         teaCategories: teaCategorySlugs
       };
