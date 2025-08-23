@@ -12,7 +12,7 @@ export const Route = createFileRoute("/blog/")({
 });
 
 function PostsIndexComponent() {
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   // Fetch blog posts and tea categories in a single API call
   const {
@@ -44,15 +44,13 @@ function PostsIndexComponent() {
     );
   }, [posts, teaCategories]);
 
-  // Filter posts based on selected categories
+  // Filter posts based on selected category
   const filteredPosts = useMemo(() => {
-    if (selectedCategories.length === 0) return posts;
+    if (!selectedCategory) return posts;
     return posts.filter((post) =>
-      post.teaCategories?.some((category) =>
-        selectedCategories.includes(category)
-      )
+      post.teaCategories?.includes(selectedCategory)
     );
-  }, [posts, selectedCategories]);
+  }, [posts, selectedCategory]);
 
   return (
     <section className="pt-24 sm:pt-32 div min-h-screen">
@@ -76,11 +74,10 @@ function PostsIndexComponent() {
             <FilterGroup
               className="justify-center"
               options={usedTeaCategories}
-              selectedOptions={selectedCategories}
-              onOptionsChange={setSelectedCategories}
-              onOptionChange={() => {}}
-              multiSelect={true}
-              showAllOption={false}
+              selectedOptions={selectedCategory}
+              onOptionChange={setSelectedCategory}
+              showAllOption={true}
+              allOptionLabel="All Categories"
             />
           </div>
         )}

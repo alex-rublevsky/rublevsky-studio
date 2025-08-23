@@ -89,13 +89,11 @@ function FilterButton({
 interface FilterGroupProps {
   title?: string;
   options: (FilterOption | string)[];
-  selectedOptions: string | string[] | null;
+  selectedOptions: string | null;
   onOptionChange: (option: string | null) => void;
-  onOptionsChange?: (options: string[]) => void;
   className?: string;
   showAllOption?: boolean;
   allOptionLabel?: string;
-  multiSelect?: boolean;
   variant?: "default" | "product";
   getOptionAvailability?: (option: string) => boolean;
   titleClassName?: string;
@@ -106,34 +104,20 @@ export function FilterGroup({
   options,
   selectedOptions,
   onOptionChange,
-  onOptionsChange,
   className,
   showAllOption = true,
   allOptionLabel = "All",
-  multiSelect = false,
   variant = "default",
   getOptionAvailability,
   titleClassName,
 }: FilterGroupProps) {
   const handleOptionClick = (optionSlug: string) => {
-    if (multiSelect && onOptionsChange) {
-      const selected = selectedOptions as string[];
-      if (selected.includes(optionSlug)) {
-        onOptionsChange(selected.filter((slug) => slug !== optionSlug));
-      } else {
-        onOptionsChange([...selected, optionSlug]);
-      }
-    } else {
-      onOptionChange(
-        optionSlug === (selectedOptions as string) ? null : optionSlug
-      );
-    }
+    onOptionChange(
+      optionSlug === selectedOptions ? null : optionSlug
+    );
   };
 
   const isSelected = (optionSlug: string) => {
-    if (multiSelect) {
-      return (selectedOptions as string[]).includes(optionSlug);
-    }
     return selectedOptions === optionSlug;
   };
 
@@ -160,7 +144,7 @@ export function FilterGroup({
         </div>
       )}
       <div className={cn("flex flex-wrap gap-1", className)}>
-        {showAllOption && !multiSelect && (
+        {showAllOption && (
           <FilterButton
             onClick={() => onOptionChange(null)}
             isSelected={selectedOptions === null}
