@@ -80,7 +80,7 @@ export const APIRoute = createAPIFileRoute('/api/blog')({
           title: post.title,
           slug: post.slug,
           excerpt, // Only excerpt, not full body
-          firstImage, // Only first image, not all images
+          images: post.images, // All images for proper gallery rendering
           publishedAt: post.publishedAt,
           teaCategories: Array.from(categories)
         };

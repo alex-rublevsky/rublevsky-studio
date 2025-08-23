@@ -89,7 +89,7 @@ export type BlogPostPreview = {
   title: string | null;
   slug: string;
   excerpt: string | null; // Shortened body text
-  firstImage: string | null; // Only the first image
+  images: string | null; // All images for proper gallery rendering
   publishedAt: number;
   teaCategories?: string[];
 };
