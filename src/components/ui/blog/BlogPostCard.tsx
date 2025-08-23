@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { BlogPostPreview } from "~/types/index";
 import { Badge } from "~/components/ui/shared/Badge";
-import { Image } from "~/components/ui/shared/Image";
 
 interface BlogPostCardProps {
   post: BlogPostPreview;
@@ -9,7 +8,12 @@ interface BlogPostCardProps {
 }
 
 export default function BlogPostCard({ post, teaCategories }: BlogPostCardProps) {
-  const { id, title, slug, excerpt, firstImage, publishedAt, teaCategories: postTeaCategories } = post;
+  const { id, title, slug, excerpt, images, publishedAt, teaCategories: postTeaCategories } = post;
+
+  // Extract first image from images string
+  const firstImage = images 
+    ? images.split(',').map(img => img.trim()).filter(img => img !== '')[0] || null
+    : null;
 
   // Get tea category names from slugs
   const categoryNames = postTeaCategories?.map(catSlug => {
@@ -22,17 +26,20 @@ export default function BlogPostCard({ post, teaCategories }: BlogPostCardProps)
       to="/blog/$slug" 
       params={{ slug }}
       className="block group"
+      viewTransition={true}
     >
       <article className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 h-full">
         {/* Image */}
         {firstImage && (
           <div className="w-full overflow-hidden">
-            <Image 
-              src={`/${firstImage}`}
+            <img 
+              src={`https://assets.rublevsky.studio/${firstImage}`}
               alt={title || `Blog post ${id}`}
               width={600}
               height={400}
-              className="w-full h-auto group-hover:scale-105 transition-transform duration-300"
+              loading="eager"
+              className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-300"
+              style={{ viewTransitionName: `blog-image-${slug}` }}
             />
           </div>
         )}
@@ -40,7 +47,10 @@ export default function BlogPostCard({ post, teaCategories }: BlogPostCardProps)
         {/* Content */}
         <div className="p-6">
           {/* Title */}
-          <h3 className="text-xl font-semibold mb-3 group-hover:text-blue-600 transition-colors">
+          <h3 
+            className="text-xl font-semibold mb-3 group-hover:text-blue-600 transition-colors"
+            style={{ viewTransitionName: `blog-title-${slug}` }}
+          >
             {title || `Post ${id}`}
           </h3>
           

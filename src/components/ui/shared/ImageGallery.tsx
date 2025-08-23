@@ -22,6 +22,7 @@ interface ImageGalleryProps extends VariantProps<typeof mainImageVariants> {
   alt: string;
   className?: string;
   productSlug?: string;
+  viewTransitionName?: string; // Custom view transition name
 }
 
 export default function ImageGallery({
@@ -30,6 +31,7 @@ export default function ImageGallery({
   className = "",
   size,
   productSlug,
+  viewTransitionName,
 }: ImageGalleryProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const mainImageContainerRef = useRef<HTMLDivElement>(null);
@@ -109,15 +111,38 @@ export default function ImageGallery({
     }
   }, [handleScroll]);
 
+  // Determine the view transition name
+  const transitionName = viewTransitionName || `product-image-${productSlug}`;
+
   if (!images.length) {
     return (
       <div className="w-full h-[75vh] bg-muted flex items-center justify-center rounded-lg relative">
         {/* Always render a view transition element even when no images */}
         <div
-          style={{ viewTransitionName: `product-image-${productSlug}`, opacity: 0, position: 'absolute' }}
+          style={{ viewTransitionName: transitionName, opacity: 0, position: 'absolute' }}
           className="w-1 h-1"
         />
         <p className="text-muted-foreground">No images available</p>
+      </div>
+    );
+  }
+
+  // Simplified single image layout (automatically applied when only 1 image)
+  if (images.length === 1) {
+    return (
+      <div className={`gallery-stack flex flex-col lg:flex-row w-full gap-2 ${className}`}>
+        {/* Main image container - same structure as multi-image gallery */}
+        <div className="flex items-center justify-center lg:items-start lg:justify-start order-1 grow relative">
+          <img
+            src={`https://assets.rublevsky.studio/${images[0]}`}
+            alt={alt}
+            width={3000}
+            height={3000}
+            loading="eager"
+            className={`${mainImageVariants({ size })} block`}
+            style={{ viewTransitionName: transitionName }}
+          />
+        </div>
       </div>
     );
   }
@@ -175,7 +200,7 @@ export default function ImageGallery({
           height={3000}
           loading="eager"
           className={`${mainImageVariants({ size })} ${currentImageIndex === 0 ? 'block' : 'hidden lg:hidden'}`}
-          style={{ viewTransitionName: `product-image-${productSlug}` }}
+          style={{ viewTransitionName: transitionName }}
         />
 
         {/* Desktop: Show selected image if not first image */}
