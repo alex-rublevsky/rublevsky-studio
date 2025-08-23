@@ -4,6 +4,7 @@ import { ProductCardSkeleton } from "./skeletons/ProductCardSkeleton";
 import { AnimatedGroup } from "~/components/motion_primitives/AnimatedGroup";
 import { useEffect, useState } from "react";
 import { useDeviceType } from "~/hooks/use-mobile";
+import { motion, AnimatePresence } from "motion/react";
 
 interface ProductListProps {
   data: Product[];
@@ -43,14 +44,6 @@ function ProductList({ data, isLoading = false }: ProductListProps) {
     );
   }
 
-  if (data.length === 0) {
-    return (
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-6 gap-x-3 sm:gap-4 mb-20">
-        <p className="text-center text-lg col-span-full">No products found.</p>
-      </div>
-    );
-  }
-
   // Animate on first visit (desktop only), show immediately on subsequent visits or mobile
   if (shouldAnimate) {
     return (
@@ -68,13 +61,35 @@ function ProductList({ data, isLoading = false }: ProductListProps) {
     );
   }
 
-  // No animation - show immediately
+  // Always use layout animations for filtering changes (like blog page)
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-6 gap-x-3 sm:gap-4 mb-20">
-      {data.map((product) => (
-        <ProductCard key={product.id} product={product} />
-      ))}
-    </div>
+    <AnimatePresence mode="popLayout">
+      {data.length === 0 ? (
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="text-center text-lg col-span-full"
+        >
+          No products found.
+        </motion.p>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-6 gap-x-3 sm:gap-4 mb-20">
+          {data.map((product) => (
+            <motion.div
+              key={product.id}
+              layout
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <ProductCard product={product} />
+            </motion.div>
+          ))}
+        </div>
+      )}
+    </AnimatePresence>
   );
 }
 
