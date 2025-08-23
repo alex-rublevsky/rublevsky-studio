@@ -26,13 +26,13 @@ export default function BlogPostCard({ post, teaCategories }: BlogPostCardProps)
       <article className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 h-full">
         {/* Image */}
         {firstImage && (
-          <div className="aspect-video w-full overflow-hidden">
+          <div className="w-full overflow-hidden">
             <Image 
               src={`/${firstImage}`}
               alt={title || `Blog post ${id}`}
               width={600}
               height={400}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              className="w-full h-auto group-hover:scale-105 transition-transform duration-300"
             />
           </div>
         )}
