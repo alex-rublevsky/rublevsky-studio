@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { BlogPostPreview } from "~/types/index";
 import { Badge } from "~/components/ui/shared/Badge";
+import ReactMarkdown from "react-markdown";
+import { markdownComponents } from "~/components/ui/shared/MarkdownComponents";
 
 interface BlogPostCardProps {
   post: BlogPostPreview;
@@ -56,9 +58,9 @@ export default function BlogPostCard({ post, teaCategories }: BlogPostCardProps)
           
           {/* Excerpt */}
           {excerpt && (
-            <p className="text-gray-600 mb-4">
-              {excerpt}
-            </p>
+            <div className="text-gray-600 mb-4 prose prose-sm prose-p:my-0 prose-strong:text-gray-800 prose-em:text-gray-700">
+              <ReactMarkdown components={markdownComponents}>{excerpt}</ReactMarkdown>
+            </div>
           )}
           
           {/* Footer with date and tags */}
