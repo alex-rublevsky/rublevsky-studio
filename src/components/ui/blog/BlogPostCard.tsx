@@ -3,6 +3,7 @@ import { BlogPostPreview } from "~/types/index";
 import { Badge } from "~/components/ui/shared/Badge";
 import ReactMarkdown from "react-markdown";
 import { markdownComponents } from "~/components/ui/shared/MarkdownComponents";
+import { formatBlogDate } from "~/lib/utils";
 
 interface BlogPostCardProps {
   post: BlogPostPreview;
@@ -30,7 +31,7 @@ export default function BlogPostCard({ post, teaCategories }: BlogPostCardProps)
       className="block group"
       viewTransition={true}
     >
-      <article className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 h-full">
+      <article className="bg-white overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
         {/* Image */}
         {firstImage && (
           <div className="w-full overflow-hidden">
@@ -67,12 +68,7 @@ export default function BlogPostCard({ post, teaCategories }: BlogPostCardProps)
           <div className="flex items-center justify-between">
             {/* Date */}
             <time className="text-sm text-gray-500">
-              {new Date(publishedAt).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-                timeZone: "UTC",
-              })}
+              {formatBlogDate(publishedAt)}
             </time>
             
             {/* Tags */}

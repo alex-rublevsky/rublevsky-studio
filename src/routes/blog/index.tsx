@@ -53,10 +53,10 @@ function PostsIndexComponent() {
   }, [posts, selectedCategory]);
 
   return (
-    <section className="pt-24 sm:pt-32 div min-h-screen">
-      <div className="max-w-7xl mx-auto px-4">
+    <section className="pt-24 sm:pt-32 div min-h-screen no-padding">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-12 px-4">
           <h1 className="mb-8">What&apos;s in the gaiwan?</h1>
           <div className="flex justify-center items-center gap-8 mb-8">
             <h5 className="text-secondary-foreground">{totalCount} posts</h5>
@@ -70,7 +70,7 @@ function PostsIndexComponent() {
 
         {/* Filters */}
         {usedTeaCategories.length > 0 && (
-          <div className="flex justify-center mb-12">
+          <div className="flex justify-center mb-12 px-4">
             <FilterGroup
               className="justify-center"
               options={usedTeaCategories}
@@ -84,9 +84,9 @@ function PostsIndexComponent() {
 
         {/* Content */}
         {isLoading ? (
-          <div className="text-center">Loading blog posts...</div>
+          <div className="text-center px-4">Loading blog posts...</div>
         ) : hasError ? (
-          <div className="text-center text-red-500">
+          <div className="text-center text-red-500 px-4">
             Error loading blog content. Please try again later.
           </div>
         ) : (
@@ -101,7 +101,7 @@ function PostsIndexComponent() {
                 No blog posts found for the selected categories.
               </motion.p>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-6 gap-x-3 sm:gap-4 items-start">
                 {filteredPosts.map((post) => (
                   <motion.div
                     key={post.id}

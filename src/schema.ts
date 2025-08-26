@@ -134,6 +134,7 @@ export const blogPosts = sqliteTable('blog_posts', {
   slug: text('slug').notNull().unique(),
   body: text('body').notNull(),
   images: text('images'),
+  isVisible: integer('is_visible', { mode: 'boolean' }).notNull().default(true),
   publishedAt: integer('published_at', { mode: 'timestamp' }).notNull(),
 });
 

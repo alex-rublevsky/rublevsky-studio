@@ -6,6 +6,7 @@ import { Link } from "@tanstack/react-router";
 import { CopyLinkButton } from "./CopyLinkButton";
 import ImageGallery from "~/components/ui/shared/ImageGallery";
 import { markdownComponents } from "../shared/MarkdownComponents";
+import { formatBlogDate } from "~/lib/utils";
 
 interface BlogPostProps {
   title: string | null;
@@ -60,41 +61,45 @@ function BlogPost({
   if (onlyContent) {
     return (
       <article id={`${slug}`}>
-        <h3 
-          style={{ viewTransitionName: `blog-title-${slug}` }}
-        >
-          {title || (id ? `Post ${id}` : 'Untitled Post')}
-        </h3>
+        <div className="sticky-header-container-constrained">
+          <div className="relative z-1">
+            <h3 
+              style={{ viewTransitionName: `blog-title-${slug}` }}
+            >
+              {title && title.trim() !== '' ? title : (id ? `Post ${id}` : 'Untitled Post')}
+            </h3>
 
-        <div className="my-2 flex gap-4 items-center">
-          <div className="flex gap-4">
-            {/* TODO: fix the link
-            
-            {productSlug && (
-          
-              <Link
-                to="/store/$itemId"
-                params={{
-                  itemId: productSlug,
-                }}
-                className="blurLink"
-              >
-                <h6 className="whitespace-nowrap">Purchase →</h6>
-              </Link>
-            )} */}
-            <time className="whitespace-nowrap">
-              {new Date(publishedAt).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-                timeZone: "UTC",
-              })}
-            </time>
+            <div className="my-2 flex gap-4 items-center">
+              <div className="flex gap-4">
+                {/* TODO: fix the link
+                
+                {productSlug && (
+              
+                  <Link
+                    to="/store/$itemId"
+                    params={{
+                      itemId: productSlug,
+                    }}
+                    className="blurLink"
+                  >
+                    <h6 className="whitespace-nowrap">Purchase →</h6>
+                  </Link>
+                )} */}
+                <time className="whitespace-nowrap">
+                  {new Date(publishedAt).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                    timeZone: "UTC",
+                  })}
+                </time>
+              </div>
+              <CopyLinkButton sectionId={slug} />
+            </div>
           </div>
-          <CopyLinkButton sectionId={slug} />
         </div>
-
-        <div className="prose prose-lg mt-6">
+        
+        <div className="prose prose-lg -mt-6">
           <ReactMarkdown components={markdownComponents}>{body}</ReactMarkdown>
         </div>
       </article>
@@ -119,12 +124,12 @@ function BlogPost({
         </div>
       )}
 
-      <div className="sticky-header-container">
-        <div className="relative max-w-2xl mx-auto z-1">
+      <div className="sticky-header-container-sidebar">
+        <div className="relative z-1">
           <h3 
             style={{ viewTransitionName: `blog-title-${slug}` }}
           >
-            {title || (id ? `Post ${id}` : 'Untitled Post')}
+            {title && title.trim() !== '' ? title : (id ? `Post ${id}` : 'Untitled Post')}
           </h3>
 
           <div className="my-2 flex gap-4 items-center">
@@ -144,12 +149,7 @@ function BlogPost({
                 </Link>
               )} */}
               <time className="whitespace-nowrap">
-                {new Date(publishedAt).toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                  timeZone: "UTC",
-                })}
+                {formatBlogDate(publishedAt)}
               </time>
             </div>
             <CopyLinkButton sectionId={slug} />
