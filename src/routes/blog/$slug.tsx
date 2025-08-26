@@ -63,12 +63,18 @@ function BlogPostComponent() {
       images: previewPost.images || null, // Use all images to prevent layout shifts
       productSlug: null, // Preview doesn't have this, will be updated when full data loads
       publishedAt: previewPost.publishedAt,
-      teaCategories: previewPost.teaCategories
+      teaCategories: previewPost.teaCategories,
+      isVisible: true, // Public blog posts are always visible
+      productName: null // Preview doesn't have this, will be updated when full data loads
     };
   }, [previewPost]);
 
   // Use fallback post during loading to prevent loading state
   const displayPost = post || fallbackPost;
+
+  // Check if the post has images
+  const hasImages = displayPost?.images && displayPost.images.trim() !== "";
+  const imageArray = hasImages ? displayPost.images!.split(",").map((img: string) => img.trim()) : [];
 
   // Only show loading if we don't have any data (neither full post nor fallback)
   if (isLoading && !displayPost) {
@@ -93,6 +99,45 @@ function BlogPostComponent() {
     throw notFound();
   }
 
+  // Conditional layout based on image presence
+  if (!hasImages) {
+    // No images layout - centered content
+    return (
+      <main className="min-h-screen flex flex-col">
+        <div className="grow flex items-start justify-center pt-24 sm:pt-32">
+          <div className="w-full max-w-3xl mx-auto px-4">
+            <div className="space-y-6">
+              {/* Back to blog button */}
+              <div>
+                <button
+                  onClick={() => {
+                    // Use browser's back navigation which preserves scroll position
+                    window.history.back();
+                  }}
+                  className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-2 no-underline bg-transparent border-none cursor-pointer"
+                >
+                  ← Back to blog
+                </button>
+              </div>
+
+              <BlogPost
+                title={displayPost.title}
+                body={displayPost.body || ""}
+                images={null} // Don't render images in the content area
+                productSlug={displayPost.productSlug}
+                slug={displayPost.slug || `post-${displayPost.id}`}
+                publishedAt={displayPost.publishedAt}
+                id={displayPost.id}
+                onlyContent={true} // New prop to render only content
+              />
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // Original layout with images
   return (
     <main className="min-h-screen flex flex-col lg:h-screen lg:overflow-hidden">
       <div className="grow flex items-start justify-center">
@@ -100,7 +145,7 @@ function BlogPostComponent() {
           {/* Image gallery with view transitions */}
           <div className="w-full lg:w-3/5 xl:w-2/3 flex flex-col lg:flex-row gap-2 lg:h-full self-start">
             <ImageGallery
-              images={displayPost.images ? displayPost.images.split(",").map((img: string) => img.trim()) : []}
+              images={imageArray}
               alt={displayPost.title || `Blog post ${displayPost.id}`}
               className="lg:pl-4 lg:pt-4 lg:pb-4"
               productSlug={displayPost.slug || `post-${displayPost.id}`}

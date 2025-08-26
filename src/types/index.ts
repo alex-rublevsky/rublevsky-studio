@@ -81,6 +81,7 @@ export type NewTeaCategory = InferInsertModel<typeof teaCategories>;
 export type BlogPost = Omit<InferSelectModel<typeof blogPosts>, 'publishedAt'> & {
   teaCategories?: string[];
   publishedAt: number;
+  productName?: string | null;
 };
 
 // Blog Post Preview (for index page)
@@ -146,6 +147,12 @@ export interface BrandFormData {
   isActive: boolean;
 }
 
+export interface TeaCategoryFormData {
+  name: string;
+  slug: string;
+  isActive: boolean;
+}
+
 export interface BlogPostFormData {
   title?: string;
   slug: string;
@@ -153,6 +160,7 @@ export interface BlogPostFormData {
   teaCategories?: string[];
   productSlug?: string;
   images?: string;
+  isVisible?: boolean;
   publishedAt: number;
 }
 

@@ -2,7 +2,7 @@ import { json } from '@tanstack/react-start'
 import { createAPIFileRoute } from '@tanstack/react-start/api'
 import { blogPosts, teaCategories, blogTeaCategories, products } from '~/schema'
 import { db } from '~/db'
-import { desc, eq } from 'drizzle-orm'
+import { desc, eq, and } from 'drizzle-orm'
 
 export const APIRoute = createAPIFileRoute('/api/blog')({
   GET: async ({ request, params }) => {
@@ -15,11 +15,13 @@ export const APIRoute = createAPIFileRoute('/api/blog')({
 
     try {
       // Get blog posts with their tea categories and product images (if linked) using a cleaner approach
+      // Only fetch visible blog posts for the public API
       const blogResults = await db
         .select()
         .from(blogPosts)
         .leftJoin(blogTeaCategories, eq(blogTeaCategories.blogPostId, blogPosts.id))
         .leftJoin(products, eq(products.slug, blogPosts.productSlug))
+        .where(eq(blogPosts.isVisible, true))
         .orderBy(desc(blogPosts.publishedAt));
 
       // Get all active tea categories separately for the filter

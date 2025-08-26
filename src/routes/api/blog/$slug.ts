@@ -2,7 +2,7 @@ import { json } from '@tanstack/react-start'
 import { createAPIFileRoute } from '@tanstack/react-start/api'
 import { blogPosts, teaCategories, blogTeaCategories, products } from '~/schema'
 import { db } from '~/db'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 
 export const APIRoute = createAPIFileRoute('/api/blog/$slug')({
   GET: async ({ params }) => {
@@ -22,12 +22,13 @@ export const APIRoute = createAPIFileRoute('/api/blog/$slug')({
 
     try {
       // Get the specific blog post with its tea categories and product images (if linked)
+      // Only fetch visible blog posts for the public API
       const blogResults = await db
         .select()
         .from(blogPosts)
         .leftJoin(blogTeaCategories, eq(blogTeaCategories.blogPostId, blogPosts.id))
         .leftJoin(products, eq(products.slug, blogPosts.productSlug))
-        .where(eq(blogPosts.slug, slug));
+        .where(and(eq(blogPosts.slug, slug), eq(blogPosts.isVisible, true)));
 
       if (!blogResults || blogResults.length === 0) {
         return json({ error: 'Blog post not found' }, { 

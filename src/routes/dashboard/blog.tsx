@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { BlogPost, BlogPostFormData, TeaCategory } from "~/types";
@@ -13,6 +13,8 @@ import { Button } from "~/components/ui/shared/Button";
 import { Input } from "~/components/ui/shared/Input";
 import { Textarea } from "~/components/ui/shared/TextArea";
 import { Checkbox } from "~/components/ui/shared/Checkbox";
+import { Switch } from "~/components/ui/shared/Switch";
+import { DatePicker } from "~/components/ui/shared/DatePicker";
 import {
   Drawer,
   DrawerContent,
@@ -21,6 +23,9 @@ import {
   DrawerFooter,
   DrawerBody,
 } from "~/components/ui/shared/Drawer";
+import DashboardBlogPostCard from "~/components/ui/blog/DashboardBlogPostCard";
+import { motion, AnimatePresence } from "motion/react";
+import { FilterGroup } from "~/components/ui/shared/FilterGroup";
 
 export const Route = createFileRoute("/dashboard/blog")({
   component: RouteComponent,
@@ -58,6 +63,7 @@ function RouteComponent() {
     teaCategories: [],
     productSlug: "",
     images: "",
+    isVisible: true,
     publishedAt: Date.now(),
   });
 
@@ -68,6 +74,7 @@ function RouteComponent() {
     teaCategories: [],
     productSlug: "",
     images: "",
+    isVisible: true,
     publishedAt: Date.now(),
   });
 
@@ -81,6 +88,47 @@ function RouteComponent() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deletingPostId, setDeletingPostId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [visibilityFilter, setVisibilityFilter] = useState<string | null>("visible");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  // Filter tea categories to only show those that are used in blog posts
+  const usedTeaCategories = useMemo(() => {
+    if (teaCategories.length === 0) return [];
+
+    const usedCategories = new Set(
+      blogPosts.flatMap((post) => post.teaCategories || [])
+    );
+    return teaCategories.filter((category) =>
+      usedCategories.has(category.slug)
+    );
+  }, [blogPosts, teaCategories]);
+
+  // Filter posts based on both visibility and category
+  const filteredBlogPosts = useMemo(() => {
+    let filtered = blogPosts;
+
+    // Apply visibility filter
+    if (visibilityFilter === "visible") {
+      filtered = filtered.filter(post => post.isVisible);
+    } else if (visibilityFilter === "hidden") {
+      filtered = filtered.filter(post => !post.isVisible);
+    }
+
+    // Apply category filter
+    if (selectedCategory) {
+      filtered = filtered.filter(post =>
+        post.teaCategories?.includes(selectedCategory)
+      );
+    }
+
+    return filtered;
+  }, [blogPosts, visibilityFilter, selectedCategory]);
+
+  // Visibility filter options
+  const visibilityFilterOptions = [
+    { slug: "visible", name: "Visible" },
+    { slug: "hidden", name: "Hidden" }
+  ];
 
   // Auto-generate slugs
   useEffect(() => {
@@ -210,6 +258,7 @@ function RouteComponent() {
       teaCategories: [],
       productSlug: "",
       images: "",
+      isVisible: true,
       publishedAt: Date.now(),
     });
     setIsCreateAutoSlug(true);
@@ -227,7 +276,8 @@ function RouteComponent() {
       teaCategories: post.teaCategories || [],
       productSlug: post.productSlug || "",
       images: post.images || "",
-      publishedAt: post.publishedAt,
+      isVisible: post.isVisible ?? true,
+      publishedAt: isNaN(new Date(post.publishedAt).getTime()) ? Date.now() : post.publishedAt,
     });
   };
 
@@ -300,6 +350,7 @@ function RouteComponent() {
       teaCategories: [],
       productSlug: "",
       images: "",
+      isVisible: true,
       publishedAt: Date.now(),
     });
     setIsEditAutoSlug(false);
@@ -316,13 +367,61 @@ function RouteComponent() {
   }
 
   return (
-    <div>
+    <div className="min-h-screen">
+      {/* Header */}
+      <div className="text-center mb-12 px-4">
+        <h1 className="mb-4">Blog Management</h1>
+        <div className="flex justify-center items-center gap-8 mb-8">
+          <h5 className="text-secondary-foreground">{blogPosts.length} posts total</h5>
+          <h5 className="text-secondary-foreground">
+            {blogPosts.filter(post => post.isVisible).length} visible
+          </h5>
+          <h5 className="text-secondary-foreground">
+            {blogPosts.filter(post => !post.isVisible).length} hidden
+          </h5>
+          {(visibilityFilter || selectedCategory) && (
+            <h5 className="text-primary font-medium">
+              {filteredBlogPosts.length} filtered
+            </h5>
+          )}
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="space-y-6 mb-8 px-4">
+        {/* Tea Category Filter */}
+        {usedTeaCategories.length > 0 && (
+          <div className="flex justify-center">
+            <FilterGroup
+              className="justify-center"
+              options={usedTeaCategories}
+              selectedOptions={selectedCategory}
+              onOptionChange={setSelectedCategory}
+              showAllOption={true}
+              allOptionLabel="All Categories"
+            />
+          </div>
+        )}
+
+        {/* Visibility Filter */}
+        <div className="flex justify-center">
+          <FilterGroup
+            className="justify-center"
+            options={visibilityFilterOptions}
+            selectedOptions={visibilityFilter}
+            onOptionChange={setVisibilityFilter}
+            showAllOption={true}
+            allOptionLabel="All Posts"
+          />
+        </div>
+      </div>
+
       {/* Fixed Create Button */}
       <div className="fixed bottom-3 right-3 z-50">
         <Button
           onClick={() => setShowCreateDrawer(true)}
           size="lg"
-          className="hover:backdrop-blur-sm"
+          className="bg-black text-white hover:bg-white/60 hover:text-black hover:backdrop-blur-md transition-all duration-300"
         >
           <Plus />
           Add New Blog Post
@@ -431,23 +530,41 @@ function RouteComponent() {
                 onChange={handleCreateChange}
               />
 
-              <Input
+              <DatePicker
                 label="Published At"
-                id="publishedAt"
-                name="publishedAt"
-                type="datetime-local"
-                value={new Date(createFormData.publishedAt)
-                  .toISOString()
-                  .slice(0, 16)}
-                onChange={(e) => {
-                  const date = new Date(e.target.value);
+                date={(() => {
+                  const timestamp = createFormData.publishedAt;
+                  if (isNaN(timestamp)) {
+                    return new Date();
+                  }
+                  // Create date from timestamp and ensure it shows the correct date
+                  const date = new Date(timestamp);
+                  return date;
+                })()}
+                onDateChange={(date) => {
                   setCreateFormData((prev) => ({
                     ...prev,
-                    publishedAt: date.getTime(),
+                    publishedAt: date ? date.getTime() : Date.now(),
                   }));
                 }}
-                required
+                placeholder="Select publication date"
               />
+
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="isVisible"
+                  checked={createFormData.isVisible ?? true}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    setCreateFormData((prev) => ({
+                      ...prev,
+                      isVisible: e.target.checked,
+                    }));
+                  }}
+                />
+                <label htmlFor="isVisible" className="text-sm font-medium">
+                  Visible on blog
+                </label>
+              </div>
             </form>
           </DrawerBody>
 
@@ -473,65 +590,37 @@ function RouteComponent() {
         </DrawerContent>
       </Drawer>
 
-      {/* Blog Posts List */}
-      <div className="bg-card rounded-lg shadow-sm border border-border">
-        <div className="p-6">
-          {isLoading ? (
-            <p>Loading blog posts...</p>
-          ) : blogPosts.length === 0 ? (
-            <p>No blog posts found.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full">
-                <thead>
-                  <tr>
-                    <th className="px-4 py-2 text-left">Title</th>
-                    <th className="px-4 py-2 text-left">Tea Category</th>
-                    <th className="px-4 py-2 text-left">Related Product</th>
-                    <th className="px-4 py-2 text-left">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {blogPosts.map((post) => (
-                    <tr key={post.id}>
-                      <td className="px-4 py-2">{post.title}</td>
-                      <td className="px-4 py-2">
-                        {post.teaCategories
-                          ?.map(
-                            (slug) =>
-                              teaCategories.find((c) => c.slug === slug)?.name
-                          )
-                          .filter(Boolean)
-                          .join(", ") || "None"}
-                      </td>
-                      <td className="px-4 py-2">
-                        {post.productSlug || "None"}
-                      </td>
-                      <td className="px-4 py-2">
-                        <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEdit(post)}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => handleDeleteClick(post)}
-                          >
-                            Delete
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+      {/* Blog Posts Grid */}
+      <div className="px-0">
+        {isLoading ? (
+          <div className="text-center px-4">Loading blog posts...</div>
+        ) : blogPosts.length === 0 ? (
+          <div className="text-center px-4">No blog posts found.</div>
+        ) : filteredBlogPosts.length === 0 ? (
+          <div className="text-center px-4">No blog posts found for the selected filter.</div>
+        ) : (
+          <AnimatePresence mode="popLayout">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-6 gap-x-3 sm:gap-4 items-start">
+              {filteredBlogPosts.map((post) => (
+                <motion.div
+                  key={post.id}
+                  layout
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <DashboardBlogPostCard
+                    post={post}
+                    teaCategories={teaCategories}
+                    onEdit={handleEdit}
+                    onDelete={handleDeleteClick}
+                  />
+                </motion.div>
+              ))}
             </div>
-          )}
-        </div>
+          </AnimatePresence>
+        )}
       </div>
 
       {/* Edit Drawer */}
@@ -650,23 +739,41 @@ function RouteComponent() {
                 value={editFormData.images}
                 onChange={handleEditChange}
               />
-              <Input
-                id="editPublishedAt"
-                label="Published at"
-                name="publishedAt"
-                type="datetime-local"
-                value={new Date(editFormData.publishedAt)
-                  .toISOString()
-                  .slice(0, 16)}
-                onChange={(e) => {
-                  const date = new Date(e.target.value);
+              <DatePicker
+                label="Published At"
+                date={(() => {
+                  const timestamp = editFormData.publishedAt;
+                  if (isNaN(timestamp)) {
+                    return new Date();
+                  }
+                  // Create date from timestamp and ensure it shows the correct date
+                  const date = new Date(timestamp);
+                  return date;
+                })()}
+                onDateChange={(date) => {
                   setEditFormData((prev) => ({
                     ...prev,
-                    publishedAt: date.getTime(),
+                    publishedAt: date ? date.getTime() : Date.now(),
                   }));
                 }}
-                required
+                placeholder="Select publication date"
               />
+
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="editIsVisible"
+                  checked={editFormData.isVisible ?? true}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    setEditFormData((prev) => ({
+                      ...prev,
+                      isVisible: e.target.checked,
+                    }));
+                  }}
+                />
+                <label htmlFor="editIsVisible" className="text-sm font-medium">
+                  Visible on blog
+                </label>
+              </div>
             </form>
           </DrawerBody>
 
