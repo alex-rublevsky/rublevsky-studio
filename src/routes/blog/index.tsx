@@ -54,7 +54,7 @@ function PostsIndexComponent() {
 
   return (
     <section className="pt-24 sm:pt-32 div min-h-screen no-padding">
-      <div className="max-w-7xl mx-auto">
+      <div className="">
         {/* Header */}
         <div className="text-center mb-12 px-4">
           <h1 className="mb-8">What&apos;s in the gaiwan?</h1>
@@ -101,7 +101,7 @@ function PostsIndexComponent() {
                 No blog posts found for the selected categories.
               </motion.p>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-6 gap-x-3 sm:gap-4 items-start">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4  gap-y-6 gap-x-3 sm:gap-4 items-start">
                 {filteredPosts.map((post) => (
                   <motion.div
                     key={post.id}

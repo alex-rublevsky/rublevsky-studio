@@ -1,14 +1,17 @@
-.sticky-header-container {
+/* Base sticky header - sticks to very top */
+.sticky-header-container,
+.sticky-header-container-constrained,
+.sticky-header-container-sidebar {
     position: sticky;
     top: 0;
-    padding: 1rem 1.5rem 3rem;
-    width: 100vw;
-    margin-left: calc(-50vw + 50%);
-    margin-right: calc(-50vw + 50%);
+    padding: 1rem 0 2rem;
     z-index: 40;
 }
 
-.sticky-header-container::before {
+/* Blurred background effect */
+.sticky-header-container::before,
+.sticky-header-container-constrained::before,
+.sticky-header-container-sidebar::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -16,31 +19,52 @@
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     mask-image: linear-gradient(to bottom,
-        rgba(0, 0, 0, 1) calc(100% - 4rem),
-        rgba(0, 0, 0, 0.95) calc(100% - 3.5rem),
-        rgba(0, 0, 0, 0.8) calc(100% - 3rem),
-        rgba(0, 0, 0, 0.6) calc(100% - 2.5rem),
-        rgba(0, 0, 0, 0.4) calc(100% - 2rem),
-        rgba(0, 0, 0, 0.2) calc(100% - 1.5rem),
-        rgba(0, 0, 0, 0)
-    );
-    -webkit-mask-image: linear-gradient(to bottom,
-        rgba(0, 0, 0, 1) calc(100% - 4rem),
-        rgba(0, 0, 0, 0.95) calc(100% - 3.5rem),
-        rgba(0, 0, 0, 0.8) calc(100% - 3rem),
-        rgba(0, 0, 0, 0.6) calc(100% - 2.5rem),
-        rgba(0, 0, 0, 0.4) calc(100% - 2rem),
-        rgba(0, 0, 0, 0.2) calc(100% - 1.5rem),
+        rgba(0, 0, 0, 1) calc(100% - 2rem),
+        rgba(0, 0, 0, 0.8) calc(100% - 1.5rem),
+        rgba(0, 0, 0, 0.4) calc(100% - 1rem),
         rgba(0, 0, 0, 0)
     );
 }
 
+/* Original full-width version */
+.sticky-header-container {
+    padding: 1rem 1.5rem 2rem;
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+    margin-right: calc(-50vw + 50%);
+}
+
+/* Constrained version for no-images layout */
+.sticky-header-container-constrained::before {
+    left: -1rem;
+    right: -1rem;
+}
+
+/* Ultra-constrained version for sidebar layout */
+.sticky-header-container-sidebar::before {
+    left: -1.5rem;
+    right: -1.5rem;
+}
+
+/* Mobile responsive */
 @media (max-width: 640px) {
     .sticky-header-container {
-        padding: 1rem 1rem 3rem;
+        padding: 1rem 1rem 2rem;
     }
-
-    .sticky-header-container h3 {
+    
+    .sticky-header-container h3,
+    .sticky-header-container-constrained h3,
+    .sticky-header-container-sidebar h3 {
         font-size: 1.7rem !important;
+    }
+    
+    .sticky-header-container-constrained::before {
+        left: -1rem;
+        right: -1rem;
+    }
+    
+    .sticky-header-container-sidebar::before {
+        left: -1.5rem;
+        right: -1.5rem;
     }
 }

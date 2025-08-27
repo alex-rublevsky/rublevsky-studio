@@ -2,9 +2,10 @@ import { BlogPost } from "~/types/index";
 import { Badge } from "~/components/ui/shared/Badge";
 import { Button } from "~/components/ui/shared/Button";
 import ReactMarkdown from "react-markdown";
-import { markdownComponents } from "~/components/ui/shared/MarkdownComponents";
+import { markdownComponents, rehypePlugins } from "~/components/ui/shared/MarkdownComponents";
 import { Edit, Trash2 } from "lucide-react";
 import { formatBlogDate } from "~/lib/utils";
+import styles from "./blogCard.module.css";
 
 interface DashboardBlogPostCardProps {
   post: BlogPost;
@@ -38,7 +39,7 @@ export default function DashboardBlogPostCard({
     : body;
 
   return (
-    <article className="bg-white dark:bg-gray-800 overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 dark:border-gray-700">
+    <article className="w-full overflow-hidden bg-background flex flex-col h-full border border-border" id={styles.blogCard}>
       {/* Image */}
       {firstImage && (
         <div className="w-full overflow-hidden">
@@ -48,7 +49,7 @@ export default function DashboardBlogPostCard({
             width={600}
             height={400}
             loading="eager"
-            className="w-full h-auto object-cover hover:scale-105 transition-transform duration-300"
+            className="w-full h-auto object-cover"
           />
         </div>
       )}
@@ -57,15 +58,15 @@ export default function DashboardBlogPostCard({
       <div className="p-4 flex flex-col flex-1">
         {/* Header with title */}
         <div className="mb-3">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <h3 className="text-lg font-semibold">
             {title || `Post ${id}`}
           </h3>
         </div>
         
         {/* Excerpt */}
         {excerpt && (
-          <div className="text-gray-600 dark:text-gray-300 mb-3 prose prose-sm prose-p:my-0 prose-strong:text-gray-800 prose-em:text-gray-700 dark:prose-strong:text-gray-200 dark:prose-em:text-gray-300 flex-1">
-            <ReactMarkdown components={markdownComponents}>{excerpt}</ReactMarkdown>
+          <div className="text-muted-foreground mb-3 prose prose-sm prose-p:my-0 prose-strong:text-foreground prose-em:text-muted-foreground flex-1">
+            <ReactMarkdown components={markdownComponents} rehypePlugins={rehypePlugins}>{excerpt}</ReactMarkdown>
           </div>
         )}
         
@@ -94,12 +95,12 @@ export default function DashboardBlogPostCard({
           {/* Linked Product */}
           {productName && productSlug && (
             <div>
-              <span className="text-xs text-gray-500 dark:text-gray-400 block mb-1">
+              <span className="text-xs text-muted-foreground block mb-1">
                 Linked product:
               </span>
               <Badge 
                 variant="outline" 
-                className="text-xs cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                className="text-xs cursor-pointer hover:bg-muted transition-colors"
                 onClick={() => window.open(`/store/${productSlug}`, '_blank')}
               >
                 {productName}
@@ -110,7 +111,7 @@ export default function DashboardBlogPostCard({
           {/* Date, Visibility and Actions */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <time className="text-sm text-gray-500 dark:text-gray-400">
+              <time className="text-sm text-muted-foreground">
                 {formatBlogDate(publishedAt)}
               </time>
               <span
@@ -147,7 +148,7 @@ export default function DashboardBlogPostCard({
           
           {/* Slug indicator */}
           <div className="flex justify-end">
-            <span className="text-xs text-gray-500 dark:text-gray-400">
+            <span className="text-xs text-muted-foreground">
               Slug: {slug}
             </span>
           </div>

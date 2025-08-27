@@ -5,7 +5,7 @@ import { Link } from "@tanstack/react-router";
 
 import { CopyLinkButton } from "./CopyLinkButton";
 import ImageGallery from "~/components/ui/shared/ImageGallery";
-import { markdownComponents } from "../shared/MarkdownComponents";
+import { markdownComponents, rehypePlugins } from "../shared/MarkdownComponents";
 import { formatBlogDate } from "~/lib/utils";
 
 interface BlogPostProps {
@@ -63,11 +63,12 @@ function BlogPost({
       <article id={`${slug}`}>
         <div className="sticky-header-container-constrained">
           <div className="relative z-1">
-            <h3 
+            <h1 
+              className="!text-4xl "
               style={{ viewTransitionName: `blog-title-${slug}` }}
             >
               {title && title.trim() !== '' ? title : (id ? `Post ${id}` : 'Untitled Post')}
-            </h3>
+            </h1>
 
             <div className="my-2 flex gap-4 items-center">
               <div className="flex gap-4">
@@ -100,7 +101,7 @@ function BlogPost({
         </div>
         
         <div className="prose prose-lg -mt-6">
-          <ReactMarkdown components={markdownComponents}>{body}</ReactMarkdown>
+          <ReactMarkdown components={markdownComponents} rehypePlugins={rehypePlugins}>{body}</ReactMarkdown>
         </div>
       </article>
     );
@@ -157,7 +158,7 @@ function BlogPost({
         </div>
       </div>
       <div className="prose prose-lg -mt-6">
-        <ReactMarkdown components={markdownComponents}>{body}</ReactMarkdown>
+        <ReactMarkdown components={markdownComponents} rehypePlugins={rehypePlugins}>{body}</ReactMarkdown>
       </div>
     </article>
   );
