@@ -387,7 +387,7 @@ export function NavBar({ className }: Omit<NavBarProps, "items">) {
   return (
     <nav
       className={cn(
-        "fixed bottom-0 left-0 right-0 z-[40] mb-3 flex justify-between items-center px-3 pointer-events-none",
+        "fixed bottom-0 left-0 right-0 z-[40] mb-3 flex justify-start items-center px-3 pointer-events-none",
         className
       )}
     >
@@ -429,22 +429,17 @@ export function NavBar({ className }: Omit<NavBarProps, "items">) {
         </>
       ) : showOther ? (
         <>
-          <div className="hidden md:block pointer-events-auto">
+          {/* Desktop layout */}
+          <div className="hidden md:flex items-center gap-3 pointer-events-auto">
             <DropdownNavMenu items={desktopMenuItems} />
+            {showBlogBackButton && <BackToBlogButton />}
           </div>
-          {showBlogBackButton && (
-            <div className="hidden md:block pointer-events-auto">
-              <BackToBlogButton />
-            </div>
-          )}
-          <div className="md:hidden pointer-events-auto">
+          
+          {/* Mobile layout */}
+          <div className="md:hidden flex items-center gap-3 pointer-events-auto">
             <DropdownNavMenu items={mobileMenuItems} />
+            {showBlogBackButton && <BackToBlogButton />}
           </div>
-          {showBlogBackButton && (
-            <div className="md:hidden pointer-events-auto">
-              <BackToBlogButton />
-            </div>
-          )}
         </>
       ) : null}
     </nav>
