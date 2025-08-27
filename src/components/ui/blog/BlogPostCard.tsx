@@ -51,12 +51,12 @@ export default function BlogPostCard({ post, teaCategories }: BlogPostCardProps)
         {/* Content */}
         <div className="p-4 flex flex-col flex-1">
           {/* Title */}
-          <h3 
-            className="text-xl font-semibold mb-3"
+          <h4 
+            className="mb-3"
             style={{ viewTransitionName: `blog-title-${slug}` }}
           >
             {title || `Post ${id}`}
-          </h3>
+          </h4>
           
           {/* Excerpt */}
           {excerpt && (
