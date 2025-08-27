@@ -15,6 +15,13 @@
       "when": 1748836178267,
       "tag": "0001_swift_black_widow",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1756185977979,
+      "tag": "0002_smart_spencer_smythe",
+      "breakpoints": true
     }
   ]
 }
