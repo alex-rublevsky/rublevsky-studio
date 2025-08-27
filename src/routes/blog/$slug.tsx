@@ -107,19 +107,6 @@ function BlogPostComponent() {
         <div className="grow flex items-start justify-center pt-24 sm:pt-32">
           <div className="w-full max-w-3xl mx-auto px-4">
             <div className="space-y-6">
-              {/* Back to blog button */}
-              <div>
-                <button
-                  onClick={() => {
-                    // Use browser's back navigation which preserves scroll position
-                    window.history.back();
-                  }}
-                  className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-2 no-underline bg-transparent border-none cursor-pointer"
-                >
-                  ← Back to blog
-                </button>
-              </div>
-
               <BlogPost
                 title={displayPost.title}
                 body={displayPost.body || ""}
@@ -143,7 +130,7 @@ function BlogPostComponent() {
       <div className="grow flex items-start justify-center">
         <div className="w-full h-full flex flex-col lg:flex-row gap-0 lg:gap-10 items-start">
           {/* Image gallery with view transitions */}
-          <div className="w-full lg:w-3/5 xl:w-2/3 flex flex-col lg:flex-row gap-2 lg:h-full self-start">
+          <div className="w-full lg:flex-1 flex flex-col lg:flex-row gap-2 lg:h-full self-start">
             <ImageGallery
               images={imageArray}
               alt={displayPost.title || `Blog post ${displayPost.id}`}
@@ -155,22 +142,9 @@ function BlogPostComponent() {
 
           {/* Blog post information */}
           <div 
-            className="w-full lg:w-2/5 xl:w-1/3 px-4 lg:px-0 lg:h-[100dvh] lg:overflow-y-auto pt-4 pb-20 lg:pr-4 scrollbar-none"
+            className="w-full md:max-w-[45ch] lg:max-w-[55ch] xl:max-w-[65ch] px-4 lg:px-0 lg:h-[100dvh] lg:overflow-y-auto pb-20 lg:pr-4 scrollbar-none lg:flex-shrink-0"
           >
-            <div className="space-y-6 w-full">
-              {/* Back to blog button */}
-              <div>
-                <button
-                  onClick={() => {
-                    // Use browser's back navigation which preserves scroll position
-                    window.history.back();
-                  }}
-                  className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-2 no-underline bg-transparent border-none cursor-pointer"
-                >
-                  ← Back to blog
-                </button>
-              </div>
-
+            <div className="space-y-6 w-full pt-4 px-4">
               <BlogPost
                 title={displayPost.title}
                 body={displayPost.body || ""}
