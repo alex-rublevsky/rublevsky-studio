@@ -18,7 +18,7 @@ import {
   IconPackage,
   IconChartBar,
 } from "@tabler/icons-react";
-import { ArrowLeftFromLine, LogOutIcon, UserCircleIcon, CreditCardIcon, BellIcon } from "lucide-react";
+import { ArrowLeftFromLine, LogOutIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { signOut } from "~/utils/auth-client";
 import { useNavigate } from "@tanstack/react-router";
@@ -128,7 +128,9 @@ const userData = {
   avatar: "me.jpg",
 };
 
-const DropdownNavMenu = ({ items }: { items: NavItem[] }) => {
+const DropdownNavMenu = ({ items, showUserInfo = false }: { items: NavItem[]; showUserInfo?: boolean }) => {
+  const navigate = useNavigate();
+  
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="relative flex w-fit rounded-full border border-black bg-background hover:bg-black hover:text-white transition-all duration-300 p-[0.3rem] focus:outline-hidden focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
@@ -141,6 +143,29 @@ const DropdownNavMenu = ({ items }: { items: NavItem[] }) => {
         align="start"
         className="mb-2 rounded-2xl border border-black bg-background text-foreground"
       >
+        {showUserInfo && (
+          <>
+            <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-200">
+              <Avatar className="h-8 w-8 rounded-lg">
+                <AvatarImage src={`https://assets.rublevsky.studio/${userData.avatar}`} alt={userData.name} />
+                <AvatarFallback className="rounded-lg">RA</AvatarFallback>
+              </Avatar>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-medium">{userData.name}</span>
+                <span className="truncate text-xs text-muted-foreground">
+                  {userData.email}
+                </span>
+              </div>
+            </div>
+            <DropdownMenuItem 
+              onClick={() => signOut({}, { onSuccess: () => navigate({ to: "/" }) })}
+              className="flex items-center gap-2 py-2 px-3 text-sm hover:bg-black hover:text-white transition-colors duration-200 border-b border-gray-200"
+            >
+              <LogOutIcon className="h-4 w-4" />
+              Log out
+            </DropdownMenuItem>
+          </>
+        )}
         {items.map((item) => (
           <DropdownMenuItem key={item.url} asChild>
             {item.url.startsWith("http") ? (
@@ -167,63 +192,7 @@ const DropdownNavMenu = ({ items }: { items: NavItem[] }) => {
   );
 };
 
-const DashboardUserMenu = () => {
-  const navigate = useNavigate();
-  
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger className="relative flex w-fit rounded-full border border-black bg-background hover:bg-black hover:text-white transition-all duration-300 p-[0.3rem] focus:outline-hidden focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
-        <div className="relative z-10 flex items-center gap-2 cursor-pointer px-3 py-1.5 text-xs text-white mix-blend-difference md:px-4 md:py-2 md:text-sm">
-          <Avatar className="h-5 w-5 md:h-6 md:w-6 rounded-full grayscale">
-            <AvatarImage
-              src={`https://assets.rublevsky.studio/${userData.avatar}`}
-              alt={userData.name}
-            />
-            <AvatarFallback className="rounded-full text-xs">RA</AvatarFallback>
-          </Avatar>
-          <span className="hidden md:inline">{userData.name}</span>
-        </div>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        side="top"
-        align="end"
-        className="mb-2 rounded-2xl border border-black bg-background text-foreground w-56"
-      >
-        <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-200">
-          <Avatar className="h-8 w-8 rounded-lg">
-            <AvatarImage src={`https://assets.rublevsky.studio/${userData.avatar}`} alt={userData.name} />
-            <AvatarFallback className="rounded-lg">RA</AvatarFallback>
-          </Avatar>
-          <div className="grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate font-medium">{userData.name}</span>
-            <span className="truncate text-xs text-muted-foreground">
-              {userData.email}
-            </span>
-          </div>
-        </div>
-        <DropdownMenuItem className="flex items-center gap-2 py-2 px-3 text-sm hover:bg-black hover:text-white transition-colors duration-200">
-          <UserCircleIcon className="h-4 w-4" />
-          Account
-        </DropdownMenuItem>
-        <DropdownMenuItem className="flex items-center gap-2 py-2 px-3 text-sm hover:bg-black hover:text-white transition-colors duration-200">
-          <CreditCardIcon className="h-4 w-4" />
-          Billing
-        </DropdownMenuItem>
-        <DropdownMenuItem className="flex items-center gap-2 py-2 px-3 text-sm hover:bg-black hover:text-white transition-colors duration-200">
-          <BellIcon className="h-4 w-4" />
-          Notifications
-        </DropdownMenuItem>
-        <DropdownMenuItem 
-          onClick={() => signOut({}, { onSuccess: () => navigate({ to: "/" }) })}
-          className="flex items-center gap-2 py-2 px-3 text-sm hover:bg-black hover:text-white transition-colors duration-200 border-t border-gray-200"
-        >
-          <LogOutIcon className="h-4 w-4" />
-          Log out
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-};
+
 
 interface TabProps {
   children: React.ReactNode;
@@ -340,6 +309,34 @@ const GoBackButton = () => {
   );
 };
 
+const BackToBlogButton = () => {
+  const navigate = useNavigate();
+  const router = useRouter();
+  
+  const handleBackToBlog = () => {
+    // Check if there's meaningful browser history (more than just the current page)
+    if (window.history.length > 1) {
+      // Try to use router's back navigation which should preserve scroll position
+      // TanStack Router handles scroll restoration automatically when using router.history.back()
+      router.history.back();
+    } else {
+      // Fallback to navigate to blog index if no history (direct URL access)
+      navigate({ to: '/blog' });
+    }
+  };
+
+  return (
+    <div className="relative flex w-fit rounded-full border border-black bg-background hover:bg-black hover:text-white transition-all duration-300 p-[0.3rem]">
+      <button
+        onClick={handleBackToBlog}
+        className="relative z-10 block cursor-pointer px-3 py-1.5 text-xs text-white mix-blend-difference md:px-4 md:py-2 md:text-sm"
+      >
+        ← Back to blog
+      </button>
+    </div>
+  );
+};
+
 export function NavBar({ className }: Omit<NavBarProps, "items">) {
   const router = useRouter();
   const routerState = useRouterState();
@@ -347,6 +344,10 @@ export function NavBar({ className }: Omit<NavBarProps, "items">) {
 
   const showGoBackButton =
     routerState.location.pathname.startsWith("/branding/");
+
+  const showBlogBackButton = 
+    routerState.location.pathname.startsWith("/blog/") && 
+    routerState.location.pathname !== "/blog";
 
   const isDashboard = routerState.location.pathname.startsWith("/dashboard");
   const showOther = !isDashboard;
@@ -360,28 +361,23 @@ export function NavBar({ className }: Omit<NavBarProps, "items">) {
     return (
       <nav
         className={cn(
-          "fixed bottom-0 left-0 right-0 z-[40] mb-3 flex justify-between items-center px-3 pointer-events-none",
+          "fixed bottom-0 left-0 right-0 z-[40] mb-3 flex justify-center items-center px-3 pointer-events-none",
           className
         )}
       >
         {/* Dashboard secondary actions + main nav (left - mobile only) */}
-        <div className="md:hidden pointer-events-auto">
-          <DropdownNavMenu items={[...dashboardSecondaryItems, ...dashboardNavItems]} />
+        <div className="md:hidden absolute left-3 pointer-events-auto">
+          <DropdownNavMenu items={[...dashboardSecondaryItems, ...dashboardNavItems]} showUserInfo={true} />
         </div>
 
         {/* Dashboard secondary actions (left - desktop only) */}
-        <div className="hidden md:block pointer-events-auto">
-          <DropdownNavMenu items={dashboardSecondaryItems} />
+        <div className="hidden md:block absolute left-3 pointer-events-auto">
+          <DropdownNavMenu items={dashboardSecondaryItems} showUserInfo={true} />
         </div>
 
         {/* Main dashboard navigation (center - desktop only) */}
-        <div className="absolute left-1/2 -translate-x-1/2 hidden md:block pointer-events-auto">
+        <div className="hidden md:block pointer-events-auto">
           <NavGroup items={dashboardNavItems} />
-        </div>
-
-        {/* User menu (right) */}
-        <div className="pointer-events-auto">
-          <DashboardUserMenu />
         </div>
       </nav>
     );
@@ -436,9 +432,19 @@ export function NavBar({ className }: Omit<NavBarProps, "items">) {
           <div className="hidden md:block pointer-events-auto">
             <DropdownNavMenu items={desktopMenuItems} />
           </div>
+          {showBlogBackButton && (
+            <div className="hidden md:block pointer-events-auto">
+              <BackToBlogButton />
+            </div>
+          )}
           <div className="md:hidden pointer-events-auto">
             <DropdownNavMenu items={mobileMenuItems} />
           </div>
+          {showBlogBackButton && (
+            <div className="md:hidden pointer-events-auto">
+              <BackToBlogButton />
+            </div>
+          )}
         </>
       ) : null}
     </nav>
