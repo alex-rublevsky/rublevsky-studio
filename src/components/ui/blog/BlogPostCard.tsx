@@ -2,8 +2,9 @@ import { Link } from "@tanstack/react-router";
 import { BlogPostPreview } from "~/types/index";
 import { Badge } from "~/components/ui/shared/Badge";
 import ReactMarkdown from "react-markdown";
-import { markdownComponents } from "~/components/ui/shared/MarkdownComponents";
+import { markdownComponents, rehypePlugins } from "~/components/ui/shared/MarkdownComponents";
 import { formatBlogDate } from "~/lib/utils";
+import styles from "./blogCard.module.css";
 
 interface BlogPostCardProps {
   post: BlogPostPreview;
@@ -28,10 +29,10 @@ export default function BlogPostCard({ post, teaCategories }: BlogPostCardProps)
     <Link 
       to="/blog/$slug" 
       params={{ slug }}
-      className="block group"
+      className="block h-full relative"
       viewTransition={true}
     >
-      <article className="bg-white overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
+      <article className="w-full overflow-hidden group bg-background flex flex-col h-full" id={styles.blogCard}>
         {/* Image */}
         {firstImage && (
           <div className="w-full overflow-hidden">
@@ -41,17 +42,17 @@ export default function BlogPostCard({ post, teaCategories }: BlogPostCardProps)
               width={600}
               height={400}
               loading="eager"
-              className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-300"
+              className="w-full h-auto object-cover"
               style={{ viewTransitionName: `blog-image-${slug}` }}
             />
           </div>
         )}
         
         {/* Content */}
-        <div className="p-6">
+        <div className="p-4 flex flex-col flex-1">
           {/* Title */}
           <h3 
-            className="text-xl font-semibold mb-3 group-hover:text-blue-600 transition-colors"
+            className="text-xl font-semibold mb-3"
             style={{ viewTransitionName: `blog-title-${slug}` }}
           >
             {title || `Post ${id}`}
@@ -59,15 +60,15 @@ export default function BlogPostCard({ post, teaCategories }: BlogPostCardProps)
           
           {/* Excerpt */}
           {excerpt && (
-            <div className="text-gray-600 mb-4 prose prose-sm prose-p:my-0 prose-strong:text-gray-800 prose-em:text-gray-700">
-              <ReactMarkdown components={markdownComponents}>{excerpt}</ReactMarkdown>
+            <div className="text-muted-foreground mb-4 prose prose-sm prose-p:my-0 prose-strong:text-foreground prose-em:text-muted-foreground flex-1">
+              <ReactMarkdown components={markdownComponents} rehypePlugins={rehypePlugins}>{excerpt}</ReactMarkdown>
             </div>
           )}
           
           {/* Footer with date and tags */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mt-auto">
             {/* Date */}
-            <time className="text-sm text-gray-500">
+            <time className="text-sm text-muted-foreground">
               {formatBlogDate(publishedAt)}
             </time>
             
