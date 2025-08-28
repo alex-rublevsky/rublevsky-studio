@@ -268,7 +268,7 @@ function RouteComponent() {
   const handleEdit = async (post: BlogPost) => {
     setEditingPostId(post.id);
     setShowEditDrawer(true);
-    setIsEditAutoSlug(false);
+    setIsEditAutoSlug(true);
     setEditFormData({
       title: post.title || "",
       slug: post.slug,
@@ -353,7 +353,7 @@ function RouteComponent() {
       isVisible: true,
       publishedAt: Date.now(),
     });
-    setIsEditAutoSlug(false);
+    setIsEditAutoSlug(true);
     setError("");
   };
 
@@ -456,14 +456,37 @@ function RouteComponent() {
                 required
               />
 
-              <Input
-                label="Slug"
-                id="slug"
-                name="slug"
-                value={createFormData.slug}
-                onChange={handleCreateChange}
-                required
-              />
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label
+                    htmlFor="slug"
+                    className="block text-sm font-medium"
+                  >
+                    Slug
+                  </label>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="autoSlug"
+                      checked={isCreateAutoSlug}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        setIsCreateAutoSlug(e.target.checked);
+                      }}
+                    />
+                    <label htmlFor="autoSlug" className="text-xs text-muted-foreground">
+                      Auto-generate
+                    </label>
+                  </div>
+                </div>
+                <Input
+                  id="slug"
+                  name="slug"
+                  value={createFormData.slug}
+                  onChange={handleCreateChange}
+                  required
+                  disabled={isCreateAutoSlug}
+                  className={isCreateAutoSlug ? "opacity-60 cursor-not-allowed" : ""}
+                />
+              </div>
 
               <div>
                 <label className="block text-sm font-medium mb-2">
@@ -658,18 +681,34 @@ function RouteComponent() {
               </div>
 
               <div>
-                <label
-                  htmlFor="editSlug"
-                  className="block text-sm font-medium mb-1"
-                >
-                  Slug
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label
+                    htmlFor="editSlug"
+                    className="block text-sm font-medium"
+                  >
+                    Slug
+                  </label>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="editAutoSlug"
+                      checked={isEditAutoSlug}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        setIsEditAutoSlug(e.target.checked);
+                      }}
+                    />
+                    <label htmlFor="editAutoSlug" className="text-xs text-muted-foreground">
+                      Auto-generate
+                    </label>
+                  </div>
+                </div>
                 <Input
                   id="editSlug"
                   name="slug"
                   value={editFormData.slug}
                   onChange={handleEditChange}
                   required
+                  disabled={isEditAutoSlug}
+                  className={isEditAutoSlug ? "opacity-60 cursor-not-allowed" : ""}
                 />
               </div>
 
