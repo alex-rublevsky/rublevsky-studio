@@ -142,9 +142,9 @@ function BlogPostComponent() {
 
           {/* Blog post information */}
           <div 
-            className="w-full md:max-w-[45ch] lg:max-w-[55ch] xl:max-w-[65ch] px-4 lg:px-0 lg:h-[100dvh] lg:overflow-y-auto pb-20 lg:pr-4 scrollbar-none lg:flex-shrink-0"
+            className="w-full md:max-w-[45ch] lg:max-w-[55ch] xl:max-w-[65ch] px-4 lg:h-[100dvh] lg:overflow-y-auto pb-20 lg:pr-4 scrollbar-none lg:flex-shrink-0"
           >
-            <div className="space-y-6 w-full pt-4 px-4">
+            <div className="space-y-6 w-full">
               <BlogPost
                 title={displayPost.title}
                 body={displayPost.body || ""}
