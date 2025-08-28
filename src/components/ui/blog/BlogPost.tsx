@@ -64,7 +64,7 @@ function BlogPost({
         <div className="sticky-header-container-constrained">
           <div className="relative z-1">
             <h1 
-              className="!text-4xl "
+              className="!text-3xl md:!text-4xl"
               style={{ viewTransitionName: `blog-title-${slug}` }}
             >
               {title && title.trim() !== '' ? title : (id ? `Post ${id}` : 'Untitled Post')}
@@ -100,7 +100,7 @@ function BlogPost({
           </div>
         </div>
         
-        <div className="prose prose-lg -mt-6">
+        <div className="prose prose -mt-6">
           <ReactMarkdown components={markdownComponents} rehypePlugins={rehypePlugins}>{body}</ReactMarkdown>
         </div>
       </article>
