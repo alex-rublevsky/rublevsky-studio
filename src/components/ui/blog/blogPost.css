@@ -1,7 +1,6 @@
 /* Base sticky header - sticks to very top */
 .sticky-header-container,
-.sticky-header-container-constrained,
-.sticky-header-container-sidebar {
+.sticky-header-container-constrained {
     position: sticky;
     top: 0;
     padding: 1rem 0 2rem;
@@ -10,8 +9,7 @@
 
 /* Blurred background effect */
 .sticky-header-container::before,
-.sticky-header-container-constrained::before,
-.sticky-header-container-sidebar::before {
+.sticky-header-container-constrained::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -40,11 +38,7 @@
     right: -1rem;
 }
 
-/* Ultra-constrained version for sidebar layout */
-.sticky-header-container-sidebar::before {
-    left: -1.5rem;
-    right: -1.5rem;
-}
+
 
 /* Mobile responsive */
 @media (max-width: 640px) {
@@ -53,8 +47,7 @@
     }
     
     .sticky-header-container h3,
-    .sticky-header-container-constrained h3,
-    .sticky-header-container-sidebar h3 {
+    .sticky-header-container-constrained h3 {
         font-size: 1.7rem !important;
     }
     
@@ -63,8 +56,5 @@
         right: -1rem;
     }
     
-    .sticky-header-container-sidebar::before {
-        left: -1.5rem;
-        right: -1.5rem;
-    }
+
 }
