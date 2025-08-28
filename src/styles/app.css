@@ -337,14 +337,59 @@ p {
   color: #000;
 }
 
+
+
+
+
+
+.prose h2 {
+  font-size: 2rem;
+  line-height: 1.2;
+  margin-bottom: 1.3rem;
+  padding-top: 1rem;
+}
+
+.prose h3 {
+  font-size: 1.6rem;
+  line-height: 1.2;
+  margin-bottom: 1.1rem;
+  padding-top: 1rem;
+}
+
 .prose h6 {
   margin-top: 0;
   margin-bottom: 0.3rem;
 } 
-
 .prose p {
   margin-top: 0;
+  margin-bottom: 1rem;
 }
+
+.prose {
+  padding-top: 1rem;
+}
+
+@media (max-width: 640px) {
+
+.prose h2 {
+  font-size: 2rem;
+  line-height: 1.2;
+  margin-bottom: 1.3rem;
+  padding-top: 1rem;
+}
+
+.prose h3 {
+  font-size: 1.6rem;
+  line-height: 1.2;
+  margin-bottom: 1.1rem;
+  padding-top: 1rem;
+}
+
+.prose h6 {
+  margin-top: 0;
+  margin-bottom: 0.3rem;
+} 
+} 
 
 
 
@@ -434,4 +479,19 @@ p {
 
 ::view-transition-new(root) {
   animation: none;
+}
+
+/* Custom breakpoint for blog gallery - keep mobile layout until 1450px */
+@media (min-width: 1024px) and (max-width: 1449px) {
+  .blog-gallery-mobile-at-lg .gallery-stack {
+    flex-direction: column !important;
+  }
+  
+  .blog-gallery-mobile-at-lg .gallery-stack > div:first-child {
+    order: 2 !important;
+  }
+  
+  .blog-gallery-mobile-at-lg .gallery-stack > div:last-child {
+    order: 1 !important;
+  }
 }
