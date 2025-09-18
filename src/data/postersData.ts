@@ -26,12 +26,12 @@ export const posters: GalleryItem[] = [
   },
   {
     id: 'graffiti-bark-abalych',
-    images: ['products/stickers/graffiti-bark-abalych-second/graffiti-bark-abalych-second.webp', 'products/stickers/graffiti-bark-abalych-second/graffiti-bark-abalych-second-preview.webp'],
+    images: ['products/stickers/abalych-graffiti-bark-second/abalych-graffiti-bark-second.webp', 'products/stickers/abalych-graffiti-bark-second/abalych-graffiti-bark-second-preview.webp'],
     storeLink: 'graffiti-bark-sticker-20'
   },
   {
     id: 'graffiti-brak-abalych-green',
-    images: ['posters/graffiti-brak-abalych-green.webp']
+    images: ['posters/graffiti-brak-abalych-green.jpg']
   },
   {
     id: 'ice-cold',
