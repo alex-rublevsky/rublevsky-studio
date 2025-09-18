@@ -1,5 +1,5 @@
-import { Category, TeaCategory } from "~/types";
-import { useState, useEffect, useCallback, memo, useRef } from "react";
+import { CategoryWithCount, TeaCategoryWithCount } from "~/types";
+import { useState, useCallback, memo, useRef } from "react";
 import { Slider } from "~/components/ui/shared/Slider";
 import { FilterGroup } from "../shared/FilterGroup";
 import { AnimatedGroup } from "~/components/motion_primitives/AnimatedGroup";
@@ -21,8 +21,8 @@ import { useCart } from "~/lib/cartContext";
 import styles from "./ProductFilters.module.css";
 
 interface ProductFiltersProps {
-  categories: Category[];
-  teaCategories: TeaCategory[];
+  categories: CategoryWithCount[];
+  teaCategories: TeaCategoryWithCount[];
   selectedCategory: string | null;
   selectedTeaCategory: string | null;
   onCategoryChange: (category: string | null) => void;
@@ -199,18 +199,55 @@ const ProductFilters = memo(function ProductFilters({
           </AnimatedGroup>
         ) : (
           /* Desktop Layout*/
-          <AnimatedGroup
-            delay={0.1}
-            staggerChildren={0.1}
-            className="flex gap-10"
-          >
-            {/* Main Categories */}
-            <FilterGroup
-              title="Categories"
-              options={categories}
-              selectedOptions={selectedCategory}
-              onOptionChange={handleMainCategoryChange}
-            />
+          <div className="flex flex-col gap-3">
+            <AnimatedGroup
+              delay={0.1}
+              staggerChildren={0.1}
+              className="flex gap-10"
+            >
+              {/* Main Categories */}
+              <FilterGroup
+                title="Categories"
+                options={categories}
+                selectedOptions={selectedCategory}
+                onOptionChange={handleMainCategoryChange}
+              />
+
+              {/* Price Range Filter */}
+              <Slider
+                value={currentPriceRange}
+                min={priceRange.min}
+                max={priceRange.max}
+                step={1}
+                onValueChange={handlePriceRangeChange}
+                showTooltip
+                tooltipContent={(value) => `$${value}`}
+                label="Price Range"
+                valueDisplay={
+                  <output className="text-sm font-medium tabular-nums">
+                    ${currentPriceRange[0]} - ${currentPriceRange[1]}
+                  </output>
+                }
+              />
+
+              {/* Sort By Filter */}
+              <div className="flex flex-col gap-2 self-start">
+                <label className="text-sm font-medium text-foreground">
+                  Sort By
+                </label>
+                <Select value={sortBy} onValueChange={onSortChange}>
+                  <SelectTrigger className="w-[15ch]">
+                    <SelectValue placeholder="Sort by..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background">
+                    <SelectItem value="relevant">Relevant</SelectItem>
+                    <SelectItem value="price-asc">Low to High $</SelectItem>
+                    <SelectItem value="price-desc">High to Low $</SelectItem>
+                    <SelectItem value="newest">Newest First</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </AnimatedGroup>
 
             {/* Tea Categories - Only show when Tea category is selected */}
             <AnimatePresence mode="wait">
@@ -220,6 +257,7 @@ const ProductFilters = memo(function ProductFilters({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
+                  className="self-start"
                 >
                   <FilterGroup
                     title="Tea Types"
@@ -231,42 +269,7 @@ const ProductFilters = memo(function ProductFilters({
                 </motion.div>
               )}
             </AnimatePresence>
-
-            {/* Price Range Filter */}
-            <Slider
-              value={currentPriceRange}
-              min={priceRange.min}
-              max={priceRange.max}
-              step={1}
-              onValueChange={handlePriceRangeChange}
-              showTooltip
-              tooltipContent={(value) => `$${value}`}
-              label="Price Range"
-              valueDisplay={
-                <output className="text-sm font-medium tabular-nums">
-                  ${currentPriceRange[0]} - ${currentPriceRange[1]}
-                </output>
-              }
-            />
-
-            {/* Sort By Filter */}
-            <div className="flex flex-col gap-2 self-start">
-              <label className="text-sm font-medium text-foreground">
-                Sort By
-              </label>
-              <Select value={sortBy} onValueChange={onSortChange}>
-                <SelectTrigger className="w-[15ch]">
-                  <SelectValue placeholder="Sort by..." />
-                </SelectTrigger>
-                <SelectContent className="bg-background">
-                  <SelectItem value="relevant">Relevant</SelectItem>
-                  <SelectItem value="price-asc">Low to High $</SelectItem>
-                  <SelectItem value="price-desc">High to Low $</SelectItem>
-                  <SelectItem value="newest">Newest First</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </AnimatedGroup>
+          </div>
         )}
         <div className="mx-auto h-1.5 w-[5rem] rounded-full bg-secondary shrink-0" />
           </div>
