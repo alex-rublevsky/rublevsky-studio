@@ -638,8 +638,12 @@ function RouteComponent() {
 
   return (
     <div>
-      <div className="fixed bottom-18 right-3 z-50">
-        <Button onClick={() => setShowCreateForm(true)} size="lg">
+      <div className="fixed bottom-3 right-3 z-50">
+        <Button 
+          onClick={() => setShowCreateForm(true)} 
+          size="lg"
+          className="bg-black text-white hover:bg-white/60 hover:text-black hover:backdrop-blur-md transition-all duration-300"
+        >
           <Plus />
           Add New Product
         </Button>
@@ -648,7 +652,7 @@ function RouteComponent() {
       {/* Products List */}
       <div className="space-y-6">
         {/* Products Header with Search */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4">
           <p className="text-muted-foreground">
             Manage your product catalog • {filteredProducts.length} of{" "}
             {products.length} products
@@ -676,14 +680,14 @@ function RouteComponent() {
         </div>
 
         {isPending ? (
-          <div className="flex items-center justify-center py-12">
+          <div className="flex items-center justify-center py-12 px-4">
             <div className="text-center space-y-4">
               <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
               <p className="text-muted-foreground">Loading products...</p>
             </div>
           </div>
         ) : filteredProducts.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
+          <div className="text-center py-8 text-muted-foreground px-4">
             <div className="mb-4">
               <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center">
                 <Plus className="w-8 h-8" />
