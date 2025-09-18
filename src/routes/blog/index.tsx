@@ -53,75 +53,75 @@ function PostsIndexComponent() {
   }, [posts, selectedCategory]);
 
   return (
-    <section className="pt-24 sm:pt-32 div min-h-screen no-padding">
-      <div className="">
-        {/* Header */}
-        <div className="text-center mb-12 px-4">
-          <h1 className="mb-8">What&apos;s in the gaiwan?</h1>
-          <div className="flex justify-center items-center gap-8 mb-8">
-            <h5 className="text-secondary-foreground">{totalCount} posts</h5>
-            <h5>
-              <a className="blurLink" href="https://t.me/gaiwan_contents">
-                🇷🇺 RU blog version
-              </a>
-            </h5>
-          </div>
+    <main><section className="pt-24 sm:pt-32 div min-h-screen no-padding">
+    <div className="">
+      {/* Header */}
+      <div className="text-center mb-12 px-4">
+        <h1 className="mb-8">What&apos;s in the gaiwan?</h1>
+        <div className="flex justify-center items-center gap-8 mb-8">
+          <h5 className="text-secondary-foreground">{totalCount} posts</h5>
+          <h5>
+            <a className="blurLink" href="https://t.me/gaiwan_contents">
+              🇷🇺 RU blog version
+            </a>
+          </h5>
         </div>
-
-        {/* Filters */}
-        {usedTeaCategories.length > 0 && (
-          <div className="flex justify-center mb-12 px-4">
-            <FilterGroup
-              className="justify-center"
-              options={usedTeaCategories}
-              selectedOptions={selectedCategory}
-              onOptionChange={setSelectedCategory}
-              showAllOption={true}
-              allOptionLabel="All Categories"
-            />
-          </div>
-        )}
-
-        {/* Content */}
-        {isLoading ? (
-          <div className="text-center px-4">Loading blog posts...</div>
-        ) : hasError ? (
-          <div className="text-center text-red-500 px-4">
-            Error loading blog content. Please try again later.
-          </div>
-        ) : (
-          <AnimatePresence mode="popLayout">
-            {filteredPosts.length === 0 ? (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="text-center text-lg"
-              >
-                No blog posts found for the selected categories.
-              </motion.p>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4  gap-y-6 gap-x-3 sm:gap-4 items-start">
-                {filteredPosts.map((post) => (
-                  <motion.div
-                    key={post.id}
-                    layout
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <BlogPostCard 
-                      post={post} 
-                      teaCategories={teaCategories}
-                    />
-                  </motion.div>
-                ))}
-              </div>
-            )}
-          </AnimatePresence>
-        )}
       </div>
-    </section>
+
+      {/* Filters */}
+      {usedTeaCategories.length > 0 && (
+        <div className="flex justify-center mb-12 px-4">
+          <FilterGroup
+            className="justify-center"
+            options={usedTeaCategories}
+            selectedOptions={selectedCategory}
+            onOptionChange={setSelectedCategory}
+            showAllOption={true}
+            allOptionLabel="All Categories"
+          />
+        </div>
+      )}
+
+      {/* Content */}
+      {isLoading ? (
+        <div className="text-center px-4">Loading blog posts...</div>
+      ) : hasError ? (
+        <div className="text-center text-red-500 px-4">
+          Error loading blog content. Please try again later.
+        </div>
+      ) : (
+        <AnimatePresence mode="popLayout">
+          {filteredPosts.length === 0 ? (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="text-center text-lg"
+            >
+              No blog posts found for the selected categories.
+            </motion.p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4  gap-y-6 gap-x-3 sm:gap-4 items-start">
+              {filteredPosts.map((post) => (
+                <motion.div
+                  key={post.id}
+                  layout
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <BlogPostCard 
+                    post={post} 
+                    teaCategories={teaCategories}
+                  />
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </AnimatePresence>
+      )}
+    </div>
+  </section></main>
   );
 }

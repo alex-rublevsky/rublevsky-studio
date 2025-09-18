@@ -11,10 +11,10 @@ function StorePage() {
   const { products, categories, teaCategories } = useCart();
 
   return (
-    <StoreFeed
+    <main><StoreFeed
       products={products}
       categories={categories}
       teaCategories={teaCategories}
-    />
+    /></main>
   );
 }
