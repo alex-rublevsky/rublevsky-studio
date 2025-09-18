@@ -19,7 +19,10 @@ import { Route as StoreRouteImport } from './routes/store/route'
 import { Route as ProductRouteImport } from './routes/product/route'
 import { Route as DashboardRouteImport } from './routes/dashboard/route'
 import { Route as IndexImport } from './routes/index'
+import { Route as WebIndexImport } from './routes/web/index'
 import { Route as StoreIndexImport } from './routes/store/index'
+import { Route as PhotosIndexImport } from './routes/photos/index'
+import { Route as DesignIndexImport } from './routes/design/index'
 import { Route as DashboardIndexImport } from './routes/dashboard/index'
 import { Route as BlogIndexImport } from './routes/blog/index'
 import { Route as StoreCheckoutImport } from './routes/store/checkout'
@@ -84,10 +87,28 @@ const IndexRoute = IndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const WebIndexRoute = WebIndexImport.update({
+  id: '/web/',
+  path: '/web/',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const StoreIndexRoute = StoreIndexImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => StoreRouteRoute,
+} as any)
+
+const PhotosIndexRoute = PhotosIndexImport.update({
+  id: '/photos/',
+  path: '/photos/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const DesignIndexRoute = DesignIndexImport.update({
+  id: '/design/',
+  path: '/design/',
+  getParentRoute: () => rootRoute,
 } as any)
 
 const DashboardIndexRoute = DashboardIndexImport.update({
@@ -321,12 +342,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexImport
       parentRoute: typeof DashboardRouteImport
     }
+    '/design/': {
+      id: '/design/'
+      path: '/design'
+      fullPath: '/design'
+      preLoaderRoute: typeof DesignIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/photos/': {
+      id: '/photos/'
+      path: '/photos'
+      fullPath: '/photos'
+      preLoaderRoute: typeof PhotosIndexImport
+      parentRoute: typeof rootRoute
+    }
     '/store/': {
       id: '/store/'
       path: '/'
       fullPath: '/store/'
       preLoaderRoute: typeof StoreIndexImport
       parentRoute: typeof StoreRouteImport
+    }
+    '/web/': {
+      id: '/web/'
+      path: '/web'
+      fullPath: '/web'
+      preLoaderRoute: typeof WebIndexImport
+      parentRoute: typeof rootRoute
     }
     '/_pathlessLayout/_nested-layout/route-a': {
       id: '/_pathlessLayout/_nested-layout/route-a'
@@ -437,7 +479,10 @@ export interface FileRoutesByFullPath {
   '/store/checkout': typeof StoreCheckoutRoute
   '/blog': typeof BlogIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/design': typeof DesignIndexRoute
+  '/photos': typeof PhotosIndexRoute
   '/store/': typeof StoreIndexRoute
+  '/web': typeof WebIndexRoute
   '/route-a': typeof PathlessLayoutNestedLayoutRouteARoute
   '/route-b': typeof PathlessLayoutNestedLayoutRouteBRoute
 }
@@ -460,7 +505,10 @@ export interface FileRoutesByTo {
   '/store/checkout': typeof StoreCheckoutRoute
   '/blog': typeof BlogIndexRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/design': typeof DesignIndexRoute
+  '/photos': typeof PhotosIndexRoute
   '/store': typeof StoreIndexRoute
+  '/web': typeof WebIndexRoute
   '/route-a': typeof PathlessLayoutNestedLayoutRouteARoute
   '/route-b': typeof PathlessLayoutNestedLayoutRouteBRoute
 }
@@ -487,7 +535,10 @@ export interface FileRoutesById {
   '/store/checkout': typeof StoreCheckoutRoute
   '/blog/': typeof BlogIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/design/': typeof DesignIndexRoute
+  '/photos/': typeof PhotosIndexRoute
   '/store/': typeof StoreIndexRoute
+  '/web/': typeof WebIndexRoute
   '/_pathlessLayout/_nested-layout/route-a': typeof PathlessLayoutNestedLayoutRouteARoute
   '/_pathlessLayout/_nested-layout/route-b': typeof PathlessLayoutNestedLayoutRouteBRoute
 }
@@ -514,7 +565,10 @@ export interface FileRouteTypes {
     | '/store/checkout'
     | '/blog'
     | '/dashboard/'
+    | '/design'
+    | '/photos'
     | '/store/'
+    | '/web'
     | '/route-a'
     | '/route-b'
   fileRoutesByTo: FileRoutesByTo
@@ -536,7 +590,10 @@ export interface FileRouteTypes {
     | '/store/checkout'
     | '/blog'
     | '/dashboard'
+    | '/design'
+    | '/photos'
     | '/store'
+    | '/web'
     | '/route-a'
     | '/route-b'
   id:
@@ -561,7 +618,10 @@ export interface FileRouteTypes {
     | '/store/checkout'
     | '/blog/'
     | '/dashboard/'
+    | '/design/'
+    | '/photos/'
     | '/store/'
+    | '/web/'
     | '/_pathlessLayout/_nested-layout/route-a'
     | '/_pathlessLayout/_nested-layout/route-b'
   fileRoutesById: FileRoutesById
@@ -578,6 +638,9 @@ export interface RootRouteChildren {
   RedirectRoute: typeof RedirectRoute
   BlogSlugRoute: typeof BlogSlugRoute
   BlogIndexRoute: typeof BlogIndexRoute
+  DesignIndexRoute: typeof DesignIndexRoute
+  PhotosIndexRoute: typeof PhotosIndexRoute
+  WebIndexRoute: typeof WebIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -591,6 +654,9 @@ const rootRouteChildren: RootRouteChildren = {
   RedirectRoute: RedirectRoute,
   BlogSlugRoute: BlogSlugRoute,
   BlogIndexRoute: BlogIndexRoute,
+  DesignIndexRoute: DesignIndexRoute,
+  PhotosIndexRoute: PhotosIndexRoute,
+  WebIndexRoute: WebIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -612,7 +678,10 @@ export const routeTree = rootRoute
         "/login",
         "/redirect",
         "/blog/$slug",
-        "/blog/"
+        "/blog/",
+        "/design/",
+        "/photos/",
+        "/web/"
       ]
     },
     "/": {
@@ -706,9 +775,18 @@ export const routeTree = rootRoute
       "filePath": "dashboard/index.tsx",
       "parent": "/dashboard"
     },
+    "/design/": {
+      "filePath": "design/index.tsx"
+    },
+    "/photos/": {
+      "filePath": "photos/index.tsx"
+    },
     "/store/": {
       "filePath": "store/index.tsx",
       "parent": "/store"
+    },
+    "/web/": {
+      "filePath": "web/index.tsx"
     },
     "/_pathlessLayout/_nested-layout/route-a": {
       "filePath": "_pathlessLayout/_nested-layout/route-a.tsx",
