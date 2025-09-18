@@ -86,16 +86,46 @@ export default function StoreFeed({
     setLocalPriceRange([effectivePriceRange.min, effectivePriceRange.max]);
   }, [effectivePriceRange.min, effectivePriceRange.max]);
 
-  // Filter tea categories based on available products
-  const filteredTeaCategories = useMemo(() => {
-    const usedCategories = new Set<string>();
-    products.forEach((product) => {
-      product.teaCategories?.forEach((cat) => usedCategories.add(cat));
+  // Calculate categories with product counts
+  const categoriesWithCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    
+    // Count products per category
+    productsWithPriceRanges.forEach(product => {
+      const category = product.categorySlug;
+      if (category) {
+        counts.set(category, (counts.get(category) || 0) + 1);
+      }
     });
-    return teaCategories.filter((category) =>
-      usedCategories.has(category.slug)
-    );
-  }, [products, teaCategories]);
+    
+    // Add counts to categories
+    return categories.map(category => ({
+      ...category,
+      count: counts.get(category.slug) || 0
+    }));
+  }, [categories, productsWithPriceRanges]);
+
+  // Filter tea categories based on available products and add counts
+  const filteredTeaCategoriesWithCounts = useMemo(() => {
+    const usedCategories = new Set<string>();
+    const counts = new Map<string, number>();
+    
+    // Count tea categories and track which ones are used
+    productsWithPriceRanges.forEach((product) => {
+      product.teaCategories?.forEach((cat) => {
+        usedCategories.add(cat);
+        counts.set(cat, (counts.get(cat) || 0) + 1);
+      });
+    });
+    
+    // Filter and add counts
+    return teaCategories
+      .filter((category) => usedCategories.has(category.slug))
+      .map(category => ({
+        ...category,
+        count: counts.get(category.slug) || 0
+      }));
+  }, [productsWithPriceRanges, teaCategories]);
 
   // Apply filters and sorting using pre-calculated price ranges
   const filteredAndSortedProducts = useMemo(() => {
@@ -192,8 +222,8 @@ export default function StoreFeed({
         <ProductFiltersSkeleton />
       ) : (
         <ProductFilters
-          categories={categories}
-          teaCategories={filteredTeaCategories}
+          categories={categoriesWithCounts}
+          teaCategories={filteredTeaCategoriesWithCounts}
           selectedCategory={selectedCategory}
           selectedTeaCategory={selectedTeaCategory}
           onCategoryChange={setSelectedCategory}
