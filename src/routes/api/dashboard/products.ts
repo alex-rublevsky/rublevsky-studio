@@ -52,7 +52,7 @@ export const APIRoute = createAPIFileRoute("/api/dashboard/products")({
       }
 
       // Get CloudFlare D1 database instance
-      const bindings = await getBindings();
+      const bindings = getBindings();
       const d1Database = bindings.DB;
       const db = drizzle(d1Database);
 
