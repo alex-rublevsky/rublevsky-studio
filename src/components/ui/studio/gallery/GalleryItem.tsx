@@ -26,7 +26,7 @@ export default function GalleryItem({
     <motion.div
       //shadow-[0_5px_6px_rgb(0,0,0,0.08)]
       id={item.id}
-      className="relative group transform-gpu rounded-lg overflow-hidden md:cursor-none mb-3"
+      className="relative group transform-gpu rounded-lg overflow-hidden cursor-pointer md:cursor-none mb-3"
       onClick={() => onOpenGallery(index)}
       onMouseEnter={handleMouseEnter()}
       onMouseLeave={handleMouseLeave()}
