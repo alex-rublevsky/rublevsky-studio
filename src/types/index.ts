@@ -229,4 +229,5 @@ export interface ProductWithDetails extends Product {
     body: string;
     blogUrl: string;
   } | null;
+  teaCategories?: string[];
 }

@@ -9,6 +9,8 @@ import {
   productVariations,
   variationAttributes,
   blogPosts,
+  productTeaCategories,
+  teaCategories,
 } from "~/schema";
 
 import { db } from "~/db";
@@ -64,6 +66,17 @@ export const APIRoute = createAPIFileRoute("/api/store/$productId")({
       const firstRow = result[0];
       const baseProduct = firstRow.products;
 
+      // Get tea categories for this product separately
+      const teaCategoriesResult = baseProduct?.id ? await db
+        .select({
+          slug: teaCategories.slug,
+          name: teaCategories.name,
+        })
+        .from(productTeaCategories)
+        .leftJoin(teaCategories, eq(productTeaCategories.teaCategorySlug, teaCategories.slug))
+        .where(eq(productTeaCategories.productId, baseProduct.id))
+        .all() : [];
+
       // Process variations and their attributes
       const variationsMap = new Map();
 
@@ -118,12 +131,13 @@ export const APIRoute = createAPIFileRoute("/api/store/$productId")({
               title: firstRow.blog_posts.title || "",
               slug: firstRow.blog_posts.slug,
               body: firstRow.blog_posts.body || "",
-              blogUrl: `/blog#${firstRow.blog_posts.slug}`,
+              blogUrl: `/blog/${firstRow.blog_posts.slug}`,
             }
           : null,
         // Use blog post body as description if available
         description: firstRow.blog_posts?.body || baseProduct.description,
         variations: Array.from(variationsMap.values()),
+        teaCategories: teaCategoriesResult.map(tc => tc.slug).filter((slug): slug is string => Boolean(slug)),
       };
 
       return json(productWithDetails, { headers: corsHeaders });
