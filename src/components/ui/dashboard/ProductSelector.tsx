@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Image } from "~/components/ui/shared/Image";
+import { DEPLOY_URL } from "~/utils/store";
 
 interface Product {
   id: number;
@@ -18,7 +19,7 @@ export default function ProductSelector({
   onProductSelect,
 }: ProductSelectorProps) {
   const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -34,6 +35,30 @@ export default function ProductSelector({
       setSelectedProduct(null);
     }
   }, [products, selectedProductSlug]);
+
+  // Single function to handle opening dropdown and fetching products
+  const openDropdown = async () => {
+    setShowDropdown(true);
+    searchInputRef.current?.focus();
+    
+    // Only fetch if we don't have products yet and aren't already loading
+    if (products.length === 0 && !isLoading) {
+      try {
+        setIsLoading(true);
+        const response = await fetch(`${DEPLOY_URL}/api/dashboard/products`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch products: ${response.status}`);
+        }
+        const data = await response.json() as { products: Product[] };
+        setProducts(data.products || []);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        setProducts([]);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
 
   // Add click outside handler
   useEffect(() => {
@@ -62,19 +87,14 @@ export default function ProductSelector({
   const handleClearSelection = () => {
     setSelectedProduct(null);
     onProductSelect("");
-    // Focus the search input after clearing
-    setTimeout(() => {
-      if (searchInputRef.current) {
-        searchInputRef.current.focus();
-        setShowDropdown(true);
-      }
-    }, 0);
+    openDropdown();
   };
 
   const toggleDropdown = () => {
-    setShowDropdown(!showDropdown);
-    if (!showDropdown && searchInputRef.current) {
-      searchInputRef.current.focus();
+    if (showDropdown) {
+      setShowDropdown(false);
+    } else {
+      openDropdown();
     }
   };
 
@@ -134,7 +154,7 @@ export default function ProductSelector({
             placeholder="Search for a product..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            onFocus={() => setShowDropdown(true)}
+            onFocus={openDropdown}
             className="w-full px-3 py-2 bg-muted border border-input rounded"
             ref={searchInputRef}
           />
