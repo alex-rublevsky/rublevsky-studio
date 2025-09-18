@@ -33,3 +33,4 @@ wrangler.jsonc
 /.vscode/
 
 /dist/
+worker-configuration.d.ts
