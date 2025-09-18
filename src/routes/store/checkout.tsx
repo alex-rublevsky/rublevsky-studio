@@ -1,16 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "~/components/ui/shared/Link";
 import React, { useState, useEffect } from "react";
-import { useCart, CartProvider } from "~/lib/cartContext";
+import { useCart} from "~/lib/cartContext";
 import { Button } from "~/components/ui/shared/Button";
 import { toast } from "sonner";
-import { createOrder } from "~/server_functions/order/createOrder";
 import { Image } from "~/components/ui/shared/Image";
 import { getAttributeDisplayName } from "~/lib/productAttributes";
 import { AddressFields } from "~/components/ui/shared/AddressFields";
 import NeumorphismCard from "~/components/ui/shared/NeumorphismCard";
 import { Checkbox } from "~/components/ui/shared/Checkbox";
 import { Textarea } from "~/components/ui/shared/TextArea";
+import { useMutation } from "@tanstack/react-query";
+import { sendOrderEmails } from "~/server_functions/sendOrderEmails";
 
 interface Address {
   firstName: string;
@@ -31,22 +32,28 @@ interface CustomerInfo {
   shippingMethod?: string;
 }
 
+interface OrderCreationResponse {
+  success: boolean;
+  error?: string;
+  message?: string;
+  orderId?: number;
+  emailWarnings?: string[];
+  clientEmailId?: string;
+  adminEmailId?: string;
+}
+
+
 export const Route = createFileRoute("/store/checkout")({
   component: CheckoutPage,
 });
 
 function CheckoutPage() {
-  return (
-    <CartProvider>
-      <CheckoutScreen />
-    </CartProvider>
-  );
+  return <CheckoutScreen />;
 }
 
 function CheckoutScreen() {
   const { cart, clearCart, products } = useCart();
   const formRef = React.useRef<HTMLFormElement>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [useSeparateBilling, setUseSeparateBilling] = useState(false);
   const [showFormError, setShowFormError] = useState(false);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
@@ -65,11 +72,132 @@ function CheckoutScreen() {
     shippingMethod: "standard",
   });
 
+  // Order creation mutation with much better UX
+  const orderMutation = useMutation({
+    mutationFn: async (orderData: {
+      customerInfo: CustomerInfo;
+      cartItems: any[];
+      products: any[];
+    }) => {
+      // Step 1: Create order
+      const orderResponse = await fetch("/api/orderCreation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: AbortSignal.timeout(15000), // 15 second timeout
+        body: JSON.stringify(orderData),
+      });
+
+      if (!orderResponse.ok) {
+        throw new Error(`Order creation failed: ${orderResponse.status}`);
+      }
+
+      const orderResult = await orderResponse.json() as OrderCreationResponse;
+      if (!orderResult.success) {
+        throw new Error(orderResult.error || "Failed to create order");
+      }
+
+      // Step 2: Send emails
+      try {
+        const emailResult = await sendOrderEmails({
+          data: {
+            orderId: orderResult.orderId!,
+            customerInfo: orderData.customerInfo,
+            cartItems: orderData.cartItems,
+            orderAmounts: {
+              subtotalAmount: subtotal,
+              discountAmount: totalDiscount
+            },
+            totalAmount: total
+          }
+        });
+
+        return {
+          orderId: orderResult.orderId!,
+          emailWarnings: emailResult.emailWarnings
+        };
+      } catch (emailError) {
+        // Order succeeded, but emails failed - still return success
+        return {
+          orderId: orderResult.orderId!,
+          emailWarnings: ["Confirmation emails failed to send"]
+        };
+      }
+    },
+    onSuccess: ({ orderId, emailWarnings }) => {
+      // Show appropriate success message
+      if (emailWarnings && emailWarnings.length > 0) {
+        toast.warning(
+          `Order placed successfully! ${emailWarnings.join(", ")}. Our team will contact you shortly.`,
+          { duration: 5000 }
+        );
+      } else {
+        toast.success("Order placed and confirmation emails sent! 🎉", {
+          duration: 3000,
+        });
+      }
+
+      // Pass display-ready order data optimistically to success page
+      const orderData = {
+        orderId,
+        customerInfo,
+        // Transform cart items to match order page display structure
+        items: cart.items.map((item, index) => ({
+          id: index,
+          productName: item.productName,
+          quantity: item.quantity,
+          unitAmount: item.price,
+          finalAmount: item.discount 
+            ? item.price * (1 - item.discount / 100) * item.quantity
+            : item.price * item.quantity,
+          discountPercentage: item.discount,
+          attributes: item.attributes || {},
+          image: item.image,
+        })),
+        subtotalAmount: subtotal,
+        discountAmount: totalDiscount,
+        totalAmount: total,
+        shippingAmount: 0, // Always 0 for new orders
+        timestamp: Date.now(),
+      };
+      
+      // Store in sessionStorage for the success page
+      sessionStorage.setItem('orderSuccess', JSON.stringify(orderData));
+      console.log('💾 Stored order data for success page:', orderId);
+      
+      // Small delay to ensure success message is seen, then redirect
+      setTimeout(() => {
+        console.log('🚀 Redirecting to order page:', orderId);
+        window.location.href = `/order/${orderId}?new=true`;
+      }, 1000);
+    },
+    onError: (error: Error) => {
+      toast.error(
+        error.message || "Failed to place order. Please try again.",
+        { duration: 5000 }
+      );
+    }
+  });
+
+  const isLoading = orderMutation.isPending;
+
   // Wait for cart and products to be loaded
   useEffect(() => {
     if (cart.items.length > 0 && products.length > 0) {
+      // Check for any variation ID mismatches and log them
+      cart.items.forEach(item => {
+        if (item.variationId) {
+          const product = products.find(p => p.id === item.productId);
+          if (product && product.variations) {
+            const variation = product.variations.find(v => v.id === item.variationId);
+            if (!variation) {
+              console.warn(`Variation ${item.variationId} not found for product ${item.productName} (ID: ${item.productId})`);
+              console.log('Available variations:', product.variations.map(v => ({ id: v.id, sku: v.sku })));
+            }
+          }
+        }
+      });
     }
-  }, [cart.items.length, products.length]);
+  }, [cart.items, products]);
 
   // Check if required fields are filled
   const isFormValid = () => {
@@ -119,9 +247,20 @@ function CheckoutScreen() {
     }
   };
 
-  // Get dynamic button text based on validation state
+  // Get dynamic button text with fun loading messages
   const getButtonText = () => {
-    if (isLoading) return "Processing...";
+    if (isLoading) {
+      // Fun, descriptive loading messages
+      const loadingMessages = [
+        "✨ Sprinkling some magic on your order...",
+        "🎨 Preparing your beautiful items...",
+        "📦 Crafting your order with love...",
+        "🚀 Launching your order into the world...",
+        "💫 Working our creative magic..."
+      ];
+      const randomMessage = loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
+      return randomMessage;
+    }
     if (showFormError) return "Please fill up the form";
     if (cart.items.length === 0) return "Cart is empty";
     return "Place Order";
@@ -224,82 +363,12 @@ function CheckoutScreen() {
       return;
     }
 
-    setIsLoading(true);
-
-    try {
-      // Pass products from context to createOrder
-      const result = await createOrder(customerInfo, cart.items, products);
-
-      if (!result.success) {
-        throw new Error(result.message);
-      }
-
-      // If order was created successfully, send the email
-      const emailResponse = await fetch("/api/emails", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          firstName: customerInfo.shippingAddress.firstName,
-          lastName: customerInfo.shippingAddress.lastName,
-          email: customerInfo.shippingAddress.email,
-          orderItems: cart.items.map((item) => ({
-            productName: item.productName,
-            quantity: item.quantity,
-            price: item.price,
-            discount: item.discount,
-            image: item.image
-              ? `https://assets.rublevsky.studio/${item.image}`
-              : undefined,
-          })),
-          orderId: result.orderId,
-          subtotal,
-          totalDiscount,
-          orderTotal: total,
-          shippingAddress: customerInfo.shippingAddress,
-          billingAddress: customerInfo.billingAddress,
-          shippingMethod: customerInfo.shippingMethod,
-          notes: customerInfo.notes,
-        }),
-      });
-
-      const emailResult = await emailResponse.json();
-
-      //   if (!emailResult.success) {
-      //     console.error("Failed to send confirmation email:", emailResult.error);
-      //     // Show warning but don't prevent order completion
-      //     toast.warning(
-      //       "Order placed but confirmation email could not be sent. Our team will contact you shortly.",
-      //       {
-      //         duration: 5000,
-      //       }
-      //     );
-      //   }
-
-      // Show success toast
-      toast.success("Order placed successfully!", {
-        duration: 3000,
-      });
-
-      //   // Redirect to order page immediately
-      //   router.replace(`/order/${result.orderId}?new=true`);
-
-      // Clear the cart after redirect is initiated
-      clearCart();
-    } catch (error) {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Failed to place order. Please try again.",
-        {
-          duration: 5000,
-        }
-      );
-      console.error("Checkout error:", error);
-    } finally {
-      setIsLoading(false);
-    }
+    // Use the mutation instead of manual fetch
+    orderMutation.mutate({
+      customerInfo,
+      cartItems: cart.items,
+      products,
+    });
   };
 
   // Calculate cart totals
@@ -464,6 +533,9 @@ function CheckoutScreen() {
                 variant={getButtonVariant()}
                 className="w-full transition-all duration-300 ease-in-out disabled:cursor-not-allowed"
               >
+                {isLoading && (
+                  <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+                )}
                 {getButtonText()}
               </Button>
               <div className="mt-6 pt-4 border-t">
