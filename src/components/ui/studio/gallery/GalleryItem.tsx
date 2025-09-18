@@ -87,7 +87,7 @@ export default function GalleryItem({
           <div className="py-4 px-2 bg-background/70 backdrop-blur-sm flex justify-between items-center opacity-0 transition-opacity duration-400 ease-in-out group-hover:opacity-100 rounded-md z-10">
             <div className="flex space-between items-center w-full">
               {item.description && (
-                <p className="text-sm text-gray-800 flex-grow mr-2">
+                <p className="text-sm text-gray-800 flex-grow mr-2 line-clamp-2">
                   {item.description}
                 </p>
               )}
