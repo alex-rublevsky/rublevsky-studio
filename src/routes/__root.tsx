@@ -101,7 +101,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body className="overscroll-none ">
-        {/* <NavBar /> */}
+        <NavBar />
         {children}
  {/* <TanStackRouterDevtools position="bottom-right" /> */}
         <Scripts />
