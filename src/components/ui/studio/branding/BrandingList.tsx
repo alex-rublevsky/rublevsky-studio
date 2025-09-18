@@ -44,7 +44,7 @@ const BrandingProjectCard = ({
           alt={project.name}
           width={800}
           height={600}
-          className="w-full rounded-lg cursor-none col-start-1 row-start-1"
+          className="w-full rounded-lg md:cursor-none col-start-1 row-start-1"
           loading="eager"
           onClick={() => setSelected(project)}
         />
@@ -61,7 +61,7 @@ const BrandingProjectCard = ({
           }}
           whileTap={{ scale: 0.95 }}
           src={`https://assets.rublevsky.studio/${project.src}`}
-          className="overflow-hidden rounded-lg cursor-none w-full h-auto col-start-1 row-start-1"
+          className="overflow-hidden rounded-lg md:cursor-none w-full h-auto col-start-1 row-start-1"
           muted
           autoPlay={true}
           playsInline={true}
