@@ -1,8 +1,6 @@
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
-import React, { useRef, useState, useEffect, useCallback } from "react";
+import React from "react";
 import { cn } from "~/utils/utils";
-import { motion } from "motion/react";
-import { Button } from "~/components/ui/shared/Button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,83 +27,12 @@ interface NavItem {
   icon?: React.ComponentType;
 }
 
-const useVisibleSection = (items: NavItem[]) => {
-  const [visibleSection, setVisibleSection] = useState("");
-  const location = useRouter().state.location;
-
-  const isElementVisible = useCallback((element: Element) => {
-    const rect = element.getBoundingClientRect();
-    const windowHeight =
-      window.innerHeight || document.documentElement.clientHeight;
-    const visibleRatio =
-      Math.min(windowHeight, rect.bottom) - Math.max(0, rect.top);
-    return visibleRatio > windowHeight * 0.3;
-  }, []);
-
-  useEffect(() => {
-    if (location.pathname !== "/") return;
-
-    const handleScroll = () => {
-      const sections = items
-        .map((item) => item.url.split("#")[1])
-        .filter(Boolean)
-        .map((id) => document.getElementById(id))
-        .filter((section): section is HTMLElement => section !== null);
-
-      const visibleSection = sections.find((section) =>
-        isElementVisible(section)
-      );
-      setVisibleSection(visibleSection ? `#${visibleSection.id}` : "");
-    };
-
-    let timeoutId: number | undefined;
-    const throttledScroll = () => {
-      if (timeoutId) return;
-      timeoutId = window.setTimeout(() => {
-        handleScroll();
-        timeoutId = undefined;
-      }, 100);
-    };
-
-    window.addEventListener("scroll", throttledScroll);
-    handleScroll();
-
-    return () => {
-      window.removeEventListener("scroll", throttledScroll);
-      if (timeoutId) window.clearTimeout(timeoutId);
-    };
-  }, [items, location.pathname, isElementVisible]);
-
-  return visibleSection;
-};
 
 interface NavBarProps {
   items?: NavItem[];
   className?: string;
 }
 
-const defaultWorkItems: NavItem[] = [
-  { name: "Web", url: "/#web" },
-  { name: "Branding", url: "/#branding" },
-  { name: "Photos", url: "/#photos" },
-  { name: "Posters", url: "/#posters" },
-];
-
-const desktopMenuItems: NavItem[] = [
-  { name: "Studio", url: "/" },
-  { name: "Blog", url: "/blog" },
-  { name: "Store", url: "/store" },
-];
-
-const mobileMenuItems: NavItem[] = [
-  { name: "Studio", url: "/" },
-  { name: "Blog", url: "/blog" },
-  { name: "Store", url: "/store" },
-  {
-    name: "Resume",
-    url: "https://assets.rublevsky.studio/PDF/Resume%20Alexander%20Rublevsky.pdf",
-  },
-];
 
 // Dashboard navigation items
 const dashboardNavItems: NavItem[] = [
@@ -194,144 +121,36 @@ const DropdownNavMenu = ({ items, showUserInfo = false }: { items: NavItem[]; sh
 
 
 
-interface TabProps {
-  children: React.ReactNode;
-  setPosition: (position: {
-    left: number;
-    width: number;
-    opacity: number;
-  }) => void;
-  href: string;
-  isActive: boolean;
+
+
+interface SmartBackButtonProps {
+  label: string;
+  fallbackPath: string;
 }
 
-const Tab = ({ children, setPosition, href, isActive }: TabProps) => {
-  const ref = useRef<HTMLLIElement>(null);
-
-  return (
-    <Link to={href}>
-      <li
-        ref={ref}
-        onMouseEnter={() => {
-          if (!ref.current) return;
-          const { width } = ref.current.getBoundingClientRect();
-          setPosition({
-            width,
-            opacity: 1,
-            left: ref.current.offsetLeft,
-          });
-        }}
-        className={cn(
-          "relative z-10 block cursor-pointer px-2.5 md:px-4 py-1.5 text-xs  text-white mix-blend-difference md:py-2 md:text-sm",
-          isActive && "underline underline-offset-4"
-        )}
-      >
-        {children}
-        {isActive && (
-          <motion.div
-            layoutId="active-pill"
-            className="absolute inset-0 z-0 rounded-full bg-black/10"
-          />
-        )}
-      </li>
-    </Link>
-  );
-};
-
-const Cursor = ({
-  position,
-}: {
-  position: { left: number; width: number; opacity: number };
-}) => {
-  return (
-    <motion.li
-      animate={position}
-      className="absolute z-0 h-7 rounded-full bg-black md:h-9"
-    />
-  );
-};
-
-interface NavGroupProps {
-  items: NavItem[];
-  className?: string;
-}
-
-const NavGroup = ({ items, className }: NavGroupProps) => {
-  const router = useRouter();
-  const pathname = router.state.location.pathname;
-  const activeSection = useVisibleSection(items);
-  const [position, setPosition] = useState({
-    left: 0,
-    width: 0,
-    opacity: 0,
-  });
-
-  return (
-    <ul
-      className={cn(
-        "relative flex w-fit rounded-full border border-black bg-background p-[0.3rem]",
-        className
-      )}
-      onMouseLeave={() => setPosition((prev) => ({ ...prev, opacity: 0 }))}
-    >
-      {items.map((item) => (
-        <Tab
-          key={item.url}
-          setPosition={setPosition}
-          href={item.url}
-          isActive={
-            item.url.includes("#")
-              ? pathname === "/" && activeSection === item.url.split("/").pop()
-              : pathname === item.url
-          }
-        >
-          {item.name}
-        </Tab>
-      ))}
-      <Cursor position={position} />
-    </ul>
-  );
-};
-
-const GoBackButton = () => {
-  return (
-    <div className="absolute bottom-full mb-2 w-full rounded-full border border-black bg-background hover:bg-black hover:text-white transition-all duration-300 p-[0.3rem]">
-      <Button asChild variant="outline" className="font-normal">
-        <Link
-          to="/"
-          hash="#branding"
-          className="relative z-10 block w-full text-center cursor-pointer px-3 py-1.5 text-xs text-white mix-blend-difference md:px-4 md:py-2 md:text-sm"
-        >
-          Go Back
-        </Link>
-      </Button>
-    </div>
-  );
-};
-
-const BackToBlogButton = () => {
+const SmartBackButton = ({ label, fallbackPath }: SmartBackButtonProps) => {
   const navigate = useNavigate();
   const router = useRouter();
   
-  const handleBackToBlog = () => {
+  const handleBack = () => {
     // Check if there's meaningful browser history (more than just the current page)
     if (window.history.length > 1) {
       // Try to use router's back navigation which should preserve scroll position
       // TanStack Router handles scroll restoration automatically when using router.history.back()
       router.history.back();
     } else {
-      // Fallback to navigate to blog index if no history (direct URL access)
-      navigate({ to: '/blog' });
+      // Fallback to navigate to specified path if no history (direct URL access)
+      navigate({ to: fallbackPath });
     }
   };
 
   return (
     <div className="relative flex w-fit rounded-full border border-black bg-background hover:bg-black hover:text-white transition-all duration-300 p-[0.3rem]">
       <button
-        onClick={handleBackToBlog}
+        onClick={handleBack}
         className="relative z-10 block cursor-pointer px-3 py-1.5 text-xs text-white mix-blend-difference md:px-4 md:py-2 md:text-sm"
       >
-        ← Back to blog
+        ← {label}
       </button>
     </div>
   );
@@ -342,19 +161,23 @@ export function NavBar({ className }: Omit<NavBarProps, "items">) {
   const routerState = useRouterState();
   const pathname = router.state.location.pathname;
 
-  const showGoBackButton =
-    routerState.location.pathname.startsWith("/branding/");
-
   const showBlogBackButton = 
     routerState.location.pathname.startsWith("/blog/") && 
     routerState.location.pathname !== "/blog";
 
+  const showStoreBackButton = 
+    routerState.location.pathname.startsWith("/store/") && 
+    routerState.location.pathname !== "/store";
+
+  const showHomeBackButton = 
+    pathname === "/web" || 
+    pathname === "/photos" || 
+    pathname === "/design" || 
+    pathname === "/store" || 
+    pathname === "/blog";
+
   const isDashboard = routerState.location.pathname.startsWith("/dashboard");
   const showOther = !isDashboard;
-
-  // Check if we should show the work sections (on homepage or branding detail pages)
-  const showWorkSections =
-    pathname === "/" || routerState.location.pathname.startsWith("/branding/");
 
   // Dashboard navigation layout
   if (isDashboard) {
@@ -377,7 +200,20 @@ export function NavBar({ className }: Omit<NavBarProps, "items">) {
 
         {/* Main dashboard navigation (center - desktop only) */}
         <div className="hidden md:block pointer-events-auto">
-          <NavGroup items={dashboardNavItems} />
+          <div className="flex w-fit rounded-full border border-black bg-background p-[0.3rem]">
+            {dashboardNavItems.map((item) => (
+              <Link
+                key={item.url}
+                to={item.url}
+                className={cn(
+                  "relative z-10 block cursor-pointer px-2.5 md:px-4 py-1.5 text-xs text-white mix-blend-difference md:py-2 md:text-sm rounded-full transition-colors",
+                  pathname === item.url && "bg-black text-white mix-blend-normal"
+                )}
+              >
+                {item.name}
+              </Link>
+            ))}
+          </div>
         </div>
       </nav>
     );
@@ -391,55 +227,49 @@ export function NavBar({ className }: Omit<NavBarProps, "items">) {
         className
       )}
     >
-      {showWorkSections ? (
+      {showOther ? (
         <>
-          <div className="hidden md:block pointer-events-auto">
-            <DropdownNavMenu items={desktopMenuItems} />
-          </div>
-          <div className="absolute left-1/2 -translate-x-1/2 hidden md:block pointer-events-auto">
-            <div className="relative">
-              {showGoBackButton && <GoBackButton />}
-              <NavGroup items={defaultWorkItems} />
+          {/* Show SmartBackButton for blog pages - Desktop layout */}
+          {showBlogBackButton && (
+            <div className="hidden md:flex items-center gap-3 pointer-events-auto z-50">
+              <SmartBackButton label="Back to blog" fallbackPath="/blog" />
             </div>
-          </div>
-          <div className="md:hidden pointer-events-auto">
-            <DropdownNavMenu items={mobileMenuItems} />
-          </div>
-          <div className="hidden md:block pointer-events-auto">
-            <div className="relative flex w-fit rounded-full border border-black bg-background hover:bg-black hover:text-white transition-all duration-300 p-[0.3rem]">
-              <button
-                onClick={() => {
-                  window.open(
-                    "https://assets.rublevsky.studio/PDF/Resume%20Alexander%20Rublevsky.pdf?",
-                    "_blank"
-                  );
-                }}
-                className="relative z-10 block cursor-pointer px-3 py-1.5 text-xs text-white mix-blend-difference md:px-4 md:py-2 md:text-sm"
-              >
-                Resume
-              </button>
-            </div>
-          </div>
-          <div className="md:hidden pointer-events-auto">
-            <div className="relative">
-              {showGoBackButton && <GoBackButton />}
-              <NavGroup items={defaultWorkItems} />
-            </div>
-          </div>
-        </>
-      ) : showOther ? (
-        <>
-          {/* Desktop layout */}
-          <div className="hidden md:flex items-center gap-3 pointer-events-auto">
-            <DropdownNavMenu items={desktopMenuItems} />
-            {showBlogBackButton && <BackToBlogButton />}
-          </div>
+          )}
           
-          {/* Mobile layout */}
-          <div className="md:hidden flex items-center gap-3 pointer-events-auto">
-            <DropdownNavMenu items={mobileMenuItems} />
-            {showBlogBackButton && <BackToBlogButton />}
-          </div>
+          {/* Show SmartBackButton for blog pages - Mobile layout */}
+          {showBlogBackButton && (
+            <div className="md:hidden flex items-center gap-3 pointer-events-auto z-50">
+              <SmartBackButton label="Back to blog" fallbackPath="/blog" />
+            </div>
+          )}
+
+          {/* Show SmartBackButton for product pages - Desktop layout */}
+          {showStoreBackButton && (
+            <div className="hidden md:flex items-center gap-3 pointer-events-auto z-50">
+              <SmartBackButton label="Back to store" fallbackPath="/store" />
+            </div>
+          )}
+          
+          {/* Show SmartBackButton for product pages - Mobile layout */}
+          {showStoreBackButton && (
+            <div className="md:hidden flex items-center gap-3 pointer-events-auto z-50">
+              <SmartBackButton label="Back to store" fallbackPath="/store" />
+            </div>
+          )}
+
+          {/* Show SmartBackButton for index pages - Desktop layout */}
+          {showHomeBackButton && (
+            <div className="hidden md:flex items-center gap-3 pointer-events-auto z-50">
+              <SmartBackButton label="Home" fallbackPath="/" />
+            </div>
+          )}
+          
+          {/* Show SmartBackButton for index pages - Mobile layout */}
+          {showHomeBackButton && (
+            <div className="md:hidden flex items-center gap-3 pointer-events-auto z-50">
+              <SmartBackButton label="Home" fallbackPath="/" />
+            </div>
+          )}
         </>
       ) : null}
     </nav>
