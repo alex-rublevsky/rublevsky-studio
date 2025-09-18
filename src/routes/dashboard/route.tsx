@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { getUserID, getUserEmail } from "~/utils/auth-server-func";
 import { Outlet } from "@tanstack/react-router";
-import { Toaster } from "~/components/ui/shared/Sonner";
+import { Toaster } from "~/components/ui/shared/sonner";
 import { NavBar } from "~/components/ui/shared/NavBar";
 
 // TODO: move to environment variable
