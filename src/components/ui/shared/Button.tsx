@@ -2,7 +2,7 @@ import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { useCursorHover } from "~/components/ui/shared/custom_cursor/CustomCursorContext";
-
+import { Link } from "@tanstack/react-router";
 
 import { cn } from "~/utils/utils";
 
@@ -13,6 +13,8 @@ const buttonVariants = cva(
       variant: {
         default:
           "bg-primary text-primary-foreground border border-black hover:bg-transparent hover:text-black",
+        secondary:
+          "text-primary border border-black hover:bg-primary hover:text-primary-foreground",
         inverted:
           "bg-white text-black border border-white hover:bg-transparent hover:text-white",
         destructive:
@@ -36,10 +38,15 @@ const buttonVariants = cva(
         lg: "h-12 rounded-md px-4 py-3 text-md",
         icon: "h-11 w-11",
       },
+      alignment: {
+        left: "text-left",
+        center: "text-center",
+      },
     },
     defaultVariants: {
       variant: "default",
       size: "default",
+      alignment: "left",
     },
   }
 );
@@ -48,6 +55,8 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
+  description?: string;
+  centered?: boolean;
   cursorType?:
     | "default"
     | "small"
@@ -58,6 +67,17 @@ export interface ButtonProps
     | "visitWebsite"
     | "shrink"
     | "hidden";
+  // Link props - automatically handles internal/external routing
+  to?: string;
+  href?: string;
+  target?: string;
+  rel?: string;
+  // TanStack Router specific props
+  params?: Record<string, any>;
+  search?: Record<string, any>;
+  hash?: string;
+  preload?: "intent" | "render" | false;
+  viewTransition?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -67,10 +87,23 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       variant,
       size,
       asChild = false,
+      description,
+      centered = false,
       cursorType = "small",
       disabled = false,
       onMouseEnter,
       onMouseLeave,
+      children,
+      // Link-related props
+      to,
+      href,
+      target,
+      rel,
+      params,
+      search,
+      hash,
+      preload,
+      viewTransition,
       ...props
     },
     ref
@@ -81,14 +114,72 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const { handleMouseEnter, handleMouseLeave: handleMouseLeaveHook } =
       useCursorHover(effectiveCursorType, disabled);
 
-    const Comp = asChild ? Slot : "button";
+    // Smart link detection logic
+    const isLink = Boolean(to || href);
+    const isExternalLink = Boolean(
+      href && (
+        href.startsWith("http://") || 
+        href.startsWith("https://") || 
+        href.startsWith("mailto:") || 
+        href.startsWith("tel:")
+      )
+    );
+    const isHashLink = Boolean(href && href.startsWith("#"));
+    const isInternalRoute = Boolean(to || (href && href.startsWith("/") && !isExternalLink));
+
+    // Determine the component to render
+    let Comp: any = "button";
+    let linkProps: any = {};
+
+    if (asChild) {
+      Comp = Slot;
+    } else if (isLink && !disabled) {
+      if (isInternalRoute && to) {
+        // Use TanStack Router Link for internal routes
+        Comp = Link;
+        linkProps = {
+          to,
+          params,
+          search,
+          hash,
+          preload,
+          viewTransition,
+        };
+      } else if (isExternalLink || isHashLink || href) {
+        // Use regular anchor for external links, hash links, or any href
+        Comp = "a";
+        linkProps = {
+          href,
+          target: target || (isExternalLink ? "_blank" : undefined),
+          rel: rel || (isExternalLink ? "noopener noreferrer" : undefined),
+        };
+      }
+    }
+    
+    // When description is provided, we need to wrap content in a div structure
+    const hasDescription = description && !asChild;
+    
+    const buttonContent = hasDescription ? (
+      <div className={cn("flex flex-col gap-1", centered && "items-center text-center")}>
+        <div className="font-light! text-2xl!">{children}</div>
+        <div className="text-sm opacity-75 leading-tight font-normal whitespace-normal break-words">{description}</div>
+      </div>
+    ) : children;
+
     return (
       <Comp
         className={cn(
+          buttonVariants({ 
+            variant, 
+            size: hasDescription ? undefined : size, 
+            alignment: centered ? "center" : "left",
+            className 
+          }),
           // Use cursor-not-allowed for disabled buttons, cursor-default for enabled buttons
           disabled ? "cursor-not-allowed" : "cursor-pointer",
           cursorType === "add" ? "cursor-none" : "cursor-pointer",
-          buttonVariants({ variant, size, className })
+          // Adjust button styling when description is present - must come after buttonVariants to override
+          hasDescription && "h-auto py-3 px-4 whitespace-normal"
         )}
         ref={ref}
         disabled={disabled}
@@ -96,8 +187,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         onMouseLeave={
           disabled ? onMouseLeave : handleMouseLeaveHook(onMouseLeave)
         }
+        {...linkProps}
         {...props}
-      />
+      >
+        {buttonContent}
+      </Comp>
     );
   }
 );
