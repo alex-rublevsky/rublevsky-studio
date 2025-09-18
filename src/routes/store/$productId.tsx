@@ -1,8 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, stripSearchParams } from "@tanstack/react-router";
 import ImageGallery from "~/components/ui/shared/ImageGallery";
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
-import type { Components } from "react-markdown";
+import { markdownComponents, rehypePlugins } from "~/components/ui/shared/MarkdownComponents";
 import { Button } from "~/components/ui/shared/Button";
 import { Link } from "@tanstack/react-router";
 import { useCart } from "~/lib/cartContext";
@@ -20,71 +20,131 @@ import {
 import { Badge } from "~/components/ui/shared/Badge";
 import { getAvailableQuantityForVariation } from "~/utils/validateStock";
 import { useVariationSelection } from "~/hooks/useVariationSelection";
-import { useQuery } from "@tanstack/react-query";
 import { DEPLOY_URL } from "~/utils/store";
-import { z } from "zod";
 import { ProductPageSkeleton } from "~/components/ui/store/skeletons/ProductPageSkeleton";
 import { getCountryByCode } from "~/constants/countries";
 import { useDeviceType } from "~/hooks/use-mobile";
+import { useQuery } from "@tanstack/react-query";
 
-// Create search params schema based on actual product attributes
-const createProductSearchSchema = () => {
-  const schemaObject: Record<string, z.ZodOptional<z.ZodString>> = {};
-
-  // Add all known product attributes as optional string fields
-  Object.keys(PRODUCT_ATTRIBUTES).forEach((attributeId) => {
-    // Convert attribute IDs to lowercase for URL params (e.g., SIZE_CM -> size_cm)
-    const paramName = attributeId.toLowerCase();
-    schemaObject[paramName] = z.string().optional();
+// Simple search params - no Zod needed for basic optional strings
+const validateSearch = (search: Record<string, unknown>) => {
+  // Get all known attribute parameter names from PRODUCT_ATTRIBUTES
+  const knownParams = Object.keys(PRODUCT_ATTRIBUTES).map(id => id.toLowerCase());
+  
+  // Create base object with known attributes
+  const result: Record<string, string | undefined> = {};
+  knownParams.forEach(param => {
+    result[param] = (search[param] as string) || undefined;
   });
-
-  return z.object(schemaObject);
+  
+  // Handle any additional dynamic attributes
+  Object.entries(search).forEach(([key, value]) => {
+    if (!knownParams.includes(key)) {
+      result[key] = (value as string) || undefined;
+    }
+  });
+  
+  return result;
 };
-
-const productSearchSchema = createProductSearchSchema();
 
 export const Route = createFileRoute("/store/$productId")({
   component: ProductPage,
-  validateSearch: productSearchSchema,
-  loader: async ({ params }) => {
-    // Fetch product data in the loader for immediate availability
-    const response = await fetch(`${DEPLOY_URL}/api/store/${params.productId}`);
-    if (!response.ok) {
-      throw new Error(`Product not found: ${response.status}`);
-    }
-    const product = await response.json();
-    return { product };
+  validateSearch,
+  // Strip undefined values from URL to keep it clean
+  search: {
+    middlewares: [
+      stripSearchParams(
+        Object.fromEntries(
+          Object.keys(PRODUCT_ATTRIBUTES).map(id => [id.toLowerCase(), undefined])
+        )
+      ),
+    ],
   },
-  // Removed pendingComponent to allow view transitions to work
-  errorComponent: ({ error }) => <div>Error: {error.message}</div>,
 });
 
 function ProductPage() {
-  const { product: loaderProduct } = Route.useLoaderData();
+  const { productId } = Route.useParams();
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
   const [quantity, setQuantity] = useState(1);
-  // Use loader data directly - cast to proper type
-  const product = loaderProduct as ProductWithDetails;
+  
   const { addProductToCart, cart, products } = useCart();
   const isMobileOrTablet = useDeviceType().isMobileOrTablet;
 
-  // Disable body scroll on desktop, enable on mobile
-  useEffect(() => {
-    if (!isMobileOrTablet) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+  // Check if this is a navigation (has referrer from same origin) vs fresh load
+  const isNavigation = typeof window !== 'undefined' && 
+    document.referrer && 
+    new URL(document.referrer).origin === window.location.origin;
 
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isMobileOrTablet]);
+  // Use React Query for data fetching - more performant and cacheable
+  const {
+    data: product,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ['product', productId],
+    queryFn: async () => {
+      const response = await fetch(`${DEPLOY_URL}/api/store/${productId}`);
+      if (!response.ok) {
+        throw new Error(`Product not found: ${response.status}`);
+      }
+      return response.json() as Promise<ProductWithDetails>;
+    },
+  });
+
+  // Auto-select first variation if no search params and product has variations
+  // This runs once when product loads and no search params exist
+  useEffect(() => {
+    if (!product?.hasVariations || !product.variations?.length) return;
+    
+    // Check if any search params are set
+    const hasAnySearchParams = Object.values(search).some(value => value !== undefined);
+    if (hasAnySearchParams) return;
+
+    // Find first available variation
+    const sortedVariations = [...product.variations].sort((a, b) => {
+      if (product.unlimitedStock) {
+        return (b.sort ?? 0) - (a.sort ?? 0);
+      }
+      
+      // Calculate actual available stock considering cart items
+      const aStock = getAvailableQuantityForVariation(product, a.id, cart.items);
+      const bStock = getAvailableQuantityForVariation(product, b.id, cart.items);
+      
+      // Prioritize variations with stock > 0
+      if (aStock > 0 && bStock === 0) return -1;
+      if (bStock > 0 && aStock === 0) return 1;
+      
+      // If both have stock or both are out of stock, sort by sort order
+      return (b.sort ?? 0) - (a.sort ?? 0);
+    });
+
+    const firstVariation = sortedVariations[0];
+    if (firstVariation?.attributes?.length > 0) {
+      // Build search params dynamically from first variation's attributes
+      const autoSearchParams: Record<string, string | undefined> = {};
+      
+      firstVariation.attributes.forEach((attr: VariationAttribute) => {
+        const paramName = attr.attributeId.toLowerCase();
+        autoSearchParams[paramName] = attr.value;
+      });
+
+      // Navigate with auto-selected variation
+      navigate({
+        search: autoSearchParams as any, // Type assertion for TanStack Router compatibility
+        replace: true,
+      });
+    }
+  }, [product, search, navigate, cart.items]);
 
   // Sync product data with cart context for stock info
   const syncedProduct = useMemo(() => {
-    if (!product) return product;
+    if (!product) {
+      // During navigation, try to get basic product info from cart context cache
+      // This ensures we have at least images for view transitions
+      const cachedProduct = products.find((p) => p.slug === productId);
+      return cachedProduct || null;
+    }
 
     // Find the product in the cart context cache
     const cachedProduct = products.find((p) => p.id === product.id);
@@ -98,9 +158,9 @@ function ProductPage() {
       };
     }
     return product;
-  }, [product, products]);
+  }, [product, products, productId]);
 
-  // Variation selection hook using URL search params
+  // Use variation selection hook with URL state for product page
   const {
     selectedVariation,
     selectedAttributes,
@@ -109,7 +169,7 @@ function ProductPage() {
   } = useVariationSelection({
     product: syncedProduct as ProductWithVariations | null,
     cartItems: cart.items,
-    search,
+    search, // Providing search enables URL state mode
     onVariationChange: () => setQuantity(1), // Reset quantity when variation changes
   });
 
@@ -257,11 +317,6 @@ function ProductPage() {
   ]);
 
   // Helper functions that don't need to be memoized
-  const getImages = (): string[] => {
-    if (!syncedProduct || !syncedProduct.images) return [];
-    return syncedProduct.images.split(",").map((img: string) => img.trim());
-  };
-
   const getUniqueAttributeNames = (): string[] => {
     if (!syncedProduct?.variations) return [];
 
@@ -277,31 +332,17 @@ function ProductPage() {
 
   const attributeNames = getUniqueAttributeNames();
 
-  // Add markdown components configuration
-  const markdownComponents: Components = {
-    a: ({ href, children, ...props }) => {
-      if (href?.startsWith("/")) {
-        // Internal link
-        return (
-          <Link to={href} className="text-primary hover:underline" {...props}>
-            {children}
-          </Link>
-        );
-      }
-      // External link
-      return (
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-primary hover:underline"
-          {...props}
-        >
-          {children}
-        </a>
-      );
-    },
-  };
+
+
+  // Handle error states
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
+
+  // For fresh loads without navigation, show full skeleton
+  if (isLoading && !syncedProduct && !isNavigation) {
+    return <ProductPageSkeleton />;
+  }
 
   return (
     <main className="min-h-screen flex flex-col lg:h-screen lg:overflow-hidden">
@@ -310,10 +351,10 @@ function ProductPage() {
           {/* Image gallery with view transitions */}
           <div className="w-full lg:w-3/5 xl:w-2/3 flex flex-col lg:flex-row gap-2 lg:h-full self-start">
             <ImageGallery
-              images={syncedProduct.images ? syncedProduct.images.split(",").map((img: string) => img.trim()) : []}
-              alt={syncedProduct.name}
+              images={syncedProduct?.images ? syncedProduct.images.split(",").map((img: string) => img.trim()) : []}
+              alt={syncedProduct?.name || "Product"}
               className="lg:pl-4 lg:pt-4 lg:pb-4"
-              productSlug={syncedProduct.slug}
+              productSlug={syncedProduct?.slug || productId}
             />
           </div>
 
@@ -321,8 +362,9 @@ function ProductPage() {
           <div 
             className="w-full lg:w-2/5 xl:w-1/3 px-4 lg:px-0 lg:h-[100dvh] lg:overflow-y-auto pt-4 pb-20 lg:pr-4 scrollbar-none product-info-enter"
           >
-            <div className="space-y-6 w-full ">
-              <h3>{syncedProduct.name}</h3>
+            {syncedProduct ? (
+              <div className="space-y-6 w-full ">
+                <h3>{syncedProduct.name}</h3>
 
               {/* Price */}
               <div className="flex gap-4 items-center">
@@ -412,30 +454,18 @@ function ProductPage() {
 
               {/* Metadata */}
               <div className="flex flex-wrap gap-6 text-sm">
-                {syncedProduct.category && (
+                {(syncedProduct as ProductWithDetails).category && (
                   <div className="flex flex-col">
                     <span className="text-muted-foreground">Category</span>
                     <Link
                       to="/store"
-                      search={{ category: syncedProduct.category.slug }}
+                      search={{ category: (syncedProduct as ProductWithDetails).category!.slug }}
                       className="text-primary hover:underline"
                     >
-                      {syncedProduct.category.name}
+                      {(syncedProduct as ProductWithDetails).category!.name}
                     </Link>
                   </div>
                 )}
-                {/* {product.brand && (
-                  <div className="flex flex-col">
-                    <span className="text-muted-foreground">Brand</span>
-                    <Link
-                      to="/store"
-                      search={{ brand: product.brand.slug }}
-                      className="text-primary hover:underline"
-                    >
-                      {product.brand.name}
-                    </Link>
-                  </div>
-                )} */}
                 {currentShippingFrom && (
                   <div className="flex flex-col">
                     <span className="text-muted-foreground">Ships from</span>
@@ -447,26 +477,45 @@ function ProductPage() {
                     </span>
                   </div>
                 )}
+                {/* Ripe Puer blog post link */}
+                {(syncedProduct as ProductWithDetails).teaCategories?.includes("ripe-pu-er") && (
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground">Learn more</span>
+                    <a
+                      href="https://rublevsky.studio/blog/shu-puer-the-foundation-trilogy-part-iii#shu-puer-the-foundation-trilogy-part-iii"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      About Ripe Pu'er
+                    </a>
+                  </div>
+                )}
               </div>
 
               {/* Blog post link */}
-              {syncedProduct?.blogPost && (
+              {(syncedProduct as ProductWithDetails).blogPost && (
                 <div className="pt-4">
                   <div className="mb-2">
-                    {syncedProduct.blogPost.title ? (
+                    {(syncedProduct as ProductWithDetails).blogPost!.title ? (
                       <>
                         <span className="text-muted-foreground">
                           From blog post:
                         </span>{" "}
                         <Link
-                          to={syncedProduct.blogPost.blogUrl}
+                          to="/blog/$slug"
+                          params={{ slug: (syncedProduct as ProductWithDetails).blogPost!.slug }}
                           className="blurLink"
                         >
-                          {syncedProduct.blogPost.title}
+                          {(syncedProduct as ProductWithDetails).blogPost!.title}
                         </Link>
                       </>
                     ) : (
-                      <Link to={syncedProduct.blogPost.blogUrl} className="blurLink">
+                      <Link 
+                        to="/blog/$slug"
+                        params={{ slug: (syncedProduct as ProductWithDetails).blogPost!.slug }}
+                        className="blurLink"
+                      >
                         From blog post
                       </Link>
                     )}
@@ -476,11 +525,22 @@ function ProductPage() {
 
               {/* Product description */}
               <div className="prose max-w-none">
-                <ReactMarkdown components={markdownComponents}>
+                <ReactMarkdown components={markdownComponents} rehypePlugins={rehypePlugins}>
                   {syncedProduct.description || ""}
                 </ReactMarkdown>
               </div>
             </div>
+            ) : (
+              // Show loading state for product info while preserving image gallery
+              <div className="space-y-6 w-full animate-pulse">
+                <div className="h-8 bg-muted rounded w-3/4"></div>
+                <div className="h-6 bg-muted rounded w-1/2"></div>
+                <div className="space-y-2">
+                  <div className="h-4 bg-muted rounded w-full"></div>
+                  <div className="h-4 bg-muted rounded w-2/3"></div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
