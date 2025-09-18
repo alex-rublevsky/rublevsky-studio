@@ -107,6 +107,19 @@ export function CartProvider({
     setInitialized(true);
   }, []);
 
+  // Listen for cart clear events from other parts of the app (like order success page)
+  useEffect(() => {
+    const handleCartCleared = () => {
+      setCart({
+        items: [],
+        lastUpdated: Date.now(),
+      });
+    };
+
+    window.addEventListener('cart-cleared', handleCartCleared);
+    return () => window.removeEventListener('cart-cleared', handleCartCleared);
+  }, []);
+
   // Load or update products in localStorage
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -316,7 +329,9 @@ export function CartProvider({
           : result.availableStock,
         unlimitedStock: result.unlimitedStock,
         discount: selectedVariation?.discount || product.discount,
-        image: product.images?.split(",")[0].trim(),
+        image: product.images && typeof product.images === 'string' 
+          ? product.images.split(",")[0]?.trim() || undefined 
+          : undefined,
         attributes: selectedAttributes,
         ...(product.weight
           ? {
