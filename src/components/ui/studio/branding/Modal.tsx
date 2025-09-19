@@ -70,22 +70,24 @@ export default function Modal({
                   : null;
               return (
                 <div className="relative flex flex-col lg:flex-row h-auto gap-2">
-                  {/* Close button - positioned absolutely to top-right of modal */}
+                  {/* Close button - styled like navbar back buttons */}
                   <motion.div
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.3, delay: 0.1 }}
-                    className="absolute right-4 top-4 z-30"
+                    className="fixed bottom-0 left-0 right-0 z-[60] mb-3 flex justify-start items-center px-3 pointer-events-none"
                   >
-                    <Button
-                      onClick={() => setSelected(null)}
-                      size="lg"
-                      className="flex"
-                      cursorType="default"
-                    >
-                      <X className="h-6 w-6" />
-                      <span className="sr-only">Close gallery</span>
-                    </Button>
+                    <div className="pointer-events-auto">
+                      <div className="relative flex w-fit rounded-full border border-black bg-background hover:bg-black hover:text-white transition-all duration-300 p-[0.3rem]">
+                        <button
+                          onClick={() => setSelected(null)}
+                          className="relative z-10 flex items-center gap-2 cursor-pointer px-3 py-1.5 text-xs text-white mix-blend-difference md:px-4 md:py-2 md:text-sm"
+                        >
+                          <X className="h-4 w-4" />
+                          Close project
+                        </button>
+                      </div>
+                    </div>
                   </motion.div>
 
                   {/* Thumbnails column - desktop only */}
