@@ -1,6 +1,7 @@
 import { cn } from "~/utils/utils";
 import { cva } from "class-variance-authority";
 import { useCursorHover } from "~/components/ui/shared/custom_cursor/CustomCursorContext";
+import useSound from "use-sound";
 
 interface FilterOption {
   slug: string;
@@ -48,6 +49,10 @@ function FilterButton({
   variant = "default",
   title,
 }: FilterButtonProps) {
+  const [playHoverSound] = useSound("/assets/plunger-immediate.mp3", {
+    volume: 0.25,
+  });
+
   const state = isDisabled
     ? isSelected
       ? "selected-disabled"
@@ -78,7 +83,11 @@ function FilterButton({
         className
       )}
       title={title}
-      onMouseEnter={handleMouseEnter()}
+      onMouseEnter={handleMouseEnter((e) => {
+        if (!isDisabled) {
+          playHoverSound();
+        }
+      })}
       onMouseLeave={handleMouseLeave()}
     >
       {children}
