@@ -5,7 +5,7 @@ import {
   createRootRoute,
   useRouter,
 } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+//import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as React from "react";
 import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary";
@@ -34,9 +34,6 @@ export const Route = createRootRoute({
         title: "Rublevsky Studio",
         description: `TanStack Start is a type-safe, client-first, full-stack React framework. `,
       }),
-    ],
-    scripts: [
-      // Spline viewer script is now loaded dynamically based on device type
     ],
     links: [
       { rel: "stylesheet", href: appCss },

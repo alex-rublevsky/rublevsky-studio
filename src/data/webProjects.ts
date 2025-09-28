@@ -11,8 +11,8 @@ export const webProjects: Project[] = [
   //       icon: 'logos/figma-text.svg'
   //     },
   //       {
-  //       name: 'Tanstack',
-  //       icon: 'logos/tanstack.png',
+  //       name: 'Vite',
+  //       icon: 'logos/vite.png',
   //       largeIcon: true
   //     },
   //      {
@@ -24,7 +24,16 @@ export const webProjects: Project[] = [
   //       name: 'Cloudflare',
   //       icon: 'logos/cloudflare.png'
   //     },
-
+    //       {
+  //       name: 'hashBlur',
+  //       icon: 'logos/hashblur.png',
+  //       largeIcon: true
+  //     },
+   //       {
+  //       name: 'Motion',
+  //       icon: 'logos/motion.png',
+  //       largeIcon: true
+  //     },
   //   ],
   //   websiteUrl: 'https://www.abaly.ch/',
   //   layout: 'full',

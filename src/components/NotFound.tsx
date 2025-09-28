@@ -1,7 +1,6 @@
 import { Button } from '~/components/ui/shared/Button'
 import { useNavigate } from '@tanstack/react-router'
 
-//TODO: where does the 1% scroll come from on such pages which should be exact hight of the screen?
 export function NotFound({ children }: { children?: any }) {
   const navigate = useNavigate();
   return (
