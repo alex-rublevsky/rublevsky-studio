@@ -10,6 +10,17 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   server: {
     port: 3000,
+    proxy: process.env.LOCAL_SERVER_FN
+      ? undefined
+      : {
+          // Proxy server function calls to production (default)
+          // Set LOCAL_SERVER_FN=true to run server functions locally
+          "/_serverFn": {
+            target: "https://rublevsky.studio",
+            changeOrigin: true,
+            secure: true,
+          },
+        },
   },
   plugins: [
     tsConfigPaths({

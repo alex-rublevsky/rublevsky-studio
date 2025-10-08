@@ -37,3 +37,5 @@ worker-configuration.d.ts
 TODO
 dist
 src/routeTree.gen.ts
+.tanstack
+src/routeTree.gen.ts
