@@ -9,11 +9,11 @@ import { env } from "cloudflare:workers";
  * BetterAuth configuration
  *
  * Note: BETTER_AUTH_SECRET, GITHUB_CLIENT_ID, and GITHUB_CLIENT_SECRET
- * must be set as regular Wrangler secrets (not Secrets Store) because
- * they need to be accessed synchronously at module initialization.
+ * must be set in .dev.vars for local development and as Wrangler secrets for production.
+ * They need to be accessed synchronously at module initialization.
  *
- * ADMIN_EMAIL and RESEND_API_KEY can be in Secrets Store because they're
- * only accessed in async server functions.
+ * ADMIN_EMAIL and RESEND_API_KEY can be in Secrets Store (production) or .dev.vars (dev)
+ * because they're only accessed in async server functions.
  */
 export const auth = betterAuth({
   database: drizzleAdapter(DB(), {

@@ -1,8 +1,12 @@
 /**
- * Cloudflare Secrets Store Utility
+ * Cloudflare Bindings Utility
  *
- * All secrets are stored in Cloudflare Secrets Store (centralized, cross-worker).
- * Secrets Store bindings return Fetcher objects that require calling .get() to retrieve the value.
+ * Handles Cloudflare bindings in both production and local development.
+ *
+ * In production: Uses cloudflare:workers env directly
+ * In local dev: Uses cloudflare:workers env provided by @cloudflare/vite-plugin
+ *
+ * The @cloudflare/vite-plugin provides bindings from wrangler.jsonc configuration.
  */
 
 /**
@@ -15,7 +19,6 @@ export async function resolveSecret(
   value: any
 ): Promise<string | null | undefined> {
   try {
-    // Plain string (shouldn't happen with Secrets Store, but handle it)
     if (typeof value === "string") {
       return value;
     }
@@ -30,10 +33,10 @@ export async function resolveSecret(
       return typeof result === "string" ? result : String(result);
     }
 
-    console.error("Unexpected secret format:", typeof value);
+    console.warn("Secret not found or unexpected format:", typeof value);
     return null;
   } catch (error) {
-    console.error("Error resolving secret:", error);
+    console.warn("Error resolving secret (will return null):", error);
     return null;
   }
 }
