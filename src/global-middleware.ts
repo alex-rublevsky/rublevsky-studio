@@ -1,6 +1,8 @@
-import { registerGlobalMiddleware } from '@tanstack/react-start'
+import { createMiddleware } from '@tanstack/react-start'
 import { logMiddleware } from './utils/loggingMiddleware'
+import { authMiddleware } from './utils/auth-middleware'
 
-registerGlobalMiddleware({
-  middleware: [logMiddleware],
-})
+// Register middleware globally by importing them
+// The middleware will be applied when imported in the app
+export const globalMiddleware = createMiddleware()
+  .middleware([logMiddleware, authMiddleware])

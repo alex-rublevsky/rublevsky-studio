@@ -4,7 +4,7 @@ import { Image } from "~/components/ui/shared/Image";
 import { Switch } from "~/components/ui/shared/Switch";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
-import { DEPLOY_URL } from "~/utils/store";
+import { getAllOrders } from "~/server_functions/dashboard/orders/getAllOrders";
 
 interface OrderAddress {
   id: number;
@@ -65,8 +65,7 @@ export const Route = createFileRoute("/dashboard/orders")({
 function OrderList() {
   const { isPending, data, isError, refetch } = useQuery<Order[]>({
     queryKey: ["dashboard-orders"],
-    queryFn: () =>
-      fetch(`${DEPLOY_URL}/api/dashboard/orders`).then((res) => res.json()),
+    queryFn: () => getAllOrders(),
   });
 
   const handleToggleStatus = async (orderId: number, currentStatus: string) => {

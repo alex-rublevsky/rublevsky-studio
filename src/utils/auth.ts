@@ -1,21 +1,32 @@
-import { betterAuth } from "better-auth"
+import { betterAuth } from "better-auth";
 import { reactStartCookies } from "better-auth/react-start";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import {db} from "~/db";
-import { schema} from "../schema";
+import { DB } from "~/db";
+import { schema } from "../schema";
+import { env } from "cloudflare:workers";
 
- 
+/**
+ * BetterAuth configuration
+ *
+ * Note: BETTER_AUTH_SECRET, GITHUB_CLIENT_ID, and GITHUB_CLIENT_SECRET
+ * must be set as regular Wrangler secrets (not Secrets Store) because
+ * they need to be accessed synchronously at module initialization.
+ *
+ * ADMIN_EMAIL and RESEND_API_KEY can be in Secrets Store because they're
+ * only accessed in async server functions.
+ */
 export const auth = betterAuth({
-    database: drizzleAdapter(db, {
-        provider: "sqlite", // D1 is SQLite-compatible
-        schema: schema,
-    }),
-    baseURL: process.env.BETTER_AUTH_URL,
-    socialProviders: {
-        github: { 
-            clientId: process.env.GITHUB_CLIENT_ID as string, 
-            clientSecret: process.env.GITHUB_CLIENT_SECRET as string, 
-        }, 
+  database: drizzleAdapter(DB(), {
+    provider: "sqlite", // D1 is SQLite-compatible
+    schema: schema,
+  }),
+  baseURL: env.BETTER_AUTH_URL as string,
+  secret: env.BETTER_AUTH_SECRET as unknown as string,
+  socialProviders: {
+    github: {
+      clientId: env.GITHUB_CLIENT_ID as unknown as string,
+      clientSecret: env.GITHUB_CLIENT_SECRET as unknown as string,
     },
-    plugins: [reactStartCookies()]
-})
+  },
+  plugins: [reactStartCookies()],
+});

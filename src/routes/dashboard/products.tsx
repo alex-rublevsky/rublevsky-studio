@@ -2,9 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { DEPLOY_URL } from "~/utils/store";
-import { Plus } from "lucide-react";
+import { getAllProducts } from "~/server_functions/dashboard/store/getAllProducts";
+import { createProduct } from "~/server_functions/dashboard/store/createProduct";
+import { updateProduct } from "~/server_functions/dashboard/store/updateProduct";
+import { deleteProduct } from "~/server_functions/dashboard/store/deleteProduct";
+import { getProductBySlug } from "~/server_functions/dashboard/store/getProductBySlug";
 import { COUNTRY_OPTIONS } from "~/constants/countries";
+import { Plus } from "lucide-react";
 
 import {
   Product,
@@ -76,8 +80,7 @@ function RouteComponent() {
     brands: Brand[];
   }>({
     queryKey: ["dashboard-products"],
-    queryFn: () =>
-      fetch(`${DEPLOY_URL}/api/dashboard/products`).then((res) => res.json()),
+    queryFn: () => getAllProducts(),
   });
 
   const defaultFormData = {
@@ -419,18 +422,7 @@ function RouteComponent() {
         teaCategories: formData.teaCategories || undefined,
       };
 
-      const response = await fetch(`${DEPLOY_URL}/api/dashboard/products`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(submissionData),
-      });
-
-      if (!response.ok) {
-        const errorData = (await response.json()) as { error?: string };
-        throw new Error(errorData.error || "Failed to create product");
-      }
+      await createProduct({ data: submissionData });
 
       toast.success("Product added successfully!");
 
@@ -481,21 +473,7 @@ function RouteComponent() {
         variations: formattedVariations,
       };
 
-      const response = await fetch(
-        `${DEPLOY_URL}/api/dashboard/products/${editingProductId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(submissionData),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = (await response.json()) as { error?: string };
-        throw new Error(errorData.error || "Failed to update product");
-      }
+      await updateProduct({ data: { id: editingProductId, data: submissionData } });
 
       toast.success("Product updated successfully!");
 
@@ -526,17 +504,7 @@ function RouteComponent() {
     setError("");
 
     try {
-      const response = await fetch(
-        `${DEPLOY_URL}/api/dashboard/products/${deletingProductId}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = (await response.json()) as { error?: string };
-        throw new Error(errorData.error || "Failed to delete product");
-      }
+      await deleteProduct({ data: { id: deletingProductId } });
 
       toast.success("Product deleted successfully!");
       setShowDeleteDialog(false);
@@ -565,20 +533,11 @@ function RouteComponent() {
 
     try {
       // Fetch complete product data including variations and tea categories
-      const response = await fetch(
-        `${DEPLOY_URL}/api/dashboard/products/${product.id}`
-      );
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch product details: ${response.status}`);
-      }
-
-      const productWithDetails =
-        (await response.json()) as ProductWithVariations;
+      const productWithDetails = await getProductBySlug({ data: { id: product.id } });
 
       // Convert variations to the frontend format
       const formattedVariations =
-        productWithDetails.variations?.map((variation) => ({
+        productWithDetails.variations?.map((variation: any) => ({
           id: variation.id.toString(),
           sku: variation.sku,
           price: variation.price,

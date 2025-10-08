@@ -4,20 +4,28 @@ import { useSession, signIn, signOut } from "~/utils/auth-client";
 import NeumorphismCard from "~/components/ui/shared/NeumorphismCard";
 import { AnimatedGroup } from "~/components/motion_primitives/AnimatedGroup";
 import { TextEffect } from "~/components/motion_primitives/AnimatedText";
+import { getAuthStatus } from "~/utils/auth-server-func";
 
 export const Route = createFileRoute("/login")({
   component: RouteComponent,
+  loader: async () => {
+    try {
+      const authStatus = await getAuthStatus();
+      return { authStatus };
+    } catch (error) {
+      console.error("Error loading auth status:", error);
+      return { authStatus: { isAuthenticated: false, isAdmin: false } };
+    }
+  },
 });
 
 function RouteComponent() {
   const { data: session } = useSession();
-
-  // TODO: move to environment variable
-  const AUTHORIZED_EMAIL = "alexander.rublevskii@gmail.com";
+  const { authStatus } = Route.useLoaderData();
 
   if (session) {
-    // Check if user is authorized
-    const isAuthorized = session.user.email === AUTHORIZED_EMAIL;
+    // Check if user is authorized using server-side check
+    const isAuthorized = authStatus?.isAdmin ?? false;
 
     if (isAuthorized) {
       return (

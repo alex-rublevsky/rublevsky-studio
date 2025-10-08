@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import BlogPostCard from "~/components/ui/blog/BlogPostCard";
 import { BlogPostPreview, TeaCategory } from "~/types/index";
 import { useQuery } from "@tanstack/react-query";
-import { DEPLOY_URL } from "~/utils/store";
+import { getAllBlogPosts } from "~/server_functions/blog/getAllBlogPosts";
 import { FilterGroup } from "~/components/ui/shared/FilterGroup";
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
@@ -25,7 +25,7 @@ function PostsIndexComponent() {
     totalCount: number;
   }>({
     queryKey: ["blog"],
-    queryFn: () => fetch(`${DEPLOY_URL}/api/blog`).then((res) => res.json()),
+    queryFn: () => getAllBlogPosts(),
   });
 
   const posts = data?.posts || [];

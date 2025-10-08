@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import {
   HeadContent,
   Outlet,
@@ -10,7 +11,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as React from "react";
 import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary";
 import { NotFound } from "~/components/NotFound";
-import appCss from "~/styles/app.css?url";
+import appCss from "../styles/app.css?url";
 import { seo } from "~/utils/seo";
 import { NavBar } from "~/components/ui/shared/NavBar";
 import { PostHogWrapper } from "~/components/PostHogWrapper";
@@ -67,6 +68,9 @@ export const Route = createRootRoute({
   },
   notFoundComponent: () => <NotFound />,
   component: RootComponent,
+  context: () => ({
+    queryClient,
+  }),
 });
 
 function RootComponent() {
@@ -78,7 +82,7 @@ function RootComponent() {
         <CursorContextProvider>
           {!isMobile && <CustomCursor />}
           <RootDocument>
-              <Outlet />
+            <Outlet />
           </RootDocument>
         </CursorContextProvider>
       </QueryClientProvider>
@@ -89,18 +93,16 @@ function RootComponent() {
 function RootDocument({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = router.state.location.pathname;
-  
+
   return (
-    <html lang="en" 
-    className={`${pathname === "/" ? "scroll-smooth" : ""}`}
-    >
+    <html lang="en" className={`${pathname === "/" ? "scroll-smooth" : ""}`}>
       <head>
         <HeadContent />
       </head>
       <body className="overscroll-none ">
         <NavBar />
         {children}
- {/* <TanStackRouterDevtools position="bottom-right" /> */}
+        {/* <TanStackRouterDevtools position="bottom-right" /> */}
         <Scripts />
       </body>
     </html>

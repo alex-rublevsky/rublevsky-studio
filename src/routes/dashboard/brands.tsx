@@ -17,7 +17,7 @@ import {
   DrawerFooter,
 } from "~/components/ui/shared/Drawer";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { DEPLOY_URL } from "~/utils/store";
+import { getAllBrands } from "~/server_functions/dashboard/getAllBrands";
 import { Plus } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard/brands")({
@@ -28,8 +28,7 @@ function RouteComponent() {
   const queryClient = useQueryClient();
   const { isPending, data } = useQuery<Brand[]>({
     queryKey: ["dashboard-brands"],
-    queryFn: () =>
-      fetch(`${DEPLOY_URL}/api/dashboard/brands`).then((res) => res.json()),
+    queryFn: () => getAllBrands(),
   });
   // Separate form data for creating and editing
   const [createFormData, setCreateFormData] = useState<BrandFormData>({

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Image } from "~/components/ui/shared/Image";
-import { DEPLOY_URL } from "~/utils/store";
+import { getProductsForSelector } from "~/server_functions/dashboard/store/getProductsForSelector";
 
 interface Product {
   id: number;
@@ -40,16 +40,12 @@ export default function ProductSelector({
   const openDropdown = async () => {
     setShowDropdown(true);
     searchInputRef.current?.focus();
-    
+
     // Only fetch if we don't have products yet and aren't already loading
     if (products.length === 0 && !isLoading) {
       try {
         setIsLoading(true);
-        const response = await fetch(`${DEPLOY_URL}/api/dashboard/products`);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch products: ${response.status}`);
-        }
-        const data = await response.json() as { products: Product[] };
+        const data = await getProductsForSelector();
         setProducts(data.products || []);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -103,36 +99,57 @@ export default function ProductSelector({
   );
 
   // Parse images for the selected product
-  const getProductImage = (product: Product): string => {
+  const getProductImage = (product: Product): string | null => {
     try {
-      if (!product.images) return "/placeholder.jpg";
+      if (!product.images) return null;
 
       // Split comma-separated string into array and add leading slash
       const imageArray = product.images
         .split(",")
         .map((img) => `/${img.trim()}`);
 
-      // Return the first image or a placeholder
-      return imageArray.length > 0 ? imageArray[0] : "/placeholder.jpg";
+      // Return the first image or null
+      return imageArray.length > 0 ? imageArray[0] : null;
     } catch (error) {
       console.error("Error parsing product images:", error);
-      return "/placeholder.jpg";
+      return null;
     }
   };
+
+  // Placeholder component for products without images
+  const ImagePlaceholder = ({ className }: { className?: string }) => (
+    <div className={`bg-muted flex items-center justify-center ${className}`}>
+      <svg
+        className="w-4 h-4 text-muted-foreground"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+        />
+      </svg>
+    </div>
+  );
 
   return (
     <div className="relative" ref={componentRef}>
       {selectedProduct ? (
         <div className="flex items-center space-x-2 p-2 border border-input rounded bg-card">
-          {getProductImage(selectedProduct) && (
-            <div className="w-10 h-10 relative shrink-0">
+          <div className="w-10 h-10 relative shrink-0">
+            {getProductImage(selectedProduct) ? (
               <Image
-                src={getProductImage(selectedProduct)}
+                src={getProductImage(selectedProduct)!}
                 alt={selectedProduct.name}
                 className="object-cover rounded"
               />
-            </div>
-          )}
+            ) : (
+              <ImagePlaceholder className="w-full h-full rounded" />
+            )}
+          </div>
           <div className="grow">
             <p className="font-medium">{selectedProduct.name}</p>
             <p className="text-sm text-muted-foreground">
@@ -169,7 +186,7 @@ export default function ProductSelector({
       )}
 
       {showDropdown && (
-        <div className="absolute z-10 w-full mt-1 bg-card border border-input rounded shadow-lg max-h-60 overflow-y-auto">
+        <div className="absolute z-10 w-full mt-1 bg-background border border-input rounded shadow-lg max-h-60 overflow-y-auto">
           {isLoading ? (
             <div className="p-2 text-center text-muted-foreground">
               Loading products...
@@ -185,15 +202,17 @@ export default function ProductSelector({
                 onClick={() => handleProductSelect(product)}
                 className="flex items-center p-2 hover:bg-muted cursor-pointer"
               >
-                {getProductImage(product) && (
-                  <div className="w-8 h-8 relative shrink-0 mr-2">
+                <div className="w-8 h-8 relative shrink-0 mr-2">
+                  {getProductImage(product) ? (
                     <Image
-                      src={getProductImage(product)}
+                      src={getProductImage(product)!}
                       alt={product.name}
                       className="object-cover rounded"
                     />
-                  </div>
-                )}
+                  ) : (
+                    <ImagePlaceholder className="w-full h-full rounded" />
+                  )}
+                </div>
                 <div>
                   <p className="font-medium">{product.name}</p>
                   <p className="text-xs text-muted-foreground">

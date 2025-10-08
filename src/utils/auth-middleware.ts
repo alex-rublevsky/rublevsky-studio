@@ -1,53 +1,46 @@
-import {createMiddleware} from "@tanstack/react-start";
-import { getWebRequest } from "@tanstack/react-start/server";
-import {auth} from "~/utils/auth";
+import { createMiddleware } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
+import { auth } from "~/utils/auth";
 
-type AuthUser = {
-    id: string | undefined;
-    name: string | undefined;
-    email: string | undefined;
-    image: string | undefined;
-};
+type User = {
+  id?: string;
+  name?: string;
+  email?: string;
+  image?: string | null;
+} | null;
 
-export const authMiddleware = createMiddleware().server(async ({next}) => {
-    try {
-        // Get the web request to access headers for better-auth
-        const request = getWebRequest();
-        
-        // Get the session using better-auth with headers
-        // Fall back to empty headers if request is not available
-        const session = await auth.api.getSession({
-            headers: request?.headers || new Headers()
-        });
-        
-        console.log('Auth middleware - session:', session);
-        
-        const user: AuthUser = {
-            id: session?.user?.id || undefined,
-            name: session?.user?.name || undefined,
-            email: session?.user?.email || undefined,
-            image: session?.user?.image || undefined,
-        };
-        
-        return await next({
-            context: {
-                user
-            },
-        });
-    } catch (error) {
-        console.error('Auth middleware error:', error);
-        const user: AuthUser = {
-            id: undefined,
-            name: undefined,
-            email: undefined,
-            image: undefined,
-        };
-        
-        return await next({
-            context: {
-                user
-            },
-        });
-    }
-}
-);
+export const authMiddleware = createMiddleware().server(async ({ next }) => {
+  const request = getRequest();
+
+  if (!request) {
+    return await next({
+      context: {
+        user: null as User,
+      },
+    });
+  }
+
+  try {
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+
+    return await next({
+      context: {
+        user: {
+          id: session?.user?.id,
+          name: session?.user?.name,
+          email: session?.user?.email,
+          image: session?.user?.image,
+        } as User,
+      },
+    });
+  } catch (error) {
+    console.error("authMiddleware: getSession failed", error);
+    return await next({
+      context: {
+        user: null as User,
+      },
+    });
+  }
+});

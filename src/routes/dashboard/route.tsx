@@ -1,38 +1,63 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
-import { getUserID, getUserEmail } from "~/utils/auth-server-func";
+import {
+  createFileRoute,
+  redirect,
+  useLoaderData,
+} from "@tanstack/react-router";
+import { getUserData } from "~/utils/auth-server-func";
 import { Outlet } from "@tanstack/react-router";
 import { Toaster } from "~/components/ui/shared/sonner";
 import { NavBar } from "~/components/ui/shared/NavBar";
 
-// TODO: move to environment variable
-const AUTHORIZED_EMAIL = "alexander.rublevskii@gmail.com";
-
 export const Route = createFileRoute("/dashboard")({
-  component: RouteComponent,
+  // Use beforeLoad for security: prevents child routes from loading if auth fails
   beforeLoad: async () => {
-    const userID = await getUserID();
-    const userEmail = await getUserEmail();
-    return { userID, userEmail };
+    try {
+      const userData = await getUserData();
+
+      // Check if user is authenticated and is admin
+      if (!userData.isAuthenticated || !userData.isAdmin) {
+        throw redirect({ to: "/login" });
+      }
+
+      // Ensure we have required user data
+      if (!userData.userID || !userData.userEmail) {
+        throw redirect({ to: "/login" });
+      }
+
+      // Return user data in context for the loader to use
+      return { userData };
+    } catch {
+      throw redirect({ to: "/login" });
+    }
   },
+  // Loader just passes through the user data from beforeLoad context
   loader: async ({ context }) => {
-    // if (!context.userID) {
-    //   throw redirect({ to: "/login" });
-    // }
-    // // Check if user email matches authorized email
-    // if (context.userEmail !== AUTHORIZED_EMAIL) {
-    //   throw redirect({ to: "/login" });
-    // }
-    // return { userID: context.userID, userEmail: context.userEmail };
+    return {
+      userID: context.userData.userID,
+      userName: context.userData.userName,
+      userEmail: context.userData.userEmail,
+      userAvatar: context.userData.userAvatar,
+    };
   },
+  component: RouteComponent,
 });
 
 function RouteComponent() {
+  const loaderData = useLoaderData({ from: "/dashboard" }) as
+    | {
+        userID: string;
+        userName: string;
+        userEmail: string;
+        userAvatar: string;
+      }
+    | undefined;
+
   return (
     <div className="min-h-screen bg-background">
       <main className="container mx-auto py-8 pb-24 max-w-7xl">
         <Outlet />
       </main>
-      <NavBar />
+      <NavBar userData={loaderData} />
       <Toaster />
     </div>
   );

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+
 // import HeroSection from "~/components/ui/studio/HeroSection";
 // import MembershipBenefitsSection from "~/components/ui/studio/MembershipBenefitsSection";
 // import SubscriptionSection from "~/components/ui/studio/SubscriptionSection";
@@ -13,13 +13,15 @@ import { createFileRoute } from "@tanstack/react-router";
 // import GallerySection from "~/components/ui/studio/gallery/GallerySection";
 // import CallBookingSection from "~/components/ui/studio/CallBookingSection";
 // import SmoothScroll from "~/components/SmoothScroll";
+import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "~/components/ui/shared/Button";
+import '../styles/app.css';
 
 export const Route = createFileRoute("/")({
-  component: Work,
+  component: App,
 });
 
-function Work() {
+function App() {
   return (
 <div className="min-h-screen flex flex-col">
   <main className="flex-1 flex items-center justify-center px-4 py-8">

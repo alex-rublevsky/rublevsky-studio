@@ -1,8 +1,16 @@
-import { createFileRoute, stripSearchParams } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  stripSearchParams,
+  notFound,
+} from "@tanstack/react-router";
+import type { ErrorComponentProps } from "@tanstack/react-router";
 import ImageGallery from "~/components/ui/shared/ImageGallery";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
-import { markdownComponents, rehypePlugins } from "~/components/ui/shared/MarkdownComponents";
+import {
+  markdownComponents,
+  rehypePlugins,
+} from "~/components/ui/shared/MarkdownComponents";
 import { Button } from "~/components/ui/shared/Button";
 import { Link } from "@tanstack/react-router";
 import { useCart } from "~/lib/cartContext";
@@ -20,42 +28,135 @@ import {
 import { Badge } from "~/components/ui/shared/Badge";
 import { getAvailableQuantityForVariation } from "~/utils/validateStock";
 import { useVariationSelection } from "~/hooks/useVariationSelection";
-import { DEPLOY_URL } from "~/utils/store";
 import { ProductPageSkeleton } from "~/components/ui/store/skeletons/ProductPageSkeleton";
 import { getCountryByCode } from "~/constants/countries";
-import { useDeviceType } from "~/hooks/use-mobile";
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { getProductBySlug } from "~/server_functions/store/getProductBySlug";
 
 // Simple search params - no Zod needed for basic optional strings
 const validateSearch = (search: Record<string, unknown>) => {
   // Get all known attribute parameter names from PRODUCT_ATTRIBUTES
-  const knownParams = Object.keys(PRODUCT_ATTRIBUTES).map(id => id.toLowerCase());
-  
+  const knownParams = Object.keys(PRODUCT_ATTRIBUTES).map((id) =>
+    id.toLowerCase()
+  );
+
   // Create base object with known attributes
   const result: Record<string, string | undefined> = {};
-  knownParams.forEach(param => {
+  knownParams.forEach((param) => {
     result[param] = (search[param] as string) || undefined;
   });
-  
+
   // Handle any additional dynamic attributes
   Object.entries(search).forEach(([key, value]) => {
     if (!knownParams.includes(key)) {
       result[key] = (value as string) || undefined;
     }
   });
-  
+
   return result;
 };
 
+// Error component for product page errors
+function ProductErrorComponent({ error }: ErrorComponentProps) {
+  return (
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="text-center max-w-md">
+        <h1 className="text-4xl font-bold mb-4">Oops!</h1>
+        <p className="text-muted-foreground mb-6">
+          Something went wrong while loading this product.
+        </p>
+        <div className="flex gap-3 justify-center">
+          <Button asChild size="lg">
+            <Link to="/store">Browse Store</Link>
+          </Button>
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={() => window.location.reload()}
+          >
+            Try Again
+          </Button>
+        </div>
+        {error && (
+          <details className="mt-6 text-left">
+            <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground">
+              Error details
+            </summary>
+            <pre className="mt-2 text-xs bg-muted p-4 rounded overflow-auto">
+              {error.message}
+            </pre>
+          </details>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Not found component for product page
+function ProductNotFoundComponent() {
+  return (
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="text-center max-w-md">
+        <h1 className="text-4xl font-bold mb-4">Product Not Found</h1>
+        <p className="text-muted-foreground mb-6">
+          The product you're looking for doesn't exist or has been removed.
+        </p>
+        <div className="flex gap-3 justify-center">
+          <Button asChild size="lg">
+            <Link to="/store">Browse Store</Link>
+          </Button>
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={() => window.history.back()}
+          >
+            Go Back
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Product query options factory for reuse
+const productQueryOptions = (productId: string) => ({
+  queryKey: ["product", productId],
+  queryFn: async () => {
+    try {
+      return await getProductBySlug({ data: productId });
+    } catch (error) {
+      if (error instanceof Error && error.message === "Product not found") {
+        throw notFound();
+      }
+      throw error;
+    }
+  },
+  retry: false, // Don't retry on error - fail fast for 404s
+  staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+});
+
 export const Route = createFileRoute("/store/$productId")({
   component: ProductPage,
+  errorComponent: ProductErrorComponent,
+  notFoundComponent: ProductNotFoundComponent,
+  pendingComponent: ProductPageSkeleton, // Show skeleton while loader is running
+
+  // Loader prefetches data before component renders
+  loader: async ({ context: { queryClient }, params: { productId } }) => {
+    // Ensure data is loaded before component renders
+    await queryClient.ensureQueryData(productQueryOptions(productId));
+  },
+
   validateSearch,
   // Strip undefined values from URL to keep it clean
   search: {
     middlewares: [
       stripSearchParams(
         Object.fromEntries(
-          Object.keys(PRODUCT_ATTRIBUTES).map(id => [id.toLowerCase(), undefined])
+          Object.keys(PRODUCT_ATTRIBUTES).map((id) => [
+            id.toLowerCase(),
+            undefined,
+          ])
         )
       ),
     ],
@@ -67,38 +168,21 @@ function ProductPage() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
   const [quantity, setQuantity] = useState(1);
-  
+
   const { addProductToCart, cart, products } = useCart();
-  const isMobileOrTablet = useDeviceType().isMobileOrTablet;
 
-  // Check if this is a navigation (has referrer from same origin) vs fresh load
-  const isNavigation = typeof window !== 'undefined' && 
-    document.referrer && 
-    new URL(document.referrer).origin === window.location.origin;
-
-  // Use React Query for data fetching - more performant and cacheable
-  const {
-    data: product,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ['product', productId],
-    queryFn: async () => {
-      const response = await fetch(`${DEPLOY_URL}/api/store/${productId}`);
-      if (!response.ok) {
-        throw new Error(`Product not found: ${response.status}`);
-      }
-      return response.json() as Promise<ProductWithDetails>;
-    },
-  });
+  // Use suspense query - data is guaranteed to be loaded by the loader
+  const { data: product } = useSuspenseQuery(productQueryOptions(productId));
 
   // Auto-select first variation if no search params and product has variations
   // This runs once when product loads and no search params exist
   useEffect(() => {
     if (!product?.hasVariations || !product.variations?.length) return;
-    
+
     // Check if any search params are set
-    const hasAnySearchParams = Object.values(search).some(value => value !== undefined);
+    const hasAnySearchParams = Object.values(search).some(
+      (value) => value !== undefined
+    );
     if (hasAnySearchParams) return;
 
     // Find first available variation
@@ -106,15 +190,23 @@ function ProductPage() {
       if (product.unlimitedStock) {
         return (b.sort ?? 0) - (a.sort ?? 0);
       }
-      
+
       // Calculate actual available stock considering cart items
-      const aStock = getAvailableQuantityForVariation(product, a.id, cart.items);
-      const bStock = getAvailableQuantityForVariation(product, b.id, cart.items);
-      
+      const aStock = getAvailableQuantityForVariation(
+        product,
+        a.id,
+        cart.items
+      );
+      const bStock = getAvailableQuantityForVariation(
+        product,
+        b.id,
+        cart.items
+      );
+
       // Prioritize variations with stock > 0
       if (aStock > 0 && bStock === 0) return -1;
       if (bStock > 0 && aStock === 0) return 1;
-      
+
       // If both have stock or both are out of stock, sort by sort order
       return (b.sort ?? 0) - (a.sort ?? 0);
     });
@@ -123,7 +215,7 @@ function ProductPage() {
     if (firstVariation?.attributes?.length > 0) {
       // Build search params dynamically from first variation's attributes
       const autoSearchParams: Record<string, string | undefined> = {};
-      
+
       firstVariation.attributes.forEach((attr: VariationAttribute) => {
         const paramName = attr.attributeId.toLowerCase();
         autoSearchParams[paramName] = attr.value;
@@ -139,13 +231,6 @@ function ProductPage() {
 
   // Sync product data with cart context for stock info
   const syncedProduct = useMemo(() => {
-    if (!product) {
-      // During navigation, try to get basic product info from cart context cache
-      // This ensures we have at least images for view transitions
-      const cachedProduct = products.find((p) => p.slug === productId);
-      return cachedProduct || null;
-    }
-
     // Find the product in the cart context cache
     const cachedProduct = products.find((p) => p.id === product.id);
     if (cachedProduct) {
@@ -158,7 +243,7 @@ function ProductPage() {
       };
     }
     return product;
-  }, [product, products, productId]);
+  }, [product, products]);
 
   // Use variation selection hook with URL state for product page
   const {
@@ -175,7 +260,11 @@ function ProductPage() {
 
   // Find variation for pricing (regardless of stock status)
   const variationForPricing = useMemo(() => {
-    if (!syncedProduct?.hasVariations || !syncedProduct.variations || !selectedAttributes) {
+    if (
+      !syncedProduct?.hasVariations ||
+      !syncedProduct.variations ||
+      !selectedAttributes
+    ) {
       return null;
     }
 
@@ -201,7 +290,10 @@ function ProductPage() {
       return relevantVariation?.price || 0;
     }
     // If product price is zero, use variation price (if available)
-    if (syncedProduct?.price === 0 && (selectedVariation || variationForPricing)) {
+    if (
+      syncedProduct?.price === 0 &&
+      (selectedVariation || variationForPricing)
+    ) {
       const relevantVariation = selectedVariation || variationForPricing;
       return relevantVariation?.price || 0;
     }
@@ -227,11 +319,20 @@ function ProductPage() {
   const currentShippingFrom = useMemo(() => {
     // Priority 1: Selected variation's shipping location
     const relevantVariation = selectedVariation || variationForPricing;
-    if (relevantVariation && relevantVariation.shippingFrom && relevantVariation.shippingFrom !== '' && relevantVariation.shippingFrom !== 'NONE') {
+    if (
+      relevantVariation &&
+      relevantVariation.shippingFrom &&
+      relevantVariation.shippingFrom !== "" &&
+      relevantVariation.shippingFrom !== "NONE"
+    ) {
       return relevantVariation.shippingFrom;
     }
     // Priority 2: Product's shipping location
-    return (syncedProduct?.shippingFrom && syncedProduct?.shippingFrom !== '' && syncedProduct?.shippingFrom !== 'NONE') ? syncedProduct?.shippingFrom : null;
+    return syncedProduct?.shippingFrom &&
+      syncedProduct?.shippingFrom !== "" &&
+      syncedProduct?.shippingFrom !== "NONE"
+      ? syncedProduct?.shippingFrom
+      : null;
   }, [selectedVariation, variationForPricing, syncedProduct?.shippingFrom]);
 
   // Calculate effective stock based on selected variation
@@ -332,18 +433,6 @@ function ProductPage() {
 
   const attributeNames = getUniqueAttributeNames();
 
-
-
-  // Handle error states
-  if (error) {
-    return <div>Error: {error.message}</div>;
-  }
-
-  // For fresh loads without navigation, show full skeleton
-  if (isLoading && !syncedProduct && !isNavigation) {
-    return <ProductPageSkeleton />;
-  }
-
   return (
     <main className="min-h-screen flex flex-col lg:h-screen lg:overflow-hidden">
       <div className="grow flex items-start justify-center">
@@ -351,7 +440,13 @@ function ProductPage() {
           {/* Image gallery with view transitions */}
           <div className="w-full lg:w-3/5 xl:w-2/3 flex flex-col lg:flex-row gap-2 lg:h-full self-start">
             <ImageGallery
-              images={syncedProduct?.images ? syncedProduct.images.split(",").map((img: string) => img.trim()) : []}
+              images={
+                syncedProduct?.images
+                  ? syncedProduct.images
+                      .split(",")
+                      .map((img: string) => img.trim())
+                  : []
+              }
               alt={syncedProduct?.name || "Product"}
               className="lg:pl-4 lg:pt-4 lg:pb-4"
               productSlug={syncedProduct?.slug || productId}
@@ -359,12 +454,9 @@ function ProductPage() {
           </div>
 
           {/* Product information */}
-          <div 
-            className="w-full lg:w-2/5 xl:w-1/3 px-4 lg:px-0 lg:h-[100dvh] lg:overflow-y-auto pt-4 pb-20 lg:pr-4 scrollbar-none product-info-enter"
-          >
-            {syncedProduct ? (
-              <div className="space-y-6 w-full ">
-                <h3>{syncedProduct.name}</h3>
+          <div className="w-full lg:w-2/5 xl:w-1/3 px-4 lg:px-0 lg:h-[100dvh] lg:overflow-y-auto pt-4 pb-20 lg:pr-4 scrollbar-none product-info-enter">
+            <div className="space-y-6 w-full ">
+              <h3>{syncedProduct.name}</h3>
 
               {/* Price */}
               <div className="flex gap-4 items-center">
@@ -459,7 +551,10 @@ function ProductPage() {
                     <span className="text-muted-foreground">Category</span>
                     <Link
                       to="/store"
-                      search={{ category: (syncedProduct as ProductWithDetails).category!.slug }}
+                      search={{
+                        category: (syncedProduct as ProductWithDetails)
+                          .category!.slug,
+                      }}
                       className="text-primary hover:underline"
                     >
                       {(syncedProduct as ProductWithDetails).category!.name}
@@ -478,7 +573,9 @@ function ProductPage() {
                   </div>
                 )}
                 {/* Ripe Puer blog post link */}
-                {(syncedProduct as ProductWithDetails).teaCategories?.includes("ripe-pu-er") && (
+                {(syncedProduct as ProductWithDetails).teaCategories?.includes(
+                  "ripe-pu-er"
+                ) && (
                   <div className="flex flex-col">
                     <span className="text-muted-foreground">Learn more</span>
                     <a
@@ -504,16 +601,25 @@ function ProductPage() {
                         </span>{" "}
                         <Link
                           to="/blog/$slug"
-                          params={{ slug: (syncedProduct as ProductWithDetails).blogPost!.slug }}
+                          params={{
+                            slug: (syncedProduct as ProductWithDetails)
+                              .blogPost!.slug,
+                          }}
                           className="blurLink"
                         >
-                          {(syncedProduct as ProductWithDetails).blogPost!.title}
+                          {
+                            (syncedProduct as ProductWithDetails).blogPost!
+                              .title
+                          }
                         </Link>
                       </>
                     ) : (
-                      <Link 
+                      <Link
                         to="/blog/$slug"
-                        params={{ slug: (syncedProduct as ProductWithDetails).blogPost!.slug }}
+                        params={{
+                          slug: (syncedProduct as ProductWithDetails).blogPost!
+                            .slug,
+                        }}
                         className="blurLink"
                       >
                         From blog post
@@ -525,22 +631,14 @@ function ProductPage() {
 
               {/* Product description */}
               <div className="prose max-w-none">
-                <ReactMarkdown components={markdownComponents} rehypePlugins={rehypePlugins}>
+                <ReactMarkdown
+                  components={markdownComponents}
+                  rehypePlugins={rehypePlugins}
+                >
                   {syncedProduct.description || ""}
                 </ReactMarkdown>
               </div>
             </div>
-            ) : (
-              // Show loading state for product info while preserving image gallery
-              <div className="space-y-6 w-full animate-pulse">
-                <div className="h-8 bg-muted rounded w-3/4"></div>
-                <div className="h-6 bg-muted rounded w-1/2"></div>
-                <div className="space-y-2">
-                  <div className="h-4 bg-muted rounded w-full"></div>
-                  <div className="h-4 bg-muted rounded w-2/3"></div>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>

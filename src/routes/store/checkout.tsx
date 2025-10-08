@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "~/components/ui/shared/Link";
 import React, { useState, useEffect } from "react";
-import { useCart} from "~/lib/cartContext";
+import { useCart } from "~/lib/cartContext";
 import { Button } from "~/components/ui/shared/Button";
 import { toast } from "sonner";
 import { Image } from "~/components/ui/shared/Image";
@@ -12,6 +12,7 @@ import { Checkbox } from "~/components/ui/shared/Checkbox";
 import { Textarea } from "~/components/ui/shared/TextArea";
 import { useMutation } from "@tanstack/react-query";
 import { sendOrderEmails } from "~/server_functions/sendOrderEmails";
+import { createOrder } from "~/server_functions/dashboard/orders/orderCreation";
 
 interface Address {
   firstName: string;
@@ -41,7 +42,6 @@ interface OrderCreationResponse {
   clientEmailId?: string;
   adminEmailId?: string;
 }
-
 
 export const Route = createFileRoute("/store/checkout")({
   component: CheckoutPage,
@@ -80,20 +80,9 @@ function CheckoutScreen() {
       products: any[];
     }) => {
       // Step 1: Create order
-      const orderResponse = await fetch("/api/orderCreation", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        signal: AbortSignal.timeout(15000), // 15 second timeout
-        body: JSON.stringify(orderData),
-      });
-
-      if (!orderResponse.ok) {
-        throw new Error(`Order creation failed: ${orderResponse.status}`);
-      }
-
-      const orderResult = await orderResponse.json() as OrderCreationResponse;
+      const orderResult = await createOrder({ data: orderData });
       if (!orderResult.success) {
-        throw new Error(orderResult.error || "Failed to create order");
+        throw new Error("Failed to create order");
       }
 
       // Step 2: Send emails
@@ -105,21 +94,21 @@ function CheckoutScreen() {
             cartItems: orderData.cartItems,
             orderAmounts: {
               subtotalAmount: subtotal,
-              discountAmount: totalDiscount
+              discountAmount: totalDiscount,
             },
-            totalAmount: total
-          }
+            totalAmount: total,
+          },
         });
 
         return {
           orderId: orderResult.orderId!,
-          emailWarnings: emailResult.emailWarnings
+          emailWarnings: emailResult.emailWarnings,
         };
       } catch (emailError) {
         // Order succeeded, but emails failed - still return success
         return {
           orderId: orderResult.orderId!,
-          emailWarnings: ["Confirmation emails failed to send"]
+          emailWarnings: ["Confirmation emails failed to send"],
         };
       }
     },
@@ -146,7 +135,7 @@ function CheckoutScreen() {
           productName: item.productName,
           quantity: item.quantity,
           unitAmount: item.price,
-          finalAmount: item.discount 
+          finalAmount: item.discount
             ? item.price * (1 - item.discount / 100) * item.quantity
             : item.price * item.quantity,
           discountPercentage: item.discount,
@@ -159,23 +148,22 @@ function CheckoutScreen() {
         shippingAmount: 0, // Always 0 for new orders
         timestamp: Date.now(),
       };
-      
+
       // Store in sessionStorage for the success page
-      sessionStorage.setItem('orderSuccess', JSON.stringify(orderData));
-      console.log('💾 Stored order data for success page:', orderId);
-      
+      sessionStorage.setItem("orderSuccess", JSON.stringify(orderData));
+      console.log("💾 Stored order data for success page:", orderId);
+
       // Small delay to ensure success message is seen, then redirect
       setTimeout(() => {
-        console.log('🚀 Redirecting to order page:', orderId);
+        console.log("🚀 Redirecting to order page:", orderId);
         window.location.href = `/order/${orderId}?new=true`;
       }, 1000);
     },
     onError: (error: Error) => {
-      toast.error(
-        error.message || "Failed to place order. Please try again.",
-        { duration: 5000 }
-      );
-    }
+      toast.error(error.message || "Failed to place order. Please try again.", {
+        duration: 5000,
+      });
+    },
   });
 
   const isLoading = orderMutation.isPending;
@@ -184,14 +172,21 @@ function CheckoutScreen() {
   useEffect(() => {
     if (cart.items.length > 0 && products.length > 0) {
       // Check for any variation ID mismatches and log them
-      cart.items.forEach(item => {
+      cart.items.forEach((item) => {
         if (item.variationId) {
-          const product = products.find(p => p.id === item.productId);
+          const product = products.find((p) => p.id === item.productId);
           if (product && product.variations) {
-            const variation = product.variations.find(v => v.id === item.variationId);
+            const variation = product.variations.find(
+              (v) => v.id === item.variationId
+            );
             if (!variation) {
-              console.warn(`Variation ${item.variationId} not found for product ${item.productName} (ID: ${item.productId})`);
-              console.log('Available variations:', product.variations.map(v => ({ id: v.id, sku: v.sku })));
+              console.warn(
+                `Variation ${item.variationId} not found for product ${item.productName} (ID: ${item.productId})`
+              );
+              console.log(
+                "Available variations:",
+                product.variations.map((v) => ({ id: v.id, sku: v.sku }))
+              );
             }
           }
         }
@@ -256,9 +251,10 @@ function CheckoutScreen() {
         "🎨 Preparing your beautiful items...",
         "📦 Crafting your order with love...",
         "🚀 Launching your order into the world...",
-        "💫 Working our creative magic..."
+        "💫 Working our creative magic...",
       ];
-      const randomMessage = loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
+      const randomMessage =
+        loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
       return randomMessage;
     }
     if (showFormError) return "Please fill up the form";
@@ -396,12 +392,11 @@ function CheckoutScreen() {
           {/* Customer Information Form - Left Side */}
           <div className="flex-1">
             <form ref={formRef} onSubmit={handleSubmit}>
-             
-                <p className="mb-8">
-                  You will be contacted regarding payment options after placing
-                  your order.
-                </p>
-             
+              <p className="mb-8">
+                You will be contacted regarding payment options after placing
+                your order.
+              </p>
+
               <div className="mb-8">
                 <h2 className="!text-lg font-bold mb-4">Shipping Address</h2>
                 <AddressFields

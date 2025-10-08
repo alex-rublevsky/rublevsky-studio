@@ -3,7 +3,10 @@ import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { BlogPost, BlogPostFormData, TeaCategory } from "~/types";
-import { DEPLOY_URL } from "~/utils/store";
+import { getAllBlogPosts } from "~/server_functions/dashboard/blog/getAllBlogPosts";
+import { createBlogPost } from "~/server_functions/dashboard/blog/createBlogPost";
+import { updateBlogPost } from "~/server_functions/dashboard/blog/updateBlogPost";
+import { deleteBlogPost } from "~/server_functions/dashboard/blog/deleteBlogPost";
 import { Plus } from "lucide-react";
 
 import DeleteConfirmationDialog from "~/components/ui/dashboard/ConfirmationDialog";
@@ -45,8 +48,7 @@ function RouteComponent() {
     teaCategories: TeaCategory[];
   }>({
     queryKey: ["dashboard-blog"],
-    queryFn: () =>
-      fetch(`${DEPLOY_URL}/api/dashboard/blog`).then((res) => res.json()),
+    queryFn: () => getAllBlogPosts(),
   });
 
   const blogPosts = data?.posts || [];
@@ -88,7 +90,9 @@ function RouteComponent() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deletingPostId, setDeletingPostId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [visibilityFilter, setVisibilityFilter] = useState<string | null>("visible");
+  const [visibilityFilter, setVisibilityFilter] = useState<string | null>(
+    "visible"
+  );
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   // Filter tea categories to only show those that are used in blog posts
@@ -109,14 +113,14 @@ function RouteComponent() {
 
     // Apply visibility filter
     if (visibilityFilter === "visible") {
-      filtered = filtered.filter(post => post.isVisible);
+      filtered = filtered.filter((post) => post.isVisible);
     } else if (visibilityFilter === "hidden") {
-      filtered = filtered.filter(post => !post.isVisible);
+      filtered = filtered.filter((post) => !post.isVisible);
     }
 
     // Apply category filter
     if (selectedCategory) {
-      filtered = filtered.filter(post =>
+      filtered = filtered.filter((post) =>
         post.teaCategories?.includes(selectedCategory)
       );
     }
@@ -127,7 +131,7 @@ function RouteComponent() {
   // Visibility filter options
   const visibilityFilterOptions = [
     { slug: "visible", name: "Visible" },
-    { slug: "hidden", name: "Hidden" }
+    { slug: "hidden", name: "Hidden" },
   ];
 
   // Auto-generate slugs
@@ -227,13 +231,7 @@ function RouteComponent() {
     setError("");
 
     try {
-      await fetch(`${DEPLOY_URL}/api/dashboard/blog`, {
-        method: "POST",
-        body: JSON.stringify(createFormData),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      await createBlogPost({ data: createFormData });
 
       toast.success("Blog post added successfully!");
 
@@ -277,7 +275,9 @@ function RouteComponent() {
       productSlug: post.productSlug || "",
       images: post.images || "",
       isVisible: post.isVisible ?? true,
-      publishedAt: isNaN(new Date(post.publishedAt).getTime()) ? Date.now() : post.publishedAt,
+      publishedAt: isNaN(new Date(post.publishedAt).getTime())
+        ? Date.now()
+        : post.publishedAt,
     });
   };
 
@@ -289,13 +289,7 @@ function RouteComponent() {
     setError("");
 
     try {
-      await fetch(`${DEPLOY_URL}/api/dashboard/blog/${editingPostId}`, {
-        method: "PUT",
-        body: JSON.stringify(editFormData),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      await updateBlogPost({ data: { id: editingPostId, data: editFormData } });
 
       toast.success("Blog post updated successfully!");
       closeEditDrawer();
@@ -322,9 +316,7 @@ function RouteComponent() {
     setError("");
 
     try {
-      await fetch(`${DEPLOY_URL}/api/dashboard/blog/${deletingPostId}`, {
-        method: "DELETE",
-      });
+      await deleteBlogPost({ data: { id: deletingPostId } });
 
       toast.success("Blog post deleted successfully!");
       setShowDeleteDialog(false);
@@ -372,12 +364,14 @@ function RouteComponent() {
       <div className="text-center mb-12 px-4">
         <h1 className="mb-4">Blog Management</h1>
         <div className="flex justify-center items-center gap-8 mb-8">
-          <h5 className="text-secondary-foreground">{blogPosts.length} posts total</h5>
           <h5 className="text-secondary-foreground">
-            {blogPosts.filter(post => post.isVisible).length} visible
+            {blogPosts.length} posts total
           </h5>
           <h5 className="text-secondary-foreground">
-            {blogPosts.filter(post => !post.isVisible).length} hidden
+            {blogPosts.filter((post) => post.isVisible).length} visible
+          </h5>
+          <h5 className="text-secondary-foreground">
+            {blogPosts.filter((post) => !post.isVisible).length} hidden
           </h5>
           {(visibilityFilter || selectedCategory) && (
             <h5 className="text-primary font-medium">
@@ -458,10 +452,7 @@ function RouteComponent() {
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label
-                    htmlFor="slug"
-                    className="block text-sm font-medium"
-                  >
+                  <label htmlFor="slug" className="block text-sm font-medium">
                     Slug
                   </label>
                   <div className="flex items-center space-x-2">
@@ -472,7 +463,10 @@ function RouteComponent() {
                         setIsCreateAutoSlug(e.target.checked);
                       }}
                     />
-                    <label htmlFor="autoSlug" className="text-xs text-muted-foreground">
+                    <label
+                      htmlFor="autoSlug"
+                      className="text-xs text-muted-foreground"
+                    >
                       Auto-generate
                     </label>
                   </div>
@@ -484,7 +478,9 @@ function RouteComponent() {
                   onChange={handleCreateChange}
                   required
                   disabled={isCreateAutoSlug}
-                  className={isCreateAutoSlug ? "opacity-60 cursor-not-allowed" : ""}
+                  className={
+                    isCreateAutoSlug ? "opacity-60 cursor-not-allowed" : ""
+                  }
                 />
               </div>
 
@@ -620,7 +616,9 @@ function RouteComponent() {
         ) : blogPosts.length === 0 ? (
           <div className="text-center px-4">No blog posts found.</div>
         ) : filteredBlogPosts.length === 0 ? (
-          <div className="text-center px-4">No blog posts found for the selected filter.</div>
+          <div className="text-center px-4">
+            No blog posts found for the selected filter.
+          </div>
         ) : (
           <AnimatePresence mode="popLayout">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-6 gap-x-3 sm:gap-4 items-start">
@@ -696,7 +694,10 @@ function RouteComponent() {
                         setIsEditAutoSlug(e.target.checked);
                       }}
                     />
-                    <label htmlFor="editAutoSlug" className="text-xs text-muted-foreground">
+                    <label
+                      htmlFor="editAutoSlug"
+                      className="text-xs text-muted-foreground"
+                    >
                       Auto-generate
                     </label>
                   </div>
@@ -708,7 +709,9 @@ function RouteComponent() {
                   onChange={handleEditChange}
                   required
                   disabled={isEditAutoSlug}
-                  className={isEditAutoSlug ? "opacity-60 cursor-not-allowed" : ""}
+                  className={
+                    isEditAutoSlug ? "opacity-60 cursor-not-allowed" : ""
+                  }
                 />
               </div>
 

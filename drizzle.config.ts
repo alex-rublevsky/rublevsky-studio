@@ -1,6 +1,7 @@
 import {defineConfig} from "drizzle-kit";
 import fs from "node:fs";
 import path from "node:path";
+import { env } from 'cloudflare:workers'
 
 
 function getLocalD1DB(){
@@ -32,9 +33,9 @@ export default defineConfig({
    ...(process.env.NODE_ENV == "production" ? {
     driver: "d1-http",
     dbCredentials: {
-        accountId: process.env.CLOUDFLARE_D1_ACCOUNT_ID,
-        databaseId: process.env.DATABASE,
-        token: process.env.CLOUDFLARE_D1_API_TOKEN,
+        accountId: env.CLOUDFLARE_D1_ACCOUNT_ID,
+        databaseId: env.DATABASE,
+        token: env.CLOUDFLARE_D1_API_TOKEN,
     },
    } : {
     

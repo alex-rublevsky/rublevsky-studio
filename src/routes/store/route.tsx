@@ -1,7 +1,8 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { CartProvider } from "~/lib/cartContext";
 import { useQuery } from "@tanstack/react-query";
-import { DEPLOY_URL } from "~/utils/store";
+import { getStoreData } from "~/server_functions/store/getAllProducts";
 import { ProductWithVariations, Category, TeaCategory } from "~/types";
 import { CartNav } from "~/components/ui/store/CartNav";
 
@@ -17,20 +18,15 @@ export const Route = createFileRoute("/store")({
 });
 
 function StoreLayout() {
-  // Use TanStack Query for better caching and data management
+  const getStore = useServerFn(getStoreData);
+  //TODO: Use TanStack Query for better caching and data management
   const {
     isPending,
     error,
     data: storeData,
   } = useQuery<StoreData>({
     queryKey: ["storeData"],
-    queryFn: async () => {
-      const response = await fetch(`${DEPLOY_URL}/api/store`);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch store data: ${response.statusText}`);
-      }
-      return response.json();
-    },
+    queryFn: async () => getStore() as Promise<StoreData>,
     staleTime: 1000 * 60 * 5, // 5 minutes
     gcTime: 1000 * 60 * 30, // 30 minutes (formerly cacheTime)
     retry: 3,

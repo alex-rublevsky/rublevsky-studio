@@ -34,4 +34,6 @@ wrangler.jsonc
 
 /dist/
 worker-configuration.d.ts
-src/TODO
+TODO
+dist
+src/routeTree.gen.ts

@@ -4,7 +4,6 @@ import { useRouter } from "@tanstack/react-router";
 import type { Category, CategoryFormData, TeaCategory, TeaCategoryFormData } from "~/types";
 import DeleteConfirmationDialog from "~/components/ui/dashboard/ConfirmationDialog";
 import { toast } from "sonner";
-import { Image } from "~/components/ui/shared/Image";
 import { Button } from "~/components/ui/shared/Button";
 import { Input } from "~/components/ui/shared/Input";
 import { Switch } from "~/components/ui/shared/Switch";
@@ -18,7 +17,14 @@ import {
 } from "~/components/ui/shared/Drawer";
 import { Badge } from "~/components/ui/shared/Badge";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { DEPLOY_URL } from "~/utils/store";
+import { getAllTeaCategories } from "~/server_functions/dashboard/tea_categories/getAllTeaCategories";
+import { createTeaCategory } from "~/server_functions/dashboard/tea_categories/createTeaCategory";
+import { updateTeaCategoryBySlug } from "~/server_functions/dashboard/tea_categories/updateTeaCategoryBySlug";
+import { deleteTeaCategoryBySlug } from "~/server_functions/dashboard/tea_categories/deleteTeaCategoryBySlug";
+import { getAllProductCategories } from "~/server_functions/dashboard/categories/getAllProductCategories";
+import { createProductCategory } from "~/server_functions/dashboard/categories/createProductCategory";
+import { updateProductCategory } from "~/server_functions/dashboard/categories/updateProductCategory";
+import { deleteProductCategory } from "~/server_functions/dashboard/categories/deleteProductCategory";
 import { Plus } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard/categories")({
@@ -31,15 +37,13 @@ function RouteComponent() {
   // Fetch product categories
   const { isPending: categoriesPending, data: categoriesData, isError: categoriesError } = useQuery<Category[]>({
     queryKey: ["dashboard-categories"],
-    queryFn: () =>
-      fetch(`${DEPLOY_URL}/api/dashboard/categories`).then((res) => res.json()),
+    queryFn: () => getAllProductCategories(),
   });
 
   // Fetch tea categories
   const { isPending: teaCategoriesPending, data: teaCategoriesData, isError: teaCategoriesError } = useQuery<TeaCategory[]>({
     queryKey: ["dashboard-tea-categories"],
-    queryFn: () =>
-      fetch(`${DEPLOY_URL}/api/dashboard/tea-categories`).then((res) => res.json()),
+    queryFn: () => getAllTeaCategories(),
   });
 
   const router = useRouter();
@@ -234,25 +238,10 @@ function RouteComponent() {
     setError("");
 
     try {
-      const endpoint = categoryType === 'product' 
-        ? `${DEPLOY_URL}/api/dashboard/categories`
-        : `${DEPLOY_URL}/api/dashboard/tea-categories`;
-      
-      const formData = categoryType === 'product' 
-        ? createCategoryFormData 
-        : createTeaCategoryFormData;
-
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json() as { error?: string };
-        throw new Error(errorData.error || 'Failed to create category');
+      if (categoryType === 'product') {
+        await createProductCategory({ data: createCategoryFormData });
+      } else {
+        await createTeaCategory({ data: createTeaCategoryFormData });
       }
 
       toast.success(`${categoryType === 'product' ? 'Category' : 'Tea category'} added successfully!`);
@@ -329,28 +318,10 @@ function RouteComponent() {
     setError("");
 
     try {
-      let endpoint: string;
-      let formData: any;
-
       if (categoryType === 'product') {
-        endpoint = `${DEPLOY_URL}/api/dashboard/categories/${editingCategoryId}`;
-        formData = editCategoryFormData;
+        await updateProductCategory({ data: { id: editingCategoryId!, data: editCategoryFormData } });
       } else {
-        endpoint = `${DEPLOY_URL}/api/dashboard/tea-categories/${editingTeaCategorySlug}`;
-        formData = editTeaCategoryFormData;
-      }
-
-      const response = await fetch(endpoint, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json() as { error?: string };
-        throw new Error(errorData.error || 'Failed to update category');
+        await updateTeaCategoryBySlug({ data: { slug: editingTeaCategorySlug!, data: editTeaCategoryFormData } });
       }
 
       toast.success(`${categoryType === 'product' ? 'Category' : 'Tea category'} updated successfully!`);
@@ -414,21 +385,10 @@ function RouteComponent() {
     setError("");
 
     try {
-      let endpoint: string;
-
       if (categoryType === 'product') {
-        endpoint = `${DEPLOY_URL}/api/dashboard/categories/${deletingCategoryId}`;
+        await deleteProductCategory({ data: { id: deletingCategoryId! } });
       } else {
-        endpoint = `${DEPLOY_URL}/api/dashboard/tea-categories/${deletingTeaCategorySlug}`;
-      }
-
-      const response = await fetch(endpoint, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json() as { error?: string };
-        throw new Error(errorData.error || 'Failed to delete category');
+        await deleteTeaCategoryBySlug({ data: { slug: deletingTeaCategorySlug! } });
       }
 
       toast.success(`${categoryType === 'product' ? 'Category' : 'Tea category'} deleted successfully!`);

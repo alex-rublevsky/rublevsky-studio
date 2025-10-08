@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import BlogPost from "~/components/ui/blog/BlogPost";
 import ImageGallery from "~/components/ui/shared/ImageGallery";
 import { BlogPost as BlogPostType, BlogPostPreview, TeaCategory } from "~/types/index";
-import { DEPLOY_URL } from "~/utils/store";
+import { getBlogPostBySlug } from "~/server_functions/blog/getBlogPostBySlug";
 import { useMemo } from "react";
 
 export const Route = createFileRoute("/blog/$slug")({
@@ -14,7 +14,6 @@ function BlogPostComponent() {
   const params = Route.useParams();
   const slug = params.slug;
   const queryClient = useQueryClient();
-  const router = useRouter();
 
   const {
     isPending: isLoading,
@@ -24,16 +23,16 @@ function BlogPostComponent() {
     queryKey: ["blog-post", slug],
     queryFn: async (): Promise<BlogPostType> => {
       console.log(`Fetching blog post with slug: ${slug}`);
-      const response = await fetch(`${DEPLOY_URL}/api/blog/${slug}`);
-      if (!response.ok) {
-        if (response.status === 404) {
+      try {
+        const data = await getBlogPostBySlug({ data: slug });
+        console.log("Fetched blog post:", data);
+        return data as BlogPostType;
+      } catch (error) {
+        if (error instanceof Error && error.message === 'Blog post not found') {
           throw notFound();
         }
         throw new Error("Failed to fetch blog post");
       }
-      const data = await response.json();
-      console.log("Fetched blog post:", data);
-      return data as BlogPostType;
     },
   });
 
