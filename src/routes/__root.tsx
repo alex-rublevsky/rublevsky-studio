@@ -96,11 +96,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 	const pathname = router.state.location.pathname;
 
 	return (
-		<html lang="en" className={`${pathname === "/" ? "scroll-smooth" : ""}`}>
+		<html lang="en" className={`${pathname === "/" ? "scroll-smooth" : ""} bg-background overscroll-none`}>
 			<head>
 				<HeadContent />
 			</head>
-			<body className="overscroll-none ">
+			<body className="">
 				<NavBar />
 				{children}
 				{/* <TanStackRouterDevtools position="bottom-right" /> */}
