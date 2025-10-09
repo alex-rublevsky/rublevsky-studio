@@ -97,6 +97,21 @@ function Cursor() {
 			setVariant("hidden");
 		};
 
+		// Check if mouse is already inside the viewport on mount
+		const checkInitialMousePosition = (e: MouseEvent) => {
+			// If we get a mousemove event, the cursor is in the viewport
+			setIsVisible(true);
+			setVariant("default");
+			updateCursorPosition(e);
+			// Remove this listener after first detection
+			window.removeEventListener("mousemove", checkInitialMousePosition);
+		};
+
+		// Add initial check listener
+		window.addEventListener("mousemove", checkInitialMousePosition, {
+			once: true,
+		});
+
 		// Listen to both mouse and pointer events for better drag support
 		window.addEventListener("mousemove", updateCursorPosition);
 		window.addEventListener("pointermove", updateCursorPosition);
@@ -108,6 +123,7 @@ function Cursor() {
 		document.body.addEventListener("mouseleave", handleMouseLeave);
 
 		return () => {
+			window.removeEventListener("mousemove", checkInitialMousePosition);
 			window.removeEventListener("mousemove", updateCursorPosition);
 			window.removeEventListener("pointermove", updateCursorPosition);
 			window.removeEventListener("mousedown", handleMouseDown);

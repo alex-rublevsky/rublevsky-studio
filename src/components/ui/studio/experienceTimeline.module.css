@@ -1,7 +1,7 @@
 .experienceTimelineSection {
 	padding-top: 0;
 	padding-bottom: 0;
-	background-color: var(--background);
+	background-color: oklch(var(--background));
 	position: relative;
 	z-index: -3;
 	margin: 0 auto;
@@ -131,7 +131,7 @@
 	top: 0;
 	background: linear-gradient(
 		to bottom,
-		var(--background),
+		oklch(var(--background)),
 		rgba(255, 255, 255, 0)
 	);
 }
@@ -140,7 +140,7 @@
 	bottom: 0;
 	background: linear-gradient(
 		to top,
-		var(--background),
+		oklch(var(--background)),
 		rgba(255, 255, 255, 0)
 	);
 }

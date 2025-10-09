@@ -34,7 +34,7 @@ export const Route = createRootRoute({
 			},
 			...seo({
 				title: "Rublevsky Studio",
-				description: `TanStack Start is a type-safe, client-first, full-stack React framework. `,
+				description: `Web Development, Graphic Design, Tea Reviews`,
 			}),
 		],
 		links: [
@@ -50,12 +50,12 @@ export const Route = createRootRoute({
 				sizes: "96x96",
 				href: "/favicon-96x96.png",
 			},
-			// {
-			//   rel: "icon",
-			//   type: "image/png",
-			//   sizes: "16x16",
-			//   href: "/favicon-16x16.png",
-			// },
+			{
+			  rel: "icon",
+			  type: "image/png",
+			  sizes: "16x16",
+			  href: "/favicon-16x16.png",
+			},
 			{ rel: "manifest", href: "/site.webmanifest", color: "#fffff" },
 			{ rel: "icon", href: "/favicon.ico" },
 		],
