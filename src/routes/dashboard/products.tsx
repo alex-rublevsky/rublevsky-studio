@@ -1,11 +1,14 @@
-import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useEffect, useId, useState } from "react";
 import { toast } from "sonner";
 import { AdminProductCard } from "~/components/ui/dashboard/AdminProductCard";
 import DeleteConfirmationDialog from "~/components/ui/dashboard/ConfirmationDialog";
+import { ImageUpload } from "~/components/ui/dashboard/ImageUpload";
 import ProductVariationForm from "~/components/ui/dashboard/ProductVariationForm";
+import { ProductsPageSkeleton } from "~/components/ui/dashboard/skeletons/ProductsPageSkeleton";
+import { deleteProductImage } from "~/server_functions/dashboard/store/deleteProductImage";
 import { Button } from "~/components/ui/shared/Button";
 import { Checkbox } from "~/components/ui/shared/Checkbox";
 import {
@@ -55,12 +58,35 @@ interface Variation {
 	attributes: VariationAttribute[];
 }
 
+// Query options factory for reuse
+const productsQueryOptions = () => ({
+	queryKey: ["dashboard-products"],
+	queryFn: () => getAllProducts(),
+	staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+});
+
 export const Route = createFileRoute("/dashboard/products")({
 	component: RouteComponent,
+	pendingComponent: ProductsPageSkeleton,
+	
+	// Loader prefetches data before component renders
+	loader: async ({ context: { queryClient } }) => {
+		// Ensure data is loaded before component renders
+		await queryClient.ensureQueryData(productsQueryOptions());
+	},
 });
 
 function RouteComponent() {
 	const _router = useRouter();
+	const navigate = Route.useNavigate();
+	
+	// Use suspense query - data is guaranteed to be loaded by the loader
+	const { data: productsData } = useSuspenseQuery(productsQueryOptions());
+	
+	// Function to refetch data by navigating to the same route
+	const refetch = () => {
+		navigate({ to: "/dashboard/products", replace: true });
+	};
 
 	// Generate unique IDs for form elements
 	const editStockId = useId();
@@ -85,22 +111,6 @@ function RouteComponent() {
 	const editProductFormId = useId();
 	const createProductFormId = useId();
 	const editPriceId = useId();
-
-	// Products Query
-	const {
-		isPending,
-		data: productsData,
-		isError,
-		refetch,
-	} = useQuery<{
-		groupedProducts: ProductGroup[];
-		categories: Category[];
-		teaCategories: TeaCategory[];
-		brands: Brand[];
-	}>({
-		queryKey: ["dashboard-products"],
-		queryFn: () => getAllProducts(),
-	});
 
 	const defaultFormData = {
 		name: "",
@@ -141,6 +151,8 @@ function RouteComponent() {
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [showCreateForm, setShowCreateForm] = useState(false);
 	const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
+	const [deletedImages, setDeletedImages] = useState<string[]>([]);
+	const [editDeletedImages, setEditDeletedImages] = useState<string[]>([]);
 
 	// Search state
 	const [searchTerm, setSearchTerm] = useState("");
@@ -215,10 +227,25 @@ function RouteComponent() {
 		setEditVariations(newVariations);
 	};
 
+	const handleImagesChange = (images: string, deletedImagesList?: string[]) => {
+		setFormData((prev) => ({ ...prev, images }));
+		if (deletedImagesList) {
+			setDeletedImages(deletedImagesList);
+		}
+	};
+
+	const handleEditImagesChange = (images: string, deletedImagesList?: string[]) => {
+		setEditFormData((prev) => ({ ...prev, images }));
+		if (deletedImagesList) {
+			setEditDeletedImages(deletedImagesList);
+		}
+	};
+
 	const closeCreateModal = () => {
 		setShowCreateForm(false);
 		setFormData(defaultFormData);
 		setVariations([]);
+		setDeletedImages([]);
 		setIsAutoSlug(true);
 		setHasAttemptedSubmit(false);
 		setError("");
@@ -229,6 +256,7 @@ function RouteComponent() {
 		setEditingProductId(null);
 		setEditFormData(defaultFormData);
 		setEditVariations([]);
+		setEditDeletedImages([]);
 		setIsEditAutoSlug(false);
 		setError("");
 	};
@@ -259,17 +287,6 @@ function RouteComponent() {
 			.filter(Boolean)
 			.join(", ");
 	};
-
-	// Handle loading and error states
-	if (!productsData) {
-		return isPending ? (
-			<div className="text-center py-4">Loading products...</div>
-		) : isError ? (
-			<div className="bg-destructive/20 border border-destructive text-destructive-foreground px-4 py-3 rounded">
-				Error loading products
-			</div>
-		) : null;
-	}
 
 	const { groupedProducts, categories, teaCategories, brands } = productsData;
 
@@ -474,6 +491,19 @@ function RouteComponent() {
 		setError("");
 
 		try {
+			// Delete images from R2 first
+			if (editDeletedImages.length > 0) {
+				
+				const deletePromises = editDeletedImages.map((filename) =>
+					deleteProductImage({ data: { filename } }).catch((error) => {
+						console.error(`Failed to delete ${filename}:`, error);
+						// Don't fail the whole update if one image deletion fails
+					}),
+				);
+				await Promise.all(deletePromises);
+				toast.success(`Deleted ${editDeletedImages.length} image(s) from storage`);
+			}
+
 			const formattedVariations = editVariations.map(
 				(variation: Variation) => ({
 					id: variation.id.startsWith("temp-")
@@ -656,14 +686,7 @@ function RouteComponent() {
 					/>
 				</div>
 
-				{isPending ? (
-					<div className="flex items-center justify-center py-12 px-4">
-						<div className="text-center space-y-4">
-							<div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
-							<p className="text-muted-foreground">Loading products...</p>
-						</div>
-					</div>
-				) : displayGroupedProducts.length === 0 ? (
+				{displayGroupedProducts.length === 0 ? (
 					<div className="text-center py-8 text-muted-foreground px-4">
 						<div className="mb-4">
 							<div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center">
@@ -695,7 +718,7 @@ function RouteComponent() {
 								</div>
 
 								{/* Products Grid */}
-								<div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 md:gap-6 px-4">
+								<div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 md:gap-3 px-4">
 									{group.products.map((product) => (
 										<AdminProductCard
 											key={product.id}
@@ -905,20 +928,14 @@ function RouteComponent() {
 								</fieldset>
 
 								<div>
-									<label
-										htmlFor={editImagesId}
-										className="block text-sm font-medium mb-1"
-									>
-										Images (comma-separated)
+									<label className="block text-sm font-medium mb-1">
+										Product Images
 									</label>
-									<Textarea
-										id={editImagesId}
-										name="images"
-										value={editFormData.images}
-										onChange={handleEditChange}
-										placeholder="image1.jpg, image2.jpg, image3.jpg"
-										className="h-48 overflow-y-auto resize-none"
-										rows={6}
+									<ImageUpload
+										currentImages={editFormData.images}
+										onImagesChange={handleEditImagesChange}
+										folder="products"
+										label="Upload New Image"
 									/>
 								</div>
 
@@ -1292,25 +1309,15 @@ function RouteComponent() {
 								</fieldset>
 
 								<div>
-									<label
-										htmlFor={addImagesId}
-										className="block text-sm font-medium mb-1"
-									>
-										Images (comma-separated)
+									<label className="block text-sm font-medium mb-1">
+										Product Images
 									</label>
-									<Textarea
-										id={addImagesId}
-										name="images"
-										value={formData.images}
-										onChange={handleChange}
-										placeholder="image1.jpg, image2.jpg, image3.jpg"
-										className="h-48 overflow-y-auto resize-none"
-										rows={6}
+									<ImageUpload
+										currentImages={formData.images}
+										onImagesChange={handleImagesChange}
+										folder="products"
+										label="Upload New Image"
 									/>
-									<p className="mt-1 text-xs text-muted-foreground">
-										Enter image identifiers separated by commas. These should
-										match your R2 image filenames.
-									</p>
 								</div>
 
 								<div className="md:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-4">

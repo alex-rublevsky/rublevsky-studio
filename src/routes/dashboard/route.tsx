@@ -54,7 +54,7 @@ function RouteComponent() {
 
 	return (
 		<div className="min-h-screen bg-background">
-			<main className="container mx-auto py-8 pb-24 max-w-7xl">
+			<main className="py-8 pb-24">
 				<Outlet />
 			</main>
 			<NavBar userData={loaderData} />

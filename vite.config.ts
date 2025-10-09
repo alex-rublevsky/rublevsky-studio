@@ -10,6 +10,13 @@ import tsConfigPaths from "vite-tsconfig-paths";
 export default defineConfig({
 	server: {
 		port: 3000,
+		watch: {
+			ignored: [
+				"**/src/routeTree.gen.ts",
+				"**/.tanstack/**",
+				"**/node_modules/**",
+			],
+		},
 		proxy: process.env.LOCAL_SERVER_FN
 			? undefined
 			: {
@@ -34,6 +41,7 @@ export default defineConfig({
 		tanstackRouter({
 			target: "react",
 			autoCodeSplitting: true,
+			generatedRouteTree: "./src/routeTree.gen.ts",
 		}),
 		viteReact(),
 		tailwindcss(),

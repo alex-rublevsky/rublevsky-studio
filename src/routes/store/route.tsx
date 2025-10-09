@@ -25,7 +25,7 @@ function StoreLayout() {
 		data: storeData,
 	} = useQuery<StoreData>({
 		queryKey: ["storeData"],
-		queryFn: async () => getStore() as Promise<StoreData>,
+		queryFn: async () => getStore() as unknown as Promise<StoreData>,
 		staleTime: 1000 * 60 * 5, // 5 minutes
 		gcTime: 1000 * 60 * 30, // 30 minutes (formerly cacheTime)
 		retry: 3,

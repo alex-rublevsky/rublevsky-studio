@@ -1,11 +1,10 @@
 import { Edit, Trash2 } from "lucide-react";
 import { Badge } from "~/components/ui/shared/Badge";
-import { Button } from "~/components/ui/shared/Button";
-import { Image } from "~/components/ui/shared/Image";
 import { getCountryByCode } from "~/constants/countries";
 import { cn } from "~/lib/utils";
 import type { ProductWithVariations } from "~/types";
 import { getStockDisplayText, isProductAvailable } from "~/utils/validateStock";
+import styles from "../store/productCard.module.css";
 
 interface AdminProductCardProps {
 	product: ProductWithVariations;
@@ -26,7 +25,7 @@ export function AdminProductCard({
 }: AdminProductCardProps) {
 	const imageArray = product.images?.split(",").map((img) => img.trim()) ?? [];
 	const primaryImage = imageArray[0];
-	const isAvailable = isProductAvailable(product);
+	const hasAnyStock = isProductAvailable(product);
 	const stockDisplayText = getStockDisplayText(product);
 
 	// Calculate the display price - use highest variation price if variations exist, otherwise base price
@@ -70,166 +69,208 @@ export function AdminProductCard({
 	const allShippingLocations = getAllShippingLocations();
 
 	return (
-		<article
-			className={cn(
-				"bg-card rounded-lg border border-border shadow-sm transition-all duration-300 overflow-hidden",
-				"hover:shadow-md hover:border-primary/20",
-				!isAvailable && "opacity-75 border-muted",
-			)}
-		>
-			{/* Product Image */}
-			<div className="relative aspect-square overflow-hidden bg-muted">
-				{primaryImage ? (
-					<Image
-						src={`/${primaryImage}`}
-						alt={product.name}
-						className={cn(
-							"object-cover w-full h-full transition-transform duration-300 hover:scale-105",
-							!isAvailable && "grayscale opacity-60",
+		<div className="block h-full relative">
+			<div
+				className="w-full product-card overflow-hidden group"
+				id={styles.productCard}
+			>
+				<div className="bg-background flex flex-col">
+					{/* Image Section */}
+					<div className="relative aspect-square overflow-hidden">
+						<div>
+							{/* Primary Image */}
+							<div className="relative aspect-square flex items-center justify-center overflow-hidden">
+								{primaryImage ? (
+									<div className="relative w-full h-full">
+										<img
+											src={`https://assets.rublevsky.studio/${primaryImage}`}
+											alt={product.name}
+											loading="eager"
+											className="absolute inset-0 w-full h-full object-cover object-center"
+											style={{
+												filter: !hasAnyStock ? "grayscale(100%)" : "none",
+												opacity: !hasAnyStock ? 0.6 : 1,
+											}}
+										/>
+									</div>
+								) : (
+									<div className="absolute inset-0 bg-muted flex items-center justify-center">
+										<span className="text-muted-foreground">No image</span>
+									</div>
+								)}
+							</div>
+						</div>
+
+						{/* Featured Badge */}
+						{product.isFeatured && (
+							<div className="absolute top-2 right-2">
+								<Badge variant="default">
+									Featured
+								</Badge>
+							</div>
 						)}
-						sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-					/>
-				) : (
-					<div className="w-full h-full flex items-center justify-center text-muted-foreground">
-						No Image
-					</div>
-				)}
 
-				{/* Out of Stock Badge */}
-				{!isAvailable && (
-					<div className="absolute inset-0 bg-black/35 flex items-center justify-center">
-						<Badge variant="secondary" className="text-black">
-							Out of Stock
-						</Badge>
-					</div>
-				)}
-
-				{/* Status Badge */}
-				<div className="absolute top-2 right-2">
-					<Badge variant={product.isActive ? "default" : "secondary"}>
-						{product.isActive ? "Active" : "Inactive"}
-					</Badge>
-				</div>
-
-				{/* Featured Badge */}
-				{product.isFeatured && (
-					<div className="absolute top-2 left-2">
-						<Badge
-							variant="outline"
-							className="bg-yellow-500/90 text-white border-yellow-500"
-						>
-							Featured
-						</Badge>
-					</div>
-				)}
-			</div>
-
-			{/* Product Details */}
-			<div className="p-4 space-y-3">
-				{/* Product Name */}
-				<div>
-					<h3 className="font-semibold !text-base line-clamp-2 mb-1">
-						{product.name}
-					</h3>
-				</div>
-
-				{/* Price */}
-				<div className="flex items-center justify-between">
-					<span className="text-lg font-bold text-primary">
-						{formatPrice(displayPrice)}
-					</span>
-					{product.discount && (
-						<Badge variant="destructive" className="text-xs">
-							-{product.discount}%
-						</Badge>
-					)}
-				</div>
-
-				{/* Stock */}
-				<div className="flex items-center gap-2 text-sm">
-					<span className="text-muted-foreground">Stock:</span>
-					<span className={isAvailable ? "text-black" : "text-red-600"}>
-						{stockDisplayText}
-					</span>
-				</div>
-
-				{/* Category */}
-				<div className="text-sm">
-					<span className="text-muted-foreground">Category: </span>
-					<span className="font-medium">
-						{getCategoryName(product.categorySlug) || "N/A"}
-					</span>
-				</div>
-
-				{/* Tea Categories */}
-				{product.teaCategories && product.teaCategories.length > 0 && (
-					<div className="text-sm">
-						<span className="text-muted-foreground">Tea Types: </span>
-						<span className="font-medium text-xs">
-							{getTeaCategoryNames(product.teaCategories)}
-						</span>
-					</div>
-				)}
-
-				{/* Weight */}
-				{product.weight && (
-					<div className="text-sm">
-						<span className="text-muted-foreground">Weight: </span>
-						<span className="font-medium">{product.weight}</span>
-					</div>
-				)}
-
-				{/* Shipping */}
-				{allShippingLocations.filter((code) => code !== "" && code !== "NONE")
-					.length > 0 && (
-					<div className="text-sm">
-						<span className="text-muted-foreground">Ships from: </span>
-						<div className="flex items-center gap-1 mt-1">
-							{allShippingLocations
-								.filter((code) => code !== "" && code !== "NONE") // Filter out empty values and NONE
-								.map((countryCode) => {
-									const country = getCountryByCode(countryCode);
-									return (
-										<span
-											key={countryCode}
-											className="text-lg"
-											title={country?.name || countryCode}
-										>
-											{country?.name?.split(" ")[0] || countryCode}
-										</span>
-									);
-								})}
+						{/* Desktop Action Buttons */}
+						<div className="absolute bottom-0 left-0 right-0 hidden md:flex opacity-0 group-hover:opacity-100 transition-all duration-500">
+							<button
+								type="button"
+								onClick={(e) => {
+									e.stopPropagation();
+									onEdit(product);
+								}}
+								className="flex-1 flex items-center justify-center space-x-2 bg-muted/70 backdrop-blur-xs text-black hover:bg-black hover:text-white active:bg-black active:text-white transition-all duration-500 py-2 cursor-pointer outline-none border-none"
+								style={{ margin: 0, padding: "0.5rem 0" }}
+							>
+								<Edit className="w-4 h-4" />
+								<span>Edit</span>
+							</button>
+							<button
+								type="button"
+								onClick={(e) => {
+									e.stopPropagation();
+									onDelete(product);
+								}}
+								className="w-12 flex items-center justify-center bg-muted/70 backdrop-blur-xs text-black hover:bg-red-600 hover:text-white active:bg-red-600 active:text-white transition-all duration-500 cursor-pointer outline-none border-none"
+								style={{ margin: 0, padding: "0.5rem 0" }}
+							>
+								<Trash2 className="w-4 h-4" />
+							</button>
 						</div>
 					</div>
-				)}
 
-				{/* Variations indicator */}
-				{product.hasVariations && (
-					<div className="text-xs">
-						<Badge variant="outline">Has Variations</Badge>
+					{/* Content Section */}
+					<div className="flex flex-col h-auto md:h-full">
+						{/* Info Section */}
+						<div className="p-4 flex flex-col h-auto md:h-full">
+							{/* Price */}
+							<div className="flex flex-col mb-2">
+								<div className="flex flex-wrap items-center justify-between w-full gap-x-2">
+									<div className="flex flex-col items-baseline gap-1">
+										{product.discount ? (
+											<>
+												<h5 className="whitespace-nowrap">
+													$
+													{(displayPrice * (1 - product.discount / 100)).toFixed(
+														2,
+													)}{" "}
+													CAD
+												</h5>
+												<div className="flex items-center gap-1">
+													<h6 className="line-through text-muted-foreground">
+														${displayPrice.toFixed(2)}
+													</h6>
+													<Badge variant="green">{product.discount}% OFF</Badge>
+												</div>
+											</>
+										) : (
+											<h5 className="whitespace-nowrap">
+												${displayPrice.toFixed(2)} CAD
+											</h5>
+										)}
+									</div>
+								</div>
+							</div>
+
+							{/* Product Name */}
+							<p className="mb-3">{product.name}</p>
+
+							{/* Metadata */}
+							<div className="space-y-1 text-sm">
+								{/* Category */}
+								<div>
+									<span className="text-muted-foreground">
+										{getCategoryName(product.categorySlug) || "N/A"}
+									</span>
+								</div>
+
+								{/* Tea Categories */}
+								{product.teaCategories && product.teaCategories.length > 0 && (
+									<div>
+										<span className="text-muted-foreground text-xs">
+											{getTeaCategoryNames(product.teaCategories)}
+										</span>
+									</div>
+								)}
+
+								{/* Stock */}
+								<div>
+									<span
+										className={cn(
+											"text-xs",
+											hasAnyStock ? "text-muted-foreground" : "text-red-600",
+										)}
+									>
+										Stock: {stockDisplayText}
+									</span>
+								</div>
+
+								{/* Weight */}
+								{product.weight && (
+									<div>
+										<span className="text-muted-foreground text-xs">
+											Weight: {product.weight}g
+										</span>
+									</div>
+								)}
+
+								{/* Shipping */}
+								{allShippingLocations.filter(
+									(code) => code !== "" && code !== "NONE",
+								).length > 0 && (
+									<div>
+										<span className="text-muted-foreground text-xs">
+											Ships from:{" "}
+											{allShippingLocations
+												.filter((code) => code !== "" && code !== "NONE")
+												.map((countryCode) => {
+													const country = getCountryByCode(countryCode);
+													return country?.name?.split(" ")[0] || countryCode;
+												})
+												.join(", ")}
+										</span>
+									</div>
+								)}
+
+								{/* Variations indicator */}
+								{product.hasVariations && (
+									<div className="pt-1">
+										<Badge variant="outline" className="text-xs">
+											Has Variations
+										</Badge>
+									</div>
+								)}
+							</div>
+						</div>
+
+						{/* Mobile Action Buttons */}
+						<div className="md:hidden mt-auto flex">
+							<button
+								type="button"
+								onClick={(e) => {
+									e.stopPropagation();
+									onEdit(product);
+								}}
+								className="flex-1 cursor-pointer flex items-center justify-center space-x-2 bg-muted backdrop-blur-xs text-black hover:bg-black hover:text-white active:bg-black active:text-white transition-all duration-500 py-2 px-4 outline-none border-none"
+								style={{ margin: 0 }}
+							>
+								<Edit className="w-4 h-4" />
+								<span>Edit</span>
+							</button>
+							<button
+								type="button"
+								onClick={(e) => {
+									e.stopPropagation();
+									onDelete(product);
+								}}
+								className="w-12 cursor-pointer flex items-center justify-center bg-muted backdrop-blur-xs text-black hover:bg-red-600 hover:text-white active:bg-red-600 active:text-white transition-all duration-500 outline-none border-none"
+								style={{ margin: 0, padding: "0.5rem 0" }}
+							>
+								<Trash2 className="w-4 h-4" />
+							</button>
+						</div>
 					</div>
-				)}
-
-				{/* Action Buttons */}
-				<div className="flex gap-2 pt-2">
-					<Button
-						size="sm"
-						variant="outline"
-						onClick={() => onEdit(product)}
-						className="flex-1 group justify-center"
-					>
-						<Edit className="w-4 h-4 group-hover:scale-110 transition-transform" />
-					</Button>
-					<Button
-						size="sm"
-						variant="destructive"
-						onClick={() => onDelete(product)}
-						className="flex-1 group justify-center"
-					>
-						<Trash2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
-					</Button>
 				</div>
 			</div>
-		</article>
+		</div>
 	);
 }
