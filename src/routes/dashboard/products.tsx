@@ -18,11 +18,11 @@ import {
   TeaCategory,
   ProductWithVariations,
   VariationAttribute,
+  ProductGroup,
 } from "~/types";
 
 import ProductVariationForm from "~/components/ui/dashboard/ProductVariationForm";
 import { AdminProductCard } from "~/components/ui/dashboard/AdminProductCard";
-import { sortProductsByStockAndName } from "~/utils/validateStock";
 
 import DeleteConfirmationDialog from "~/components/ui/dashboard/ConfirmationDialog";
 import { toast } from "sonner";
@@ -74,7 +74,7 @@ function RouteComponent() {
     isError,
     refetch,
   } = useQuery<{
-    products: ProductWithVariations[];
+    groupedProducts: ProductGroup[];
     categories: Category[];
     teaCategories: TeaCategory[];
     brands: Brand[];
@@ -123,9 +123,8 @@ function RouteComponent() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
 
-  // Search and filter state
+  // Search state
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
 
   // All useEffect hooks
   useEffect(() => {
@@ -253,27 +252,32 @@ function RouteComponent() {
     ) : null;
   }
 
-  const { products, categories, teaCategories, brands } = productsData;
+  const { groupedProducts, categories, teaCategories, brands } = productsData;
 
-  // Filter and sort products based on search and status
-  const filteredProducts = products
-    .filter((product) => {
-      const matchesSearch =
-        searchTerm === "" ||
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.slug.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        getCategoryName(product.categorySlug)
-          ?.toLowerCase()
-          .includes(searchTerm.toLowerCase());
+  // Filter grouped products based on search
+  const displayGroupedProducts: ProductGroup[] = searchTerm
+    ? groupedProducts
+        .map((group) => ({
+          ...group,
+          products: group.products.filter(
+            (product) =>
+              product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              product.slug.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              group.title.toLowerCase().includes(searchTerm.toLowerCase())
+          ),
+        }))
+        .filter((group) => group.products.length > 0)
+    : groupedProducts;
 
-      const matchesStatus =
-        statusFilter === "all" ||
-        (statusFilter === "active" && product.isActive) ||
-        (statusFilter === "inactive" && !product.isActive);
-
-      return matchesSearch && matchesStatus;
-    })
-    .sort(sortProductsByStockAndName);
+  // Calculate total products count
+  const totalProducts = groupedProducts.reduce(
+    (sum, group) => sum + group.products.length,
+    0
+  );
+  const displayedProducts = displayGroupedProducts.reduce(
+    (sum, group) => sum + group.products.length,
+    0
+  );
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -473,7 +477,9 @@ function RouteComponent() {
         variations: formattedVariations,
       };
 
-      await updateProduct({ data: { id: editingProductId, data: submissionData } });
+      await updateProduct({
+        data: { id: editingProductId, data: submissionData },
+      });
 
       toast.success("Product updated successfully!");
 
@@ -509,7 +515,7 @@ function RouteComponent() {
       toast.success("Product deleted successfully!");
       setShowDeleteDialog(false);
       setDeletingProductId(null);
-      
+
       // Refresh data
       refetch();
     } catch (err) {
@@ -533,7 +539,9 @@ function RouteComponent() {
 
     try {
       // Fetch complete product data including variations and tea categories
-      const productWithDetails = await getProductBySlug({ data: { id: product.id } });
+      const productWithDetails = await getProductBySlug({
+        data: { id: product.id },
+      });
 
       // Convert variations to the frontend format
       const formattedVariations =
@@ -598,8 +606,8 @@ function RouteComponent() {
   return (
     <div>
       <div className="fixed bottom-3 right-3 z-50">
-        <Button 
-          onClick={() => setShowCreateForm(true)} 
+        <Button
+          onClick={() => setShowCreateForm(true)}
           size="lg"
           className="bg-black text-white hover:bg-white/60 hover:text-black hover:backdrop-blur-md transition-all duration-300"
         >
@@ -613,29 +621,18 @@ function RouteComponent() {
         {/* Products Header with Search */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4">
           <p className="text-muted-foreground">
-            Manage your product catalog • {filteredProducts.length} of{" "}
-            {products.length} products
+            {searchTerm
+              ? `${displayedProducts} of ${totalProducts} products`
+              : `${totalProducts} products`}
           </p>
 
-          {/* Search and Filter */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-            <Input
-              placeholder="Search products..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full sm:w-64"
-            />
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Search */}
+          <Input
+            placeholder="Search products..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full sm:w-64"
+          />
         </div>
 
         {isPending ? (
@@ -645,7 +642,7 @@ function RouteComponent() {
               <p className="text-muted-foreground">Loading products...</p>
             </div>
           </div>
-        ) : filteredProducts.length === 0 ? (
+        ) : displayGroupedProducts.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground px-4">
             <div className="mb-4">
               <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center">
@@ -653,31 +650,52 @@ function RouteComponent() {
               </div>
             </div>
             <h3 className="text-lg font-medium mb-2">
-              {searchTerm || statusFilter !== "all"
-                ? "No products found"
-                : "No products yet"}
+              {searchTerm ? "No products found" : "No products yet"}
             </h3>
             <p className="text-sm text-muted-foreground">
-              {searchTerm || statusFilter !== "all"
-                ? "Try adjusting your search or filters"
+              {searchTerm
+                ? "Try adjusting your search"
                 : "Get started by creating your first product"}
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 md:gap-6">
-            {filteredProducts.map((product) => (
-              <AdminProductCard
-                key={product.id}
-                product={product}
-                categories={categories}
-                teaCategories={teaCategories}
-                brands={brands}
-                onEdit={handleEdit}
-                onDelete={handleDeleteClick}
-                formatPrice={formatPrice}
-                getCategoryName={getCategoryName}
-                getTeaCategoryNames={getTeaCategoryNames}
-              />
+          <div className="space-y-8">
+            {displayGroupedProducts.map((group, index) => (
+              <div key={index} className="space-y-4">
+                {/* Group Title */}
+                <div className="px-4">
+                  <h2 className="text-2xl font-semibold text-foreground">
+                    {group.title}
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {group.products.length}{" "}
+                    {group.products.length === 1 ? "product" : "products"}
+                  </p>
+                </div>
+
+                {/* Products Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 md:gap-6 px-4">
+                  {group.products.map((product) => (
+                    <AdminProductCard
+                      key={product.id}
+                      product={product}
+                      categories={categories}
+                      teaCategories={teaCategories}
+                      brands={brands}
+                      onEdit={handleEdit}
+                      onDelete={handleDeleteClick}
+                      formatPrice={formatPrice}
+                      getCategoryName={getCategoryName}
+                      getTeaCategoryNames={getTeaCategoryNames}
+                    />
+                  ))}
+                </div>
+
+                {/* Divider between groups (except for the last one) */}
+                {index < displayGroupedProducts.length - 1 && (
+                  <div className="border-b border-border/40 mt-8 mx-4" />
+                )}
+              </div>
             ))}
           </div>
         )}
@@ -832,7 +850,10 @@ function RouteComponent() {
                           }
                           onCheckedChange={(checked) => {
                             const newCategories = checked
-                              ? [...(editFormData.teaCategories || []), category.slug]
+                              ? [
+                                  ...(editFormData.teaCategories || []),
+                                  category.slug,
+                                ]
                               : (editFormData.teaCategories || []).filter(
                                   (slug) => slug !== category.slug
                                 );
@@ -927,7 +948,10 @@ function RouteComponent() {
                     value={editFormData.shippingFrom || "NONE"}
                     onValueChange={(value: string) =>
                       handleEditChange({
-                        target: { name: "shippingFrom", value: value === "NONE" ? "" : value },
+                        target: {
+                          name: "shippingFrom",
+                          value: value === "NONE" ? "" : value,
+                        },
                       } as React.ChangeEvent<HTMLSelectElement>)
                     }
                   >
@@ -1174,7 +1198,10 @@ function RouteComponent() {
                           }
                           onCheckedChange={(checked) => {
                             const newCategories = checked
-                              ? [...(formData.teaCategories || []), category.slug]
+                              ? [
+                                  ...(formData.teaCategories || []),
+                                  category.slug,
+                                ]
                               : (formData.teaCategories || []).filter(
                                   (slug) => slug !== category.slug
                                 );
@@ -1272,17 +1299,17 @@ function RouteComponent() {
                         shippingFrom: value === "NONE" ? "" : value,
                       });
                     }}
-                                      >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Shipping from..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {COUNTRY_OPTIONS.map((country) => (
-                          <SelectItem key={country.code} value={country.code}>
-                            {country.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Shipping from..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {COUNTRY_OPTIONS.map((country) => (
+                        <SelectItem key={country.code} value={country.code}>
+                          {country.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
                   </Select>
                 </div>
               </div>

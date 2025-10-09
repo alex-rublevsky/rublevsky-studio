@@ -16,21 +16,10 @@ import {
 import { useVariationSelection } from "~/hooks/useVariationSelection";
 import { cn } from "~/lib/utils";
 import { useCursorHover } from "../shared/custom_cursor/CustomCursorContext";
-import {unstable_ViewTransition as ViewTransition} from 'react';
 
 // Extended product interface with variations
 interface ProductWithVariations extends Product {
   variations?: ProductVariationWithAttributes[];
-  stockDisplay?: {
-    label: string;
-    showValues: boolean;
-    countries: {
-      countryCode: string;
-      stock: number;
-      emoji: string;
-      displayValue: string | null;
-    }[];
-  };
 }
 
 interface ProductVariationWithAttributes extends ProductVariation {
@@ -91,12 +80,12 @@ const getDefaultVariation = (
   const sortedVariations = [...product.variations].sort((a, b) => {
     const aStock = getAvailableQuantityForVariation(product, a.id, cartItems);
     const bStock = getAvailableQuantityForVariation(product, b.id, cartItems);
-    
+
     // Prioritize variations with stock, then by sort order
     if (product.unlimitedStock) {
       return (b.sort ?? 0) - (a.sort ?? 0);
     }
-    
+
     if (aStock > 0 && bStock <= 0) return -1;
     if (bStock > 0 && aStock <= 0) return 1;
     return (b.sort ?? 0) - (a.sort ?? 0);
@@ -106,7 +95,9 @@ const getDefaultVariation = (
 };
 
 // Helper function to convert variation attributes to URL search params
-const getVariationSearchParams = (variation: ProductVariationWithAttributes | null): Record<string, string> => {
+const getVariationSearchParams = (
+  variation: ProductVariationWithAttributes | null
+): Record<string, string> => {
   if (!variation) return {};
 
   const params: Record<string, string> = {};
@@ -118,11 +109,7 @@ const getVariationSearchParams = (variation: ProductVariationWithAttributes | nu
   return params;
 };
 
-function ProductCard({
-  product,
-}: {
-  product: ProductWithVariations;
-}) {
+function ProductCard({ product }: { product: ProductWithVariations }) {
   const [isHovering, setIsHovering] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const { addProductToCart, cart } = useCart();
@@ -139,13 +126,13 @@ function ProductCard({
   });
 
   // Calculate default variation and search params for the Link
-  const defaultVariation = useMemo(() => 
-    getDefaultVariation(product, cart.items), 
+  const defaultVariation = useMemo(
+    () => getDefaultVariation(product, cart.items),
     [product, cart.items]
   );
 
-  const linkSearchParams = useMemo(() => 
-    getVariationSearchParams(defaultVariation), 
+  const linkSearchParams = useMemo(
+    () => getVariationSearchParams(defaultVariation),
     [defaultVariation]
   );
 
@@ -185,7 +172,10 @@ function ProductCard({
   }, [product.isActive, product.unlimitedStock, getEffectiveStock]);
 
   // Custom cursor hover for Add to Cart button
-  const { handleMouseEnter: handleAddToCartMouseEnter, handleMouseLeave: handleAddToCartMouseLeave } = useCursorHover(
+  const {
+    handleMouseEnter: handleAddToCartMouseEnter,
+    handleMouseLeave: handleAddToCartMouseLeave,
+  } = useCursorHover(
     "add",
     !isAvailable // Disable cursor when product is not available
   );
@@ -244,7 +234,6 @@ function ProductCard({
     ]
   );
 
-  
   // Check if product is coming soon (not in the type, so we'll use a placeholder)
   const isComingSoon = false; // Replace with actual logic when available
 
@@ -267,9 +256,7 @@ function ProductCard({
     }, 100);
   }, []);
 
-
-
-    return (
+  return (
     <Link
       to="/store/$productId"
       params={{
@@ -292,23 +279,22 @@ function ProductCard({
               {/* Primary Image */}
               <div className="relative aspect-square flex items-center justify-center overflow-hidden">
                 {imageArray.length > 0 ? (
-                  
-                    <div className="relative w-full h-full">
-                      <img
-                        src={`https://assets.rublevsky.studio/${imageArray[0]}`}
-                        alt={product.name}
-                        loading="eager"
-                        className="absolute inset-0 w-full h-full object-cover object-center"
-                        //TODO: update with srcset?
-                        //sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        style={{
-                          viewTransitionName: `product-image-${product.slug}`,
-                          filter: !hasAnyStock ? 'grayscale(100%)' : 'none',
-                          opacity: !hasAnyStock ? 0.6 : 1
-                        }}
-                      />
-                      {/* Secondary Image (if exists) - Only on desktop devices with hover capability */}
-                      {/* COMMENTED OUT: Hover effect for second image - disabled for view transitions
+                  <div className="relative w-full h-full">
+                    <img
+                      src={`https://assets.rublevsky.studio/${imageArray[0]}`}
+                      alt={product.name}
+                      loading="eager"
+                      className="absolute inset-0 w-full h-full object-cover object-center"
+                      //TODO: update with srcset?
+                      //sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      style={{
+                        viewTransitionName: `product-image-${product.slug}`,
+                        filter: !hasAnyStock ? "grayscale(100%)" : "none",
+                        opacity: !hasAnyStock ? 0.6 : 1,
+                      }}
+                    />
+                    {/* Secondary Image (if exists) - Only on desktop devices with hover capability */}
+                    {/* COMMENTED OUT: Hover effect for second image - disabled for view transitions
                       {imageArray.length > 1 && (
                         <Image
                           src={`/${imageArray[1]}`}
@@ -323,8 +309,7 @@ function ProductCard({
                         />
                       )}
                       */}
-                    </div>
-                 
+                  </div>
                 ) : (
                   <div className="absolute inset-0 bg-muted flex items-center justify-center">
                     <span className="text-muted-foreground">No image</span>
@@ -378,14 +363,13 @@ function ProductCard({
                 <span>{isComingSoon ? "Pre-ordering..." : "Adding..."}</span>
               )}
             </button>
-            
           </div>
 
           {/* Content Section */}
           <div className="flex flex-col h-auto md:h-full">
             {/* Info Section */}
             <div className="p-4 flex flex-col h-auto md:h-full">
-              {/* Price and Stock */}
+              {/* Price */}
               <div className="flex flex-col mb-2">
                 <div className="flex flex-wrap items-center justify-between w-full gap-x-2">
                   <div className="flex flex-col items-baseline gap-1">
@@ -407,33 +391,16 @@ function ProductCard({
                         </div>
                       </>
                     ) : (
-                      <h5 className="whitespace-nowrap"
-                      style={{
-                        viewTransitionName: `product-price-${product.slug}`
-                      }}
+                      <h5
+                        className="whitespace-nowrap"
+                        style={{
+                          viewTransitionName: `product-price-${product.slug}`,
+                        }}
                       >
                         ${currentPrice?.toFixed(2)} CAD
                       </h5>
                     )}
                   </div>
-
-                  {product.stockDisplay && product.stockDisplay.countries.length > 0 && (
-                    <div className="flex flex-col items-end text-xs">
-                      <span className="text-muted-foreground mb-0">
-                        {product.stockDisplay.label}
-                      </span>
-                      <div className="flex items-center gap-2 text-sm">
-                        {product.stockDisplay.countries.map((country) => (
-                          <span key={country.countryCode} className="flex items-center">
-                            <span className="text-lg">{country.emoji}</span>
-                            {country.displayValue && (
-                              <span className="ml-1 font-medium">{country.displayValue}</span>
-                            )}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
                 </div>
 
                 {isComingSoon && (
@@ -449,9 +416,10 @@ function ProductCard({
               </div>
 
               {/* Product Name */}
-              <p className=" mb-3" 
+              <p
+                className=" mb-3"
                 style={{
-                  viewTransitionName: `product-name-${product.slug}`
+                  viewTransitionName: `product-name-${product.slug}`,
                 }}
               >
                 {product.name}
@@ -489,10 +457,10 @@ function ProductCard({
             {/* Mobile Add to Cart button */}
             <div className="md:hidden mt-auto">
               <button
-                              onClick={(e) => {
-                e.stopPropagation();
-                handleAddToCart(e);
-              }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleAddToCart(e);
+                }}
                 className={`w-full cursor-pointer flex items-center justify-center space-x-2 bg-muted backdrop-blur-xs text-black hover:bg-black  transition-all duration-500 py-2 px-4 ${
                   !isAvailable
                     ? "opacity-50 cursor-not-allowed hover:bg-muted/70 hover:text-black"

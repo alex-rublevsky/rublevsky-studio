@@ -3,12 +3,11 @@ import {
   categories,
   brands,
   productVariations,
-
   orders,
   orderItems,
   addresses,
   blogPosts,
-  teaCategories
+  teaCategories,
 } from "~/schema";
 import { InferSelectModel, InferInsertModel } from "drizzle-orm";
 
@@ -27,11 +26,13 @@ export interface ProductVariationWithAttributes extends ProductVariation {
 export interface ProductWithVariations extends Product {
   variations?: ProductVariationWithAttributes[];
   teaCategories?: string[];
-  countryStock?: {
-    countryCode: string;
-    emoji: string;
-    stock: number;
-  }[];
+}
+
+// Product group for dashboard
+export interface ProductGroup {
+  title: string;
+  products: ProductWithVariations[];
+  categorySlug?: string;
 }
 
 // Categories
@@ -78,7 +79,10 @@ export type TeaCategory = InferSelectModel<typeof teaCategories>;
 export type NewTeaCategory = InferInsertModel<typeof teaCategories>;
 
 // Blog Posts
-export type BlogPost = Omit<InferSelectModel<typeof blogPosts>, 'publishedAt'> & {
+export type BlogPost = Omit<
+  InferSelectModel<typeof blogPosts>,
+  "publishedAt"
+> & {
   teaCategories?: string[];
   publishedAt: number;
   productName?: string | null;
