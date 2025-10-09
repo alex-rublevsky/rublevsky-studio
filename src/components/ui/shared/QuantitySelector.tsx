@@ -25,7 +25,7 @@ function QuantitySelectorButton({
 		<button
 			type="button"
 			onClick={onClick}
-			className={`${styles.button} hover:bg-muted transition flex items-center justify-center ${
+			className={`${styles.button} hover:bg-muted active:bg-muted transition flex items-center justify-center ${
 				disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
 			}`}
 			disabled={disabled}

@@ -62,30 +62,30 @@ function DatePicker({
 			{label && <Label htmlFor={id}>{label}</Label>}
 			<Popover>
 				<PopoverTrigger asChild>
-					<Button
-						id={id}
-						variant={"outline"}
-						disabled={disabled}
+				<Button
+					id={id}
+					variant={"outline"}
+					disabled={disabled}
+					className={cn(
+						"group w-full justify-between bg-background px-3 font-normal outline-offset-0 hover:bg-black hover:text-white active:bg-black active:text-white focus-visible:border-ring focus-visible:outline-[3px] focus-visible:outline-ring/20 transition-colors duration-200",
+						!selectedDate && "text-muted-foreground hover:text-white active:text-white",
+					)}
+				>
+					<span
 						className={cn(
-							"group w-full justify-between bg-background px-3 font-normal outline-offset-0 hover:bg-black hover:text-white focus-visible:border-ring focus-visible:outline-[3px] focus-visible:outline-ring/20 transition-colors duration-200",
-							!selectedDate && "text-muted-foreground hover:text-white",
+							"truncate",
+							!selectedDate && "text-muted-foreground",
 						)}
 					>
-						<span
-							className={cn(
-								"truncate",
-								!selectedDate && "text-muted-foreground",
-							)}
-						>
-							{selectedDate ? format(selectedDate, "PPP") : placeholder}
-						</span>
-						<CalendarIcon
-							size={16}
-							strokeWidth={2}
-							className="shrink-0 text-muted-foreground/80 transition-colors group-hover:text-white"
-							aria-hidden="true"
-						/>
-					</Button>
+						{selectedDate ? format(selectedDate, "PPP") : placeholder}
+					</span>
+					<CalendarIcon
+						size={16}
+						strokeWidth={2}
+						className="shrink-0 text-muted-foreground/80 transition-colors group-hover:text-white group-active:text-white"
+						aria-hidden="true"
+					/>
+				</Button>
 				</PopoverTrigger>
 				<PopoverContent className="w-auto p-0" align="start">
 					<Calendar

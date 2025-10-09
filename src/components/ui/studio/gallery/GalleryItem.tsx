@@ -72,7 +72,7 @@ export default function GalleryItemComponent({
 					asChild
 					variant="default"
 					size="lg"
-					className="group-hover:opacity-100 opacity-0 backdrop-blur-md hover:bg-background/20 absolute top-2 right-2 transition-all duration-300 ease-in-out"
+					className="group-hover:opacity-100 opacity-0 backdrop-blur-md hover:bg-background/20 active:bg-background/20 absolute top-2 right-2 transition-all duration-300 ease-in-out"
 				>
 					<Link
 						to="/store/$productId"

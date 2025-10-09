@@ -38,22 +38,22 @@ const SelectTrigger = React.forwardRef<
 			useCursorHover("small");
 
 		return (
-			<SelectPrimitive.Trigger
-				ref={ref}
-				className={cn(
-					"relative flex rounded-full border border-border bg-background hover:bg-black hover:text-white transition-all duration-200",
-					"focus:outline-hidden focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
-					// Responsive width - larger for default (Sort By), smaller for navbar (Other)
-					"w-[18ch]",
-					variant === "navbar" && "w-[10ch]",
-					// Custom cursor styles - always cursor-pointer
-					"cursor-pointer",
-					className,
-				)}
-				onMouseEnter={handleMouseEnter(onMouseEnter)}
-				onMouseLeave={handleMouseLeaveHook(onMouseLeave)}
-				{...props}
-			>
+		<SelectPrimitive.Trigger
+			ref={ref}
+			className={cn(
+				"relative flex rounded-full border border-border bg-background hover:bg-black hover:text-white active:bg-black active:text-white transition-all duration-200",
+				"focus:outline-hidden focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
+				// Responsive width - larger for default (Sort By), smaller for navbar (Other)
+				"w-[18ch]",
+				variant === "navbar" && "w-[10ch]",
+				// Custom cursor styles - always cursor-pointer
+				"cursor-pointer",
+				className,
+			)}
+			onMouseEnter={handleMouseEnter(onMouseEnter)}
+			onMouseLeave={handleMouseLeaveHook(onMouseLeave)}
+			{...props}
+		>
 				<span className="relative z-10 flex items-center justify-between w-full cursor-pointer px-2 md:px-4 py-1.5 md:py-2 text-sm md:text-sm font-medium text-white mix-blend-difference">
 					<span className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-left">
 						{children}
@@ -121,7 +121,7 @@ const SelectItem = React.forwardRef<
 		<SelectPrimitive.Item
 			ref={ref}
 			className={cn(
-				"relative flex w-full cursor-default select-none items-center py-2 px-3 text-sm outline-none focus:bg-black focus:text-white data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-black hover:text-white transition-colors duration-200",
+				"relative flex w-full cursor-default select-none items-center py-2 px-3 text-sm outline-none focus:bg-black focus:text-white data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-black hover:text-white active:bg-black active:text-white transition-colors duration-200",
 				// Custom cursor styles - always cursor-pointer
 				"cursor-pointer",
 				className,

@@ -56,17 +56,17 @@ function Calendar({
 			"relative mx-10 mb-1 flex h-9 items-center justify-center z-20",
 		caption_label: "text-sm font-medium",
 		nav: "absolute top-0 flex w-full justify-between z-10",
-		button_previous: cn(
-			buttonVariants({ variant: "ghost" }),
-			"size-9 text-muted-foreground/80 hover:text-foreground p-0 cursor-pointer",
-		),
-		button_next: cn(
-			buttonVariants({ variant: "ghost" }),
-			"size-9 text-muted-foreground/80 hover:text-foreground p-0 cursor-pointer",
-		),
-		weekday: "size-9 p-0 text-xs font-medium text-muted-foreground/80",
-		day_button:
-			"relative flex size-9 items-center justify-center whitespace-nowrap rounded-lg p-0 text-foreground outline-offset-2 cursor-pointer pointer-events-auto transition-all duration-150 focus:outline-none group-data-[disabled]:pointer-events-none group-data-[disabled]:cursor-not-allowed focus-visible:z-10 hover:bg-accent group-data-[selected]:bg-black group-data-[selected]:text-white group-data-[selected]:hover:bg-transparent group-data-[selected]:hover:text-black group-data-[selected]:hover:border-2 group-data-[selected]:hover:border-black hover:text-foreground group-data-[disabled]:text-foreground/30 group-data-[disabled]:line-through group-data-[outside]:text-foreground/30 group-data-[outside]:group-data-[selected]:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring/70 group-[.range-start:not(.range-end)]:rounded-e-none group-[.range-end:not(.range-start)]:rounded-s-none group-[.range-middle]:rounded-none group-data-[selected]:group-[.range-middle]:bg-accent group-data-[selected]:group-[.range-middle]:text-foreground",
+	button_previous: cn(
+		buttonVariants({ variant: "ghost" }),
+		"size-9 text-muted-foreground/80 hover:text-foreground active:text-foreground p-0 cursor-pointer",
+	),
+	button_next: cn(
+		buttonVariants({ variant: "ghost" }),
+		"size-9 text-muted-foreground/80 hover:text-foreground active:text-foreground p-0 cursor-pointer",
+	),
+	weekday: "size-9 p-0 text-xs font-medium text-muted-foreground/80",
+	day_button:
+		"relative flex size-9 items-center justify-center whitespace-nowrap rounded-lg p-0 text-foreground outline-offset-2 cursor-pointer pointer-events-auto transition-all duration-150 focus:outline-none group-data-[disabled]:pointer-events-none group-data-[disabled]:cursor-not-allowed focus-visible:z-10 hover:bg-accent active:bg-accent group-data-[selected]:bg-black group-data-[selected]:text-white group-data-[selected]:hover:bg-transparent group-data-[selected]:hover:text-black group-data-[selected]:hover:border-2 group-data-[selected]:hover:border-black group-data-[selected]:active:bg-transparent group-data-[selected]:active:text-black group-data-[selected]:active:border-2 group-data-[selected]:active:border-black hover:text-foreground active:text-foreground group-data-[disabled]:text-foreground/30 group-data-[disabled]:line-through group-data-[outside]:text-foreground/30 group-data-[outside]:group-data-[selected]:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring/70 group-[.range-start:not(.range-end)]:rounded-e-none group-[.range-end:not(.range-start)]:rounded-s-none group-[.range-middle]:rounded-none group-data-[selected]:group-[.range-middle]:bg-accent group-data-[selected]:group-[.range-middle]:text-foreground",
 		day: "group size-9 px-0 text-sm",
 		range_start: "range-start",
 		range_end: "range-end",

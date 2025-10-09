@@ -125,7 +125,7 @@ function DragHandle({ id }: { id: number }) {
 			{...listeners}
 			variant="ghost"
 			size="icon"
-			className="size-7 text-muted-foreground hover:bg-transparent"
+			className="size-7 text-muted-foreground hover:bg-transparent active:bg-transparent"
 		>
 			<GripVerticalIcon className="size-3 text-muted-foreground" />
 			<span className="sr-only">Drag to reorder</span>
@@ -215,14 +215,14 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
 					});
 				}}
 			>
-				<Label htmlFor={`${row.original.id}-target`} className="sr-only">
-					Target
-				</Label>
-				<Input
-					className="h-8 w-16 border-transparent bg-transparent text-right shadow-none hover:bg-input/30 focus-visible:border focus-visible:bg-background"
-					defaultValue={row.original.target}
-					id={`${row.original.id}-target`}
-				/>
+			<Label htmlFor={`${row.original.id}-target`} className="sr-only">
+				Target
+			</Label>
+			<Input
+				className="h-8 w-16 border-transparent bg-transparent text-right shadow-none hover:bg-input/30 active:bg-input/30 focus-visible:border focus-visible:bg-background"
+				defaultValue={row.original.target}
+				id={`${row.original.id}-target`}
+			/>
 			</form>
 		),
 	},
@@ -240,14 +240,14 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
 					});
 				}}
 			>
-				<Label htmlFor={`${row.original.id}-limit`} className="sr-only">
-					Limit
-				</Label>
-				<Input
-					className="h-8 w-16 border-transparent bg-transparent text-right shadow-none hover:bg-input/30 focus-visible:border focus-visible:bg-background"
-					defaultValue={row.original.limit}
-					id={`${row.original.id}-limit`}
-				/>
+			<Label htmlFor={`${row.original.id}-limit`} className="sr-only">
+				Limit
+			</Label>
+			<Input
+				className="h-8 w-16 border-transparent bg-transparent text-right shadow-none hover:bg-input/30 active:bg-input/30 focus-visible:border focus-visible:bg-background"
+				defaultValue={row.original.limit}
+				id={`${row.original.id}-limit`}
+			/>
 			</form>
 		),
 	},

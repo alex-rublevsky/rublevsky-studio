@@ -160,13 +160,13 @@ export default function ProductSelector({
 							{selectedProduct.slug}
 						</p>
 					</div>
-					<button
-						type="button"
-						onClick={handleClearSelection}
-						className="text-destructive hover:text-destructive/80"
-					>
-						✕
-					</button>
+				<button
+					type="button"
+					onClick={handleClearSelection}
+					className="text-destructive hover:text-destructive/80 active:text-destructive/80"
+				>
+					✕
+				</button>
 				</div>
 			) : (
 				<div className="relative">
@@ -200,13 +200,13 @@ export default function ProductSelector({
 							No products found
 						</div>
 					) : (
-						filteredProducts.map((product) => (
-							<button
-								type="button"
-								key={product.id}
-								onClick={() => handleProductSelect(product)}
-								className="flex items-center p-2 hover:bg-muted cursor-pointer w-full text-left"
-							>
+					filteredProducts.map((product) => (
+						<button
+							type="button"
+							key={product.id}
+							onClick={() => handleProductSelect(product)}
+							className="flex items-center p-2 hover:bg-muted active:bg-muted cursor-pointer w-full text-left"
+						>
 								<div className="w-8 h-8 relative shrink-0 mr-2">
 									{(() => {
 										const productImage = getProductImage(product);

@@ -22,7 +22,7 @@ export function CartNav() {
 					<button
 						type="button"
 						onClick={() => setCartOpen(true)}
-						className="relative flex items-center justify-center w-[2.6rem] h-[2.6rem] md:w-[3.2rem] md:h-[3.2rem] rounded-full border border-black bg-background hover:bg-black hover:text-white transition-all duration-500"
+						className="relative flex items-center justify-center w-[2.6rem] h-[2.6rem] md:w-[3.2rem] md:h-[3.2rem] rounded-full border border-black bg-background hover:bg-black hover:text-white active:bg-black active:text-white transition-all duration-500"
 					>
 						{/* Cart SVG Icon */}
 						<svg

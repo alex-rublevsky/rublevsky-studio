@@ -121,12 +121,12 @@ export default function DashboardBlogPostCard({
 							<span className="text-xs text-muted-foreground block mb-1">
 								Linked product:
 							</span>
-							<Badge
-								variant="outline"
-								className="text-xs cursor-pointer hover:bg-muted transition-colors"
-								onClick={() => window.open(`/store/${productSlug}`, "_blank")}
-							>
-								{productName}
+						<Badge
+							variant="outline"
+							className="text-xs cursor-pointer hover:bg-muted active:bg-muted transition-colors"
+							onClick={() => window.open(`/store/${productSlug}`, "_blank")}
+						>
+							{productName}
 							</Badge>
 						</div>
 					)}

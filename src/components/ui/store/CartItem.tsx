@@ -89,14 +89,14 @@ export function CartItem({ item }: CartItemProps) {
 						</div>
 					)}
 				</div>
-				<button
-					type="button"
-					onClick={() => removeFromCart(item.productId, item.variationId)}
-					className="absolute translate-x-1/2 translate-y-1/2 bottom-0 right-0 p-1 bg-background/80 hover:bg-background/80 backdrop-blur-[2px] rounded-md shadow-sm text-secondary-foreground hover:text-foreground cursor-pointer transition-colors"
-					aria-label="Remove item"
-				>
-					<X size={16} />
-				</button>
+			<button
+				type="button"
+				onClick={() => removeFromCart(item.productId, item.variationId)}
+				className="absolute translate-x-1/2 translate-y-1/2 bottom-0 right-0 p-1 bg-background/80 hover:bg-background/80 active:bg-background/80 backdrop-blur-[2px] rounded-md shadow-sm text-secondary-foreground hover:text-foreground active:text-foreground cursor-pointer transition-colors"
+				aria-label="Remove item"
+			>
+				<X size={16} />
+			</button>
 			</div>
 
 			{/* Product info */}

@@ -19,25 +19,25 @@ const buttonVariants = cva(
 		variants: {
 			variant: {
 				default:
-					"bg-primary text-primary-foreground border border-black hover:bg-transparent hover:text-black",
+					"bg-primary text-primary-foreground border border-black hover:bg-transparent hover:text-black active:bg-transparent active:text-black",
 				secondary:
-					"text-primary border border-black hover:bg-primary hover:text-primary-foreground",
+					"text-primary border border-black hover:bg-primary hover:text-primary-foreground active:bg-primary active:text-primary-foreground",
 				inverted:
-					"bg-white text-black border border-white hover:bg-transparent hover:text-white",
+					"bg-white text-black border border-white hover:bg-transparent hover:text-white active:bg-transparent active:text-white",
 				destructive:
-					"bg-backgorund text-destructive border border-destructive shadow-2xs hover:bg-destructive/90 hover:text-destructive-foreground",
+					"bg-backgorund text-destructive border border-destructive shadow-2xs hover:bg-destructive/90 hover:text-destructive-foreground active:bg-destructive/90 active:text-destructive-foreground",
 				invertedDestructive:
-					"bg-destructive text-destructive-foreground border border-destructive hover:bg-transparent",
+					"bg-destructive text-destructive-foreground border border-destructive hover:bg-transparent active:bg-transparent",
 				greenInverted:
-					"bg-green-500 text-black font-medium border border-green-500 hover:bg-transparent hover:text-green-500",
+					"bg-green-500 text-black font-medium border border-green-500 hover:bg-transparent hover:text-green-500 active:bg-transparent active:text-green-500",
 				outline:
-					"bg-transparent text-black border border-black hover:bg-black hover:text-white",
+					"bg-transparent text-black border border-black hover:bg-black hover:text-white active:bg-black active:text-white",
 				accent:
-					"bg-black text-black border border-black hover:bg-black hover:text-white",
+					"bg-black text-black border border-black hover:bg-black hover:text-white active:bg-black active:text-white",
 				secondaryInverted:
-					"bg-secondary font-medium text-secondary-foreground border border-secondary hover:bg-transparent ",
-				ghost: "hover:bg-accent hover:text-accent-foreground",
-				link: "text-primary underline-offset-4 hover:underline",
+					"bg-secondary font-medium text-secondary-foreground border border-secondary hover:bg-transparent active:bg-transparent",
+				ghost: "hover:bg-accent hover:text-accent-foreground active:bg-accent active:text-accent-foreground",
+				link: "text-primary underline-offset-4 hover:underline active:underline",
 			},
 			size: {
 				default: "h-11 px-4 py-3",
