@@ -1,17 +1,17 @@
-import { Outlet, createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { CartProvider } from "~/lib/cartContext";
 
 export const Route = createFileRoute("/product")({
-  component: RouteComponent,
+	component: RouteComponent,
 });
 
 function RouteComponent() {
-  return (
-    <>
-      <div>Product Layout</div>
-      <CartProvider>
-        <Outlet />
-      </CartProvider>
-    </>
-  );
+	return (
+		<>
+			<div>Product Layout</div>
+			<CartProvider>
+				<Outlet />
+			</CartProvider>
+		</>
+	);
 }

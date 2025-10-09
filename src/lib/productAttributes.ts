@@ -1,29 +1,29 @@
 export interface ProductAttribute {
-  id: string;
-  displayName: string;
+	id: string;
+	displayName: string;
 }
 
 export const PRODUCT_ATTRIBUTES: { [key: string]: ProductAttribute } = {
-  SIZE_CM: {
-    id: "SIZE_CM",
-    displayName: "Size cm",
-  },
-  SIZE: {
-    id: "SIZE",
-    displayName: "Size",
-  },
-  COLOR: {
-    id: "COLOR",
-    displayName: "Color",
-  },
-  APPAREL_TYPE: {
-    id: "APPAREL_TYPE",
-    displayName: "Apparel Type",
-  },
-  WEIGHT_G: {
-    id: "WEIGHT_G",
-    displayName: "Weight g",
-  },
+	SIZE_CM: {
+		id: "SIZE_CM",
+		displayName: "Size cm",
+	},
+	SIZE: {
+		id: "SIZE",
+		displayName: "Size",
+	},
+	COLOR: {
+		id: "COLOR",
+		displayName: "Color",
+	},
+	APPAREL_TYPE: {
+		id: "APPAREL_TYPE",
+		displayName: "Apparel Type",
+	},
+	WEIGHT_G: {
+		id: "WEIGHT_G",
+		displayName: "Weight g",
+	},
 };
 
 /**
@@ -31,6 +31,6 @@ export const PRODUCT_ATTRIBUTES: { [key: string]: ProductAttribute } = {
  * This is a client-side function that can be used anywhere in the application
  */
 export function getAttributeDisplayName(attributeId: string): string {
-  const attribute = PRODUCT_ATTRIBUTES[attributeId];
-  return attribute ? attribute.displayName : attributeId;
-} 
+	const attribute = PRODUCT_ATTRIBUTES[attributeId];
+	return attribute ? attribute.displayName : attributeId;
+}

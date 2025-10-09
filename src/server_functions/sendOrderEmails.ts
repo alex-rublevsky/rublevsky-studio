@@ -1,75 +1,75 @@
+import { env } from "cloudflare:workers";
 import { createServerFn } from "@tanstack/react-start";
 import { Resend } from "resend";
-import { env } from "cloudflare:workers";
 import { resolveSecret } from "~/utils/cloudflare-env";
 
 interface CartItem {
-  productId: number;
-  productName: string;
-  productSlug: string;
-  variationId?: number;
-  quantity: number;
-  price: number;
-  maxStock: number;
-  unlimitedStock: boolean;
-  discount?: number | null;
-  image?: string;
-  attributes?: Record<string, string>;
-  weightInfo?: {
-    totalWeight: number;
-  };
+	productId: number;
+	productName: string;
+	productSlug: string;
+	variationId?: number;
+	quantity: number;
+	price: number;
+	maxStock: number;
+	unlimitedStock: boolean;
+	discount?: number | null;
+	image?: string;
+	attributes?: Record<string, string>;
+	weightInfo?: {
+		totalWeight: number;
+	};
 }
 
 interface Address {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  streetAddress: string;
-  city: string;
-  state: string;
-  country: string;
-  zipCode: string;
+	firstName: string;
+	lastName: string;
+	email: string;
+	phone: string;
+	streetAddress: string;
+	city: string;
+	state: string;
+	country: string;
+	zipCode: string;
 }
 
 interface CustomerInfo {
-  shippingAddress: Address;
-  billingAddress?: Address;
-  notes?: string;
-  shippingMethod?: string;
+	shippingAddress: Address;
+	billingAddress?: Address;
+	notes?: string;
+	shippingMethod?: string;
 }
 
 interface EmailData {
-  orderId: number;
-  customerInfo: CustomerInfo;
-  cartItems: CartItem[];
-  orderAmounts: { subtotalAmount: number; discountAmount: number };
-  totalAmount: number;
+	orderId: number;
+	customerInfo: CustomerInfo;
+	cartItems: CartItem[];
+	orderAmounts: { subtotalAmount: number; discountAmount: number };
+	totalAmount: number;
 }
 
 // HTML Email Templates (replacing React Email components for server function compatibility)
 function generateClientEmailHtml(data: {
-  Name: string;
-  LastName: string;
-  email: string;
-  orderId: string;
-  orderDate: string;
-  subtotal: string;
-  totalDiscount?: string;
-  orderTotal: string;
-  orderStatus: string;
-  orderItems: Array<{
-    name: string;
-    quantity: number;
-    price: string;
-    originalPrice: string;
-    discount?: number;
-    image?: string;
-  }>;
+	Name: string;
+	LastName: string;
+	email: string;
+	orderId: string;
+	orderDate: string;
+	subtotal: string;
+	totalDiscount?: string;
+	orderTotal: string;
+	orderStatus: string;
+	orderItems: Array<{
+		name: string;
+		quantity: number;
+		price: string;
+		originalPrice: string;
+		discount?: number;
+		image?: string;
+	}>;
 }): string {
-  const orderItemsHtml = data.orderItems
-    .map(
-      (item) => `
+	const orderItemsHtml = data.orderItems
+		.map(
+			(item) => `
     <tr style="border-bottom: 1px solid #e5e7eb;">
       <td style="padding: 12px 0; width: 80px;">
         ${item.image ? `<img src="${item.image}" alt="${item.name}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;" />` : ""}
@@ -79,8 +79,8 @@ function generateClientEmailHtml(data: {
       </td>
       <td style="padding: 12px 0; text-align: right;">
         ${
-          item.discount
-            ? `
+					item.discount
+						? `
           <div style="text-align: right;">
             <p style="margin: 0; font-size: 14px;">
               <span style="color: #dc2626; font-weight: 500;">-${item.discount}%</span>
@@ -90,20 +90,20 @@ function generateClientEmailHtml(data: {
             <p style="margin: 0; font-size: 14px; color: #6b7280;">Quantity: ${item.quantity}</p>
           </div>
         `
-            : `
+						: `
           <div style="text-align: right;">
             <p style="margin: 0; font-size: 18px; color: #000;">${item.price}</p>
             <p style="margin: 0; font-size: 14px; color: #6b7280;">Quantity: ${item.quantity}</p>
           </div>
         `
-        }
+				}
       </td>
     </tr>
-  `
-    )
-    .join("");
+  `,
+		)
+		.join("");
 
-  return `
+	return `
     <!DOCTYPE html>
     <html>
       <head>
@@ -177,30 +177,30 @@ function generateClientEmailHtml(data: {
 }
 
 function generateAdminEmailHtml(data: {
-  Name: string;
-  LastName: string;
-  email: string;
-  orderId: string;
-  orderDate: string;
-  subtotal: string;
-  totalDiscount?: string;
-  orderTotal: string;
-  orderStatus: string;
-  shippingMethod?: string;
-  shippingAddress: Address;
-  billingAddress?: Address;
-  orderItems: Array<{
-    name: string;
-    quantity: number;
-    price: string;
-    originalPrice: string;
-    discount?: number;
-    image?: string;
-  }>;
+	Name: string;
+	LastName: string;
+	email: string;
+	orderId: string;
+	orderDate: string;
+	subtotal: string;
+	totalDiscount?: string;
+	orderTotal: string;
+	orderStatus: string;
+	shippingMethod?: string;
+	shippingAddress: Address;
+	billingAddress?: Address;
+	orderItems: Array<{
+		name: string;
+		quantity: number;
+		price: string;
+		originalPrice: string;
+		discount?: number;
+		image?: string;
+	}>;
 }): string {
-  const orderItemsHtml = data.orderItems
-    .map(
-      (item) => `
+	const orderItemsHtml = data.orderItems
+		.map(
+			(item) => `
     <tr style="border-bottom: 1px solid #e5e7eb;">
       <td style="padding: 12px 0; width: 80px;">
         ${item.image ? `<img src="${item.image}" alt="${item.name}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;" />` : ""}
@@ -210,8 +210,8 @@ function generateAdminEmailHtml(data: {
       </td>
       <td style="padding: 12px 0; text-align: right;">
         ${
-          item.discount
-            ? `
+					item.discount
+						? `
           <div style="text-align: right;">
             <p style="margin: 0; font-size: 14px;">
               <span style="color: #dc2626; font-weight: 500;">-${item.discount}%</span>
@@ -221,20 +221,20 @@ function generateAdminEmailHtml(data: {
             <p style="margin: 0; font-size: 14px; color: #6b7280;">Quantity: ${item.quantity}</p>
           </div>
         `
-            : `
+						: `
           <div style="text-align: right;">
             <p style="margin: 0; font-size: 18px; color: #000;">${item.price}</p>
             <p style="margin: 0; font-size: 14px; color: #6b7280;">Quantity: ${item.quantity}</p>
           </div>
         `
-        }
+				}
       </td>
     </tr>
-  `
-    )
-    .join("");
+  `,
+		)
+		.join("");
 
-  return `
+	return `
     <!DOCTYPE html>
     <html>
       <head>
@@ -281,8 +281,8 @@ function generateAdminEmailHtml(data: {
           </div>
           
           ${
-            data.billingAddress && data.billingAddress !== data.shippingAddress
-              ? `
+						data.billingAddress && data.billingAddress !== data.shippingAddress
+							? `
           <!-- Billing Details -->
           <h3 style="color: #000; font-size: 16px; font-weight: 600; margin: 16px 0 8px 0;">Billing Details</h3>
           <div style="margin-bottom: 16px;">
@@ -295,8 +295,8 @@ function generateAdminEmailHtml(data: {
             </p>
           </div>
           `
-              : ""
-          }
+							: ""
+					}
           
           <hr style="border: none; border-top: 1px solid #eaeaea; margin: 16px 0;" />
           
@@ -343,116 +343,116 @@ function generateAdminEmailHtml(data: {
 }
 
 export const sendOrderEmails = createServerFn({ method: "POST" })
-  .inputValidator((data: EmailData) => {
-    // Validate required fields
-    if (!data.orderId) {
-      throw new Error("Order ID is required");
-    }
-    if (!data.customerInfo?.shippingAddress?.email) {
-      throw new Error("Customer email is required");
-    }
-    if (!data.cartItems || data.cartItems.length === 0) {
-      throw new Error("Cart items are required");
-    }
-    return data;
-  })
-  .handler(async ({ data }) => {
-    try {
-      // Get the API key from Secrets Store
-      const resendApiKey = await resolveSecret(env.RESEND_API_KEY);
+	.inputValidator((data: EmailData) => {
+		// Validate required fields
+		if (!data.orderId) {
+			throw new Error("Order ID is required");
+		}
+		if (!data.customerInfo?.shippingAddress?.email) {
+			throw new Error("Customer email is required");
+		}
+		if (!data.cartItems || data.cartItems.length === 0) {
+			throw new Error("Cart items are required");
+		}
+		return data;
+	})
+	.handler(async ({ data }) => {
+		try {
+			// Get the API key from Secrets Store
+			const resendApiKey = await resolveSecret(env.RESEND_API_KEY);
 
-      if (!resendApiKey) {
-        console.error("RESEND_API_KEY secret not found or empty");
-        throw new Error(
-          "Email service configuration error - API key not found"
-        );
-      }
+			if (!resendApiKey) {
+				console.error("RESEND_API_KEY secret not found or empty");
+				throw new Error(
+					"Email service configuration error - API key not found",
+				);
+			}
 
-      const resend = new Resend(resendApiKey);
+			const resend = new Resend(resendApiKey);
 
-      // Format order date
-      const orderDate = new Date().toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
+			// Format order date
+			const orderDate = new Date().toLocaleDateString("en-US", {
+				year: "numeric",
+				month: "long",
+				day: "numeric",
+			});
 
-      // Prepare email data for templates
-      const emailTemplateData = {
-        Name: data.customerInfo.shippingAddress.firstName,
-        LastName: data.customerInfo.shippingAddress.lastName,
-        email: data.customerInfo.shippingAddress.email,
-        orderId: data.orderId.toString(),
-        orderDate: orderDate,
-        subtotal: `CA$${data.orderAmounts.subtotalAmount.toFixed(2)}`,
-        totalDiscount:
-          data.orderAmounts.discountAmount > 0
-            ? `CA$${data.orderAmounts.discountAmount.toFixed(2)}`
-            : undefined,
-        orderTotal: `CA$${data.totalAmount.toFixed(2)}`,
-        orderStatus: "Pending",
-        shippingMethod: data.customerInfo.shippingMethod || "Standard",
-        shippingAddress: data.customerInfo.shippingAddress,
-        billingAddress: data.customerInfo.billingAddress,
-        orderItems: data.cartItems.map((item) => ({
-          name: item.productName,
-          quantity: item.quantity,
-          price: item.discount
-            ? `CA$${(item.price * (1 - item.discount / 100) * item.quantity).toFixed(2)}`
-            : `CA$${(item.price * item.quantity).toFixed(2)}`,
-          originalPrice: `CA$${(item.price * item.quantity).toFixed(2)}`,
-          discount: item.discount ?? undefined,
-          image:
-            item.image && typeof item.image === "string"
-              ? `https://assets.rublevsky.studio/${item.image}`
-              : undefined,
-        })),
-      };
+			// Prepare email data for templates
+			const emailTemplateData = {
+				Name: data.customerInfo.shippingAddress.firstName,
+				LastName: data.customerInfo.shippingAddress.lastName,
+				email: data.customerInfo.shippingAddress.email,
+				orderId: data.orderId.toString(),
+				orderDate: orderDate,
+				subtotal: `CA$${data.orderAmounts.subtotalAmount.toFixed(2)}`,
+				totalDiscount:
+					data.orderAmounts.discountAmount > 0
+						? `CA$${data.orderAmounts.discountAmount.toFixed(2)}`
+						: undefined,
+				orderTotal: `CA$${data.totalAmount.toFixed(2)}`,
+				orderStatus: "Pending",
+				shippingMethod: data.customerInfo.shippingMethod || "Standard",
+				shippingAddress: data.customerInfo.shippingAddress,
+				billingAddress: data.customerInfo.billingAddress,
+				orderItems: data.cartItems.map((item) => ({
+					name: item.productName,
+					quantity: item.quantity,
+					price: item.discount
+						? `CA$${(item.price * (1 - item.discount / 100) * item.quantity).toFixed(2)}`
+						: `CA$${(item.price * item.quantity).toFixed(2)}`,
+					originalPrice: `CA$${(item.price * item.quantity).toFixed(2)}`,
+					discount: item.discount ?? undefined,
+					image:
+						item.image && typeof item.image === "string"
+							? `https://assets.rublevsky.studio/${item.image}`
+							: undefined,
+				})),
+			};
 
-      // Generate and send client confirmation email
-      const clientEmailHtml = generateClientEmailHtml(emailTemplateData);
-      const clientEmailResponse = await resend.emails.send({
-        from: "store@rublevsky.studio",
-        to: data.customerInfo.shippingAddress.email,
-        subject: `Order Confirmation #${data.orderId} - Rublevsky Studio`,
-        html: clientEmailHtml,
-      });
+			// Generate and send client confirmation email
+			const clientEmailHtml = generateClientEmailHtml(emailTemplateData);
+			const clientEmailResponse = await resend.emails.send({
+				from: "store@rublevsky.studio",
+				to: data.customerInfo.shippingAddress.email,
+				subject: `Order Confirmation #${data.orderId} - Rublevsky Studio`,
+				html: clientEmailHtml,
+			});
 
-      // Generate and send admin notification email
-      const adminEmailHtml = generateAdminEmailHtml(emailTemplateData);
-      const adminEmailResponse = await resend.emails.send({
-        from: "store@rublevsky.studio",
-        to: "alexander@rublevsky.studio",
-        subject: `New Order #${data.orderId} Received - Rublevsky Studio`,
-        html: adminEmailHtml,
-      });
+			// Generate and send admin notification email
+			const adminEmailHtml = generateAdminEmailHtml(emailTemplateData);
+			const adminEmailResponse = await resend.emails.send({
+				from: "store@rublevsky.studio",
+				to: "alexander@rublevsky.studio",
+				subject: `New Order #${data.orderId} Received - Rublevsky Studio`,
+				html: adminEmailHtml,
+			});
 
-      // Check results and prepare response
-      let emailWarnings: string[] = [];
+			// Check results and prepare response
+			const emailWarnings: string[] = [];
 
-      if (clientEmailResponse.error) {
-        console.error("Client email error:", clientEmailResponse.error);
-        emailWarnings.push("Failed to send customer confirmation email");
-      }
+			if (clientEmailResponse.error) {
+				console.error("Client email error:", clientEmailResponse.error);
+				emailWarnings.push("Failed to send customer confirmation email");
+			}
 
-      if (adminEmailResponse.error) {
-        console.error("Admin email error:", adminEmailResponse.error);
-        emailWarnings.push("Failed to send admin notification email");
-      }
+			if (adminEmailResponse.error) {
+				console.error("Admin email error:", adminEmailResponse.error);
+				emailWarnings.push("Failed to send admin notification email");
+			}
 
-      return {
-        success: true,
-        emailWarnings: emailWarnings.length > 0 ? emailWarnings : undefined,
-        clientEmailId: clientEmailResponse.data?.id,
-        adminEmailId: adminEmailResponse.data?.id,
-      };
-    } catch (error) {
-      console.error("Email sending failed:", error);
+			return {
+				success: true,
+				emailWarnings: emailWarnings.length > 0 ? emailWarnings : undefined,
+				clientEmailId: clientEmailResponse.data?.id,
+				adminEmailId: adminEmailResponse.data?.id,
+			};
+		} catch (error) {
+			console.error("Email sending failed:", error);
 
-      return {
-        success: false,
-        emailWarnings: ["Failed to send confirmation emails"],
-        error: error instanceof Error ? error.message : "Unknown email error",
-      };
-    }
-  });
+			return {
+				success: false,
+				emailWarnings: ["Failed to send confirmation emails"],
+				error: error instanceof Error ? error.message : "Unknown email error",
+			};
+		}
+	});

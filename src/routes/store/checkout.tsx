@@ -1,617 +1,621 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Link } from "~/components/ui/shared/Link";
-import React, { useState, useEffect } from "react";
-import { useCart } from "~/lib/cartContext";
-import { Button } from "~/components/ui/shared/Button";
-import { toast } from "sonner";
-import { Image } from "~/components/ui/shared/Image";
-import { getAttributeDisplayName } from "~/lib/productAttributes";
-import { AddressFields } from "~/components/ui/shared/AddressFields";
-import NeumorphismCard from "~/components/ui/shared/NeumorphismCard";
-import { Checkbox } from "~/components/ui/shared/Checkbox";
-import { Textarea } from "~/components/ui/shared/TextArea";
 import { useMutation } from "@tanstack/react-query";
-import { sendOrderEmails } from "~/server_functions/sendOrderEmails";
+import { createFileRoute } from "@tanstack/react-router";
+import React, { useCallback, useEffect, useId, useState } from "react";
+import { toast } from "sonner";
+import { AddressFields } from "~/components/ui/shared/AddressFields";
+import { Button } from "~/components/ui/shared/Button";
+import { Checkbox } from "~/components/ui/shared/Checkbox";
+import { Image } from "~/components/ui/shared/Image";
+import { Link } from "~/components/ui/shared/Link";
+import NeumorphismCard from "~/components/ui/shared/NeumorphismCard";
+import { Textarea } from "~/components/ui/shared/TextArea";
+import { useCart } from "~/lib/cartContext";
+import { getAttributeDisplayName } from "~/lib/productAttributes";
 import { createOrder } from "~/server_functions/dashboard/orders/orderCreation";
+import { sendOrderEmails } from "~/server_functions/sendOrderEmails";
+import type { CartItem, ProductWithVariations } from "~/types";
 
 interface Address {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  streetAddress: string;
-  city: string;
-  state: string;
-  country: string;
-  zipCode: string;
+	firstName: string;
+	lastName: string;
+	email: string;
+	phone: string;
+	streetAddress: string;
+	city: string;
+	state: string;
+	country: string;
+	zipCode: string;
 }
 
 interface CustomerInfo {
-  shippingAddress: Address;
-  billingAddress?: Address;
-  notes?: string;
-  shippingMethod?: string;
-}
-
-interface OrderCreationResponse {
-  success: boolean;
-  error?: string;
-  message?: string;
-  orderId?: number;
-  emailWarnings?: string[];
-  clientEmailId?: string;
-  adminEmailId?: string;
+	shippingAddress: Address;
+	billingAddress?: Address;
+	notes?: string;
+	shippingMethod?: string;
 }
 
 export const Route = createFileRoute("/store/checkout")({
-  component: CheckoutPage,
+	component: CheckoutPage,
 });
 
 function CheckoutPage() {
-  return <CheckoutScreen />;
+	return <CheckoutScreen />;
 }
 
 function CheckoutScreen() {
-  const { cart, clearCart, products } = useCart();
-  const formRef = React.useRef<HTMLFormElement>(null);
-  const [useSeparateBilling, setUseSeparateBilling] = useState(false);
-  const [showFormError, setShowFormError] = useState(false);
-  const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
-    shippingAddress: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      phone: "",
-      streetAddress: "",
-      city: "",
-      state: "",
-      country: "",
-      zipCode: "",
-    },
-    notes: "",
-    shippingMethod: "standard",
-  });
+	const { cart, clearCart, products } = useCart();
+	const formRef = React.useRef<HTMLFormElement>(null);
+	const notesId = useId();
+	const billingId = useId();
+	const [useSeparateBilling, setUseSeparateBilling] = useState(false);
+	const [showFormError, setShowFormError] = useState(false);
+	const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
+		shippingAddress: {
+			firstName: "",
+			lastName: "",
+			email: "",
+			phone: "",
+			streetAddress: "",
+			city: "",
+			state: "",
+			country: "",
+			zipCode: "",
+		},
+		notes: "",
+		shippingMethod: "standard",
+	});
 
-  // Order creation mutation with much better UX
-  const orderMutation = useMutation({
-    mutationFn: async (orderData: {
-      customerInfo: CustomerInfo;
-      cartItems: any[];
-      products: any[];
-    }) => {
-      // Step 1: Create order
-      const orderResult = await createOrder({ data: orderData });
-      if (!orderResult.success) {
-        throw new Error("Failed to create order");
-      }
+	// Order creation mutation with much better UX
+	const orderMutation = useMutation({
+		mutationFn: async (orderData: {
+			customerInfo: CustomerInfo;
+			cartItems: CartItem[];
+			products: ProductWithVariations[];
+		}) => {
+			// Step 1: Create order
+			const orderResult = await createOrder({ data: orderData });
+			if (!orderResult.success) {
+				throw new Error("Failed to create order");
+			}
 
-      // Step 2: Send emails
-      try {
-        const emailResult = await sendOrderEmails({
-          data: {
-            orderId: orderResult.orderId!,
-            customerInfo: orderData.customerInfo,
-            cartItems: orderData.cartItems,
-            orderAmounts: {
-              subtotalAmount: subtotal,
-              discountAmount: totalDiscount,
-            },
-            totalAmount: total,
-          },
-        });
+			// Validate orderId exists
+			if (!orderResult.orderId) {
+				throw new Error("Order was created but no order ID was returned");
+			}
 
-        return {
-          orderId: orderResult.orderId!,
-          emailWarnings: emailResult.emailWarnings,
-        };
-      } catch (emailError) {
-        // Order succeeded, but emails failed - still return success
-        return {
-          orderId: orderResult.orderId!,
-          emailWarnings: ["Confirmation emails failed to send"],
-        };
-      }
-    },
-    onSuccess: ({ orderId, emailWarnings }) => {
-      // Show appropriate success message
-      if (emailWarnings && emailWarnings.length > 0) {
-        toast.warning(
-          `Order placed successfully! ${emailWarnings.join(", ")}. Our team will contact you shortly.`,
-          { duration: 5000 }
-        );
-      } else {
-        toast.success("Order placed and confirmation emails sent! 🎉", {
-          duration: 3000,
-        });
-      }
+			// Step 2: Send emails
+			try {
+				const emailResult = await sendOrderEmails({
+					data: {
+						orderId: orderResult.orderId,
+						customerInfo: orderData.customerInfo,
+						cartItems: orderData.cartItems,
+						orderAmounts: {
+							subtotalAmount: subtotal,
+							discountAmount: totalDiscount,
+						},
+						totalAmount: total,
+					},
+				});
 
-      // Pass display-ready order data optimistically to success page
-      const orderData = {
-        orderId,
-        customerInfo,
-        // Transform cart items to match order page display structure
-        items: cart.items.map((item, index) => ({
-          id: index,
-          productName: item.productName,
-          quantity: item.quantity,
-          unitAmount: item.price,
-          finalAmount: item.discount
-            ? item.price * (1 - item.discount / 100) * item.quantity
-            : item.price * item.quantity,
-          discountPercentage: item.discount,
-          attributes: item.attributes || {},
-          image: item.image,
-        })),
-        subtotalAmount: subtotal,
-        discountAmount: totalDiscount,
-        totalAmount: total,
-        shippingAmount: 0, // Always 0 for new orders
-        timestamp: Date.now(),
-      };
+				return {
+					orderId: orderResult.orderId,
+					emailWarnings: emailResult.emailWarnings,
+				};
+			} catch (_emailError) {
+				// Order succeeded, but emails failed - still return success
+				return {
+					orderId: orderResult.orderId,
+					emailWarnings: ["Confirmation emails failed to send"],
+				};
+			}
+		},
+		onSuccess: ({ orderId, emailWarnings }) => {
+			// Clear the cart after successful order
+			clearCart();
 
-      // Store in sessionStorage for the success page
-      sessionStorage.setItem("orderSuccess", JSON.stringify(orderData));
-      console.log("💾 Stored order data for success page:", orderId);
+			// Show appropriate success message
+			if (emailWarnings && emailWarnings.length > 0) {
+				toast.warning(
+					`Order placed successfully! ${emailWarnings.join(", ")}. Our team will contact you shortly.`,
+					{ duration: 5000 },
+				);
+			} else {
+				toast.success("Order placed and confirmation emails sent! 🎉", {
+					duration: 3000,
+				});
+			}
 
-      // Small delay to ensure success message is seen, then redirect
-      setTimeout(() => {
-        console.log("🚀 Redirecting to order page:", orderId);
-        window.location.href = `/order/${orderId}?new=true`;
-      }, 1000);
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to place order. Please try again.", {
-        duration: 5000,
-      });
-    },
-  });
+			// Pass display-ready order data optimistically to success page
+			const orderData = {
+				orderId,
+				customerInfo,
+				// Transform cart items to match order page display structure
+				items: cart.items.map((item, index) => ({
+					id: index,
+					productName: item.productName,
+					quantity: item.quantity,
+					unitAmount: item.price,
+					finalAmount: item.discount
+						? item.price * (1 - item.discount / 100) * item.quantity
+						: item.price * item.quantity,
+					discountPercentage: item.discount,
+					attributes: item.attributes || {},
+					image: item.image,
+				})),
+				subtotalAmount: subtotal,
+				discountAmount: totalDiscount,
+				totalAmount: total,
+				shippingAmount: 0, // Always 0 for new orders
+				timestamp: Date.now(),
+			};
 
-  const isLoading = orderMutation.isPending;
+			// Store in sessionStorage for the success page
+			sessionStorage.setItem("orderSuccess", JSON.stringify(orderData));
+			console.log("💾 Stored order data for success page:", orderId);
 
-  // Wait for cart and products to be loaded
-  useEffect(() => {
-    if (cart.items.length > 0 && products.length > 0) {
-      // Check for any variation ID mismatches and log them
-      cart.items.forEach((item) => {
-        if (item.variationId) {
-          const product = products.find((p) => p.id === item.productId);
-          if (product && product.variations) {
-            const variation = product.variations.find(
-              (v) => v.id === item.variationId
-            );
-            if (!variation) {
-              console.warn(
-                `Variation ${item.variationId} not found for product ${item.productName} (ID: ${item.productId})`
-              );
-              console.log(
-                "Available variations:",
-                product.variations.map((v) => ({ id: v.id, sku: v.sku }))
-              );
-            }
-          }
-        }
-      });
-    }
-  }, [cart.items, products]);
+			// Small delay to ensure success message is seen, then redirect
+			setTimeout(() => {
+				console.log("🚀 Redirecting to order page:", orderId);
+				window.location.href = `/order/${orderId}?new=true`;
+			}, 1000);
+		},
+		onError: (error: Error) => {
+			toast.error(error.message || "Failed to place order. Please try again.", {
+				duration: 5000,
+			});
+		},
+	});
 
-  // Check if required fields are filled
-  const isFormValid = () => {
-    const requiredFields = [
-      "firstName",
-      "lastName",
-      "email",
-      "phone",
-      "streetAddress",
-      "city",
-      "country",
-      "zipCode",
-    ];
+	const isLoading = orderMutation.isPending;
 
-    return requiredFields.every((field) =>
-      customerInfo.shippingAddress[field as keyof Address]?.trim()
-    );
-  };
+	// Wait for cart and products to be loaded
+	useEffect(() => {
+		if (cart.items.length > 0 && products.length > 0) {
+			// Check for any variation ID mismatches and log them
+			cart.items.forEach((item) => {
+				if (item.variationId) {
+					const product = products.find((p) => p.id === item.productId);
+					if (product?.variations) {
+						const variation = product.variations.find(
+							(v) => v.id === item.variationId,
+						);
+						if (!variation) {
+							console.warn(
+								`Variation ${item.variationId} not found for product ${item.productName} (ID: ${item.productId})`,
+							);
+							console.log(
+								"Available variations:",
+								product.variations.map((v) => ({ id: v.id, sku: v.sku })),
+							);
+						}
+					}
+				}
+			});
+		}
+	}, [cart.items, products]);
 
-  // Reset form error state when fields are filled
-  useEffect(() => {
-    if (showFormError && isFormValid()) {
-      setShowFormError(false);
-    }
-  }, [customerInfo.shippingAddress, showFormError]);
+	// Check if required fields are filled
+	const isFormValid = useCallback(() => {
+		const requiredFields = [
+			"firstName",
+			"lastName",
+			"email",
+			"phone",
+			"streetAddress",
+			"city",
+			"country",
+			"zipCode",
+		];
 
-  // Handle button click with proper validation feedback
-  const handleButtonClick = () => {
-    if (!isFormValid()) {
-      setShowFormError(true);
-      // Reset error state after 3 seconds
-      setTimeout(() => setShowFormError(false), 3000);
+		return requiredFields.every((field) =>
+			customerInfo.shippingAddress[field as keyof Address]?.trim(),
+		);
+	}, [customerInfo.shippingAddress]);
 
-      // Use the existing form submit logic for validation and field focus
-      const formElement = formRef.current;
-      if (formElement) {
-        formElement.requestSubmit();
-      }
-    } else if (cart.items.length === 0) {
-      toast.error("Your cart is empty");
-    } else {
-      // If all validation passes, submit the form
-      const formElement = formRef.current;
-      if (formElement) {
-        formElement.requestSubmit();
-      }
-    }
-  };
+	// Reset form error state when fields are filled
+	useEffect(() => {
+		if (showFormError && isFormValid()) {
+			setShowFormError(false);
+		}
+	}, [isFormValid, showFormError]);
 
-  // Get dynamic button text with fun loading messages
-  const getButtonText = () => {
-    if (isLoading) {
-      // Fun, descriptive loading messages
-      const loadingMessages = [
-        "✨ Sprinkling some magic on your order...",
-        "🎨 Preparing your beautiful items...",
-        "📦 Crafting your order with love...",
-        "🚀 Launching your order into the world...",
-        "💫 Working our creative magic...",
-      ];
-      const randomMessage =
-        loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
-      return randomMessage;
-    }
-    if (showFormError) return "Please fill up the form";
-    if (cart.items.length === 0) return "Cart is empty";
-    return "Place Order";
-  };
+	// Handle button click with proper validation feedback
+	const handleButtonClick = () => {
+		if (!isFormValid()) {
+			setShowFormError(true);
+			// Reset error state after 3 seconds
+			setTimeout(() => setShowFormError(false), 3000);
 
-  // Get dynamic button variant based on state
-  const getButtonVariant = () => {
-    if (showFormError || cart.items.length === 0) return "destructive";
-    return "default";
-  };
+			// Use the existing form submit logic for validation and field focus
+			const formElement = formRef.current;
+			if (formElement) {
+				formElement.requestSubmit();
+			}
+		} else if (cart.items.length === 0) {
+			toast.error("Your cart is empty");
+		} else {
+			// If all validation passes, submit the form
+			const formElement = formRef.current;
+			if (formElement) {
+				formElement.requestSubmit();
+			}
+		}
+	};
 
-  // Only redirect if cart is empty AND cart has been loaded AND order is not complete
-  //   useEffect(() => {
-  //     if (isCartLoaded && cart.items.length === 0 && !isOrderComplete) {
-  //       router.push("/store");
-  //     }
-  //   }, [cart.items.length, router, isCartLoaded, isOrderComplete]);
+	// Get dynamic button text with fun loading messages
+	const getButtonText = () => {
+		if (isLoading) {
+			// Fun, descriptive loading messages
+			const loadingMessages = [
+				"✨ Sprinkling some magic on your order...",
+				"🎨 Preparing your beautiful items...",
+				"📦 Crafting your order with love...",
+				"🚀 Launching your order into the world...",
+				"💫 Working our creative magic...",
+			];
+			const randomMessage =
+				loadingMessages[Math.floor(Math.random() * loadingMessages.length)];
+			return randomMessage;
+		}
+		if (showFormError) return "Please fill up the form";
+		if (cart.items.length === 0) return "Cart is empty";
+		return "Place Order";
+	};
 
-  const handleAddressChange =
-    (addressType: "shipping" | "billing") => (name: string, value: string) => {
-      setCustomerInfo((prev) => ({
-        ...prev,
-        [addressType === "shipping" ? "shippingAddress" : "billingAddress"]: {
-          ...(addressType === "shipping"
-            ? prev.shippingAddress
-            : prev.billingAddress || prev.shippingAddress),
-          [name]: value,
-        },
-      }));
-    };
+	// Get dynamic button variant based on state
+	const getButtonVariant = () => {
+		if (showFormError || cart.items.length === 0) return "destructive";
+		return "default";
+	};
 
-  const handleInputChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
-    const { name, value } = e.target;
-    setCustomerInfo((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+	// Only redirect if cart is empty AND cart has been loaded AND order is not complete
+	//   useEffect(() => {
+	//     if (isCartLoaded && cart.items.length === 0 && !isOrderComplete) {
+	//       router.push("/store");
+	//     }
+	//   }, [cart.items.length, router, isCartLoaded, isOrderComplete]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+	const handleAddressChange =
+		(addressType: "shipping" | "billing") => (name: string, value: string) => {
+			setCustomerInfo((prev) => ({
+				...prev,
+				[addressType === "shipping" ? "shippingAddress" : "billingAddress"]: {
+					...(addressType === "shipping"
+						? prev.shippingAddress
+						: prev.billingAddress || prev.shippingAddress),
+					[name]: value,
+				},
+			}));
+		};
 
-    // Combined field definitions with display names
-    const requiredFields = {
-      firstName: "First Name",
-      lastName: "Last Name",
-      email: "Email",
-      phone: "Phone Number",
-      streetAddress: "Street Address",
-      city: "City",
-      country: "Country",
-      zipCode: "ZIP/Postal Code",
-    } as const;
+	const handleInputChange = (
+		e: React.ChangeEvent<
+			HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+		>,
+	) => {
+		const { name, value } = e.target;
+		setCustomerInfo((prev) => ({
+			...prev,
+			[name]: value,
+		}));
+	};
 
-    const missingFields = Object.entries(requiredFields).filter(
-      ([field]) => !customerInfo.shippingAddress[field as keyof Address]
-    );
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
 
-    if (missingFields.length > 0) {
-      // Trigger button error state
-      setShowFormError(true);
+		// Combined field definitions with display names
+		const requiredFields = {
+			firstName: "First Name",
+			lastName: "Last Name",
+			email: "Email",
+			phone: "Phone Number",
+			streetAddress: "Street Address",
+			city: "City",
+			country: "Country",
+			zipCode: "ZIP/Postal Code",
+		} as const;
 
-      // Get the friendly names directly from the missingFields entries
-      const missingFieldNames = missingFields.map(
-        ([, displayName]) => displayName
-      );
+		const missingFields = Object.entries(requiredFields).filter(
+			([field]) => !customerInfo.shippingAddress[field as keyof Address],
+		);
 
-      toast.error(
-        `Please fill in all required fields: ${missingFieldNames.join(", ")}`
-      );
+		if (missingFields.length > 0) {
+			// Trigger button error state
+			setShowFormError(true);
 
-      // Focus the first missing field using the form ref
-      if (formRef.current) {
-        const firstMissingFieldId = missingFields[0][0];
-        const firstMissingField = formRef.current.querySelector(
-          `input[name="${firstMissingFieldId}"]`
-        ) as HTMLInputElement;
+			// Get the friendly names directly from the missingFields entries
+			const missingFieldNames = missingFields.map(
+				([, displayName]) => displayName,
+			);
 
-        if (firstMissingField) {
-          firstMissingField.focus();
-          firstMissingField.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          });
-        }
-      }
+			toast.error(
+				`Please fill in all required fields: ${missingFieldNames.join(", ")}`,
+			);
 
-      // Reset error state after 3 seconds
-      setTimeout(() => setShowFormError(false), 3000);
-      return;
-    }
+			// Focus the first missing field using the form ref
+			if (formRef.current) {
+				const firstMissingFieldId = missingFields[0][0];
+				const firstMissingField = formRef.current.querySelector(
+					`input[name="${firstMissingFieldId}"]`,
+				) as HTMLInputElement;
 
-    // If form is valid but cart is empty
-    if (cart.items.length === 0) {
-      toast.error("Your cart is empty");
-      return;
-    }
+				if (firstMissingField) {
+					firstMissingField.focus();
+					firstMissingField.scrollIntoView({
+						behavior: "smooth",
+						block: "center",
+					});
+				}
+			}
 
-    // Use the mutation instead of manual fetch
-    orderMutation.mutate({
-      customerInfo,
-      cartItems: cart.items,
-      products,
-    });
-  };
+			// Reset error state after 3 seconds
+			setTimeout(() => setShowFormError(false), 3000);
+			return;
+		}
 
-  // Calculate cart totals
-  const subtotal = cart.items.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0
-  );
+		// If form is valid but cart is empty
+		if (cart.items.length === 0) {
+			toast.error("Your cart is empty");
+			return;
+		}
 
-  // Calculate total discounts
-  const totalDiscount = cart.items.reduce((total, item) => {
-    if (item.discount) {
-      const itemDiscount = item.price * item.quantity * (item.discount / 100);
-      return total + itemDiscount;
-    }
-    return total;
-  }, 0);
+		// Use the mutation instead of manual fetch
+		orderMutation.mutate({
+			customerInfo,
+			cartItems: cart.items,
+			products,
+		});
+	};
 
-  const total = subtotal - totalDiscount;
+	// Calculate cart totals
+	const subtotal = cart.items.reduce(
+		(total, item) => total + item.price * item.quantity,
+		0,
+	);
 
-  return (
-    <div className="w-full px-4 pt-10 pb-20">
-      <div className="max-w-[2000px] mx-auto">
-        <h2 className="mb-4">Checkout</h2>
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Customer Information Form - Left Side */}
-          <div className="flex-1">
-            <form ref={formRef} onSubmit={handleSubmit}>
-              <p className="mb-8">
-                You will be contacted regarding payment options after placing
-                your order.
-              </p>
+	// Calculate total discounts
+	const totalDiscount = cart.items.reduce((total, item) => {
+		if (item.discount) {
+			const itemDiscount = item.price * item.quantity * (item.discount / 100);
+			return total + itemDiscount;
+		}
+		return total;
+	}, 0);
 
-              <div className="mb-8">
-                <h2 className="!text-lg font-bold mb-4">Shipping Address</h2>
-                <AddressFields
-                  values={customerInfo.shippingAddress}
-                  onChange={handleAddressChange("shipping")}
-                />
-                <div className="mb-6">
-                  <label className="flex items-center space-x-2">
-                    <Checkbox
-                      checked={useSeparateBilling}
-                      onCheckedChange={(checked: boolean) => {
-                        setUseSeparateBilling(checked);
-                        if (checked && !customerInfo.billingAddress) {
-                          setCustomerInfo((prev) => ({
-                            ...prev,
-                            billingAddress: { ...prev.shippingAddress },
-                          }));
-                        }
-                      }}
-                      className="form-checkbox"
-                    />
-                    <span>Use different billing address</span>
-                  </label>
-                </div>
-                {useSeparateBilling && (
-                  <div className="">
-                    <h3 className="mb-4">Billing Address</h3>
-                    <AddressFields
-                      values={
-                        customerInfo.billingAddress ||
-                        customerInfo.shippingAddress
-                      }
-                      onChange={handleAddressChange("billing")}
-                      required={useSeparateBilling}
-                    />
-                  </div>
-                )}
-                <div className="mt-12">
-                  <h3 className=" mb-4">Additional Information</h3>
-                  <div className="mb-6">
-                    <label className="block text-sm font-medium mb-2">
-                      Shipping Method
-                    </label>
-                    <div className="flex gap-4">
-                      <Button
-                        type="button"
-                        onClick={() =>
-                          setCustomerInfo((prev) => ({
-                            ...prev,
-                            shippingMethod: "standard",
-                          }))
-                        }
-                        variant={
-                          customerInfo.shippingMethod === "standard"
-                            ? "default"
-                            : "outline"
-                        }
-                        className="flex-1"
-                      >
-                        Standard Shipping
-                      </Button>
-                      <Button
-                        type="button"
-                        onClick={() =>
-                          setCustomerInfo((prev) => ({
-                            ...prev,
-                            shippingMethod: "pickup",
-                          }))
-                        }
-                        variant={
-                          customerInfo.shippingMethod === "pickup"
-                            ? "default"
-                            : "outline"
-                        }
-                        className="flex-1"
-                      >
-                        Local Pickup
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="mb-6">
-                    <label
-                      className="block text-sm font-medium mb-2"
-                      htmlFor="notes"
-                    >
-                      Order Notes
-                    </label>
-                    <Textarea
-                      id="notes"
-                      name="notes"
-                      value={customerInfo.notes}
-                      onChange={handleInputChange}
-                      rows={4}
-                      className="w-full p-2 border rounded-md"
-                      placeholder="Any special instructions for your order?"
-                    />
-                  </div>
-                </div>
-              </div>
-            </form>
-          </div>
-          {/* Order Summary - Right Side */}
-          <div className="lg:w-[27rem] lg:sticky lg:top-4 lg:self-start">
-            <NeumorphismCard className="">
-              <h5>Summary</h5>
-              <div className="flex justify-between items-baseline my-2">
-                <span>Subtotal</span>
-                <span>CA${subtotal.toFixed(2)}</span>
-              </div>
-              {totalDiscount > 0 && (
-                <div className="flex justify-between items-baseline my-2 text-red-600">
-                  <span>Discount</span>
-                  <span>-CA${totalDiscount.toFixed(2)}</span>
-                </div>
-              )}
-              <div className="flex justify-between items-baseline mb-4">
-                <p>Shipping</p>
-                <p className="text-right text-muted-foreground">
-                  To be discussed after order
-                </p>
-              </div>
-              <div className="flex justify-between items-baseline text-xl mb-2 border-t pt-4">
-                <span>Total</span>
-                <h3 className="">CA${total.toFixed(2)}</h3>
-              </div>
-              <Button
-                onClick={handleButtonClick}
-                disabled={isLoading || cart.items.length === 0}
-                variant={getButtonVariant()}
-                className="w-full transition-all duration-300 ease-in-out disabled:cursor-not-allowed"
-              >
-                {isLoading && (
-                  <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
-                )}
-                {getButtonText()}
-              </Button>
-              <div className="mt-6 pt-4 border-t">
-                <h6>Order Items</h6>
-                {cart.items.map((item) => (
-                  <div
-                    key={`${item.productId}-${item.variationId || "default"}`}
-                    className="flex items-start gap-3 py-2"
-                  >
-                    {/* Product image */}
-                    <div className="shrink-0 relative w-16 h-16 bg-muted rounded overflow-hidden">
-                      {item.image ? (
-                        <Image
-                          src={`/${item.image}`}
-                          alt={item.productName}
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                          No image
-                        </div>
-                      )}
-                    </div>
-                    {/* Product info */}
-                    <div className="grow">
-                      <Link
-                        href={`/store/${item.productId}`}
-                        className="blurLink"
-                        id={`product-${item.productId}`}
-                      >
-                        {item.productName}
-                      </Link>
-                      {item.attributes &&
-                        Object.keys(item.attributes).length > 0 && (
-                          <p className="text-sm text-muted-foreground">
-                            {Object.entries(item.attributes)
-                              .map(
-                                ([key, value]) =>
-                                  `${getAttributeDisplayName(key)}: ${value}`
-                              )
-                              .join(", ")}
-                          </p>
-                        )}
-                      <p className="text-sm text-muted-foreground">
-                        Quantity: {item.quantity}
-                      </p>
-                    </div>
-                    {/* Price */}
-                    <div className="text-right">
-                      {item.discount ? (
-                        <>
-                          <p className="text-sm font-medium line-through text-muted-foreground">
-                            CA${(item.price * item.quantity).toFixed(2)}
-                          </p>
-                          <div className="flex items-center justify-end gap-2">
-                            <p className="text-sm font-medium">
-                              CA$
-                              {(
-                                item.price *
-                                (1 - item.discount / 100) *
-                                item.quantity
-                              ).toFixed(2)}
-                            </p>
-                            <span className="text-xs text-red-600">
-                              {item.discount}% OFF
-                            </span>
-                          </div>
-                        </>
-                      ) : (
-                        <p className="text-sm font-medium">
-                          CA${(item.price * item.quantity).toFixed(2)}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </NeumorphismCard>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+	const total = subtotal - totalDiscount;
+
+	return (
+		<div className="w-full px-4 pt-10 pb-20">
+			<div className="max-w-[2000px] mx-auto">
+				<h2 className="mb-4">Checkout</h2>
+				<div className="flex flex-col lg:flex-row gap-8">
+					{/* Customer Information Form - Left Side */}
+					<div className="flex-1">
+						<form ref={formRef} onSubmit={handleSubmit}>
+							<p className="mb-8">
+								You will be contacted regarding payment options after placing
+								your order.
+							</p>
+
+							<div className="mb-8">
+								<h2 className="!text-lg font-bold mb-4">Shipping Address</h2>
+								<AddressFields
+									values={customerInfo.shippingAddress}
+									onChange={handleAddressChange("shipping")}
+								/>
+								<div className="mb-6">
+									<div className="flex items-center space-x-2">
+										<Checkbox
+											checked={useSeparateBilling}
+											onCheckedChange={(checked: boolean) => {
+												setUseSeparateBilling(checked);
+												if (checked && !customerInfo.billingAddress) {
+													setCustomerInfo((prev) => ({
+														...prev,
+														billingAddress: { ...prev.shippingAddress },
+													}));
+												}
+											}}
+											className="form-checkbox"
+											id={billingId}
+										/>
+										<label htmlFor={billingId} className="cursor-pointer">
+											Use different billing address
+										</label>
+									</div>
+								</div>
+								{useSeparateBilling && (
+									<div className="">
+										<h3 className="mb-4">Billing Address</h3>
+										<AddressFields
+											values={
+												customerInfo.billingAddress ||
+												customerInfo.shippingAddress
+											}
+											onChange={handleAddressChange("billing")}
+											required={useSeparateBilling}
+										/>
+									</div>
+								)}
+								<div className="mt-12">
+									<h3 className=" mb-4">Additional Information</h3>
+									<div className="mb-6">
+										<h4 className="block text-sm font-medium mb-2">
+											Shipping Method
+										</h4>
+										<div className="flex gap-4">
+											<Button
+												type="button"
+												onClick={() =>
+													setCustomerInfo((prev) => ({
+														...prev,
+														shippingMethod: "standard",
+													}))
+												}
+												variant={
+													customerInfo.shippingMethod === "standard"
+														? "default"
+														: "outline"
+												}
+												className="flex-1"
+											>
+												Standard Shipping
+											</Button>
+											<Button
+												type="button"
+												onClick={() =>
+													setCustomerInfo((prev) => ({
+														...prev,
+														shippingMethod: "pickup",
+													}))
+												}
+												variant={
+													customerInfo.shippingMethod === "pickup"
+														? "default"
+														: "outline"
+												}
+												className="flex-1"
+											>
+												Local Pickup
+											</Button>
+										</div>
+									</div>
+									<div className="mb-6">
+										<label
+											className="block text-sm font-medium mb-2"
+											htmlFor={notesId}
+										>
+											Order Notes
+										</label>
+										<Textarea
+											id={notesId}
+											name="notes"
+											value={customerInfo.notes}
+											onChange={handleInputChange}
+											rows={4}
+											className="w-full p-2 border rounded-md"
+											placeholder="Any special instructions for your order?"
+										/>
+									</div>
+								</div>
+							</div>
+						</form>
+					</div>
+					{/* Order Summary - Right Side */}
+					<div className="lg:w-[27rem] lg:sticky lg:top-4 lg:self-start">
+						<NeumorphismCard className="">
+							<h5>Summary</h5>
+							<div className="flex justify-between items-baseline my-2">
+								<span>Subtotal</span>
+								<span>CA${subtotal.toFixed(2)}</span>
+							</div>
+							{totalDiscount > 0 && (
+								<div className="flex justify-between items-baseline my-2 text-red-600">
+									<span>Discount</span>
+									<span>-CA${totalDiscount.toFixed(2)}</span>
+								</div>
+							)}
+							<div className="flex justify-between items-baseline mb-4">
+								<p>Shipping</p>
+								<p className="text-right text-muted-foreground">
+									To be discussed after order
+								</p>
+							</div>
+							<div className="flex justify-between items-baseline text-xl mb-2 border-t pt-4">
+								<span>Total</span>
+								<h3 className="">CA${total.toFixed(2)}</h3>
+							</div>
+							<Button
+								onClick={handleButtonClick}
+								disabled={isLoading || cart.items.length === 0}
+								variant={getButtonVariant()}
+								className="w-full transition-all duration-300 ease-in-out disabled:cursor-not-allowed"
+							>
+								{isLoading && (
+									<div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+								)}
+								{getButtonText()}
+							</Button>
+							<div className="mt-6 pt-4 border-t">
+								<h6>Order Items</h6>
+								{cart.items.map((item) => (
+									<div
+										key={`${item.productId}-${item.variationId || "default"}`}
+										className="flex items-start gap-3 py-2"
+									>
+										{/* Product image */}
+										<div className="shrink-0 relative w-16 h-16 bg-muted rounded overflow-hidden">
+											{item.image ? (
+												<Image
+													src={`/${item.image}`}
+													alt={item.productName}
+													className="object-cover"
+												/>
+											) : (
+												<div className="w-full h-full flex items-center justify-center text-muted-foreground">
+													No image
+												</div>
+											)}
+										</div>
+										{/* Product info */}
+										<div className="grow">
+											<Link
+												href={`/store/${item.productId}`}
+												className="blurLink"
+												id={`product-${item.productId}`}
+											>
+												{item.productName}
+											</Link>
+											{item.attributes &&
+												Object.keys(item.attributes).length > 0 && (
+													<p className="text-sm text-muted-foreground">
+														{Object.entries(item.attributes)
+															.map(
+																([key, value]) =>
+																	`${getAttributeDisplayName(key)}: ${value}`,
+															)
+															.join(", ")}
+													</p>
+												)}
+											<p className="text-sm text-muted-foreground">
+												Quantity: {item.quantity}
+											</p>
+										</div>
+										{/* Price */}
+										<div className="text-right">
+											{item.discount ? (
+												<>
+													<p className="text-sm font-medium line-through text-muted-foreground">
+														CA${(item.price * item.quantity).toFixed(2)}
+													</p>
+													<div className="flex items-center justify-end gap-2">
+														<p className="text-sm font-medium">
+															CA$
+															{(
+																item.price *
+																(1 - item.discount / 100) *
+																item.quantity
+															).toFixed(2)}
+														</p>
+														<span className="text-xs text-red-600">
+															{item.discount}% OFF
+														</span>
+													</div>
+												</>
+											) : (
+												<p className="text-sm font-medium">
+													CA${(item.price * item.quantity).toFixed(2)}
+												</p>
+											)}
+										</div>
+									</div>
+								))}
+							</div>
+						</NeumorphismCard>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
 }

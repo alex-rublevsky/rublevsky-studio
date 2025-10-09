@@ -26,7 +26,7 @@
 // const DB_NAME = 'rublevsky-studio-storage';
 
 // // Define available tables for seeding
-// type TableName = 
+// type TableName =
 //   | 'tea_categories'
 //   | 'categories'
 //   | 'brands'
@@ -63,21 +63,21 @@
 // const shouldSeedAll = tablesToSeed.length === 0 || tablesToSeed.includes('all');
 
 // // Get the final list of tables to seed
-// const finalTablesToSeed = shouldSeedAll 
-//   ? ['tea_categories', 'categories', 'brands', 'products', 'blog_posts'] 
+// const finalTablesToSeed = shouldSeedAll
+//   ? ['tea_categories', 'categories', 'brands', 'products', 'blog_posts']
 //   : getRequiredTables(tablesToSeed);
 
 // // Function to get all required tables including dependencies
 // function getRequiredTables(tables: TableName[]): TableName[] {
 //   const required = new Set<TableName>();
-  
+
 //   function addDependencies(table: TableName) {
 //     if (!required.has(table)) {
 //       required.add(table);
 //       tableDependencies[table]?.forEach(dep => addDependencies(dep));
 //     }
 //   }
-  
+
 //   tables.forEach(table => addDependencies(table));
 //   return Array.from(required);
 // }
@@ -85,12 +85,12 @@
 // // Function to find the local SQLite database file
 // function findLocalDbPath() {
 //   const basePath = resolve('./.wrangler/state/v3/d1/miniflare-D1DatabaseObject');
-  
+
 //   if (!existsSync(basePath)) {
 //     console.error('❌ No SQLite database found. Make sure you have run your app locally first.');
 //     process.exit(1);
 //   }
-  
+
 //   const files = readdirSync(basePath).filter(f => f.endsWith('.sqlite'));
 //   return files.length > 0 ? resolve(basePath, files[0]) : null;
 // }
@@ -116,7 +116,7 @@
 //     if (description) {
 //       console.log(`${colors.blue}Executing: ${description}${colors.reset}`);
 //     }
-    
+
 //     const output = execSync(`npx wrangler d1 execute ${DB_NAME} --remote --command="${command.replace(/"/g, '\\"')}"`, {
 //       encoding: 'utf-8',
 //       maxBuffer: 1024 * 1024 * 10 // 10MB buffer
@@ -129,7 +129,7 @@
 //     }
 
 //     const response = JSON.parse(jsonMatch[0])[0];
-    
+
 //     if (!response.success) {
 //       throw new Error(`Command failed: ${output}`);
 //     }
@@ -156,17 +156,17 @@
 // // Function to clear tables
 // async function clearTables(dbConnection: any, tables: string[]) {
 //   console.log('\n🗑️ Clearing existing data...');
-  
+
 //   const tablesToClear = new Set<string>();
 //   tables.forEach(table => {
 //     tablesToClear.add(table);
 //     if (tableDependentClearMap[table as TableName]) {
-//       tableDependentClearMap[table as TableName].forEach(depTable => 
+//       tableDependentClearMap[table as TableName].forEach(depTable =>
 //         tablesToClear.add(depTable)
 //       );
 //     }
 //   });
-  
+
 //   const sortedTablesToDelete = Array.from(tablesToClear).sort((a, b) => {
 //     const aIsDep = a.includes('_');
 //     const bIsDep = b.includes('_');
@@ -174,7 +174,7 @@
 //     if (!aIsDep && bIsDep) return 1;
 //     return 0;
 //   });
-  
+
 //   for (const table of sortedTablesToDelete) {
 //     if (dbConnection.isRemote) {
 //       try {
@@ -183,7 +183,7 @@
 //           `SELECT name FROM sqlite_master WHERE type='table' AND name='${table}';`,
 //           `Checking if table ${table} exists`
 //         );
-        
+
 //         if (!tableExists || !tableExists.name) {
 //           console.warn(`⚠️ Table ${table} does not exist, skipping...`);
 //           continue;
@@ -238,7 +238,7 @@
 // async function seedTeaCategories(dbConnection: any) {
 //   if (!finalTablesToSeed.includes('tea_categories')) return;
 //   console.log('\n🍵 Seeding tea categories...');
-  
+
 //   for (const item of mockTeaCategories) {
 //     try {
 //       if (dbConnection.isRemote) {
@@ -268,12 +268,12 @@
 // async function seedCategories(dbConnection: any) {
 //   if (!finalTablesToSeed.includes('categories')) return;
 //   console.log('\n🏷️ Seeding categories...');
-  
+
 //   // Process in smaller batches
 //   for (let i = 0; i < mockCategories.length; i += BATCH_SIZE) {
 //     const batch = mockCategories.slice(i, i + BATCH_SIZE);
 //     console.log(`Processing batch ${i/BATCH_SIZE + 1} of ${Math.ceil(mockCategories.length/BATCH_SIZE)}`);
-    
+
 //     for (const item of batch) {
 //       try {
 //         if (dbConnection.isRemote) {
@@ -295,7 +295,7 @@
 //         continue;
 //       }
 //     }
-    
+
 //     // Add a short delay between batches
 //     if (i + BATCH_SIZE < mockCategories.length) {
 //       console.log('Waiting 1 second before next batch...');
@@ -307,7 +307,7 @@
 // async function seedBrands(dbConnection: any) {
 //   if (!finalTablesToSeed.includes('brands')) return;
 //   console.log('\n🏢 Seeding brands...');
-  
+
 //   for (const item of mockBrands) {
 //     try {
 //       if (dbConnection.isRemote) {
@@ -333,7 +333,7 @@
 // async function seedProducts(dbConnection: any) {
 //   if (!finalTablesToSeed.includes('products')) return;
 //   console.log('\n🛍️ Seeding products...');
-  
+
 //   // First, ensure tea categories exist without recreating them
 //   if (dbConnection.isRemote) {
 //     const teaCategoriesExist = await verifyRemoteTable('tea_categories');
@@ -403,7 +403,7 @@
 //           const variationsArray = JSON.parse(variations);
 //           for (const variation of variationsArray) {
 //             const sku = variation.sku || `${slug}-${variation.attributes?.map((attr: { value: string }) => attr.value.toLowerCase()).join('-')}`;
-            
+
 //             const variationResult = await executeRemoteSQL(`
 //               INSERT INTO product_variations (product_id, sku, price, stock, sort, createdAt)
 //               VALUES (
@@ -417,7 +417,7 @@
 //             `, `Adding variation for product: ${product.name}`);
 
 //             const variationIdResult = await executeRemoteSQL(`
-//               SELECT id FROM product_variations 
+//               SELECT id FROM product_variations
 //               WHERE product_id = ${productId} AND sku = ${toSqlValue(sku)}
 //               ORDER BY id DESC LIMIT 1;
 //             `, `Getting ID for variation`);
@@ -494,7 +494,7 @@
 //           const variationsArray = JSON.parse(variations);
 //           for (const variation of variationsArray) {
 //             const sku = variation.sku || `${slug}-${variation.attributes?.map((attr: { value: string }) => attr.value.toLowerCase()).join('-')}`;
-            
+
 //             const variationResult = await dbConnection.db.insert(schema.productVariations)
 //               .values({
 //                 productId,
@@ -531,7 +531,7 @@
 // async function seedBlogPosts(dbConnection: any) {
 //   if (!finalTablesToSeed.includes('blog_posts')) return;
 //   console.log('\n📝 Seeding blog posts...');
-  
+
 //   // First, ensure tea categories exist without recreating them
 //   if (dbConnection.isRemote) {
 //     const teaCategoriesExist = await verifyRemoteTable('tea_categories');
@@ -622,17 +622,17 @@
 // async function seedDatabase() {
 //   console.log(`🌱 Seeding ${isRemote ? 'remote' : 'local'} database...`);
 //   console.log(`📊 Tables to seed: ${finalTablesToSeed.join(', ')}`);
-  
+
 //   try {
 //     const dbConnection = await initializeDb();
-    
+
 //     await clearTables(dbConnection, finalTablesToSeed);
 //     await seedTeaCategories(dbConnection);
 //     await seedCategories(dbConnection);
 //     await seedBrands(dbConnection);
 //     await seedProducts(dbConnection);
 //     await seedBlogPosts(dbConnection);
-    
+
 //     console.log(`\n🎉 ${isRemote ? 'Remote' : 'Local'} database seeded successfully!`);
 //   } catch (error) {
 //     console.error(`❌ Error seeding ${isRemote ? 'remote' : 'local'} database:`, error);

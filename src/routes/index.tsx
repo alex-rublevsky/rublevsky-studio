@@ -1,4 +1,3 @@
-
 // import HeroSection from "~/components/ui/studio/HeroSection";
 // import MembershipBenefitsSection from "~/components/ui/studio/MembershipBenefitsSection";
 // import SubscriptionSection from "~/components/ui/studio/SubscriptionSection";
@@ -15,51 +14,107 @@
 // import SmoothScroll from "~/components/SmoothScroll";
 import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "~/components/ui/shared/Button";
-import '../styles/app.css';
+import "../styles/app.css";
 
 export const Route = createFileRoute("/")({
-  component: App,
+	component: App,
 });
 
 function App() {
-  return (
-<div className="min-h-screen flex flex-col">
-  <main className="flex-1 flex items-center justify-center px-4 py-8">
-    <div className="w-full max-w-md space-y-6 text-center">
-      <section className="!p-0 !static">
-        <h1 className="text-2xl!">Hi, I'm Alex. I do things. Mostly code, design and tea reviews.</h1>
-        <nav aria-label="Main navigation" className="space-y-3 mt-6">
-          <Button to="/web" centered variant="secondary" className="w-full max-w-lg" description="I design and code web experiences — from blogs to ecommerce solutions">Websites</Button>
-          <Button to="/design" centered variant="secondary" className="w-full max-w-lg" description="Includes branding, packaging, posters, photomanipulations,">Graphic Design</Button>
-          <Button to="/blog" centered variant="secondary" className="w-full max-w-lg" description="I study, drink, compare and analyse traditional chinese tea, as well as conduct tea ceremonies">Tea Blog</Button>
-          <Button to="/store" centered variant="secondary" className="w-full max-w-lg" description="I sell tea, handmade clothing prints, posters and stickers">Store</Button>
-          <Button to="/photos" centered variant="secondary" className="w-full max-w-lg" description="Some portraits and animal pics ">Photography</Button>
-        </nav>
-      </section>
-    </div>
-  </main>
-  
-  <footer className="flex flex-col items-center justify-center">
-  <p className="text-center">Let's level up your business together!</p>
-    <div className="flex flex-wrap gap-2 justify-center pb-4 pt-2 border-t border-gray-200/20">
-    <Button href="https://assets.rublevsky.studio/PDF/Resume%20Alexander%20Rublevsky.pdf" target="_blank" variant="secondary">Resume</Button>
-    <Button href="https://t.me/alexrublevsky" target="_blank" variant="secondary">Telegram</Button>
-    <Button href="mailto:alexander@rublevsky.studio" variant="secondary">Email</Button>
-    </div>
-  </footer>
-</div>
+	return (
+		<div className="min-h-screen flex flex-col">
+			<main className="flex-1 flex items-center justify-center px-4 py-8">
+				<div className="w-full max-w-md space-y-6 text-center">
+					<section className="!p-0 !static">
+						<h1 className="text-2xl!">
+							Hi, I'm Alex. I do things. Mostly code, design and tea reviews.
+						</h1>
+						<nav aria-label="Main navigation" className="space-y-3 mt-6">
+							<Button
+								to="/web"
+								centered
+								variant="secondary"
+								className="w-full max-w-lg"
+								description="I design and code web experiences — from blogs to ecommerce solutions"
+							>
+								Websites
+							</Button>
+							<Button
+								to="/design"
+								centered
+								variant="secondary"
+								className="w-full max-w-lg"
+								description="Includes branding, packaging, posters, photomanipulations,"
+							>
+								Graphic Design
+							</Button>
+							<Button
+								to="/blog"
+								centered
+								variant="secondary"
+								className="w-full max-w-lg"
+								description="I study, drink, compare and analyse traditional chinese tea, as well as conduct tea ceremonies"
+							>
+								Tea Blog
+							</Button>
+							<Button
+								to="/store"
+								centered
+								variant="secondary"
+								className="w-full max-w-lg"
+								description="I sell tea, handmade clothing prints, posters and stickers"
+							>
+								Store
+							</Button>
+							<Button
+								to="/photos"
+								centered
+								variant="secondary"
+								className="w-full max-w-lg"
+								description="Some portraits and animal pics "
+							>
+								Photography
+							</Button>
+						</nav>
+					</section>
+				</div>
+			</main>
 
-// TODO: things that are no longer used:
-    // <SmoothScroll>
-    
-    //     <HeroSection />
-    //     <MembershipBenefitsSection />
-    //     <SubscriptionSection />
-    //     <TestimonialsSection />
-    //     <FaqSection />
-    //     <ServicesOffered />
-    //     <CallBookingSection />
-      
-    // </SmoothScroll>
-  );
+			<footer className="flex flex-col items-center justify-center">
+				<p className="text-center">Let's level up your business together!</p>
+				<div className="flex flex-wrap gap-2 justify-center pb-4 pt-2 border-t border-gray-200/20">
+					<Button
+						href="https://assets.rublevsky.studio/PDF/Resume%20Alexander%20Rublevsky.pdf"
+						target="_blank"
+						variant="secondary"
+					>
+						Resume
+					</Button>
+					<Button
+						href="https://t.me/alexrublevsky"
+						target="_blank"
+						variant="secondary"
+					>
+						Telegram
+					</Button>
+					<Button href="mailto:alexander@rublevsky.studio" variant="secondary">
+						Email
+					</Button>
+				</div>
+			</footer>
+		</div>
+
+		// TODO: things that are no longer used:
+		// <SmoothScroll>
+
+		//     <HeroSection />
+		//     <MembershipBenefitsSection />
+		//     <SubscriptionSection />
+		//     <TestimonialsSection />
+		//     <FaqSection />
+		//     <ServicesOffered />
+		//     <CallBookingSection />
+
+		// </SmoothScroll>
+	);
 }

@@ -1,9 +1,9 @@
+import { env } from "cloudflare:workers";
 import { betterAuth } from "better-auth";
-import { reactStartCookies } from "better-auth/react-start";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { reactStartCookies } from "better-auth/react-start";
 import { DB } from "~/db";
 import { schema } from "../schema";
-import { env } from "cloudflare:workers";
 
 /**
  * BetterAuth configuration
@@ -16,17 +16,17 @@ import { env } from "cloudflare:workers";
  * because they're only accessed in async server functions.
  */
 export const auth = betterAuth({
-  database: drizzleAdapter(DB(), {
-    provider: "sqlite", // D1 is SQLite-compatible
-    schema: schema,
-  }),
-  baseURL: env.BETTER_AUTH_URL as string,
-  secret: env.BETTER_AUTH_SECRET as unknown as string,
-  socialProviders: {
-    github: {
-      clientId: env.GITHUB_CLIENT_ID as unknown as string,
-      clientSecret: env.GITHUB_CLIENT_SECRET as unknown as string,
-    },
-  },
-  plugins: [reactStartCookies()],
+	database: drizzleAdapter(DB(), {
+		provider: "sqlite", // D1 is SQLite-compatible
+		schema: schema,
+	}),
+	baseURL: env.BETTER_AUTH_URL as string,
+	secret: env.BETTER_AUTH_SECRET as unknown as string,
+	socialProviders: {
+		github: {
+			clientId: env.GITHUB_CLIENT_ID as unknown as string,
+			clientSecret: env.GITHUB_CLIENT_SECRET as unknown as string,
+		},
+	},
+	plugins: [reactStartCookies()],
 });

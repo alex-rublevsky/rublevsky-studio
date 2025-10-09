@@ -1,127 +1,126 @@
-import { createFileRoute } from "@tanstack/react-router";
-import BlogPostCard from "~/components/ui/blog/BlogPostCard";
-import { BlogPostPreview, TeaCategory } from "~/types/index";
 import { useQuery } from "@tanstack/react-query";
-import { getAllBlogPosts } from "~/server_functions/blog/getAllBlogPosts";
+import { createFileRoute } from "@tanstack/react-router";
+import { AnimatePresence, motion } from "motion/react";
+import { useMemo, useState } from "react";
+import BlogPostCard from "~/components/ui/blog/BlogPostCard";
 import { FilterGroup } from "~/components/ui/shared/FilterGroup";
-import { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { getAllBlogPosts } from "~/server_functions/blog/getAllBlogPosts";
+import type { BlogPostPreview, TeaCategory } from "~/types/index";
 
 export const Route = createFileRoute("/blog/")({
-  component: PostsIndexComponent,
+	component: PostsIndexComponent,
 });
 
 function PostsIndexComponent() {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+	const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  // Fetch blog posts and tea categories in a single API call
-  const {
-    isPending: isLoading,
-    error: hasError,
-    data,
-  } = useQuery<{
-    posts: BlogPostPreview[];
-    teaCategories: TeaCategory[];
-    totalCount: number;
-  }>({
-    queryKey: ["blog"],
-    queryFn: () => getAllBlogPosts(),
-  });
+	// Fetch blog posts and tea categories in a single API call
+	const {
+		isPending: isLoading,
+		error: hasError,
+		data,
+	} = useQuery<{
+		posts: BlogPostPreview[];
+		teaCategories: TeaCategory[];
+		totalCount: number;
+	}>({
+		queryKey: ["blog"],
+		queryFn: () => getAllBlogPosts(),
+	});
 
-  const posts = data?.posts || [];
-  const teaCategories = data?.teaCategories || [];
-  const totalCount = data?.totalCount || 0;
+	const posts = data?.posts || [];
+	const teaCategories = data?.teaCategories || [];
+	const totalCount = data?.totalCount || 0;
 
-  // Filter tea categories to only show those that are used in blog posts
-  const usedTeaCategories = useMemo(() => {
-    if (teaCategories.length === 0) return [];
+	// Filter tea categories to only show those that are used in blog posts
+	const usedTeaCategories = useMemo(() => {
+		if (teaCategories.length === 0) return [];
 
-    const usedCategories = new Set(
-      posts.flatMap((post) => post.teaCategories || [])
-    );
-    return teaCategories.filter((category) =>
-      usedCategories.has(category.slug)
-    );
-  }, [posts, teaCategories]);
+		const usedCategories = new Set(
+			posts.flatMap((post) => post.teaCategories || []),
+		);
+		return teaCategories.filter((category) =>
+			usedCategories.has(category.slug),
+		);
+	}, [posts, teaCategories]);
 
-  // Filter posts based on selected category
-  const filteredPosts = useMemo(() => {
-    if (!selectedCategory) return posts;
-    return posts.filter((post) =>
-      post.teaCategories?.includes(selectedCategory)
-    );
-  }, [posts, selectedCategory]);
+	// Filter posts based on selected category
+	const filteredPosts = useMemo(() => {
+		if (!selectedCategory) return posts;
+		return posts.filter((post) =>
+			post.teaCategories?.includes(selectedCategory),
+		);
+	}, [posts, selectedCategory]);
 
-  return (
-    <main><section className="pt-24 sm:pt-32 div min-h-screen no-padding">
-    <div className="">
-      {/* Header */}
-      <div className="text-center mb-12 px-4">
-        <h1 className="mb-8">What&apos;s in the gaiwan?</h1>
-        <div className="flex justify-center items-center gap-8 mb-8">
-          <h5 className="text-secondary-foreground">{totalCount} posts</h5>
-          <h5>
-            <a className="blurLink" href="https://t.me/gaiwan_contents">
-              🇷🇺 RU blog version
-            </a>
-          </h5>
-        </div>
-      </div>
+	return (
+		<main>
+			<section className="pt-24 sm:pt-32 div min-h-screen no-padding">
+				<div className="">
+					{/* Header */}
+					<div className="text-center mb-12 px-4">
+						<h1 className="mb-8">What&apos;s in the gaiwan?</h1>
+						<div className="flex justify-center items-center gap-8 mb-8">
+							<h5 className="text-secondary-foreground">{totalCount} posts</h5>
+							<h5>
+								<a className="blurLink" href="https://t.me/gaiwan_contents">
+									🇷🇺 RU blog version
+								</a>
+							</h5>
+						</div>
+					</div>
 
-      {/* Filters */}
-      {usedTeaCategories.length > 0 && (
-        <div className="flex justify-center mb-12 px-4">
-          <FilterGroup
-            className="justify-center"
-            options={usedTeaCategories}
-            selectedOptions={selectedCategory}
-            onOptionChange={setSelectedCategory}
-            showAllOption={true}
-            allOptionLabel="All Categories"
-          />
-        </div>
-      )}
+					{/* Filters */}
+					{usedTeaCategories.length > 0 && (
+						<div className="flex justify-center mb-12 px-4">
+							<FilterGroup
+								className="justify-center"
+								options={usedTeaCategories}
+								selectedOptions={selectedCategory}
+								onOptionChange={setSelectedCategory}
+								showAllOption={true}
+								allOptionLabel="All Categories"
+							/>
+						</div>
+					)}
 
-      {/* Content */}
-      {isLoading ? (
-        <div className="text-center px-4">Loading blog posts...</div>
-      ) : hasError ? (
-        <div className="text-center text-red-500 px-4">
-          Error loading blog content. Please try again later.
-        </div>
-      ) : (
-        <AnimatePresence mode="popLayout">
-          {filteredPosts.length === 0 ? (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="text-center text-lg"
-            >
-              No blog posts found for the selected categories.
-            </motion.p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4  gap-y-6 gap-x-3 sm:gap-4 items-start">
-              {filteredPosts.map((post) => (
-                <motion.div
-                  key={post.id}
-                  layout
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <BlogPostCard 
-                    post={post} 
-                    teaCategories={teaCategories}
-                  />
-                </motion.div>
-              ))}
-            </div>
-          )}
-        </AnimatePresence>
-      )}
-    </div>
-  </section></main>
-  );
+					{/* Content */}
+					{isLoading ? (
+						<div className="text-center px-4">Loading blog posts...</div>
+					) : hasError ? (
+						<div className="text-center text-red-500 px-4">
+							Error loading blog content. Please try again later.
+						</div>
+					) : (
+						<AnimatePresence mode="popLayout">
+							{filteredPosts.length === 0 ? (
+								<motion.p
+									initial={{ opacity: 0 }}
+									animate={{ opacity: 1 }}
+									exit={{ opacity: 0 }}
+									className="text-center text-lg"
+								>
+									No blog posts found for the selected categories.
+								</motion.p>
+							) : (
+								<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4  gap-y-6 gap-x-3 sm:gap-4 items-start">
+									{filteredPosts.map((post) => (
+										<motion.div
+											key={post.id}
+											layout
+											initial={{ opacity: 0, y: 20 }}
+											animate={{ opacity: 1, y: 0 }}
+											exit={{ opacity: 0, y: -20 }}
+											transition={{ duration: 0.3 }}
+										>
+											<BlogPostCard post={post} teaCategories={teaCategories} />
+										</motion.div>
+									))}
+								</div>
+							)}
+						</AnimatePresence>
+					)}
+				</div>
+			</section>
+		</main>
+	);
 }

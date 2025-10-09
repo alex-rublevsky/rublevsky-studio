@@ -1,12 +1,12 @@
 .backdrop {
-  position: absolute;
-  inset: 0;
-  height: 200%;
-  backdrop-filter: blur(9px) brightness(90%) saturate(140%);
-  -webkit-backdrop-filter: blur(9px) brightness(90%) saturate(140%);
-  mask-image: url(#frostyGlassMask);
-  -webkit-mask-image: url(#frostyGlassMask);
-  pointer-events: none;
+	position: absolute;
+	inset: 0;
+	height: 200%;
+	backdrop-filter: blur(9px) brightness(90%) saturate(140%);
+	-webkit-backdrop-filter: blur(9px) brightness(90%) saturate(140%);
+	mask-image: var(--mask-image);
+	-webkit-mask-image: var(--mask-image);
+	pointer-events: none;
 }
 
 /* .backdropEdge {

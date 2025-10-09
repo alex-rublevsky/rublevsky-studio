@@ -1,241 +1,235 @@
-import { Category, TeaCategory, Brand, ProductWithVariations } from "~/types";
-import { useState } from "react";
-import { Image } from "~/components/ui/shared/Image";
-import { Button } from "~/components/ui/shared/Button";
-import { Badge } from "~/components/ui/shared/Badge";
-import { cn } from "~/lib/utils";
 import { Edit, Trash2 } from "lucide-react";
-import { isProductAvailable, getStockDisplayText } from "~/utils/validateStock";
+import { Badge } from "~/components/ui/shared/Badge";
+import { Button } from "~/components/ui/shared/Button";
+import { Image } from "~/components/ui/shared/Image";
 import { getCountryByCode } from "~/constants/countries";
+import { cn } from "~/lib/utils";
+import type { ProductWithVariations } from "~/types";
+import { getStockDisplayText, isProductAvailable } from "~/utils/validateStock";
 
 interface AdminProductCardProps {
-  product: ProductWithVariations;
-  categories: Category[];
-  teaCategories: TeaCategory[];
-  brands: Brand[];
-  onEdit: (product: ProductWithVariations) => void;
-  onDelete: (product: ProductWithVariations) => void;
-  formatPrice: (price: number) => string;
-  getCategoryName: (slug: string | null) => string | null;
-  getTeaCategoryNames: (teaCategories: string[]) => string;
+	product: ProductWithVariations;
+	onEdit: (product: ProductWithVariations) => void;
+	onDelete: (product: ProductWithVariations) => void;
+	formatPrice: (price: number) => string;
+	getCategoryName: (slug: string | null) => string | null;
+	getTeaCategoryNames: (teaCategories: string[]) => string;
 }
 
 export function AdminProductCard({
-  product,
-  categories,
-  teaCategories,
-  brands,
-  onEdit,
-  onDelete,
-  formatPrice,
-  getCategoryName,
-  getTeaCategoryNames,
+	product,
+	onEdit,
+	onDelete,
+	formatPrice,
+	getCategoryName,
+	getTeaCategoryNames,
 }: AdminProductCardProps) {
-  const [isHovering, setIsHovering] = useState(false);
+	const imageArray = product.images?.split(",").map((img) => img.trim()) ?? [];
+	const primaryImage = imageArray[0];
+	const isAvailable = isProductAvailable(product);
+	const stockDisplayText = getStockDisplayText(product);
 
-  const imageArray = product.images?.split(",").map((img) => img.trim()) ?? [];
-  const primaryImage = imageArray[0];
-  const isAvailable = isProductAvailable(product);
-  const stockDisplayText = getStockDisplayText(product);
+	// Calculate the display price - use highest variation price if variations exist, otherwise base price
+	const displayPrice = (() => {
+		if (
+			product.hasVariations &&
+			product.variations &&
+			product.variations.length > 0
+		) {
+			const prices = product.variations.map((v) => v.price);
+			return Math.max(...prices);
+		}
+		return product.price;
+	})();
 
-  // Calculate the display price - use highest variation price if variations exist, otherwise base price
-  const displayPrice = (() => {
-    if (
-      product.hasVariations &&
-      product.variations &&
-      product.variations.length > 0
-    ) {
-      const prices = product.variations.map((v) => v.price);
-      return Math.max(...prices);
-    }
-    return product.price;
-  })();
+	// Get all shipping locations (product + variations)
+	const getAllShippingLocations = () => {
+		const locations = new Set<string>();
 
-  // Get all shipping locations (product + variations)
-  const getAllShippingLocations = () => {
-    const locations = new Set<string>();
+		// Add product-level shipping if available
+		if (product.shippingFrom) {
+			locations.add(product.shippingFrom);
+		}
 
-    // Add product-level shipping if available
-    if (product.shippingFrom) {
-      locations.add(product.shippingFrom);
-    }
+		// Add variation-level shipping if available
+		if (
+			product.hasVariations &&
+			product.variations &&
+			product.variations.length > 0
+		) {
+			product.variations.forEach((variation) => {
+				if (variation.shippingFrom) {
+					locations.add(variation.shippingFrom);
+				}
+			});
+		}
 
-    // Add variation-level shipping if available
-    if (product.hasVariations && product.variations && product.variations.length > 0) {
-      product.variations.forEach((variation) => {
-        if (variation.shippingFrom) {
-          locations.add(variation.shippingFrom);
-        }
-      });
-    }
+		return Array.from(locations);
+	};
 
-    return Array.from(locations);
-  };
+	const allShippingLocations = getAllShippingLocations();
 
-  const allShippingLocations = getAllShippingLocations();
+	return (
+		<article
+			className={cn(
+				"bg-card rounded-lg border border-border shadow-sm transition-all duration-300 overflow-hidden",
+				"hover:shadow-md hover:border-primary/20",
+				!isAvailable && "opacity-75 border-muted",
+			)}
+		>
+			{/* Product Image */}
+			<div className="relative aspect-square overflow-hidden bg-muted">
+				{primaryImage ? (
+					<Image
+						src={`/${primaryImage}`}
+						alt={product.name}
+						className={cn(
+							"object-cover w-full h-full transition-transform duration-300 hover:scale-105",
+							!isAvailable && "grayscale opacity-60",
+						)}
+						sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+					/>
+				) : (
+					<div className="w-full h-full flex items-center justify-center text-muted-foreground">
+						No Image
+					</div>
+				)}
 
-  return (
-    <div
-      className={cn(
-        "bg-card rounded-lg border border-border shadow-sm transition-all duration-300 overflow-hidden",
-        "hover:shadow-md hover:border-primary/20",
-        !isAvailable && "opacity-75 border-muted"
-      )}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
-    >
-      {/* Product Image */}
-      <div className="relative aspect-square overflow-hidden bg-muted">
-        {primaryImage ? (
-          <Image
-            src={`/${primaryImage}`}
-            alt={product.name}
-            className={cn(
-              "object-cover w-full h-full transition-transform duration-300 hover:scale-105",
-              !isAvailable && "grayscale opacity-60"
-            )}
-            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-            No Image
-          </div>
-        )}
+				{/* Out of Stock Badge */}
+				{!isAvailable && (
+					<div className="absolute inset-0 bg-black/35 flex items-center justify-center">
+						<Badge variant="secondary" className="text-black">
+							Out of Stock
+						</Badge>
+					</div>
+				)}
 
-        {/* Out of Stock Badge */}
-        {!isAvailable && (
-          <div className="absolute inset-0 bg-black/35 flex items-center justify-center">
-            <Badge variant="secondary" className="text-black">
-              Out of Stock
-            </Badge>
-          </div>
-        )}
+				{/* Status Badge */}
+				<div className="absolute top-2 right-2">
+					<Badge variant={product.isActive ? "default" : "secondary"}>
+						{product.isActive ? "Active" : "Inactive"}
+					</Badge>
+				</div>
 
-        {/* Status Badge */}
-        <div className="absolute top-2 right-2">
-          <Badge variant={product.isActive ? "default" : "secondary"}>
-            {product.isActive ? "Active" : "Inactive"}
-          </Badge>
-        </div>
+				{/* Featured Badge */}
+				{product.isFeatured && (
+					<div className="absolute top-2 left-2">
+						<Badge
+							variant="outline"
+							className="bg-yellow-500/90 text-white border-yellow-500"
+						>
+							Featured
+						</Badge>
+					</div>
+				)}
+			</div>
 
-        {/* Featured Badge */}
-        {product.isFeatured && (
-          <div className="absolute top-2 left-2">
-            <Badge
-              variant="outline"
-              className="bg-yellow-500/90 text-white border-yellow-500"
-            >
-              Featured
-            </Badge>
-          </div>
-        )}
-      </div>
+			{/* Product Details */}
+			<div className="p-4 space-y-3">
+				{/* Product Name */}
+				<div>
+					<h3 className="font-semibold !text-base line-clamp-2 mb-1">
+						{product.name}
+					</h3>
+				</div>
 
-      {/* Product Details */}
-      <div className="p-4 space-y-3">
-        {/* Product Name */}
-        <div>
-          <h3 className="font-semibold !text-base line-clamp-2 mb-1">
-            {product.name}
-          </h3>
-        </div>
+				{/* Price */}
+				<div className="flex items-center justify-between">
+					<span className="text-lg font-bold text-primary">
+						{formatPrice(displayPrice)}
+					</span>
+					{product.discount && (
+						<Badge variant="destructive" className="text-xs">
+							-{product.discount}%
+						</Badge>
+					)}
+				</div>
 
-        {/* Price */}
-        <div className="flex items-center justify-between">
-          <span className="text-lg font-bold text-primary">
-            {formatPrice(displayPrice)}
-          </span>
-          {product.discount && (
-            <Badge variant="destructive" className="text-xs">
-              -{product.discount}%
-            </Badge>
-          )}
-        </div>
+				{/* Stock */}
+				<div className="flex items-center gap-2 text-sm">
+					<span className="text-muted-foreground">Stock:</span>
+					<span className={isAvailable ? "text-black" : "text-red-600"}>
+						{stockDisplayText}
+					</span>
+				</div>
 
-        {/* Stock */}
-        <div className="flex items-center gap-2 text-sm">
-          <span className="text-muted-foreground">Stock:</span>
-          <span className={isAvailable ? "text-black" : "text-red-600"}>
-            {stockDisplayText}
-          </span>
-        </div>
+				{/* Category */}
+				<div className="text-sm">
+					<span className="text-muted-foreground">Category: </span>
+					<span className="font-medium">
+						{getCategoryName(product.categorySlug) || "N/A"}
+					</span>
+				</div>
 
-        {/* Category */}
-        <div className="text-sm">
-          <span className="text-muted-foreground">Category: </span>
-          <span className="font-medium">
-            {getCategoryName(product.categorySlug) || "N/A"}
-          </span>
-        </div>
+				{/* Tea Categories */}
+				{product.teaCategories && product.teaCategories.length > 0 && (
+					<div className="text-sm">
+						<span className="text-muted-foreground">Tea Types: </span>
+						<span className="font-medium text-xs">
+							{getTeaCategoryNames(product.teaCategories)}
+						</span>
+					</div>
+				)}
 
-        {/* Tea Categories */}
-        {product.teaCategories && product.teaCategories.length > 0 && (
-          <div className="text-sm">
-            <span className="text-muted-foreground">Tea Types: </span>
-            <span className="font-medium text-xs">
-              {getTeaCategoryNames(product.teaCategories)}
-            </span>
-          </div>
-        )}
+				{/* Weight */}
+				{product.weight && (
+					<div className="text-sm">
+						<span className="text-muted-foreground">Weight: </span>
+						<span className="font-medium">{product.weight}</span>
+					</div>
+				)}
 
-        {/* Weight */}
-        {product.weight && (
-          <div className="text-sm">
-            <span className="text-muted-foreground">Weight: </span>
-            <span className="font-medium">{product.weight}</span>
-          </div>
-        )}
+				{/* Shipping */}
+				{allShippingLocations.filter((code) => code !== "" && code !== "NONE")
+					.length > 0 && (
+					<div className="text-sm">
+						<span className="text-muted-foreground">Ships from: </span>
+						<div className="flex items-center gap-1 mt-1">
+							{allShippingLocations
+								.filter((code) => code !== "" && code !== "NONE") // Filter out empty values and NONE
+								.map((countryCode) => {
+									const country = getCountryByCode(countryCode);
+									return (
+										<span
+											key={countryCode}
+											className="text-lg"
+											title={country?.name || countryCode}
+										>
+											{country?.name?.split(" ")[0] || countryCode}
+										</span>
+									);
+								})}
+						</div>
+					</div>
+				)}
 
-        {/* Shipping */}
-        {allShippingLocations.filter(code => code !== '' && code !== 'NONE').length > 0 && (
-          <div className="text-sm">
-            <span className="text-muted-foreground">Ships from: </span>
-            <div className="flex items-center gap-1 mt-1">
-              {allShippingLocations
-                .filter(code => code !== '' && code !== 'NONE') // Filter out empty values and NONE
-                .map((countryCode) => {
-                  const country = getCountryByCode(countryCode);
-                  return (
-                    <span
-                      key={countryCode}
-                      className="text-lg"
-                      title={country?.name || countryCode}
-                    >
-                      {country?.name?.split(' ')[0] || countryCode}
-                    </span>
-                  );
-                })}
-            </div>
-          </div>
-        )}
+				{/* Variations indicator */}
+				{product.hasVariations && (
+					<div className="text-xs">
+						<Badge variant="outline">Has Variations</Badge>
+					</div>
+				)}
 
-        {/* Variations indicator */}
-        {product.hasVariations && (
-          <div className="text-xs">
-            <Badge variant="outline">Has Variations</Badge>
-          </div>
-        )}
-
-        {/* Action Buttons */}
-        <div className="flex gap-2 pt-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => onEdit(product)}
-            className="flex-1 group justify-center"
-          >
-            <Edit className="w-4 h-4 group-hover:scale-110 transition-transform" />
-          </Button>
-          <Button
-            size="sm"
-            variant="destructive"
-            onClick={() => onDelete(product)}
-            className="flex-1 group justify-center"
-          >
-            <Trash2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
+				{/* Action Buttons */}
+				<div className="flex gap-2 pt-2">
+					<Button
+						size="sm"
+						variant="outline"
+						onClick={() => onEdit(product)}
+						className="flex-1 group justify-center"
+					>
+						<Edit className="w-4 h-4 group-hover:scale-110 transition-transform" />
+					</Button>
+					<Button
+						size="sm"
+						variant="destructive"
+						onClick={() => onDelete(product)}
+						className="flex-1 group justify-center"
+					>
+						<Trash2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
+					</Button>
+				</div>
+			</div>
+		</article>
+	);
 }
