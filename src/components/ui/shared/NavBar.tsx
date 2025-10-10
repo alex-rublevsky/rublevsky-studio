@@ -13,7 +13,7 @@ import {
 	useRouter,
 	useRouterState,
 } from "@tanstack/react-router";
-import { ArrowLeftFromLine, LogOutIcon } from "lucide-react";
+import { ArrowLeftFromLine, LogOutIcon, Plus } from "lucide-react";
 import type React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import {
@@ -40,6 +40,7 @@ interface NavBarProps {
 		userEmail: string;
 		userAvatar: string;
 	};
+	onActionClick?: () => void;
 }
 
 // Dashboard navigation items
@@ -173,13 +174,17 @@ const SmartBackButton = ({ label, fallbackPath }: SmartBackButtonProps) => {
 	const router = useRouter();
 
 	const handleBack = () => {
-		// Check if there's meaningful browser history (more than just the current page)
-		if (window.history.length > 1) {
-			// Try to use router's back navigation which should preserve scroll position
-			// TanStack Router handles scroll restoration automatically when using router.history.back()
+		// Try to detect if we have meaningful navigation history by checking document.referrer
+		// document.referrer is empty when opening via direct link, bookmark, or new tab
+		const hasReferrer = document.referrer && document.referrer !== "";
+		const referrerIsSameSite = hasReferrer && new URL(document.referrer).origin === window.location.origin;
+		
+		// If we have same-site referrer and browser history, try going back
+		if (referrerIsSameSite && window.history.length > 1) {
+			// Use router's back navigation for proper scroll restoration
 			router.history.back();
 		} else {
-			// Fallback to navigate to specified path if no history (direct URL access)
+			// No referrer or external referrer - navigate directly to fallback
 			navigate({ to: fallbackPath });
 		}
 	};
@@ -197,7 +202,7 @@ const SmartBackButton = ({ label, fallbackPath }: SmartBackButtonProps) => {
 	);
 };
 
-export function NavBar({ className, userData }: Omit<NavBarProps, "items">) {
+export function NavBar({ className, userData, onActionClick }: Omit<NavBarProps, "items">) {
 	const router = useRouter();
 	const routerState = useRouterState();
 	const pathname = router.state.location.pathname;
@@ -222,42 +227,72 @@ export function NavBar({ className, userData }: Omit<NavBarProps, "items">) {
 	const isDashboard = routerState.location.pathname.startsWith("/dashboard");
 	const showOther = !isDashboard;
 
+	// Configure action button based on current route
+	const getActionButton = () => {
+		if (pathname === "/dashboard/products") {
+			return {
+				label: "Add Product",
+				onClick: onActionClick,
+			};
+		}
+		if (pathname === "/dashboard/blog") {
+			return {
+				label: "Add Post",
+				onClick: onActionClick,
+			};
+		}
+		return null;
+	};
+
+	const actionButton = getActionButton();
+
 	// Dashboard navigation layout
 	if (isDashboard) {
 		return (
 			<nav
 				className={cn(
-					"fixed bottom-0 left-0 right-0 z-[40] mb-3 flex justify-center items-center px-3 pointer-events-none",
+					"fixed bottom-0 left-0 right-0 z-[40] mb-3 px-3 pointer-events-none",
 					className,
 				)}
 			>
-				{/* Dashboard secondary actions + main nav (left - mobile only) */}
-				<div className="md:hidden absolute left-3 pointer-events-auto">
+				{/* Mobile: Stack menu and action button */}
+				<div className="xl:hidden flex justify-between items-center gap-2 pointer-events-auto">
 					<DropdownNavMenu
 						items={[...dashboardSecondaryItems, ...dashboardNavItems]}
 						showUserInfo={true}
 						userData={userData}
 					/>
+					{actionButton && (
+						<button
+							type="button"
+							onClick={actionButton.onClick}
+							className="relative flex w-fit rounded-full border border-black bg-black text-white hover:bg-background hover:text-black transition-all duration-300 p-[0.3rem] focus:outline-hidden focus:ring-1 focus:ring-ring whitespace-nowrap"
+						>
+							<span className="relative z-10 flex items-center gap-1.5 cursor-pointer px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">
+								<Plus className="w-4 h-4" />
+								{actionButton.label}
+							</span>
+						</button>
+					)}
 				</div>
 
-				{/* Dashboard secondary actions (left - desktop only) */}
-				<div className="hidden md:block absolute left-3 pointer-events-auto">
+				{/* Desktop: Full width flex with space-between */}
+				<div className="hidden xl:flex items-center justify-between gap-2 w-full pointer-events-auto">
+					{/* Left: Menu dropdown */}
 					<DropdownNavMenu
 						items={dashboardSecondaryItems}
 						showUserInfo={true}
 						userData={userData}
 					/>
-				</div>
 
-				{/* Main dashboard navigation (center - desktop only) */}
-				<div className="hidden md:block pointer-events-auto">
+					{/* Center: Page navigation tabs */}
 					<div className="flex w-fit rounded-full border border-black bg-background p-[0.3rem]">
 						{dashboardNavItems.map((item) => (
 							<Link
 								key={item.url}
 								to={item.url}
 								className={cn(
-									"relative z-10 block cursor-pointer px-2.5 md:px-4 py-1.5 text-xs text-white mix-blend-difference md:py-2 md:text-sm rounded-full transition-colors",
+									"relative z-10 block cursor-pointer px-3 xl:px-4 py-1.5 text-xs text-white mix-blend-difference xl:py-2 xl:text-sm rounded-full transition-colors",
 									pathname === item.url &&
 										"bg-black text-white mix-blend-normal",
 								)}
@@ -266,6 +301,23 @@ export function NavBar({ className, userData }: Omit<NavBarProps, "items">) {
 							</Link>
 						))}
 					</div>
+
+					{/* Right: Action button */}
+					{actionButton ? (
+						<button
+							type="button"
+							onClick={actionButton.onClick}
+							className="relative flex w-fit rounded-full border border-black bg-black text-white hover:bg-background hover:text-black transition-all duration-300 p-[0.3rem] focus:outline-hidden focus:ring-1 focus:ring-ring whitespace-nowrap"
+						>
+							<span className="relative z-10 flex items-center gap-1.5 cursor-pointer px-3 py-1.5 text-xs xl:px-4 xl:py-2 xl:text-sm">
+								<Plus className="w-4 h-4" />
+								{actionButton.label}
+							</span>
+						</button>
+					) : (
+						// Placeholder to maintain spacing when no action button
+						<div className="w-[120px]" />
+					)}
 				</div>
 			</nav>
 		);

@@ -2,18 +2,23 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 import { AnimatedGroup } from "~/components/motion_primitives/AnimatedGroup";
 import { useDeviceType } from "~/hooks/use-mobile";
-import type { Product } from "~/types";
+import type { Product, TeaCategory } from "~/types";
 import ProductCard from "./ProductCard";
 import { ProductCardSkeleton } from "./skeletons/ProductCardSkeleton";
 
 interface ProductListProps {
 	data: Product[];
 	isLoading?: boolean;
+	teaCategories?: TeaCategory[];
 }
 
 const STORE_ANIMATION_KEY = "store-products-animated";
 
-function ProductList({ data, isLoading = false }: ProductListProps) {
+function ProductList({
+	data,
+	isLoading = false,
+	teaCategories = [],
+}: ProductListProps) {
 	const [shouldAnimate, setShouldAnimate] = useState<boolean | null>(null); // null = loading state
 	const { isMobileOrTablet } = useDeviceType();
 
@@ -42,7 +47,7 @@ function ProductList({ data, isLoading = false }: ProductListProps) {
 		// Show enough skeletons to maintain page height for proper scroll restoration
 		// 32 skeletons should be enough to cover most scroll positions
 		return (
-			<div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-6 gap-x-3 sm:gap-4 mb-20">
+			<div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 md:gap-3 mb-20">
 				{skeletonKeys.map((key) => (
 					<ProductCardSkeleton key={key} />
 				))}
@@ -54,14 +59,18 @@ function ProductList({ data, isLoading = false }: ProductListProps) {
 	if (shouldAnimate) {
 		return (
 			<AnimatedGroup
-				className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-6 gap-x-3 sm:gap-4 mb-20"
+				className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 md:gap-3 mb-20"
 				once={false} // We handle the "once" logic ourselves
 				amount={0.05} // Even lower threshold for better mobile compatibility
 				delay={0.1}
 				staggerChildren={0.06}
 			>
 				{data.map((product) => (
-					<ProductCard key={product.id} product={product} />
+					<ProductCard
+						key={product.id}
+						product={product}
+						teaCategories={teaCategories}
+					/>
 				))}
 			</AnimatedGroup>
 		);
@@ -80,7 +89,7 @@ function ProductList({ data, isLoading = false }: ProductListProps) {
 					No products found.
 				</motion.p>
 			) : (
-				<div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-6 gap-x-3 sm:gap-4 mb-20">
+				<div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 md:gap-3 mb-20">
 					{data.map((product) => (
 						<motion.div
 							key={product.id}
@@ -90,7 +99,7 @@ function ProductList({ data, isLoading = false }: ProductListProps) {
 							exit={{ opacity: 0, y: -20 }}
 							transition={{ duration: 0.3 }}
 						>
-							<ProductCard product={product} />
+							<ProductCard product={product} teaCategories={teaCategories} />
 						</motion.div>
 					))}
 				</div>

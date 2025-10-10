@@ -178,6 +178,16 @@ function RouteComponent() {
 		}
 	}, [editFormData.title, isEditAutoSlug]);
 
+	// Listen for action button clicks from navbar
+	useEffect(() => {
+		const handleAction = () => {
+			setShowCreateDrawer(true);
+		};
+
+		window.addEventListener("dashboardAction", handleAction);
+		return () => window.removeEventListener("dashboardAction", handleAction);
+	}, []);
+
 	// Event handlers
 	const handleCreateChange = (
 		e: React.ChangeEvent<
@@ -419,18 +429,6 @@ function RouteComponent() {
 						allOptionLabel="All Posts"
 					/>
 				</div>
-			</div>
-
-			{/* Fixed Create Button */}
-			<div className="fixed bottom-3 right-3 z-50">
-				<Button
-					onClick={() => setShowCreateDrawer(true)}
-					size="lg"
-					className="bg-black text-white hover:bg-white/60 hover:text-black hover:backdrop-blur-md transition-all duration-300"
-				>
-					<Plus />
-					Add New Blog Post
-				</Button>
 			</div>
 
 			{/* Blog Posts List */}

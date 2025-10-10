@@ -73,7 +73,9 @@ export function CopyLinkButton({ sectionId }: CopyLinkButtonProps) {
 						type="button"
 						className={cn(
 							buttonVariants({ variant: "outline", size: "icon" }),
-							"disabled:opacity-100",
+							"disabled:opacity-100 cursor-pointer hover:cursor-pointer",
+							"transition-all duration-200 ease-in-out",
+							"hover:scale-105 hover:shadow-md active:scale-95",
 						)}
 						onClick={handleCopy}
 						aria-label={copied ? "Copied" : "Copy to clipboard"}
@@ -102,7 +104,7 @@ export function CopyLinkButton({ sectionId }: CopyLinkButtonProps) {
 						</div>
 					</button>
 				</TooltipTrigger>
-				<TooltipContent className="px-2 py-1 text-xs">
+				<TooltipContent className="px-2 py-1 text-xs transition-opacity duration-200">
 					{copied ? "Copied!" : "Copy link to post"}
 				</TooltipContent>
 			</Tooltip>

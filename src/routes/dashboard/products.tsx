@@ -218,6 +218,16 @@ function RouteComponent() {
 		}));
 	}, [editVariations]);
 
+	// Listen for action button clicks from navbar
+	useEffect(() => {
+		const handleAction = () => {
+			setShowCreateForm(true);
+		};
+
+		window.addEventListener("dashboardAction", handleAction);
+		return () => window.removeEventListener("dashboardAction", handleAction);
+	}, []);
+
 	// Event handlers and utility functions
 	const handleVariationsChange = (newVariations: Variation[]) => {
 		setVariations(newVariations);
@@ -656,17 +666,6 @@ function RouteComponent() {
 
 	return (
 		<div>
-			<div className="fixed bottom-3 right-3 z-50">
-				<Button
-					onClick={() => setShowCreateForm(true)}
-					size="lg"
-					className="bg-black text-white hover:bg-white/60 hover:text-black hover:backdrop-blur-md transition-all duration-300"
-				>
-					<Plus />
-					Add New Product
-				</Button>
-			</div>
-
 			{/* Products List */}
 			<div className="space-y-6">
 				{/* Products Header with Search */}

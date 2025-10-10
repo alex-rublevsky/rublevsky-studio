@@ -236,7 +236,11 @@ export default function StoreFeed({
 				/>
 			)}
 			<div className="px-0">
-				<ProductList data={filteredAndSortedProducts} isLoading={isLoading} />
+				<ProductList
+					data={filteredAndSortedProducts}
+					isLoading={isLoading}
+					teaCategories={teaCategories}
+				/>
 			</div>
 		</section>
 	);

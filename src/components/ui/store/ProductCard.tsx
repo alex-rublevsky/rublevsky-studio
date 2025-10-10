@@ -3,7 +3,12 @@ import { useCallback, useMemo, useState } from "react";
 import { useVariationSelection } from "~/hooks/useVariationSelection";
 import { type CartItem, useCart } from "~/lib/cartContext";
 import { getAttributeDisplayName } from "~/lib/productAttributes";
-import type { Product, ProductVariation, VariationAttribute } from "~/types";
+import type {
+	Product,
+	ProductVariation,
+	TeaCategory,
+	VariationAttribute,
+} from "~/types";
 import {
 	getAvailableQuantityForVariation,
 	isProductAvailable,
@@ -105,7 +110,43 @@ const getVariationSearchParams = (
 	return params;
 };
 
-function ProductCard({ product }: { product: ProductWithVariations }) {
+// Helper function to get badge variant based on tea category name
+const getTeaCategoryBadgeVariant = (
+	categoryName: string,
+):
+	| "default"
+	| "secondary"
+	| "shuPuer"
+	| "rawPuer"
+	| "purple"
+	| "destructive"
+	| "outline"
+	| "green"
+	| "greenOutline"
+	| null
+	| undefined => {
+	const lowerName = categoryName.toLowerCase();
+
+	if (lowerName.includes("shu") || lowerName.includes("ripe")) {
+		return "shuPuer";
+	}
+	if (lowerName.includes("raw") || lowerName.includes("sheng")) {
+		return "rawPuer";
+	}
+	if (lowerName.includes("purple")) {
+		return "purple";
+	}
+
+	return "secondary";
+};
+
+function ProductCard({
+	product,
+	teaCategories = [],
+}: {
+	product: ProductWithVariations;
+	teaCategories?: TeaCategory[];
+}) {
 	const [isAddingToCart, setIsAddingToCart] = useState(false);
 	const { addProductToCart, cart } = useCart();
 
@@ -195,6 +236,20 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
 		() => calculateAttributeNames(product.variations),
 		[product.variations],
 	);
+
+	// Get tea category names for this product - memoized
+	const productTeaCategoryNames = useMemo(() => {
+		if (!product.teaCategories || product.teaCategories.length === 0) {
+			return [];
+		}
+
+		return product.teaCategories
+			.map((slug) => {
+				const category = teaCategories.find((cat) => cat.slug === slug);
+				return category?.name;
+			})
+			.filter((name): name is string => !!name);
+	}, [product.teaCategories, teaCategories]);
 
 	const handleAddToCart = useCallback(
 		async (e: React.MouseEvent) => {
@@ -348,14 +403,16 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
 									<div className="flex flex-col items-baseline gap-1">
 										{product.discount ? (
 											<>
-												<h5 className="whitespace-nowrap">
-													$
-													{(
-														currentPrice *
-														(1 - product.discount / 100)
-													).toFixed(2)}{" "}
-													CAD
-												</h5>
+												<div className="whitespace-nowrap flex items-baseline gap-1">
+													<span className="text-lg font-normal">
+														$
+														{(
+															currentPrice *
+															(1 - product.discount / 100)
+														).toFixed(2)}
+													</span>
+													<span className="text-sm text-muted-foreground">CAD</span>
+												</div>
 												<div className="flex items-center gap-1">
 													<h6 className=" line-through text-muted-foreground">
 														${currentPrice?.toFixed(2)}
@@ -364,16 +421,32 @@ function ProductCard({ product }: { product: ProductWithVariations }) {
 												</div>
 											</>
 										) : (
-											<h5
-												className="whitespace-nowrap"
+											<div
+												className="whitespace-nowrap flex items-baseline gap-1"
 												style={{
 													viewTransitionName: `product-price-${product.slug}`,
 												}}
 											>
-												${currentPrice?.toFixed(2)} CAD
-											</h5>
+												<span className="text-lg font-normal">
+													${currentPrice?.toFixed(2)}
+												</span>
+												<span className="text-sm text-muted-foreground">CAD</span>
+											</div>
 										)}
 									</div>
+									{/* Tea Category Badges */}
+									{productTeaCategoryNames.length > 0 && (
+										<div className="flex flex-col gap-1 items-end justify-center">
+											{productTeaCategoryNames.map((name) => (
+												<Badge
+													key={name}
+													variant={getTeaCategoryBadgeVariant(name)}
+												>
+													{name}
+												</Badge>
+											))}
+										</div>
+									)}
 								</div>
 
 								{isComingSoon && (

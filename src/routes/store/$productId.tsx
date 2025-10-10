@@ -571,23 +571,55 @@ function ProductPage() {
 										</span>
 									</div>
 								)}
-								{/* Ripe Puer blog post link */}
-								{(syncedProduct as ProductWithDetails).teaCategories?.includes(
-									"ripe-pu-er",
-								) && (
-									<div className="flex flex-col">
-										<span className="text-muted-foreground">Learn more</span>
-										<a
-											href="https://rublevsky.studio/blog/shu-puer-the-foundation-trilogy-part-iii#shu-puer-the-foundation-trilogy-part-iii"
-											target="_blank"
-											rel="noopener noreferrer"
-											className="text-primary hover:underline"
-										>
-											About Ripe Pu'er
-										</a>
-									</div>
-								)}
-							</div>
+							{/* Ripe Puer blog post link */}
+							{(syncedProduct as ProductWithDetails).teaCategories?.includes(
+								"ripe-pu-er",
+							) && (
+								<div className="flex flex-col">
+									<span className="text-muted-foreground">Learn more</span>
+									<a
+										href="https://rublevsky.studio/blog/shu-puer-the-foundation-trilogy-part-iii#shu-puer-the-foundation-trilogy-part-iii"
+										target="_blank"
+										rel="noopener noreferrer"
+										className="text-primary hover:underline"
+									>
+										About Ripe Pu'er
+									</a>
+								</div>
+							)}
+							{/* Raw Puer blog post link */}
+							{(syncedProduct as ProductWithDetails).teaCategories?.includes(
+								"raw-pu-er",
+							) && (
+								<div className="flex flex-col">
+									<span className="text-muted-foreground">Learn more</span>
+									<a
+										href="https://rublevsky.studio/blog/sheng-puer-the-foundation-trilogy-part-ii"
+										target="_blank"
+										rel="noopener noreferrer"
+										className="text-primary hover:underline"
+									>
+										About Raw Pu'er
+									</a>
+								</div>
+							)}
+							{/* Purple Tea blog post link */}
+							{(syncedProduct as ProductWithDetails).teaCategories?.includes(
+								"purple",
+							) && (
+								<div className="flex flex-col">
+									<span className="text-muted-foreground">Learn more</span>
+									<a
+										href="https://rublevsky.studio/blog/purple-tea-what-is-this-mystery"
+										target="_blank"
+										rel="noopener noreferrer"
+										className="text-primary hover:underline"
+									>
+										About Purple Tea
+									</a>
+								</div>
+							)}
+						</div>
 
 							{/* Blog post link */}
 							{(() => {

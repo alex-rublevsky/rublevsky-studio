@@ -52,12 +52,19 @@ function RouteComponent() {
 		  }
 		| undefined;
 
+
+	// Get the action handler from route context if it exists
+	const handleActionClick = () => {
+		// Dispatch a custom event that child routes can listen to
+		window.dispatchEvent(new CustomEvent("dashboardAction"));
+	};
+
 	return (
 		<div className="min-h-screen bg-background">
 			<main className="py-8 pb-24">
 				<Outlet />
 			</main>
-			<NavBar userData={loaderData} />
+			<NavBar userData={loaderData} onActionClick={handleActionClick} />
 			<Toaster />
 		</div>
 	);
