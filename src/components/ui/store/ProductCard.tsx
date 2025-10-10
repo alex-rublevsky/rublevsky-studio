@@ -412,9 +412,9 @@ function ProductCard({
 													<span className="text-sm text-muted-foreground">CAD</span>
 												</div>
 												<div className="flex items-center gap-1">
-													<h6 className=" line-through text-muted-foreground">
+													<span className="text-sm line-through text-muted-foreground">
 														${currentPrice?.toFixed(2)}
-													</h6>
+													</span>
 													<Badge variant="green">{product.discount}% OFF</Badge>
 												</div>
 											</>
