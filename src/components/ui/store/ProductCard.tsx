@@ -329,7 +329,6 @@ function ProductCard({
 												className="absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-500 ease-in-out opacity-0 group-hover:opacity-100 hidden md:block"
 												style={{
 													filter: !hasAnyStock ? "grayscale(100%)" : "none",
-													opacity: !hasAnyStock ? 0.6 : undefined,
 												}}
 											/>
 										)}
