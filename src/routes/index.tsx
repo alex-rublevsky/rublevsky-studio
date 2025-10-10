@@ -105,8 +105,7 @@ function App() {
 		</div>
 
 		// TODO: things that are no longer used:
-		// <SmoothScroll>
-
+		
 		//     <HeroSection />
 		//     <MembershipBenefitsSection />
 		//     <SubscriptionSection />
