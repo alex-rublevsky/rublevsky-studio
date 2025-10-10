@@ -398,7 +398,7 @@ function ProductCard({
 							{/* Price */}
 							<div className="flex flex-col mb-2">
 								<div className="flex flex-wrap items-center justify-between w-full gap-x-2">
-									<div className="flex flex-col items-baseline gap-1">
+									<div className="flex flex-col items-baseline gap-0">
 										{product.discount ? (
 											<>
 												<div className="whitespace-nowrap flex items-baseline gap-1">
@@ -415,7 +415,7 @@ function ProductCard({
 													<span className="text-sm line-through text-muted-foreground">
 														${currentPrice?.toFixed(2)}
 													</span>
-													<Badge variant="green">{product.discount}% OFF</Badge>
+													<Badge variant="green">-{product.discount}%</Badge>
 												</div>
 											</>
 										) : (
