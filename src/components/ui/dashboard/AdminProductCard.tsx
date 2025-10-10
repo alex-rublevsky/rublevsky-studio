@@ -82,6 +82,7 @@ export function AdminProductCard({
 							<div className="relative aspect-square flex items-center justify-center overflow-hidden">
 								{primaryImage ? (
 									<div className="relative w-full h-full">
+										{/* Primary Image */}
 										<img
 											src={`https://assets.rublevsky.studio/${primaryImage}`}
 											alt={product.name}
@@ -92,6 +93,19 @@ export function AdminProductCard({
 												opacity: !hasAnyStock ? 0.6 : 1,
 											}}
 										/>
+										{/* Secondary Image (if exists) - Only on desktop devices with hover capability */}
+										{imageArray.length > 1 && (
+											<img
+												src={`https://assets.rublevsky.studio/${imageArray[1]}`}
+												alt={product.name}
+												loading="eager"
+												className="absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-500 ease-in-out opacity-0 group-hover:opacity-100 hidden md:block"
+												style={{
+													filter: !hasAnyStock ? "grayscale(100%)" : "none",
+													opacity: !hasAnyStock ? 0.6 : undefined,
+												}}
+											/>
+										)}
 									</div>
 								) : (
 									<div className="absolute inset-0 bg-muted flex items-center justify-center">
