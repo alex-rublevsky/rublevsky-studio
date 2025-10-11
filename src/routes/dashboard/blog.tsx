@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useId, useMemo, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { toast } from "sonner";
 import DashboardBlogPostCard from "~/components/ui/blog/DashboardBlogPostCard";
 import DeleteConfirmationDialog from "~/components/ui/dashboard/ConfirmationDialog";
@@ -15,6 +15,7 @@ import { FilterGroup } from "~/components/ui/shared/FilterGroup";
 import { Input } from "~/components/ui/shared/Input";
 import { Switch } from "~/components/ui/shared/Switch";
 import { Textarea } from "~/components/ui/shared/TextArea";
+import { generateSlug, useSlugGeneration } from "~/hooks/useSlugGeneration";
 import { createBlogPost } from "~/server_functions/dashboard/blog/createBlogPost";
 import { deleteBlogPost } from "~/server_functions/dashboard/blog/deleteBlogPost";
 import { getAllBlogPosts } from "~/server_functions/dashboard/blog/getAllBlogPosts";
@@ -138,38 +139,20 @@ function RouteComponent() {
 		{ slug: "hidden", name: "Hidden" },
 	];
 
+	// Stable callbacks for slug generation
+	const handleCreateSlugChange = useCallback(
+		(slug: string) => setCreateFormData((prev) => ({ ...prev, slug })),
+		[]
+	);
+
+	const handleEditSlugChange = useCallback(
+		(slug: string) => setEditFormData((prev) => ({ ...prev, slug })),
+		[]
+	);
+
 	// Auto-generate slugs
-	useEffect(() => {
-		if (isCreateAutoSlug && createFormData.title) {
-			const slug = createFormData.title
-				.toLowerCase()
-				.replace(/[^\w\s-]/g, "")
-				.replace(/\s+/g, "-")
-				.replace(/-+/g, "-")
-				.trim();
-
-			setCreateFormData((prev) => ({
-				...prev,
-				slug,
-			}));
-		}
-	}, [createFormData.title, isCreateAutoSlug]);
-
-	useEffect(() => {
-		if (isEditAutoSlug && editFormData.title) {
-			const slug = editFormData.title
-				.toLowerCase()
-				.replace(/[^\w\s-]/g, "")
-				.replace(/\s+/g, "-")
-				.replace(/-+/g, "-")
-				.trim();
-
-			setEditFormData((prev) => ({
-				...prev,
-				slug,
-			}));
-		}
-	}, [editFormData.title, isEditAutoSlug]);
+	useSlugGeneration(createFormData.title || "", isCreateAutoSlug, handleCreateSlugChange);
+	useSlugGeneration(editFormData.title || "", isEditAutoSlug, handleEditSlugChange);
 
 	// Listen for action button clicks from navbar
 	useEffect(() => {
@@ -199,7 +182,6 @@ function RouteComponent() {
 			[name]: type === "checkbox" ? checked : value,
 		});
 	};
-
 
 	const handleEditChange = (
 		e: React.ChangeEvent<
@@ -274,7 +256,10 @@ function RouteComponent() {
 	const handleEdit = async (post: BlogPost) => {
 		setEditingPostId(post.id);
 		setShowEditDrawer(true);
-		setIsEditAutoSlug(true);
+
+		// Determine if slug is custom (doesn't match auto-generated)
+		const isCustomSlug = post.slug !== generateSlug(post.title || "");
+
 		setEditFormData({
 			title: post.title || "",
 			slug: post.slug,
@@ -287,6 +272,8 @@ function RouteComponent() {
 				? Date.now()
 				: post.publishedAt,
 		});
+
+		setIsEditAutoSlug(!isCustomSlug);
 	};
 
 	const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -477,7 +464,6 @@ function RouteComponent() {
 									idPrefix="create"
 								/>
 
-
 								<div>
 									<label
 										htmlFor="product"
@@ -652,7 +638,6 @@ function RouteComponent() {
 									onAutoSlugChange={setIsEditAutoSlug}
 									idPrefix="edit"
 								/>
-
 
 								<div>
 									<label

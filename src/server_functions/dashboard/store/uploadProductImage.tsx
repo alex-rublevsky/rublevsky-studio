@@ -12,6 +12,7 @@ interface UploadImageInput {
 	fileType: string;
 	fileSize: number;
 	folder?: string;
+	slug?: string; // product slug for subdirectory organization
 }
 
 export const uploadProductImage = createServerFn({ method: "POST" })
@@ -24,6 +25,7 @@ export const uploadProductImage = createServerFn({ method: "POST" })
 				fileType,
 				fileSize,
 				folder = "products",
+				slug,
 			} = data;
 
 			if (!fileData) {
@@ -70,16 +72,19 @@ export const uploadProductImage = createServerFn({ method: "POST" })
 				sanitizedFileName.lastIndexOf("."),
 			);
 
+			// Create directory path with slug if provided
+			const directoryPath = slug ? `${folder}/${slug}` : folder;
+
 			// Check if file exists and find available name
 			let finalName = nameWithoutExt;
-			let filename = `${folder}/${finalName}.${extension}`;
+			let filename = `${directoryPath}/${finalName}.${extension}`;
 			let copyNumber = 0;
 
 			// Check if file exists in R2
 			while (await bucket.head(filename)) {
 				copyNumber++;
 				finalName = `${nameWithoutExt}-copy${copyNumber > 1 ? copyNumber : ""}`;
-				filename = `${folder}/${finalName}.${extension}`;
+				filename = `${directoryPath}/${finalName}.${extension}`;
 			}
 
 			// Convert base64 to ArrayBuffer

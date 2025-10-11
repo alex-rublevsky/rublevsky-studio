@@ -1,6 +1,6 @@
 export type Tool = {
 	name: string;
-	icon: string;
+	icon?: string;
 	largeIcon?: boolean;
 };
 

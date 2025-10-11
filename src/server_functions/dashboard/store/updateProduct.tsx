@@ -5,6 +5,7 @@ import type { DrizzleD1Database } from "drizzle-orm/d1";
 import { DB } from "~/db";
 import type * as schema from "~/schema";
 import {
+	blogPosts,
 	products,
 	productTeaCategories,
 	productVariations,
@@ -55,6 +56,11 @@ export const updateProduct = createServerFn({ method: "POST" })
 			const imageString =
 				productData.images?.trim() || existingProduct[0].images || "";
 
+			// Check if slug is changing and update blog post references
+			const oldSlug = existingProduct[0].slug;
+			const newSlug = productData.slug;
+			const slugChanged = oldSlug !== newSlug;
+
 			// Update product and related data
 			await Promise.all([
 				// Update main product
@@ -77,6 +83,16 @@ export const updateProduct = createServerFn({ method: "POST" })
 						shippingFrom: productData.shippingFrom || null,
 					})
 					.where(eq(products.id, productId)),
+
+				// Update blog post references if slug changed
+				...(slugChanged
+					? [
+							db
+								.update(blogPosts)
+								.set({ productSlug: newSlug })
+								.where(eq(blogPosts.productSlug, oldSlug)),
+						]
+					: []),
 
 				// Handle tea categories
 				(async () => {

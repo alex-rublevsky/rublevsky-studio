@@ -10,7 +10,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { Badge } from "~/components/ui/shared/Badge";
 import { Button } from "~/components/ui/shared/Button";
-import { TeaCategoryLink } from "~/components/ui/shared/TeaCategoryLink";
 import { FilterGroup } from "~/components/ui/shared/FilterGroup";
 import ImageGallery from "~/components/ui/shared/ImageGallery";
 import {
@@ -18,6 +17,7 @@ import {
 	rehypePlugins,
 } from "~/components/ui/shared/MarkdownComponents";
 import { QuantitySelector } from "~/components/ui/shared/QuantitySelector";
+import { TeaCategoryLearnMore } from "~/components/ui/shared/TeaCategoryLearnMore";
 import { ProductPageSkeleton } from "~/components/ui/store/skeletons/ProductPageSkeleton";
 import { getCountryName } from "~/constants/countries";
 import { useVariationSelection } from "~/hooks/useVariationSelection";
@@ -32,6 +32,7 @@ import type {
 	ProductWithVariations,
 	VariationAttribute,
 } from "~/types";
+import { seo } from "~/utils/seo";
 import { getAvailableQuantityForVariation } from "~/utils/validateStock";
 
 // Simple search params - no Zod needed for basic optional strings
@@ -146,6 +147,21 @@ export const Route = createFileRoute("/store/$productId")({
 	loader: async ({ context: { queryClient }, params: { productId } }) => {
 		// Ensure data is loaded before component renders
 		await queryClient.ensureQueryData(productQueryOptions(productId));
+	},
+
+	head: ({ loaderData }) => {
+		const product = loaderData as ProductWithDetails | undefined;
+
+		return {
+			meta: [
+				...seo({
+					title: `${product?.name || "Product"} - Rublevsky Studio`,
+					description:
+						product?.description ||
+						"Discover premium products at Rublevsky Studio store.",
+				}),
+			],
+		};
 	},
 
 	validateSearch,
@@ -569,54 +585,8 @@ function ProductPage() {
 										</span>
 									</div>
 								)}
-								{/* Ripe Puer blog post link */}
-								{(syncedProduct as ProductWithDetails).teaCategories?.includes(
-									"ripe-pu-er",
-								) && (
-									<div className="flex flex-col">
-										<span className="text-muted-foreground">Learn more about</span>
-										<TeaCategoryLink
-											href="https://rublevsky.studio/blog/shu-puer-the-foundation-trilogy-part-iii#shu-puer-the-foundation-trilogy-part-iii"
-											variant="shuPuer"
-											target="_blank"
-											rel="noopener noreferrer"
-										>
-											Ripe Pu'er
-										</TeaCategoryLink>
-									</div>
-								)}
-								{/* Raw Puer blog post link */}
-								{(syncedProduct as ProductWithDetails).teaCategories?.includes(
-									"raw-pu-er",
-								) && (
-									<div className="flex flex-col">
-										<span className="text-muted-foreground">Learn more about</span>
-										<TeaCategoryLink
-											href="https://rublevsky.studio/blog/sheng-puer-the-foundation-trilogy-part-ii"
-											variant="rawPuer"
-											target="_blank"
-											rel="noopener noreferrer"
-										>
-											Raw Pu'er
-										</TeaCategoryLink>
-									</div>
-								)}
-								{/* Purple Tea blog post link */}
-								{(syncedProduct as ProductWithDetails).teaCategories?.includes(
-									"purple",
-								) && (
-									<div className="flex flex-col">
-										<span className="text-muted-foreground">Learn more about</span>
-										<TeaCategoryLink
-											href="https://rublevsky.studio/blog/purple-tea-what-is-this-mystery"
-											variant="purple"
-											target="_blank"
-											rel="noopener noreferrer"
-										>
-											Purple Tea
-										</TeaCategoryLink>
-									</div>
-								)}
+								{/* Tea category learn more links */}
+								<TeaCategoryLearnMore teaCategories={(syncedProduct as ProductWithDetails).teaCategories} />
 							</div>
 
 							{/* Blog post link */}

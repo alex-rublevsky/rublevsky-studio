@@ -1,7 +1,7 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
-import { useEffect, useId, useState } from "react";
+import { useCallback, useEffect, useId, useState } from "react";
 import { toast } from "sonner";
 import { AdminProductCard } from "~/components/ui/dashboard/AdminProductCard";
 import DeleteConfirmationDialog from "~/components/ui/dashboard/ConfirmationDialog";
@@ -27,6 +27,7 @@ import {
 	getCountryName,
 	SHIPPING_COUNTRIES,
 } from "~/constants/countries";
+import { generateSlug, useSlugGeneration } from "~/hooks/useSlugGeneration";
 import { cn } from "~/lib/utils";
 import { createProduct } from "~/server_functions/dashboard/store/createProduct";
 import { deleteProduct } from "~/server_functions/dashboard/store/deleteProduct";
@@ -154,30 +155,20 @@ function RouteComponent() {
 	// Search state
 	const [searchTerm, setSearchTerm] = useState("");
 
-	// All useEffect hooks
-	useEffect(() => {
-		if (isAutoSlug && formData.name) {
-			const slug = formData.name
-				.toLowerCase()
-				.replace(/[^\w\s-]/g, "")
-				.replace(/\s+/g, "-")
-				.replace(/-+/g, "-")
-				.trim();
-			setFormData((prev) => ({ ...prev, slug }));
-		}
-	}, [formData.name, isAutoSlug]);
+	// Stable callbacks for slug generation
+	const handleCreateSlugChange = useCallback(
+		(slug: string) => setFormData((prev) => ({ ...prev, slug })),
+		[]
+	);
 
-	useEffect(() => {
-		if (isEditAutoSlug && editFormData.name) {
-			const slug = editFormData.name
-				.toLowerCase()
-				.replace(/[^\w\s-]/g, "")
-				.replace(/\s+/g, "-")
-				.replace(/-+/g, "-")
-				.trim();
-			setEditFormData((prev) => ({ ...prev, slug }));
-		}
-	}, [editFormData.name, isEditAutoSlug]);
+	const handleEditSlugChange = useCallback(
+		(slug: string) => setEditFormData((prev) => ({ ...prev, slug })),
+		[]
+	);
+
+	// Auto-slug generation hooks
+	useSlugGeneration(formData.name, isAutoSlug, handleCreateSlugChange);
+	useSlugGeneration(editFormData.name, isEditAutoSlug, handleEditSlugChange);
 
 	useEffect(() => {
 		setFormData((prev) => ({
@@ -596,7 +587,6 @@ function RouteComponent() {
 		setEditingProductId(product.id);
 		setShowEditModal(true);
 		setIsEditMode(true);
-		setIsEditAutoSlug(false);
 
 		try {
 			// Fetch complete product data including variations and tea categories
@@ -618,6 +608,10 @@ function RouteComponent() {
 					}),
 				) || [];
 
+			// Determine if slug is custom (doesn't match auto-generated)
+			const isCustomSlug =
+				productWithDetails.slug !== generateSlug(productWithDetails.name);
+
 			setEditFormData({
 				name: productWithDetails.name,
 				slug: productWithDetails.slug,
@@ -636,6 +630,9 @@ function RouteComponent() {
 				shippingFrom: productWithDetails.shippingFrom || "",
 				variations: [],
 			});
+
+			// Set auto-slug state based on whether slug is custom
+			setIsEditAutoSlug(!isCustomSlug);
 
 			// Set the variations separately
 			setEditVariations(formattedVariations);
@@ -709,14 +706,14 @@ function RouteComponent() {
 							<div key={group.title} className="space-y-4">
 								{/* Group Title */}
 								<div className="px-4">
-								<h2 className="text-2xl font-semibold text-foreground flex items-baseline gap-1">
-									{group.title}
-									<span className="text-sm text-muted-foreground">
-										{group.products.length}{" "}
-										{group.products.length === 1 ? "product" : "products"}
-									</span>
-								</h2>
-							</div>
+									<h2 className="text-2xl font-semibold text-foreground flex items-baseline gap-1">
+										{group.title}
+										<span className="text-sm text-muted-foreground">
+											{group.products.length}{" "}
+											{group.products.length === 1 ? "product" : "products"}
+										</span>
+									</h2>
+								</div>
 
 								{/* Products Grid */}
 								<div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 md:gap-3 px-4">
@@ -733,7 +730,7 @@ function RouteComponent() {
 									))}
 								</div>
 
-							{/* No divider between groups */}
+								{/* No divider between groups */}
 							</div>
 						))}
 					</div>
@@ -766,6 +763,7 @@ function RouteComponent() {
 								currentImages={editFormData.images}
 								onImagesChange={handleEditImagesChange}
 								folder="products"
+								slug={editFormData.slug}
 							/>
 						</ProductFormSection>
 
@@ -815,18 +813,14 @@ function RouteComponent() {
 								slug={editFormData.slug}
 								name={editFormData.name}
 								isAutoSlug={isEditAutoSlug}
-								onSlugChange={(slug) =>
-									setEditFormData((prev) => ({ ...prev, slug }))
-								}
+								onSlugChange={(slug) => {
+									setIsEditAutoSlug(false);
+									setEditFormData((prev) => ({ ...prev, slug }));
+								}}
 								onAutoSlugChange={(isAuto) => {
 									setIsEditAutoSlug(isAuto);
 									if (isAuto && editFormData.name) {
-										const generated = editFormData.name
-											.toLowerCase()
-											.replace(/[^\w\s-]/g, "")
-											.replace(/\s+/g, "-")
-											.replace(/-+/g, "-")
-											.trim();
+										const generated = generateSlug(editFormData.name);
 										setEditFormData((prev) => ({ ...prev, slug: generated }));
 									}
 								}}
@@ -954,15 +948,15 @@ function RouteComponent() {
 									/>
 								</div>
 
-                                {/* Column 2: Ships From */}
-                                <div className="w-24">
+								{/* Column 2: Ships From */}
+								<div className="w-24">
 									<label
 										htmlFor={editShipsFromId}
 										className="block text-sm font-medium mb-1"
 									>
 										Ships From
 									</label>
-                                    <Select
+									<Select
 										name="shippingFrom"
 										value={editFormData.shippingFrom || "NONE"}
 										onValueChange={(value: string) =>
@@ -974,7 +968,7 @@ function RouteComponent() {
 											} as React.ChangeEvent<HTMLSelectElement>)
 										}
 									>
-                                        <SelectTrigger id={editShipsFromId} className="w-24">
+										<SelectTrigger id={editShipsFromId} className="w-24">
 											<SelectValue placeholder="Choose shipping location">
 												{getCountryFlag(
 													editFormData.shippingFrom || undefined,
@@ -1050,6 +1044,7 @@ function RouteComponent() {
 								currentImages={formData.images}
 								onImagesChange={handleImagesChange}
 								folder="products"
+								slug={formData.slug}
 							/>
 						</ProductFormSection>
 
@@ -1102,9 +1097,10 @@ function RouteComponent() {
 								slug={formData.slug}
 								name={formData.name}
 								isAutoSlug={isAutoSlug}
-								onSlugChange={(slug) =>
-									setFormData((prev) => ({ ...prev, slug }))
-								}
+								onSlugChange={(slug) => {
+									setIsAutoSlug(false);
+									setFormData((prev) => ({ ...prev, slug }));
+								}}
 								onAutoSlugChange={setIsAutoSlug}
 								className={
 									hasAttemptedSubmit && !formData.slug ? "border-red-500" : ""
@@ -1227,15 +1223,15 @@ function RouteComponent() {
 									placeholder="Enter weight in grams"
 								/>
 
-                                {/* Column 2: Ships From */}
-                                <div className="w-24">
+								{/* Column 2: Ships From */}
+								<div className="w-24">
 									<label
 										htmlFor={addShipsFromId}
 										className="block text-sm font-medium mb-1"
 									>
 										Ships From
 									</label>
-                                    <Select
+									<Select
 										value={formData.shippingFrom || "NONE"}
 										onValueChange={(value) => {
 											setFormData({
@@ -1244,7 +1240,7 @@ function RouteComponent() {
 											});
 										}}
 									>
-                                        <SelectTrigger id={addShipsFromId} className="w-24">
+										<SelectTrigger id={addShipsFromId} className="w-24">
 											<SelectValue placeholder="Shipping from...">
 												{getCountryFlag(formData.shippingFrom || undefined) ||
 													""}

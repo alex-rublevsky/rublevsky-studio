@@ -1,53 +1,51 @@
 import type { Project } from "~/components/ui/studio/web/webTypes";
 
 export const webProjects: Project[] = [
-	// {
-	//   id: 'abalych',
-	//   title: 'Abalych WorldWide',
-	//   description: 'Website design and development for a street artist Kristina, known as Abalych, who blends traditional with modern, east with west, void with form.',
-	//   tools: [
-	//      {
-	//       name: 'Figma',
-	//       icon: 'logos/figma-text.svg'
-	//     },
-	//       {
-	//       name: 'Vite',
-	//       icon: 'logos/vite.png',
-	//       largeIcon: true
-	//     },
-	//      {
-	//       name: 'React',
-	//       icon: 'logos/react.svg',
-	//        largeIcon: true
-	//     },
-	//      {
-	//       name: 'Cloudflare',
-	//       icon: 'logos/cloudflare.png'
-	//     },
-	//       {
-	//       name: 'hashBlur',
-	//       icon: 'logos/hashblur.png',
-	//       largeIcon: true
-	//     },
-	//       {
-	//       name: 'Motion',
-	//       icon: 'logos/motion.png',
-	//       largeIcon: true
-	//     },
-	//   ],
-	//   websiteUrl: 'https://www.abaly.ch/',
-	//   layout: 'full',
-	//   devices: [
-	//     {
-	//       type: 'tablet',
-	//       content: {
-	//         type: 'video',
-	//         //TODO: upload video
-	//         url: 'web-videos/abalych-tablet.mp4'
-	//       }
-	//     }
-	//   ]
-	// },
+	{
+		id: "abalych",
+		title: "Abalych WorldWide",
+		description:
+			"Website design and development for a street artist Kristina, known as Abalych, who blends traditional with modern, east with west, void with form.",
+		tools: [
+			{
+				name: "Figma",
+				icon: "logos/figma-text.svg",
+			},
+			{
+				name: "Vite",
+				icon: "logos/vite.svg",
+				largeIcon: true,
+			},
+			{
+				name: "React",
+				icon: "logos/react.svg",
+				largeIcon: true,
+			},
+			{
+				name: "Cloudflare",
+				icon: "logos/cloudflare.png",
+			},
+			{
+				name: "hashBlur",
+			},
+			{
+				name: "Motion",
+				icon: "logos/motion.png",
+				largeIcon: true,
+			},
+		],
+		websiteUrl: "https://www.abaly.ch/",
+		layout: "full",
+		devices: [
+			{
+				type: "tablet",
+				content: {
+					type: "video",
+					url: "web/abalych/abalych.mp4",
+				},
+			},
+		],
+	},
 	{
 		id: "africa-power-supply",
 		title: "Africa Power Supply",

@@ -214,7 +214,7 @@ function SortableVariationItem({
 					/>
 				</div>
 
-                <div className="w-20">
+				<div className="w-20">
 					<label
 						htmlFor={`shipping-${variation.id}`}
 						className="block text-xs text-muted-foreground mb-1"
@@ -231,9 +231,9 @@ function SortableVariationItem({
 							)
 						}
 					>
-                        <SelectTrigger
+						<SelectTrigger
 							id={`shipping-${variation.id}`}
-                            className="text-sm w-20"
+							className="text-sm w-20"
 							onPointerDown={(e) => e.stopPropagation()}
 						>
 							<SelectValue placeholder="Country">

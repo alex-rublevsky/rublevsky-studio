@@ -164,27 +164,38 @@ export default function WebProjectEntry({ project }: WebProjectEntryProps) {
 		<div className="mb-52">
 			<div className="lg:grid lg:grid-cols-12 lg:gap-x-12 lg:gap-y-6">
 				<div className="col-span-12 lg:col-span-8 mb-6 lg:mb-0">
-					<h3 className="large-text-description">{project.description}</h3>
+					<h3 className="">{project.description}</h3>
 				</div>
 				<div className="col-span-12 lg:col-span-4 flex flex-col lg:items-end mb-6 lg:mb-0">
 					<h4>Tools used:</h4>
 					<div className="flex flex-wrap items-center lg:justify-end mt-4 mb-6 gap-6">
-						{project.tools.map((tool, _index) => (
-							<Image
-								key={tool.name}
-								src={`/${tool.icon}`}
-								alt={tool.name}
-								width={29}
-								height={29}
-								className={`w-auto logo-hover ${
-									tool.largeIcon ? "h-[3.5rem] md:h-[4.5rem]" : "h-[1.8rem]"
-								}`}
-								//quality={100}
-								style={{
-									maxWidth: "unset",
-								}}
-							/>
-						))}
+						{project.tools.map((tool, _index) =>
+							tool.icon ? (
+								<Image
+									key={tool.name}
+									src={`/${tool.icon}`}
+									alt={tool.name}
+									width={29}
+									height={29}
+									className={`w-auto logo-hover ${
+										tool.largeIcon ? "h-[3.5rem] md:h-[4.5rem]" : "h-[1.8rem]"
+									}`}
+									//quality={100}
+									style={{
+										maxWidth: "unset",
+									}}
+								/>
+							) : (
+								<span
+									key={tool.name}
+									className={`text-gray-700 font-medium ${
+										tool.largeIcon ? "text-2xl md:text-3xl" : "text-lg"
+									}`}
+								>
+									{tool.name}
+								</span>
+							),
+						)}
 					</div>
 					<h3>
 						<Link

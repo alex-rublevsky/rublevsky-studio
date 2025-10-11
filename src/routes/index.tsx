@@ -15,9 +15,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "~/components/ui/shared/Button";
 import "../styles/app.css";
+import { seo } from "~/utils/seo";
 
 export const Route = createFileRoute("/")({
 	component: App,
+	head: () => ({
+		meta: [
+			...seo({
+				title: "Rublevsky Studio",
+				description: "Web Development, Graphic Design, Tea Reviews",
+			}),
+		],
+	}),
 });
 
 function App() {

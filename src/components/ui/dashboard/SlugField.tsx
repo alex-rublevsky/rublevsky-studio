@@ -1,7 +1,9 @@
 import { Button } from "~/components/ui/shared/Button";
 import { Input } from "~/components/ui/shared/Input";
 import { Switch } from "~/components/ui/shared/Switch";
+import { generateSlug, useIsCustomSlug } from "~/hooks/useSlugGeneration";
 import { cn } from "~/lib/utils";
+import { Badge } from "../shared/Badge";
 
 interface SlugFieldProps {
 	/** Current slug value */
@@ -42,14 +44,8 @@ export function SlugField({
 	const slugId = `${idPrefix}slug`;
 	const autoSlugId = `${idPrefix}autoSlug`;
 
-	const generateSlug = (text: string) => {
-		return text
-			.toLowerCase()
-			.replace(/[^\w\s-]/g, "")
-			.replace(/\s+/g, "-")
-			.replace(/-+/g, "-")
-			.trim();
-	};
+	// Check if current slug is custom (doesn't match auto-generated)
+	const isCustomSlug = useIsCustomSlug(slug, name);
 
 	const handleResetClick = () => {
 		onAutoSlugChange(true);
@@ -63,9 +59,16 @@ export function SlugField({
 		return (
 			<div>
 				<div className="flex items-center justify-between mb-1">
-					<label htmlFor={slugId} className="block text-sm font-medium">
-						Slug
-					</label>
+					<div className="flex items-center gap-2">
+						<label htmlFor={slugId} className="block text-sm font-medium">
+							Slug
+						</label>
+						{isCustomSlug && (
+							<Badge className="" variant="default">
+								custom
+							</Badge>
+						)}
+					</div>
 					<div className="flex items-center space-x-2">
 						<Switch
 							id={autoSlugId}

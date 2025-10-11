@@ -183,11 +183,11 @@ export default function StoreFeed({
 					return bDate - aDate;
 				}
 			} else {
-				// Default: Custom category order - Produce first, Tea second, Stickers third
+				// Default: Custom category order - Tea first, then existing order for others
 				const categoryOrder = {
-					apparel: 1,
-					posters: 2,
-					tea: 3,
+					tea: 1,
+					apparel: 2,
+					posters: 3,
 					stickers: 4,
 					produce: 5,
 				};

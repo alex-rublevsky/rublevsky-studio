@@ -1,5 +1,6 @@
 import { Edit, Trash2 } from "lucide-react";
 import { Badge } from "~/components/ui/shared/Badge";
+import { TeaCategoryBadges } from "~/components/ui/shared/TeaCategoryBadges";
 import { getCountryFlag } from "~/constants/countries";
 import { cn } from "~/lib/utils";
 import type { ProductWithVariations } from "~/types";
@@ -12,7 +13,7 @@ interface AdminProductCardProps {
 	onDelete: (product: ProductWithVariations) => void;
 	formatPrice: (price: number) => string;
 	getCategoryName: (slug: string | null) => string | null;
-	getTeaCategoryNames: (teaCategories: string[]) => string;
+	getTeaCategoryNames: (slugs: string[] | undefined) => string;
 }
 
 export function AdminProductCard({
@@ -21,7 +22,6 @@ export function AdminProductCard({
 	onDelete,
 	formatPrice: _formatPrice,
 	getCategoryName,
-	getTeaCategoryNames,
 }: AdminProductCardProps) {
 	const imageArray = product.images?.split(",").map((img) => img.trim()) ?? [];
 	const primaryImage = imageArray[0];
@@ -180,6 +180,18 @@ export function AdminProductCard({
 											</h5>
 										)}
 									</div>
+									{/* Tea Category Badges - Desktop/Tablet */}
+									<TeaCategoryBadges 
+										teaCategories={product.teaCategories} 
+										className="hidden md:flex flex-col gap-1 items-end justify-center"
+									/>
+								</div>
+								{/* Tea Category Badges - Mobile */}
+								<div className="md:hidden mt-2">
+									<TeaCategoryBadges 
+										teaCategories={product.teaCategories} 
+										className="flex flex-wrap gap-2"
+									/>
 								</div>
 							</div>
 
@@ -195,14 +207,6 @@ export function AdminProductCard({
 									</span>
 								</div>
 
-								{/* Tea Categories */}
-								{product.teaCategories && product.teaCategories.length > 0 && (
-									<div>
-										<span className="text-muted-foreground text-xs">
-											{getTeaCategoryNames(product.teaCategories)}
-										</span>
-									</div>
-								)}
 
 								{/* Stock */}
 								<div>
@@ -232,10 +236,13 @@ export function AdminProductCard({
 									<div>
 										<span className="text-muted-foreground text-xs">
 											Ships from:{" "}
-                                            {allShippingLocations
-                                                .filter((code) => code !== "" && code !== "NONE")
-                                                .map((countryCode) => getCountryFlag(countryCode) || countryCode)
-                                                .join(" ")}
+											{allShippingLocations
+												.filter((code) => code !== "" && code !== "NONE")
+												.map(
+													(countryCode) =>
+														getCountryFlag(countryCode) || countryCode,
+												)
+												.join(" ")}
 										</span>
 									</div>
 								)}

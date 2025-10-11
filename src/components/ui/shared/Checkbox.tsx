@@ -25,7 +25,10 @@ function Checkbox({
 			{...props}
 		>
 			{/* Hide indicator to keep a simple solid fill when checked */}
-			<CheckboxPrimitive.Indicator data-slot="checkbox-indicator" className="hidden" />
+			<CheckboxPrimitive.Indicator
+				data-slot="checkbox-indicator"
+				className="hidden"
+			/>
 		</CheckboxPrimitive.Root>
 	);
 }

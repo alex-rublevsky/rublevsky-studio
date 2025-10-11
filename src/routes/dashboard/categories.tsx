@@ -1,16 +1,18 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
-import { useId, useState } from "react";
+import { useCallback, useId, useState } from "react";
 import { toast } from "sonner";
 import DeleteConfirmationDialog from "~/components/ui/dashboard/ConfirmationDialog";
 import { DashboardFormDrawer } from "~/components/ui/dashboard/DashboardFormDrawer";
+import { FormSection } from "~/components/ui/dashboard/ProductFormSection";
 import { SlugField } from "~/components/ui/dashboard/SlugField";
 import { Badge } from "~/components/ui/shared/Badge";
 import { Button } from "~/components/ui/shared/Button";
 import { Input } from "~/components/ui/shared/Input";
 import { Switch } from "~/components/ui/shared/Switch";
 import { useDashboardForm } from "~/hooks/useDashboardForm";
+import { generateSlug, useSlugGeneration } from "~/hooks/useSlugGeneration";
 import { createProductCategory } from "~/server_functions/dashboard/categories/createProductCategory";
 import { deleteProductCategory } from "~/server_functions/dashboard/categories/deleteProductCategory";
 import { getAllProductCategories } from "~/server_functions/dashboard/categories/getAllProductCategories";
@@ -92,6 +94,33 @@ function RouteComponent() {
 		string | null
 	>(null);
 
+	// Stable callbacks for slug generation
+	const handleCreateSlugChange = useCallback(
+		(slug: string) => {
+			if (categoryType === "product") {
+				productCategoryForm.createForm.updateField("slug", slug);
+			} else {
+				teaCategoryForm.createForm.updateField("slug", slug);
+			}
+		},
+		[categoryType, productCategoryForm.createForm.updateField, teaCategoryForm.createForm.updateField]
+	);
+
+	const handleEditSlugChange = useCallback(
+		(slug: string) => {
+			if (categoryType === "product") {
+				productCategoryForm.editForm.updateField("slug", slug);
+			} else {
+				teaCategoryForm.editForm.updateField("slug", slug);
+			}
+		},
+		[categoryType, productCategoryForm.editForm.updateField, teaCategoryForm.editForm.updateField]
+	);
+
+	// Auto-slug generation hooks
+	useSlugGeneration(activeForm.createForm.formData.name, isCreateAutoSlug, handleCreateSlugChange);
+	useSlugGeneration(activeForm.editForm.formData.name, isEditAutoSlug, handleEditSlugChange);
+
 	// Submit handler for creating categories
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
@@ -142,13 +171,17 @@ function RouteComponent() {
 		setCategoryType("product");
 		setEditingCategoryId(category.id);
 		setEditingTeaCategorySlug(null);
+
+		// Determine if slug is custom (doesn't match auto-generated)
+		const isCustomSlug = category.slug !== generateSlug(category.name);
+
 		productCategoryForm.editForm.setFormData({
 			name: category.name,
 			slug: category.slug,
 			image: category.image || "",
 			isActive: category.isActive,
 		});
-		setIsEditAutoSlug(true);
+		setIsEditAutoSlug(!isCustomSlug);
 		productCategoryForm.crud.openEditDrawer();
 	};
 
@@ -157,12 +190,16 @@ function RouteComponent() {
 		setCategoryType("tea");
 		setEditingTeaCategorySlug(teaCategory.slug);
 		setEditingCategoryId(null);
+
+		// Determine if slug is custom (doesn't match auto-generated)
+		const isCustomSlug = teaCategory.slug !== generateSlug(teaCategory.name);
+
 		teaCategoryForm.editForm.setFormData({
 			name: teaCategory.name,
 			slug: teaCategory.slug,
 			isActive: teaCategory.isActive,
 		});
-		setIsEditAutoSlug(true);
+		setIsEditAutoSlug(!isCustomSlug);
 		teaCategoryForm.crud.openEditDrawer();
 	};
 
@@ -466,53 +503,61 @@ function RouteComponent() {
 				}
 				layout="single-column"
 			>
-				<form onSubmit={handleSubmit} id={createFormId} className="space-y-4">
-					<Input
-						label={`${categoryType === "product" ? "Category" : "Tea Category"} Name *`}
-						type="text"
-						name="name"
-						value={activeForm.createForm.formData.name}
-						onChange={activeForm.createForm.handleChange}
-						required
-					/>
+				<form onSubmit={handleSubmit} id={createFormId} className="contents">
+					<FormSection
+						maxWidth
+						title={`${categoryType === "product" ? "Category" : "Tea Category"} Details`}
+					>
+						<div className="space-y-4">
+							<Input
+								label={`${categoryType === "product" ? "Category" : "Tea Category"} Name`}
+								type="text"
+								name="name"
+								value={activeForm.createForm.formData.name}
+								onChange={activeForm.createForm.handleChange}
+								required
+							/>
 
-					<SlugField
-						slug={activeForm.createForm.formData.slug}
-						name={activeForm.createForm.formData.name}
-						isAutoSlug={isCreateAutoSlug}
-						onSlugChange={(slug) => {
-							if (categoryType === "product") {
-								productCategoryForm.createForm.updateField("slug", slug);
-							} else {
-								teaCategoryForm.createForm.updateField("slug", slug);
-							}
-						}}
-						onAutoSlugChange={setIsCreateAutoSlug}
-						showResetButton={true}
-						idPrefix="create"
-					/>
+							<SlugField
+								slug={activeForm.createForm.formData.slug}
+								name={activeForm.createForm.formData.name}
+								isAutoSlug={isCreateAutoSlug}
+								onSlugChange={(slug) => {
+									setIsCreateAutoSlug(false);
+									if (categoryType === "product") {
+										productCategoryForm.createForm.updateField("slug", slug);
+									} else {
+										teaCategoryForm.createForm.updateField("slug", slug);
+									}
+								}}
+								onAutoSlugChange={setIsCreateAutoSlug}
+								idPrefix="create"
+							/>
 
-					{categoryType === "product" && (
-						<Input
-							label="Image URL"
-							type="text"
-							name="image"
-							value={
-								(activeForm.createForm.formData as CategoryFormData).image || ""
-							}
-							onChange={activeForm.createForm.handleChange}
-							placeholder="https://example.com/image.jpg"
-						/>
-					)}
+							{categoryType === "product" && (
+								<Input
+									label="Image URL"
+									type="text"
+									name="image"
+									value={
+										(activeForm.createForm.formData as CategoryFormData)
+											.image || ""
+									}
+									onChange={activeForm.createForm.handleChange}
+									placeholder="https://example.com/image.jpg"
+								/>
+							)}
 
-					<div className="flex items-center gap-2">
-						<Switch
-							name="isActive"
-							checked={activeForm.createForm.formData.isActive}
-							onChange={activeForm.createForm.handleChange}
-						/>
-						<span className="text-sm">Active</span>
-					</div>
+							<div className="flex items-center gap-2">
+								<Switch
+									name="isActive"
+									checked={activeForm.createForm.formData.isActive}
+									onChange={activeForm.createForm.handleChange}
+								/>
+								<span className="text-sm">Active</span>
+							</div>
+						</div>
+					</FormSection>
 				</form>
 			</DashboardFormDrawer>
 
@@ -533,53 +578,61 @@ function RouteComponent() {
 				}
 				layout="single-column"
 			>
-				<form onSubmit={handleUpdate} id={editFormId} className="space-y-4">
-					<Input
-						label={`${categoryType === "product" ? "Category" : "Tea Category"} Name *`}
-						type="text"
-						name="name"
-						value={activeForm.editForm.formData.name}
-						onChange={activeForm.editForm.handleChange}
-						required
-					/>
+				<form onSubmit={handleUpdate} id={editFormId} className="contents">
+					<FormSection
+						maxWidth
+						title={`${categoryType === "product" ? "Category" : "Tea Category"} Details`}
+					>
+						<div className="space-y-4">
+							<Input
+								label={`${categoryType === "product" ? "Category" : "Tea Category"} Name`}
+								type="text"
+								name="name"
+								value={activeForm.editForm.formData.name}
+								onChange={activeForm.editForm.handleChange}
+								required
+							/>
 
-					<SlugField
-						slug={activeForm.editForm.formData.slug}
-						name={activeForm.editForm.formData.name}
-						isAutoSlug={isEditAutoSlug}
-						onSlugChange={(slug) => {
-							if (categoryType === "product") {
-								productCategoryForm.editForm.updateField("slug", slug);
-							} else {
-								teaCategoryForm.editForm.updateField("slug", slug);
-							}
-						}}
-						onAutoSlugChange={setIsEditAutoSlug}
-						showResetButton={true}
-						idPrefix="edit"
-					/>
+							<SlugField
+								slug={activeForm.editForm.formData.slug}
+								name={activeForm.editForm.formData.name}
+								isAutoSlug={isEditAutoSlug}
+								onSlugChange={(slug) => {
+									setIsEditAutoSlug(false);
+									if (categoryType === "product") {
+										productCategoryForm.editForm.updateField("slug", slug);
+									} else {
+										teaCategoryForm.editForm.updateField("slug", slug);
+									}
+								}}
+								onAutoSlugChange={setIsEditAutoSlug}
+								idPrefix="edit"
+							/>
 
-					{categoryType === "product" && (
-						<Input
-							label="Image URL"
-							type="text"
-							name="image"
-							value={
-								(activeForm.editForm.formData as CategoryFormData).image || ""
-							}
-							onChange={activeForm.editForm.handleChange}
-							placeholder="https://example.com/image.jpg"
-						/>
-					)}
+							{categoryType === "product" && (
+								<Input
+									label="Image URL"
+									type="text"
+									name="image"
+									value={
+										(activeForm.editForm.formData as CategoryFormData).image ||
+										""
+									}
+									onChange={activeForm.editForm.handleChange}
+									placeholder="https://example.com/image.jpg"
+								/>
+							)}
 
-					<div className="flex items-center gap-2">
-						<Switch
-							name="isActive"
-							checked={activeForm.editForm.formData.isActive}
-							onChange={activeForm.editForm.handleChange}
-						/>
-						<span className="text-sm">Active</span>
-					</div>
+							<div className="flex items-center gap-2">
+								<Switch
+									name="isActive"
+									checked={activeForm.editForm.formData.isActive}
+									onChange={activeForm.editForm.handleChange}
+								/>
+								<span className="text-sm">Active</span>
+							</div>
+						</div>
+					</FormSection>
 				</form>
 			</DashboardFormDrawer>
 

@@ -26,6 +26,7 @@ interface ImageUploadProps {
 	currentImages: string; // comma-separated string from the form
 	onImagesChange: (images: string, deletedImages?: string[]) => void; // callback to update the form
 	folder?: string;
+	slug?: string; // product slug for subdirectory organization
 }
 
 interface SortableImageItemProps {
@@ -99,6 +100,7 @@ export function ImageUpload({
 	currentImages,
 	onImagesChange,
 	folder = "products",
+	slug,
 }: ImageUploadProps) {
 	const [isUploading, setIsUploading] = useState(false);
 	const [imageList, setImageList] = useState<string[]>([]);
@@ -162,6 +164,7 @@ export function ImageUpload({
 							fileType: file.type,
 							fileSize: file.size,
 							folder,
+							slug,
 						},
 					});
 
@@ -207,9 +210,7 @@ export function ImageUpload({
 	};
 
 	const handleDragOver = (
-		e: React.DragEvent<
-			HTMLDivElement | HTMLLabelElement | HTMLFieldSetElement
-		>,
+		e: React.DragEvent<HTMLDivElement | HTMLLabelElement | HTMLFieldSetElement>,
 	) => {
 		e.preventDefault();
 		e.stopPropagation();
@@ -217,9 +218,7 @@ export function ImageUpload({
 	};
 
 	const handleDragLeave = (
-		e: React.DragEvent<
-			HTMLDivElement | HTMLLabelElement | HTMLFieldSetElement
-		>,
+		e: React.DragEvent<HTMLDivElement | HTMLLabelElement | HTMLFieldSetElement>,
 	) => {
 		e.preventDefault();
 		e.stopPropagation();
@@ -227,9 +226,7 @@ export function ImageUpload({
 	};
 
 	const handleDrop = (
-		e: React.DragEvent<
-			HTMLDivElement | HTMLLabelElement | HTMLFieldSetElement
-		>,
+		e: React.DragEvent<HTMLDivElement | HTMLLabelElement | HTMLFieldSetElement>,
 	) => {
 		e.preventDefault();
 		e.stopPropagation();
@@ -279,7 +276,11 @@ export function ImageUpload({
 	return (
 		<div className="space-y-2">
 			<div className="flex items-center justify-between">
-				<label htmlFor={fileInputId} className="block text-sm font-medium" id={`${fileInputId}-label`}>
+				<label
+					htmlFor={fileInputId}
+					className="block text-sm font-medium"
+					id={`${fileInputId}-label`}
+				>
 					Product Images {imageList.length > 0 && `(${imageList.length})`}
 				</label>
 				{imageList.length > 0 && (
@@ -330,11 +331,11 @@ export function ImageUpload({
 								))}
 
 								{/* Upload Button */}
-							<button
+								<button
 									type="button"
 									onClick={handleUploadClick}
 									disabled={isUploading}
-								className="aspect-square rounded-lg border-2 border-dashed border-border/50 bg-background hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed group"
+									className="aspect-square rounded-lg border-2 border-dashed border-border/50 bg-background hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed group"
 								>
 									{isUploading ? (
 										<>

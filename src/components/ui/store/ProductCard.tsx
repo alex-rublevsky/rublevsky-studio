@@ -14,6 +14,7 @@ import {
 	isProductAvailable,
 } from "~/utils/validateStock";
 import { Badge } from "../shared/Badge";
+import { TeaCategoryBadges } from "../shared/TeaCategoryBadges";
 import { useCursorHover } from "../shared/custom_cursor/CustomCursorContext";
 import { FilterGroup } from "../shared/FilterGroup";
 import styles from "./productCard.module.css";
@@ -110,35 +111,6 @@ const getVariationSearchParams = (
 	return params;
 };
 
-// Helper function to get badge variant based on tea category name
-const getTeaCategoryBadgeVariant = (
-	categoryName: string,
-):
-	| "default"
-	| "secondary"
-	| "shuPuer"
-	| "rawPuer"
-	| "purple"
-	| "destructive"
-	| "outline"
-	| "green"
-	| "greenOutline"
-	| null
-	| undefined => {
-	const lowerName = categoryName.toLowerCase();
-
-	if (lowerName.includes("shu") || lowerName.includes("ripe")) {
-		return "shuPuer";
-	}
-	if (lowerName.includes("raw") || lowerName.includes("sheng")) {
-		return "rawPuer";
-	}
-	if (lowerName.includes("purple")) {
-		return "purple";
-	}
-
-	return "secondary";
-};
 
 function ProductCard({
 	product,
@@ -237,19 +209,6 @@ function ProductCard({
 		[product.variations],
 	);
 
-	// Get tea category names for this product - memoized
-	const productTeaCategoryNames = useMemo(() => {
-		if (!product.teaCategories || product.teaCategories.length === 0) {
-			return [];
-		}
-
-		return product.teaCategories
-			.map((slug) => {
-				const category = teaCategories.find((cat) => cat.slug === slug);
-				return category?.name;
-			})
-			.filter((name): name is string => !!name);
-	}, [product.teaCategories, teaCategories]);
 
 	const handleAddToCart = useCallback(
 		async (e: React.MouseEvent) => {
@@ -435,19 +394,18 @@ function ProductCard({
 											</div>
 										)}
 									</div>
-									{/* Tea Category Badges */}
-									{productTeaCategoryNames.length > 0 && (
-										<div className="flex flex-col gap-1 items-end justify-center">
-											{productTeaCategoryNames.map((name) => (
-												<Badge
-													key={name}
-													variant={getTeaCategoryBadgeVariant(name)}
-												>
-													{name}
-												</Badge>
-											))}
-										</div>
-									)}
+									{/* Tea Category Badges - Desktop/Tablet */}
+									<TeaCategoryBadges 
+										teaCategories={product.teaCategories} 
+										className="hidden md:flex flex-col gap-1 items-end justify-center"
+									/>
+								</div>
+								{/* Tea Category Badges - Mobile */}
+								<div className="md:hidden mt-2">
+									<TeaCategoryBadges 
+										teaCategories={product.teaCategories} 
+										className="flex flex-wrap gap-2"
+									/>
 								</div>
 
 								{isComingSoon && (

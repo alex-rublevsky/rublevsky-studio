@@ -54,7 +54,10 @@ export default function DashboardBlogPostCard({
 		body && body.length > 120 ? `${body.substring(0, 120).trim()}...` : body;
 
 	return (
-		<article className="w-full overflow-hidden bg-background flex flex-col h-full" id={styles.blogCard}>
+		<article
+			className="w-full overflow-hidden bg-background flex flex-col h-full"
+			id={styles.blogCard}
+		>
 			{/* Image and Desktop Action Bar Area */}
 			{firstImage && (
 				<div className="relative aspect-square overflow-hidden group">
@@ -103,7 +106,10 @@ export default function DashboardBlogPostCard({
 					{/* Excerpt */}
 					{excerpt && (
 						<div className="text-muted-foreground mb-3 prose prose-sm prose-p:my-0 prose-strong:text-foreground prose-em:text-muted-foreground">
-							<ReactMarkdown components={markdownComponents} rehypePlugins={rehypePlugins}>
+							<ReactMarkdown
+								components={markdownComponents}
+								rehypePlugins={rehypePlugins}
+							>
 								{excerpt}
 							</ReactMarkdown>
 						</div>
@@ -115,7 +121,11 @@ export default function DashboardBlogPostCard({
 						{categoryNames.length > 0 && (
 							<div className="flex flex-wrap gap-1">
 								{categoryNames.slice(0, 3).map((categoryName) => (
-									<Badge key={categoryName} variant="secondary" className="text-xs">
+									<Badge
+										key={categoryName}
+										variant="secondary"
+										className="text-xs"
+									>
 										{categoryName}
 									</Badge>
 								))}
@@ -130,7 +140,9 @@ export default function DashboardBlogPostCard({
 						{/* Linked Product */}
 						{productName && productSlug && (
 							<div>
-								<span className="text-xs text-muted-foreground block mb-1">Linked product:</span>
+								<span className="text-xs text-muted-foreground block mb-1">
+									Linked product:
+								</span>
 								<Badge
 									variant="outline"
 									className="text-xs cursor-pointer hover:bg-muted active:bg-muted transition-colors"
@@ -144,7 +156,9 @@ export default function DashboardBlogPostCard({
 						{/* Date and Visibility */}
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-2">
-								<time className="text-sm text-muted-foreground">{formatBlogDate(publishedAt)}</time>
+								<time className="text-sm text-muted-foreground">
+									{formatBlogDate(publishedAt)}
+								</time>
 								<span
 									className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
 										isVisible

@@ -1,5 +1,21 @@
 @import "tailwindcss";
 
+/* Variable Font Declaration */
+@font-face {
+	font-family: "Overused Grotesk";
+	src: url("/fonts/OverusedGrotesk-VF.woff2") format("woff2-variations");
+	font-weight: 300 900;
+	font-style: normal;
+	font-display: swap;
+}
+
+/* Apply font globally */
+html,
+body {
+	font-family: "Overused Grotesk", ui-sans-serif, system-ui, sans-serif;
+	letter-spacing: 3%; /* Slightly increased character spacing */
+}
+
 @theme {
 	--color-background: oklch(var(--background));
 	--color-foreground: oklch(var(--foreground));
@@ -24,6 +40,8 @@
 	--radius-lg: var(--radius);
 	--radius-md: calc(var(--radius) - 2px);
 	--radius-sm: calc(var(--radius) - 4px);
+
+	--font-family-sans: "Overused Grotesk", ui-sans-serif, system-ui, sans-serif;
 }
 
 /* Tailwind CSS v4 plugin - converted to standard CSS */
@@ -122,14 +140,25 @@
 	--sidebar-accent-foreground: 240 5.9% 10%;
 	--sidebar-border: 220 13% 91%;
 	--sidebar-ring: 217.2 91.2% 59.8%;
-	
-	/* Tea category colors */
-	--tea-shu-puer-bg: #FFC280;
-	--tea-shu-puer-text: #473421;
-	--tea-raw-puer-bg: #DFF589;
-	--tea-raw-puer-text: #3B4220;
-	--tea-purple-bg: #E5C8FF;
-	--tea-purple-text: #392E43;
+
+	/* Tea category colors - outline style */
+	--tea-shu-puer-outline: #FFA545;
+	--tea-shu-puer-text: #55310A;
+	--tea-raw-puer-outline: #BEE42B;
+	--tea-raw-puer-text: #39440A;
+	--tea-purple-outline: #B662FF;
+	--tea-purple-text: #2D1047;
+	--tea-gong-ting-outline: #852400;
+	--tea-gong-ting-text: #852400;
+	--tea-gong-ting-text-hover: #FFEBE4;
+	--tea-white-outline: #D2D2D8;
+	--tea-white-text: #44444A;
+	--tea-rattan-trees-outline: #36EB93;
+	--tea-rattan-trees-text: #12452C;
+	--tea-ancient-trees-outline: #B3E2FF;
+	--tea-ancient-trees-text: #2B3840;
+	--tea-oolong-outline: #FFC3C3;
+	--tea-oolong-text: #662121;
 }
 .dark {
 	--background: 0 0% 3.9%;
@@ -164,14 +193,6 @@
 	--sidebar-accent-foreground: 240 4.8% 95.9%;
 	--sidebar-border: 240 3.7% 15.9%;
 	--sidebar-ring: 217.2 91.2% 59.8%;
-	
-	/* Tea category colors - dark mode */
-	--tea-shu-puer-bg: #FFC280;
-	--tea-shu-puer-text: #473421;
-	--tea-raw-puer-bg: #DFF589;
-	--tea-raw-puer-text: #3B4220;
-	--tea-purple-bg: #E5C8FF;
-	--tea-purple-text: #392E43;
 }
 
 @layer base {
@@ -292,36 +313,42 @@ h1 {
 	font-size: 3.8rem;
 	font-weight: 300;
 	line-height: 1.1;
+	letter-spacing: 1.2%;
 }
 
 h2 {
 	font-size: 3.5rem;
 	font-weight: 300;
 	line-height: 1.2;
+	letter-spacing: 1.2%;
 }
 
 h3 {
 	font-size: 2.2rem;
 	line-height: 1.2;
 	font-weight: 300;
+	letter-spacing: 1.2%;
 }
 
 h4 {
 	font-size: 1.6rem;
 	line-height: 1.2;
 	font-weight: 300;
+	letter-spacing: 1.2%;
 }
 
 h5 {
 	font-size: 1.4rem;
 	line-height: 1.2;
 	font-weight: 300;
+	letter-spacing: 1.2%;
 }
 
 h6 {
 	font-size: 1.2rem;
 	line-height: 1.2;
 	font-weight: 300;
+	letter-spacing: 1.2%;
 }
 
 p {
@@ -522,18 +549,91 @@ input[type="number"] {
 	appearance: textfield;
 }
 
-/* Tea category badge styles */
+/* Tea category badge styles - outline with hover fill */
 .tea-badge-shu-puer {
-	background-color: var(--tea-shu-puer-bg);
+	background-color: transparent;
+	border-color: var(--tea-shu-puer-outline);
+	color: var(--tea-shu-puer-text);
+}
+
+.tea-badge-shu-puer:hover {
+	background-color: var(--tea-shu-puer-outline);
 	color: var(--tea-shu-puer-text);
 }
 
 .tea-badge-raw-puer {
-	background-color: var(--tea-raw-puer-bg);
+	background-color: transparent;
+	border-color: var(--tea-raw-puer-outline);
+	color: var(--tea-raw-puer-text);
+}
+
+.tea-badge-raw-puer:hover {
+	background-color: var(--tea-raw-puer-outline);
 	color: var(--tea-raw-puer-text);
 }
 
 .tea-badge-purple {
-	background-color: var(--tea-purple-bg);
+	background-color: transparent;
+	border-color: var(--tea-purple-outline);
 	color: var(--tea-purple-text);
+}
+
+.tea-badge-purple:hover {
+	background-color: var(--tea-purple-outline);
+	color: var(--tea-purple-text);
+}
+
+.tea-badge-gong-ting {
+	background-color: transparent;
+	border-color: var(--tea-gong-ting-outline);
+	color: var(--tea-gong-ting-text);
+}
+
+.tea-badge-gong-ting:hover {
+	background-color: var(--tea-gong-ting-outline);
+	color: var(--tea-gong-ting-text-hover);
+}
+
+.tea-badge-white {
+	background-color: transparent;
+	border-color: var(--tea-white-outline);
+	color: var(--tea-white-text);
+}
+
+.tea-badge-white:hover {
+	background-color: var(--tea-white-outline);
+	color: var(--tea-white-text);
+}
+
+.tea-badge-rattan-trees {
+	background-color: transparent;
+	border-color: var(--tea-rattan-trees-outline);
+	color: var(--tea-rattan-trees-text);
+}
+
+.tea-badge-rattan-trees:hover {
+	background-color: var(--tea-rattan-trees-outline);
+	color: var(--tea-rattan-trees-text);
+}
+
+.tea-badge-ancient-trees {
+	background-color: transparent;
+	border-color: var(--tea-ancient-trees-outline);
+	color: var(--tea-ancient-trees-text);
+}
+
+.tea-badge-ancient-trees:hover {
+	background-color: var(--tea-ancient-trees-outline);
+	color: var(--tea-ancient-trees-text);
+}
+
+.tea-badge-oolong {
+	background-color: transparent;
+	border-color: var(--tea-oolong-outline);
+	color: var(--tea-oolong-text);
+}
+
+.tea-badge-oolong:hover {
+	background-color: var(--tea-oolong-outline);
+	color: var(--tea-oolong-text);
 }

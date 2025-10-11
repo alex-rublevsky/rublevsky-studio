@@ -41,7 +41,7 @@ const SelectTrigger = React.forwardRef<
 			<SelectPrimitive.Trigger
 				ref={ref}
 				className={cn(
-					"relative flex rounded-full border border-border bg-background hover:bg-black hover:text-white active:bg-black active:text-white transition-all duration-200",
+					"relative flex rounded-full border border-border bg-background hover:border-black hover:bg-black/5 active:border-black active:bg-black/5 transition-all duration-200",
 					"focus:outline-hidden focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
 					// Responsive width - larger for default (Sort By), smaller for navbar (Other)
 					"w-[18ch]",
@@ -55,7 +55,7 @@ const SelectTrigger = React.forwardRef<
 				{...props}
 			>
 				<span className="relative z-10 flex items-center justify-between w-full cursor-pointer px-2 md:px-4 py-1.5 md:py-2 text-sm md:text-sm font-medium text-foreground">
-                    <span className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-left [filter:none] [mix-blend-normal]">
+					<span className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-left [filter:none] [mix-blend-normal]">
 						{children}
 					</span>
 					<SelectPrimitive.Icon asChild>
