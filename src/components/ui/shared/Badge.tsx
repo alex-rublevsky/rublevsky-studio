@@ -18,9 +18,9 @@ const badgeVariants = cva(
 				outline:
 					"text-foreground border-muted hover:bg-muted hover:text-foreground active:bg-muted active:text-foreground",
 				green:
-					"bg-green-600 text-primary-foreground font-medium hover:bg-green-600/90 active:bg-green-600/90 focus-visible:ring-green-600/20 dark:focus-visible:ring-green-600/40 dark:bg-green-600/70",
+					"bg-discount-badge text-discount-badge-foreground font-medium hover:bg-discount-badge/90 active:bg-discount-badge/90 focus-visible:ring-discount-badge/20 dark:focus-visible:ring-discount-badge/40 dark:bg-discount-badge/70",
 				greenOutline:
-					"border-green-600 bg-transparent text-green-600 hover:bg-green-600/10 active:bg-green-600/10 focus-visible:ring-green-600/20 dark:focus-visible:ring-green-600/40 dark:bg-green-600/70",
+					"border-discount-badge bg-transparent text-discount-badge hover:bg-discount-badge/10 active:bg-discount-badge/10 focus-visible:ring-discount-badge/20 dark:focus-visible:ring-discount-badge/40 dark:bg-discount-badge/70",
 				shuPuer: "hover:brightness-90 active:brightness-90 tea-badge-shu-puer",
 				rawPuer: "tea-badge-raw-puer",
 				purple: "tea-badge-purple",

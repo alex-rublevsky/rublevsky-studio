@@ -355,40 +355,39 @@ function ProductCard({
 						<div className="p-4 flex flex-col h-auto md:h-full">
 							{/* Price */}
 							<div className="flex flex-col mb-2">
-								<div className="flex flex-wrap items-center justify-between w-full gap-x-2">
-									<div className="flex flex-col items-baseline gap-0">
+								<div className="flex flex-wrap items-center w-full gap-2">
+									<div className="flex flex-col items-baseline gap-0 flex-shrink-0">
 										{product.discount ? (
 											<>
-												<div className="whitespace-nowrap flex items-baseline gap-1">
-													<span className="text-lg font-normal">
-														$
+												<div className="whitespace-nowrap flex items-baseline gap-0.5">
+													<span className="text-xl font-light">
 														{(
 															currentPrice *
 															(1 - product.discount / 100)
 														).toFixed(2)}
 													</span>
-													<span className="text-sm text-muted-foreground">
+													<span className="text-xs  font-light text-muted-foreground">
 														CAD
 													</span>
 												</div>
 												<div className="flex items-center gap-1">
 													<span className="text-sm line-through text-muted-foreground">
-														${currentPrice?.toFixed(2)}
+														{currentPrice?.toFixed(2)}
 													</span>
 													<Badge variant="green">-{product.discount}%</Badge>
 												</div>
 											</>
 										) : (
 											<div
-												className="whitespace-nowrap flex items-baseline gap-1"
+												className="whitespace-nowrap flex items-baseline gap-0.5"
 												style={{
 													viewTransitionName: `product-price-${product.slug}`,
 												}}
 											>
-												<span className="text-lg font-normal">
-													${currentPrice?.toFixed(2)}
+												<span className="text-xl font-light">
+													{currentPrice?.toFixed(2)}
 												</span>
-												<span className="text-sm text-muted-foreground">
+												<span className="text-xs font-light text-muted-foreground">
 													CAD
 												</span>
 											</div>
@@ -397,7 +396,7 @@ function ProductCard({
 									{/* Tea Category Badges - Desktop/Tablet */}
 									<TeaCategoryBadges 
 										teaCategories={product.teaCategories} 
-										className="hidden md:flex flex-col gap-1 items-end justify-center"
+										className="hidden md:flex flex-wrap gap-1 items-center justify-end flex-1 min-w-0"
 									/>
 								</div>
 								{/* Tea Category Badges - Mobile */}

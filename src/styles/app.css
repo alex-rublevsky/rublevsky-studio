@@ -36,6 +36,8 @@ body {
 	--color-border: oklch(var(--border));
 	--color-input: hsl(var(--input));
 	--color-ring: hsl(var(--ring));
+	--color-discount-badge: var(--discount-badge);
+	--color-discount-badge-foreground: var(--discount-badge-foreground);
 
 	--radius-lg: var(--radius);
 	--radius-md: calc(var(--radius) - 2px);
@@ -140,12 +142,14 @@ body {
 	--sidebar-accent-foreground: 240 5.9% 10%;
 	--sidebar-border: 220 13% 91%;
 	--sidebar-ring: 217.2 91.2% 59.8%;
+	--discount-badge: #BEE42B;
+	--discount-badge-foreground: #3C480B;
 
 	/* Tea category colors - outline style */
 	--tea-shu-puer-outline: #FFA545;
 	--tea-shu-puer-text: #55310A;
-	--tea-raw-puer-outline: #BEE42B;
-	--tea-raw-puer-text: #39440A;
+	--tea-raw-puer-outline: var(--discount-badge);
+	--tea-raw-puer-text: var(--discount-badge-foreground);
 	--tea-purple-outline: #B662FF;
 	--tea-purple-text: #2D1047;
 	--tea-gong-ting-outline: #852400;
