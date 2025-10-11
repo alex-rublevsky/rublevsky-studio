@@ -76,7 +76,7 @@ export default function DashboardBlogPostCard({
 								e.stopPropagation();
 								onEdit(post);
 							}}
-							className="flex-1 flex items-center justify-center space-x-2 bg-muted/70 backdrop-blur-xs text-black hover:bg-black hover:text-white active:bg-black active:text-white transition-all duration-500 py-2 cursor-pointer outline-none border-none"
+							className="flex-1 flex items-center justify-center space-x-2 bg-muted/70 backdrop-blur-xs text-foreground hover:bg-primary hover:text-primary-foreground active:bg-primary active:text-primary-foreground transition-all duration-500 py-2 cursor-pointer outline-none border-none"
 							style={{ margin: 0, padding: "0.5rem 0" }}
 						>
 							<Edit className="w-4 h-4" />
@@ -88,7 +88,7 @@ export default function DashboardBlogPostCard({
 								e.stopPropagation();
 								onDelete(post);
 							}}
-							className="w-12 flex items-center justify-center bg-muted/70 backdrop-blur-xs text-black hover:bg-red-600 hover:text-white active:bg-red-600 active:text-white transition-all duration-500 cursor-pointer outline-none border-none"
+							className="w-12 flex items-center justify-center bg-muted/70 backdrop-blur-xs text-foreground hover:bg-red-600 hover:text-primary-foreground active:bg-red-600 active:text-primary-foreground transition-all duration-500 cursor-pointer outline-none border-none"
 							style={{ margin: 0, padding: "0.5rem 0" }}
 						>
 							<Trash2 className="w-4 h-4" />
@@ -180,7 +180,7 @@ export default function DashboardBlogPostCard({
 								e.stopPropagation();
 								onEdit(post);
 							}}
-							className="flex-1 cursor-pointer flex items-center justify-center space-x-2 bg-muted backdrop-blur-xs text-black hover:bg-black hover:text-white active:bg-black active:text-white transition-all duration-500 py-2 px-4 outline-none border-none"
+							className="flex-1 cursor-pointer flex items-center justify-center space-x-2 bg-muted backdrop-blur-xs text-foreground hover:bg-primary hover:text-primary-foreground active:bg-primary active:text-primary-foreground transition-all duration-500 py-2 px-4 outline-none border-none"
 							style={{ margin: 0 }}
 						>
 							<Edit className="w-4 h-4" />
@@ -192,7 +192,7 @@ export default function DashboardBlogPostCard({
 								e.stopPropagation();
 								onDelete(post);
 							}}
-							className="w-12 cursor-pointer flex items-center justify-center bg-muted backdrop-blur-xs text-black hover:bg-red-600 hover:text-white active:bg-red-600 active:text-white transition-all duration-500 outline-none border-none"
+							className="w-12 cursor-pointer flex items-center justify-center bg-muted backdrop-blur-xs text-foreground hover:bg-red-600 hover:text-primary-foreground active:bg-red-600 active:text-primary-foreground transition-all duration-500 outline-none border-none"
 							style={{ margin: 0, padding: "0.5rem 0" }}
 						>
 							<Trash2 className="w-4 h-4" />

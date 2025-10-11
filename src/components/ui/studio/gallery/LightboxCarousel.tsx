@@ -73,11 +73,11 @@ export default function Carousel({
 
 	const carousel = (
 		<MotionConfig transition={{ type: "spring", bounce: 0 }}>
-			<div className="fixed inset-0 bg-black/90 z-50 py-4">
+			<div className="fixed inset-0 bg-primary/90 z-50 py-4">
 				<button
 					type="button"
 					onClick={onClose}
-					className="absolute right-4 top-4 text-white hover:text-gray-300 active:text-gray-300 z-50 cursor-pointer"
+					className="absolute right-4 top-4 text-primary-foreground hover:text-gray-300 active:text-gray-300 z-50 cursor-pointer"
 				>
 					<X className="h-6 w-6" />
 				</button>

@@ -21,7 +21,7 @@ export function ProductCardSkeleton() {
 						{/* Desktop Add to Cart button - invisible but present for layout */}
 						<button
 							type="button"
-							className="absolute bottom-0 left-0 right-0 hidden md:flex items-center justify-center space-x-2 bg-muted/70 backdrop-blur-xs text-black transition-all duration-500 py-2 opacity-0 pointer-events-none"
+							className="absolute bottom-0 left-0 right-0 hidden md:flex items-center justify-center space-x-2 bg-muted/70 backdrop-blur-xs text-foreground transition-all duration-500 py-2 opacity-0 pointer-events-none"
 						>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"

@@ -159,6 +159,8 @@ body {
 	--tea-ancient-trees-text: #2B3840;
 	--tea-oolong-outline: #FFC3C3;
 	--tea-oolong-text: #662121;
+	--tea-red-tea-outline: #FF7060;
+	--tea-red-tea-text: #491510;
 }
 .dark {
 	--background: 0 0% 3.9%;
@@ -636,4 +638,15 @@ input[type="number"] {
 .tea-badge-oolong:hover {
 	background-color: var(--tea-oolong-outline);
 	color: var(--tea-oolong-text);
+}
+
+.tea-badge-red-tea {
+	background-color: transparent;
+	border-color: var(--tea-red-tea-outline);
+	color: var(--tea-red-tea-text);
+}
+
+.tea-badge-red-tea:hover {
+	background-color: var(--tea-red-tea-outline);
+	color: var(--tea-red-tea-text);
 }

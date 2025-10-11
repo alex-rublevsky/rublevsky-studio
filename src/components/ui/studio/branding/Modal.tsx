@@ -77,11 +77,11 @@ export default function Modal({
 										className="fixed bottom-0 left-0 right-0 z-[60] mb-3 flex justify-start items-center px-3 pointer-events-none"
 									>
 										<div className="pointer-events-auto">
-											<div className="relative flex w-fit rounded-full border border-black bg-background hover:bg-black hover:text-white active:bg-black active:text-white transition-all duration-300 p-[0.3rem]">
+											<div className="relative flex w-fit rounded-full border border-black bg-background hover:bg-primary hover:text-primary-foreground active:bg-primary active:text-primary-foreground transition-all duration-300 p-[0.3rem]">
 												<button
 													type="button"
 													onClick={() => setSelected(null)}
-													className="relative z-10 flex items-center gap-2 cursor-pointer px-3 py-1.5 text-xs text-white mix-blend-difference md:px-4 md:py-2 md:text-sm"
+													className="relative z-10 flex items-center gap-2 cursor-pointer px-3 py-1.5 text-xs text-primary-foreground mix-blend-difference md:px-4 md:py-2 md:text-sm"
 												>
 													<X className="h-4 w-4" />
 													Close project

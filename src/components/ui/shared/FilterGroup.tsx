@@ -25,9 +25,9 @@ const buttonVariants = cva("transition-all duration-200 border", {
 			product: "px-2 py-1 text-xs rounded-full",
 		},
 		state: {
-			selected: "border-black bg-black text-white",
+			selected: "border-black bg-primary text-primary-foreground",
 			unselected:
-				"border-border bg-background/80 hover:border-black hover:bg-black/5 active:border-black active:bg-black/5 active:scale-95",
+				"border-border bg-background/80 hover:border-black hover:bg-primary/5 active:border-black active:bg-primary/5 active:scale-95",
 			disabled:
 				"border-border bg-muted hover:border-black active:border-black text-muted-foreground",
 			"selected-disabled":

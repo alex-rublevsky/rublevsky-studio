@@ -81,8 +81,8 @@ const DropdownNavMenu = ({
 
 	return (
 		<DropdownMenu>
-			<DropdownMenuTrigger className="relative flex w-fit rounded-full border border-black bg-background hover:bg-black hover:text-white active:bg-black active:text-white transition-all duration-300 p-[0.3rem] focus:outline-hidden focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
-				<span className="relative z-10 block cursor-pointer px-3 py-1.5 text-xs text-white mix-blend-difference md:px-4 md:py-2 md:text-sm">
+			<DropdownMenuTrigger className="relative flex w-fit rounded-full border border-black bg-background hover:bg-primary hover:text-primary-foreground active:bg-primary active:text-primary-foreground transition-all duration-300 p-[0.3rem] focus:outline-hidden focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
+				<span className="relative z-10 block cursor-pointer px-3 py-1.5 text-xs text-primary-foreground mix-blend-difference md:px-4 md:py-2 md:text-sm">
 					Menu
 				</span>
 			</DropdownMenuTrigger>
@@ -131,7 +131,7 @@ const DropdownNavMenu = ({
 									navigate({ to: "/" });
 								}
 							}}
-							className="flex items-center gap-2 py-2 px-3 text-sm hover:bg-black hover:text-white active:bg-black active:text-white transition-colors duration-200 border-b border-gray-200"
+							className="flex items-center gap-2 py-2 px-3 text-sm hover:bg-priimary hover:text-primary-foreground active:bg-primary active:text-primary-foreground transition-colors duration-200 border-b border-gray-200"
 						>
 							<LogOutIcon className="h-4 w-4" />
 							Log out
@@ -145,14 +145,14 @@ const DropdownNavMenu = ({
 								href={item.url}
 								target="_blank"
 								rel="noopener noreferrer"
-								className="relative flex w-full cursor-default select-none items-center py-2 px-3 text-sm outline-none focus:bg-black focus:text-white data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-black hover:text-white active:bg-black active:text-white transition-colors duration-200"
+								className="relative flex w-full cursor-default select-none items-center py-2 px-3 text-sm outline-none focus:bg-primary focus:text-primary-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-primary hover:text-primary-foreground active:bg-primary active:text-primary-foreground transition-colors duration-200"
 							>
 								{item.name}
 							</a>
 						) : (
 							<Link
 								to={item.url}
-								className="relative flex w-full cursor-default select-none items-center py-2 px-3 text-sm outline-none focus:bg-black focus:text-white data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-black hover:text-white active:bg-black active:text-white transition-colors duration-200"
+								className="relative flex w-full cursor-default select-none items-center py-2 px-3 text-sm outline-none focus:bg-primary focus:text-primary-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-primary hover:text-primary-foreground text-primary-foreground active:bg-primary active:text-primary-foreground transition-colors duration-200"
 							>
 								{item.name}
 							</Link>
@@ -192,11 +192,11 @@ const SmartBackButton = ({ label, fallbackPath }: SmartBackButtonProps) => {
 	};
 
 	return (
-		<div className="relative flex w-fit rounded-full border border-black bg-background hover:bg-black hover:text-white active:bg-black active:text-white transition-all duration-300 p-[0.3rem]">
+		<div className="relative flex w-fit rounded-full border border-black bg-background hover:bg-primary hover:text-primary-foreground active:bg-primary active:text-primary-foreground transition-all duration-300 p-[0.3rem]">
 			<button
 				type="button"
 				onClick={handleBack}
-				className="relative z-10 block cursor-pointer px-3 py-1.5 text-xs text-white mix-blend-difference md:px-4 md:py-2 md:text-sm"
+				className="relative z-10 block cursor-pointer px-3 py-1.5 text-xs text-primary-foreground mix-blend-difference md:px-4 md:py-2 md:text-sm"
 			>
 				← {label}
 			</button>
@@ -272,7 +272,7 @@ export function NavBar({
 						<button
 							type="button"
 							onClick={actionButton.onClick}
-							className="relative flex w-fit rounded-full border border-black bg-black text-white hover:bg-background hover:text-black transition-all duration-300 p-[0.3rem] focus:outline-hidden focus:ring-1 focus:ring-ring whitespace-nowrap"
+							className="relative flex w-fit rounded-full border border-black bg-primary text-primary-foreground hover:bg-background hover:text-foreground transition-all duration-300 p-[0.3rem] focus:outline-hidden focus:ring-1 focus:ring-ring whitespace-nowrap"
 						>
 							<span className="relative z-10 flex items-center gap-1.5 cursor-pointer px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm">
 								<Plus className="w-4 h-4" />
@@ -292,15 +292,15 @@ export function NavBar({
 					/>
 
 					{/* Center: Page navigation tabs */}
-					<div className="flex w-fit rounded-full border border-black bg-background p-[0.3rem]">
+					<div className="flex w-fit rounded-full border border-primary bg-background p-[0.3rem]">
 						{dashboardNavItems.map((item) => (
 							<Link
 								key={item.url}
 								to={item.url}
 								className={cn(
-									"relative z-10 block cursor-pointer px-3 xl:px-4 py-1.5 text-xs text-white mix-blend-difference xl:py-2 xl:text-sm rounded-full transition-colors",
+									"relative z-10 block cursor-pointer px-3 xl:px-4 py-1.5 text-xs text-primary-foreground mix-blend-difference xl:py-2 xl:text-sm rounded-full transition-colors",
 									pathname === item.url &&
-										"bg-black text-white mix-blend-normal",
+										"bg-primary text-primary-foreground mix-blend-normal",
 								)}
 							>
 								{item.name}
@@ -313,7 +313,7 @@ export function NavBar({
 						<button
 							type="button"
 							onClick={actionButton.onClick}
-							className="relative flex w-fit rounded-full border border-black bg-black text-white hover:bg-background hover:text-black transition-all duration-300 p-[0.3rem] focus:outline-hidden focus:ring-1 focus:ring-ring whitespace-nowrap"
+							className="relative flex w-fit rounded-full border border-primary bg-primary text-primary-foreground hover:bg-background hover:text-foreground transition-all duration-300 p-[0.3rem] focus:outline-hidden focus:ring-1 focus:ring-ring whitespace-nowrap"
 						>
 							<span className="relative z-10 flex items-center gap-1.5 cursor-pointer px-3 py-1.5 text-xs xl:px-4 xl:py-2 xl:text-sm">
 								<Plus className="w-4 h-4" />

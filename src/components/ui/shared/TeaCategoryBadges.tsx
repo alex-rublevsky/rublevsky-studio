@@ -8,7 +8,7 @@ interface TeaCategoryBadgesProps {
 }
 
 // Mapping from tea category slugs to Badge variants
-const teaCategoryVariantMap: Record<string, "shuPuer" | "rawPuer" | "purple" | "gongTing" | "white" | "rattanTrees" | "ancientTrees" | "oolong"> = {
+const teaCategoryVariantMap: Record<string, "shuPuer" | "rawPuer" | "purple" | "gongTing" | "white" | "rattanTrees" | "ancientTrees" | "oolong" | "redTea"> = {
 	"ripe-pu-er": "shuPuer",
 	"raw-pu-er": "rawPuer",
 	"purple": "purple",
@@ -17,6 +17,7 @@ const teaCategoryVariantMap: Record<string, "shuPuer" | "rawPuer" | "purple" | "
 	"rattan-trees": "rattanTrees",
 	"ancient-trees": "ancientTrees",
 	"oolong": "oolong",
+	"red-tea": "redTea",
 };
 
 // Display names for tea categories
@@ -29,6 +30,7 @@ const teaCategoryNames: Record<string, string> = {
 	"rattan-trees": "Rattan Trees",
 	"ancient-trees": "Ancient Trees",
 	"oolong": "Oolong",
+	"red-tea": "Red Tea",
 };
 
 export function TeaCategoryBadges({ teaCategories = [], className }: TeaCategoryBadgesProps) {

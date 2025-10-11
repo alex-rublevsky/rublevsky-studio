@@ -41,10 +41,14 @@ const teaCategoryBlogMap: Record<string, { href: string; name: string }> = {
 		href: "/blog/oolong", // Add actual blog post URL when available
 		name: "Oolong",
 	},
+	"red-tea": {
+		href: "/blog/red-tea", // Add actual blog post URL when available
+		name: "Red Tea",
+	},
 };
 
 // Mapping from tea category slugs to Badge variants
-const teaCategoryVariantMap: Record<string, "shuPuer" | "rawPuer" | "purple" | "gongTing" | "white" | "rattanTrees" | "ancientTrees" | "oolong"> = {
+const teaCategoryVariantMap: Record<string, "shuPuer" | "rawPuer" | "purple" | "gongTing" | "white" | "rattanTrees" | "ancientTrees" | "oolong" | "redTea"> = {
 	"ripe-pu-er": "shuPuer",
 	"raw-pu-er": "rawPuer",
 	"purple": "purple",
@@ -53,6 +57,7 @@ const teaCategoryVariantMap: Record<string, "shuPuer" | "rawPuer" | "purple" | "
 	"rattan-trees": "rattanTrees",
 	"ancient-trees": "ancientTrees",
 	"oolong": "oolong",
+	"red-tea": "redTea",
 };
 
 export function TeaCategoryLearnMore({ teaCategories = [], className }: TeaCategoryLearnMoreProps) {

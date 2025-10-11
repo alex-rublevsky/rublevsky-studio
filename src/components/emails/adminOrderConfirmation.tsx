@@ -95,33 +95,33 @@ export const AdminOrderConfirmation = ({
 								className="my-0 mx-auto"
 							/>
 						</Section>
-						<Heading className="text-black text-[24px] font-normal text-center p-0 my-[30px] mx-0">
+						<Heading className="text-foreground text-[24px] font-normal text-center p-0 my-[30px] mx-0">
 							New Order Received!
 						</Heading>
-						<Text className="text-black text-[14px] leading-[15px]">
+						<Text className="text-foreground text-[14px] leading-[15px]">
 							Order #{orderId} has been placed by {Name} {LastName}.
 						</Text>
-						<Text className="text-black text-[14px] leading-[15px]">
+						<Text className="text-foreground text-[14px] leading-[15px]">
 							Customer Email: {email}
 						</Text>
-						<Text className="text-black text-[14px] leading-[15px]">
+						<Text className="text-foreground text-[14px] leading-[15px]">
 							Order Status: {orderStatus || "Pending"}
 						</Text>
-						<Text className="text-black text-[14px] leading-[15px]">
+						<Text className="text-foreground text-[14px] leading-[15px]">
 							Order Date: {orderDate || "Not specified"}
 						</Text>
 
 						<Hr className="border border-solid border-[#eaeaea] my-[16px] mx-0 w-full" />
 
-						<Text className="text-black text-[16px] font-semibold mb-2">
+						<Text className="text-foreground text-[16px] font-semibold mb-2">
 							Shipping Details
 						</Text>
-						<Text className="text-black text-[14px] leading-[20px]">
+						<Text className="text-foreground text-[14px] leading-[20px]">
 							Method: {shippingMethod || "Not specified"}
 						</Text>
 						{shippingAddress && (
 							<div className="mb-4">
-								<Text className="text-black text-[14px] leading-[20px]">
+								<Text className="text-foreground text-[14px] leading-[20px]">
 									{shippingAddress.firstName} {shippingAddress.lastName}
 									<br />
 									{shippingAddress.streetAddress}
@@ -138,11 +138,11 @@ export const AdminOrderConfirmation = ({
 
 						{billingAddress && billingAddress !== shippingAddress && (
 							<>
-								<Text className="text-black text-[16px] font-semibold mb-2">
+								<Text className="text-foreground text-[16px] font-semibold mb-2">
 									Billing Details
 								</Text>
 								<div className="mb-4">
-									<Text className="text-black text-[14px] leading-[20px]">
+									<Text className="text-foreground text-[14px] leading-[20px]">
 										{billingAddress.firstName} {billingAddress.lastName}
 										<br />
 										{billingAddress.streetAddress}
@@ -194,7 +194,7 @@ export const AdminOrderConfirmation = ({
 															CA${item.originalPrice}
 														</span>
 													</Text>
-													<Text className="text-black text-lg leading-[15px]">
+													<Text className="text-foreground text-lg leading-[15px]">
 														CA${item.price}
 													</Text>
 													<Text className="text-sm text-gray-500">
@@ -203,7 +203,7 @@ export const AdminOrderConfirmation = ({
 												</div>
 											) : (
 												<div className="space-y-0 text-right">
-													<Text className="text-black text-lg leading-[15px]">
+													<Text className="text-foreground text-lg leading-[15px]">
 														CA${item.price}
 													</Text>
 													<Text className="text-sm text-gray-500">
@@ -231,7 +231,7 @@ export const AdminOrderConfirmation = ({
 							<Row>
 								<Column align="center">
 									<Button
-										className="box-border w-full rounded-[8px] bg-black px-[12px] py-[12px] text-center font-normal text-white"
+										className="box-border w-full rounded-[8px] bg-primary px-[12px] py-[12px] text-center font-normal text-primary-foreground"
 										href={`https://www.rublevsky.studio/admin/orders/${orderId}`}
 									>
 										View Order Details
@@ -252,7 +252,7 @@ export const AdminOrderConfirmation = ({
 						<Hr className="border border-solid border-[#eaeaea] my-[26px] mx-0 w-full" />
 						<Text className="text-[#666666] text-[12px] leading-[22px]">
 							This is an automated admin notification from{" "}
-							<span className="text-black">Rublevsky Studio</span>. If you
+							<span className="text-foreground">Rublevsky Studio</span>. If you
 							received this email by mistake, please contact the system
 							administrator.
 						</Text>

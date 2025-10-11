@@ -41,7 +41,7 @@ const SelectTrigger = React.forwardRef<
 			<SelectPrimitive.Trigger
 				ref={ref}
 				className={cn(
-					"relative flex rounded-full border border-border bg-background hover:border-black hover:bg-black/5 active:border-black active:bg-black/5 transition-all duration-200",
+					"relative flex rounded-full border border-border bg-background hover:border-black hover:bg-primary/5 active:border-black active:bg-primary/5 transition-all duration-200",
 					"focus:outline-hidden focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
 					// Responsive width - larger for default (Sort By), smaller for navbar (Other)
 					"w-[18ch]",
@@ -121,7 +121,7 @@ const SelectItem = React.forwardRef<
 		<SelectPrimitive.Item
 			ref={ref}
 			className={cn(
-				"relative flex w-full cursor-default select-none items-center py-2 px-3 text-sm outline-none focus:bg-black focus:text-white data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-black hover:text-white active:bg-black active:text-white transition-colors duration-200",
+				"relative flex w-full cursor-default select-none items-center py-2 px-3 text-sm outline-none focus:bg-primary focus:text-primary-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-primary hover:text-primary-foreground active:bg-priamry active:text-primary-foreground transition-colors duration-200",
 				// Custom cursor styles - always cursor-pointer
 				"cursor-pointer",
 				className,

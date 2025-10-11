@@ -67,9 +67,9 @@ function DatePicker({
 						variant={"outline"}
 						disabled={disabled}
 						className={cn(
-							"group w-full justify-between bg-background px-3 font-normal outline-offset-0 hover:bg-black hover:text-white active:bg-black active:text-white focus-visible:border-ring focus-visible:outline-[3px] focus-visible:outline-ring/20 transition-colors duration-200",
+							"group w-full justify-between bg-background px-3 font-normal outline-offset-0 hover:bg-primary hover:text-primary-foreground active:bg-primary active:text-primary-foreground focus-visible:border-ring focus-visible:outline-[3px] focus-visible:outline-ring/20 transition-colors duration-200",
 							!selectedDate &&
-								"text-muted-foreground hover:text-white active:text-white",
+								"text-muted-foreground hover:text-primary-foreground active:text-primary-foreground",
 						)}
 					>
 						<span
@@ -83,7 +83,7 @@ function DatePicker({
 						<CalendarIcon
 							size={16}
 							strokeWidth={2}
-							className="shrink-0 text-muted-foreground/80 transition-colors group-hover:text-white group-active:text-white"
+							className="shrink-0 text-muted-foreground/80 transition-colors group-hover:text-primary-foreground group-active:text-primary-foreground"
 							aria-hidden="true"
 						/>
 					</Button>

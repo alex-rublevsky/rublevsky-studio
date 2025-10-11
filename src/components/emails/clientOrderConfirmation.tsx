@@ -63,13 +63,13 @@ export const ClientOrderConfirmation = ({
 								className="my-0 mx-auto"
 							/>
 						</Section>
-						<Heading className="text-black text-[24px] font-normal text-center p-0 my-[30px] mx-0">
+						<Heading className="text-foreground text-[24px] font-normal text-center p-0 my-[30px] mx-0">
 							Your order has been placed successfully!
 						</Heading>
-						<Text className="text-black text-[14px] leading-[15px]">
+						<Text className="text-foreground text-[14px] leading-[15px]">
 							Greetings, {Name} {LastName}!
 						</Text>
-						<Text className="text-black text-[14px] leading-[15px]">
+						<Text className="text-foreground text-[14px] leading-[15px]">
 							You will be contacted shortly regarding delivery and payment.
 						</Text>
 
@@ -107,7 +107,7 @@ export const ClientOrderConfirmation = ({
 															CA${item.originalPrice}
 														</span>
 													</Text>
-													<Text className="text-black text-lg leading-[15px]">
+													<Text className="text-foreground text-lg leading-[15px]">
 														CA${item.price}
 													</Text>
 													<Text className="text-sm text-gray-500">
@@ -116,7 +116,7 @@ export const ClientOrderConfirmation = ({
 												</div>
 											) : (
 												<div className="space-y-0 text-right">
-													<Text className="text-black text-lg leading-[15px]">
+													<Text className="text-foreground text-lg leading-[15px]">
 														CA${item.price}
 													</Text>
 													<Text className="text-sm text-gray-500">
@@ -144,7 +144,7 @@ export const ClientOrderConfirmation = ({
 							<Row>
 								<Column align="center">
 									<Button
-										className="box-border w-full rounded-[8px] bg-black px-[12px] py-[12px] text-center font-normal text-white"
+										className="box-border w-full rounded-[8px] bg-primary px-[12px] py-[12px] text-center font-normal text-primary-foreground"
 										href={`https://www.rublevsky.studio/order/${orderId}`}
 									>
 										View Order
@@ -165,9 +165,9 @@ export const ClientOrderConfirmation = ({
 						<Hr className="border border-solid border-[#eaeaea] my-[26px] mx-0 w-full" />
 						<Text className="text-[#666666] text-[12px] leading-[22px]">
 							This order confirmation was intended for{" "}
-							<span className="text-black">{Name}</span>. This email was sent
-							from <span className="text-black">Rublevsky Studio</span> located
-							in <span className="text-black">Ontario, Canada</span>. If you
+							<span className="text-foreground">{Name}</span>. This email was sent
+							from <span className="text-foreground">Rublevsky Studio</span> located
+							in <span className="text-foreground">Ontario, Canada</span>. If you
 							were not expecting this order confirmation, you can ignore this
 							email. If you are concerned about your account's safety, please
 							reply to this email to get in touch with us.

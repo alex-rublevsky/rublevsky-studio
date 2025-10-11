@@ -10,7 +10,7 @@ const EnlargeCursor = () => (
 		viewBox="0 0 29 29"
 		fill="none"
 		xmlns="http://www.w3.org/2000/svg"
-		className="text-white"
+		className="text-primary-foreground"
 		aria-hidden="true"
 	>
 		<path
@@ -29,7 +29,7 @@ const LinkCursor = () => (
 		viewBox="0 0 70 70"
 		fill="none"
 		xmlns="http://www.w3.org/2000/svg"
-		className="text-white"
+		className="text-primary-foreground"
 		aria-hidden="true"
 	>
 		<path
@@ -46,7 +46,7 @@ const AddCursor = () => (
 		viewBox="0 0 70 70"
 		fill="none"
 		xmlns="http://www.w3.org/2000/svg"
-		className="text-white"
+		className="text-primary-foreground"
 		aria-hidden="true"
 	>
 		<path d="M39 31H70V39H39V70H31V39H0V31H31V0H39V31Z" fill="currentColor" />
@@ -237,7 +237,7 @@ function Cursor() {
 				transition={{ duration: 0.1 }}
 			>
 				<motion.div
-					className="absolute flex items-center justify-center bg-black text-white rounded-3xl text-sm font-medium whitespace-nowrap px-7 py-4"
+					className="absolute flex items-center justify-center bg-primary text-primary-foreground rounded-3xl text-sm font-medium whitespace-nowrap px-7 py-4"
 					initial={{ scale: 0, opacity: 0 }}
 					animate={{
 						scale: (variant === "visitWebsite" ? 1 : 0) * pressScale,

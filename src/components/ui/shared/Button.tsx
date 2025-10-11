@@ -19,21 +19,21 @@ const buttonVariants = cva(
 		variants: {
 			variant: {
 				default:
-					"bg-primary text-primary-foreground border border-black hover:bg-transparent hover:text-black active:bg-transparent active:text-black",
+					"bg-primary text-primary-foreground border border-black hover:bg-transparent hover:text-foreground active:bg-transparent active:text-foreground",
 				secondary:
 					"text-primary border border-black hover:bg-primary hover:text-primary-foreground active:bg-primary active:text-primary-foreground",
 				inverted:
-					"bg-white text-black border border-white hover:bg-transparent hover:text-white active:bg-transparent active:text-white",
+					"bg-white text-foreground border border-white hover:bg-transparent hover:text-primary-foreground active:bg-transparent active:text-primary-foreground",
 				destructive:
 					"bg-backgorund text-destructive border border-destructive shadow-2xs hover:bg-destructive/90 hover:text-destructive-foreground active:bg-destructive/90 active:text-destructive-foreground",
 				invertedDestructive:
 					"bg-destructive text-destructive-foreground border border-destructive hover:bg-transparent active:bg-transparent",
 				greenInverted:
-					"bg-green-500 text-black font-medium border border-green-500 hover:bg-transparent hover:text-green-500 active:bg-transparent active:text-green-500",
+					"bg-green-500 text-foreground font-medium border border-green-500 hover:bg-transparent hover:text-green-500 active:bg-transparent active:text-green-500",
 				outline:
-					"bg-transparent text-black border border-black hover:bg-black hover:text-white active:bg-black active:text-white",
+					"bg-transparent text-foreground border border-black hover:bg-primary hover:text-primary-foreground active:bg-primary active:text-primary-foreground",
 				accent:
-					"bg-black text-black border border-black hover:bg-black hover:text-white active:bg-black active:text-white",
+					"bg-primary text-foreground border border-black hover:bg-primary hover:text-primary-foreground active:bg-primary active:text-primary-foreground",
 				secondaryInverted:
 					"bg-secondary font-medium text-secondary-foreground border border-secondary hover:bg-transparent active:bg-transparent",
 				ghost:

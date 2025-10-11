@@ -22,7 +22,7 @@ export function CartNav() {
 					<button
 						type="button"
 						onClick={() => setCartOpen(true)}
-						className="relative flex items-center justify-center w-[2.6rem] h-[2.6rem] md:w-[3.2rem] md:h-[3.2rem] rounded-full border border-black bg-background hover:bg-black hover:text-white active:bg-black active:text-white transition-all duration-500"
+						className="relative flex items-center justify-center w-[2.6rem] h-[2.6rem] md:w-[3.2rem] md:h-[3.2rem] rounded-full border border-black bg-background hover:bg-primary hover:text-primary-foreground active:bg-primary active:text-primary-foreground transition-all duration-500"
 					>
 						{/* Cart SVG Icon */}
 						<svg
@@ -47,7 +47,7 @@ export function CartNav() {
 
 						{/* Cart Counter Badge */}
 						{itemCount > 0 && (
-							<span className="absolute -top-1 -right-1 bg-black text-white text-sm w-3.5 h-3.5 md:w-5 md:h-5 flex items-center justify-center rounded-full">
+							<span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-sm w-3.5 h-3.5 md:w-5 md:h-5 flex items-center justify-center rounded-full">
 								{itemCount}
 							</span>
 						)}

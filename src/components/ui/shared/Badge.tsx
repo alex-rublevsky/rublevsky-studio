@@ -14,11 +14,11 @@ const badgeVariants = cva(
 				secondary:
 					"bg-muted/65 text-secondary-foreground hover:brightness-96 active:brightness-96",
 				destructive:
-					"bg-destructive text-white hover:bg-destructive/90 active:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/70",
+					"bg-destructive text-primary-foreground hover:bg-destructive/90 active:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/70",
 				outline:
 					"text-foreground border-muted hover:bg-muted hover:text-foreground active:bg-muted active:text-foreground",
 				green:
-					"bg-green-600 text-white font-medium hover:bg-green-600/90 active:bg-green-600/90 focus-visible:ring-green-600/20 dark:focus-visible:ring-green-600/40 dark:bg-green-600/70",
+					"bg-green-600 text-primary-foreground font-medium hover:bg-green-600/90 active:bg-green-600/90 focus-visible:ring-green-600/20 dark:focus-visible:ring-green-600/40 dark:bg-green-600/70",
 				greenOutline:
 					"border-green-600 bg-transparent text-green-600 hover:bg-green-600/10 active:bg-green-600/10 focus-visible:ring-green-600/20 dark:focus-visible:ring-green-600/40 dark:bg-green-600/70",
 				shuPuer: "hover:brightness-90 active:brightness-90 tea-badge-shu-puer",
@@ -29,6 +29,7 @@ const badgeVariants = cva(
 				rattanTrees: "tea-badge-rattan-trees",
 				ancientTrees: "tea-badge-ancient-trees",
 				oolong: "tea-badge-oolong",
+				redTea: "tea-badge-red-tea",
 			},
 			size: {
 				default: "px-2 py-0.5 text-xs",
