@@ -10,6 +10,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { Badge } from "~/components/ui/shared/Badge";
 import { Button } from "~/components/ui/shared/Button";
+import { TeaCategoryLink } from "~/components/ui/shared/TeaCategoryLink";
 import { FilterGroup } from "~/components/ui/shared/FilterGroup";
 import ImageGallery from "~/components/ui/shared/ImageGallery";
 import {
@@ -18,7 +19,7 @@ import {
 } from "~/components/ui/shared/MarkdownComponents";
 import { QuantitySelector } from "~/components/ui/shared/QuantitySelector";
 import { ProductPageSkeleton } from "~/components/ui/store/skeletons/ProductPageSkeleton";
-import { getCountryByCode } from "~/constants/countries";
+import { getCountryName } from "~/constants/countries";
 import { useVariationSelection } from "~/hooks/useVariationSelection";
 import { useCart } from "~/lib/cartContext";
 import {
@@ -564,62 +565,59 @@ function ProductPage() {
 									<div className="flex flex-col">
 										<span className="text-muted-foreground">Ships from</span>
 										<span className="text-foreground">
-											{(() => {
-												const country = getCountryByCode(currentShippingFrom);
-												return country?.name || currentShippingFrom;
-											})()}
+											{getCountryName(currentShippingFrom)}
 										</span>
 									</div>
 								)}
-							{/* Ripe Puer blog post link */}
-							{(syncedProduct as ProductWithDetails).teaCategories?.includes(
-								"ripe-pu-er",
-							) && (
-								<div className="flex flex-col">
-									<span className="text-muted-foreground">Learn more</span>
-									<a
-										href="https://rublevsky.studio/blog/shu-puer-the-foundation-trilogy-part-iii#shu-puer-the-foundation-trilogy-part-iii"
-										target="_blank"
-										rel="noopener noreferrer"
-										className="text-primary hover:underline"
-									>
-										About Ripe Pu'er
-									</a>
-								</div>
-							)}
-							{/* Raw Puer blog post link */}
-							{(syncedProduct as ProductWithDetails).teaCategories?.includes(
-								"raw-pu-er",
-							) && (
-								<div className="flex flex-col">
-									<span className="text-muted-foreground">Learn more</span>
-									<a
-										href="https://rublevsky.studio/blog/sheng-puer-the-foundation-trilogy-part-ii"
-										target="_blank"
-										rel="noopener noreferrer"
-										className="text-primary hover:underline"
-									>
-										About Raw Pu'er
-									</a>
-								</div>
-							)}
-							{/* Purple Tea blog post link */}
-							{(syncedProduct as ProductWithDetails).teaCategories?.includes(
-								"purple",
-							) && (
-								<div className="flex flex-col">
-									<span className="text-muted-foreground">Learn more</span>
-									<a
-										href="https://rublevsky.studio/blog/purple-tea-what-is-this-mystery"
-										target="_blank"
-										rel="noopener noreferrer"
-										className="text-primary hover:underline"
-									>
-										About Purple Tea
-									</a>
-								</div>
-							)}
-						</div>
+								{/* Ripe Puer blog post link */}
+								{(syncedProduct as ProductWithDetails).teaCategories?.includes(
+									"ripe-pu-er",
+								) && (
+									<div className="flex flex-col">
+										<span className="text-muted-foreground">Learn more about</span>
+										<TeaCategoryLink
+											href="https://rublevsky.studio/blog/shu-puer-the-foundation-trilogy-part-iii#shu-puer-the-foundation-trilogy-part-iii"
+											variant="shuPuer"
+											target="_blank"
+											rel="noopener noreferrer"
+										>
+											Ripe Pu'er
+										</TeaCategoryLink>
+									</div>
+								)}
+								{/* Raw Puer blog post link */}
+								{(syncedProduct as ProductWithDetails).teaCategories?.includes(
+									"raw-pu-er",
+								) && (
+									<div className="flex flex-col">
+										<span className="text-muted-foreground">Learn more about</span>
+										<TeaCategoryLink
+											href="https://rublevsky.studio/blog/sheng-puer-the-foundation-trilogy-part-ii"
+											variant="rawPuer"
+											target="_blank"
+											rel="noopener noreferrer"
+										>
+											Raw Pu'er
+										</TeaCategoryLink>
+									</div>
+								)}
+								{/* Purple Tea blog post link */}
+								{(syncedProduct as ProductWithDetails).teaCategories?.includes(
+									"purple",
+								) && (
+									<div className="flex flex-col">
+										<span className="text-muted-foreground">Learn more about</span>
+										<TeaCategoryLink
+											href="https://rublevsky.studio/blog/purple-tea-what-is-this-mystery"
+											variant="purple"
+											target="_blank"
+											rel="noopener noreferrer"
+										>
+											Purple Tea
+										</TeaCategoryLink>
+									</div>
+								)}
+							</div>
 
 							{/* Blog post link */}
 							{(() => {

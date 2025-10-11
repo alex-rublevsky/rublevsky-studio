@@ -1,6 +1,6 @@
 import { Edit, Trash2 } from "lucide-react";
 import { Badge } from "~/components/ui/shared/Badge";
-import { getCountryByCode } from "~/constants/countries";
+import { getCountryFlag } from "~/constants/countries";
 import { cn } from "~/lib/utils";
 import type { ProductWithVariations } from "~/types";
 import { getStockDisplayText, isProductAvailable } from "~/utils/validateStock";
@@ -19,7 +19,7 @@ export function AdminProductCard({
 	product,
 	onEdit,
 	onDelete,
-	formatPrice,
+	formatPrice: _formatPrice,
 	getCategoryName,
 	getTeaCategoryNames,
 }: AdminProductCardProps) {
@@ -102,7 +102,6 @@ export function AdminProductCard({
 												className="absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-500 ease-in-out opacity-0 group-hover:opacity-100 hidden md:block"
 												style={{
 													filter: !hasAnyStock ? "grayscale(100%)" : "none",
-													opacity: !hasAnyStock ? 0.6 : undefined,
 												}}
 											/>
 										)}
@@ -118,9 +117,7 @@ export function AdminProductCard({
 						{/* Featured Badge */}
 						{product.isFeatured && (
 							<div className="absolute top-2 right-2">
-								<Badge variant="default">
-									Featured
-								</Badge>
+								<Badge variant="default">Featured</Badge>
 							</div>
 						)}
 
@@ -164,9 +161,10 @@ export function AdminProductCard({
 											<>
 												<h5 className="whitespace-nowrap">
 													$
-													{(displayPrice * (1 - product.discount / 100)).toFixed(
-														2,
-													)}{" "}
+													{(
+														displayPrice *
+														(1 - product.discount / 100)
+													).toFixed(2)}{" "}
 													CAD
 												</h5>
 												<div className="flex items-center gap-1">
@@ -234,13 +232,10 @@ export function AdminProductCard({
 									<div>
 										<span className="text-muted-foreground text-xs">
 											Ships from:{" "}
-											{allShippingLocations
-												.filter((code) => code !== "" && code !== "NONE")
-												.map((countryCode) => {
-													const country = getCountryByCode(countryCode);
-													return country?.name?.split(" ")[0] || countryCode;
-												})
-												.join(", ")}
+                                            {allShippingLocations
+                                                .filter((code) => code !== "" && code !== "NONE")
+                                                .map((countryCode) => getCountryFlag(countryCode) || countryCode)
+                                                .join(" ")}
 										</span>
 									</div>
 								)}

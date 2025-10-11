@@ -1,5 +1,4 @@
 import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
-import { CheckIcon } from "lucide-react";
 import type * as React from "react";
 
 import { cn } from "~/lib/utils";
@@ -12,17 +11,21 @@ function Checkbox({
 		<CheckboxPrimitive.Root
 			data-slot="checkbox"
 			className={cn(
-				"cursor-pointer bg-background hover:border-secondary peer border-border dark:bg-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:data-[state=checked]:bg-primary data-[state=checked]:border-primary focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive size-4 shrink-0 rounded-[4px] border shadow-xs transition-all outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50",
+				"cursor-pointer size-4 shrink-0 rounded-[4px] border transition-all outline-none",
+				// Default: black outline
+				"border-primary	 bg-transparent",
+				// Checked: fully black fill and border
+				"data-[state=checked]:bg-primary data-[state=checked]:border-primary",
+				// Accessibility focus
+				"focus-visible:ring-[2px] focus-visible:ring-ring/40 focus-visible:border-black",
+				// Disabled
+				"disabled:cursor-not-allowed disabled:opacity-50",
 				className,
 			)}
 			{...props}
 		>
-			<CheckboxPrimitive.Indicator
-				data-slot="checkbox-indicator"
-				className="flex items-center justify-center text-current transition-none"
-			>
-				<CheckIcon className="size-3.5" />
-			</CheckboxPrimitive.Indicator>
+			{/* Hide indicator to keep a simple solid fill when checked */}
+			<CheckboxPrimitive.Indicator data-slot="checkbox-indicator" className="hidden" />
 		</CheckboxPrimitive.Root>
 	);
 }

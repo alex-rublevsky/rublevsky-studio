@@ -348,14 +348,14 @@ function ProductCard({
 								e.stopPropagation();
 								handleAddToCart(e);
 							}}
-						onMouseEnter={handleAddToCartMouseEnter()}
-						onMouseLeave={handleAddToCartMouseLeave()}
-						className={`absolute bottom-0 left-0 right-0 hidden md:flex items-center justify-center space-x-2 bg-muted/70 backdrop-blur-xs text-black hover:bg-black active:bg-black transition-all duration-500 py-2 opacity-0 group-hover:opacity-100 ${
-							!isAvailable
-								? "cursor-not-allowed hover:bg-muted/70 active:bg-muted/70 opacity-50"
-								: "cursor-none hover:text-white active:text-white"
-						}`}
-						disabled={!isAvailable}
+							onMouseEnter={handleAddToCartMouseEnter()}
+							onMouseLeave={handleAddToCartMouseLeave()}
+							className={`absolute bottom-0 left-0 right-0 hidden md:flex items-center justify-center space-x-2 bg-muted/70 backdrop-blur-xs text-black hover:bg-black active:bg-black transition-all duration-500 py-2 opacity-0 group-hover:opacity-100 ${
+								!isAvailable
+									? "cursor-not-allowed hover:bg-muted/70 active:bg-muted/70 opacity-50"
+									: "cursor-none hover:text-white active:text-white"
+							}`}
+							disabled={!isAvailable}
 						>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
@@ -408,7 +408,9 @@ function ProductCard({
 															(1 - product.discount / 100)
 														).toFixed(2)}
 													</span>
-													<span className="text-sm text-muted-foreground">CAD</span>
+													<span className="text-sm text-muted-foreground">
+														CAD
+													</span>
 												</div>
 												<div className="flex items-center gap-1">
 													<span className="text-sm line-through text-muted-foreground">
@@ -427,7 +429,9 @@ function ProductCard({
 												<span className="text-lg font-normal">
 													${currentPrice?.toFixed(2)}
 												</span>
-												<span className="text-sm text-muted-foreground">CAD</span>
+												<span className="text-sm text-muted-foreground">
+													CAD
+												</span>
 											</div>
 										)}
 									</div>
@@ -505,12 +509,12 @@ function ProductCard({
 									e.stopPropagation();
 									handleAddToCart(e);
 								}}
-							className={`w-full cursor-pointer flex items-center justify-center space-x-2 bg-muted backdrop-blur-xs text-black hover:bg-black active:bg-black transition-all duration-500 py-2 px-4 ${
-								!isAvailable
-									? "opacity-50 cursor-not-allowed hover:bg-muted/70 hover:text-black active:bg-muted/70 active:text-black"
-									: "hover:text-white active:text-white"
-							}`}
-							disabled={!isAvailable}
+								className={`w-full cursor-pointer flex items-center justify-center space-x-2 bg-muted backdrop-blur-xs text-black hover:bg-black active:bg-black transition-all duration-500 py-2 px-4 ${
+									!isAvailable
+										? "opacity-50 cursor-not-allowed hover:bg-muted/70 hover:text-black active:bg-muted/70 active:text-black"
+										: "hover:text-white active:text-white"
+								}`}
+								disabled={!isAvailable}
 							>
 								<svg
 									xmlns="http://www.w3.org/2000/svg"

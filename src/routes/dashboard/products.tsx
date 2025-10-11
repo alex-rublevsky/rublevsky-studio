@@ -1,24 +1,18 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { useEffect, useId, useState } from "react";
 import { toast } from "sonner";
 import { AdminProductCard } from "~/components/ui/dashboard/AdminProductCard";
 import DeleteConfirmationDialog from "~/components/ui/dashboard/ConfirmationDialog";
+import { DashboardFormDrawer } from "~/components/ui/dashboard/DashboardFormDrawer";
 import { ImageUpload } from "~/components/ui/dashboard/ImageUpload";
+import { ProductFormSection } from "~/components/ui/dashboard/ProductFormSection";
+import { ProductSettingsFields } from "~/components/ui/dashboard/ProductSettingsFields";
 import ProductVariationForm from "~/components/ui/dashboard/ProductVariationForm";
+import { SlugField } from "~/components/ui/dashboard/SlugField";
 import { ProductsPageSkeleton } from "~/components/ui/dashboard/skeletons/ProductsPageSkeleton";
-import { deleteProductImage } from "~/server_functions/dashboard/store/deleteProductImage";
-import { Button } from "~/components/ui/shared/Button";
-import { Checkbox } from "~/components/ui/shared/Checkbox";
-import {
-	Drawer,
-	DrawerBody,
-	DrawerContent,
-	DrawerFooter,
-	DrawerHeader,
-	DrawerTitle,
-} from "~/components/ui/shared/Drawer";
+import { TeaCategoriesSelector } from "~/components/ui/dashboard/TeaCategoriesSelector";
 import { Input } from "~/components/ui/shared/Input";
 import {
 	Select,
@@ -27,12 +21,16 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "~/components/ui/shared/Select";
-import { Switch } from "~/components/ui/shared/Switch";
 import { Textarea } from "~/components/ui/shared/TextArea";
-import { COUNTRY_OPTIONS } from "~/constants/countries";
+import {
+	getCountryFlag,
+	getCountryName,
+	SHIPPING_COUNTRIES,
+} from "~/constants/countries";
 import { cn } from "~/lib/utils";
 import { createProduct } from "~/server_functions/dashboard/store/createProduct";
 import { deleteProduct } from "~/server_functions/dashboard/store/deleteProduct";
+import { deleteProductImage } from "~/server_functions/dashboard/store/deleteProductImage";
 import { getAllProducts } from "~/server_functions/dashboard/store/getAllProducts";
 import { getProductBySlug } from "~/server_functions/dashboard/store/getProductBySlug";
 import { updateProduct } from "~/server_functions/dashboard/store/updateProduct";
@@ -43,7 +41,6 @@ import type {
 	ProductGroup,
 	ProductVariationWithAttributes,
 	ProductWithVariations,
-	TeaCategory,
 	VariationAttribute,
 } from "~/types";
 
@@ -68,7 +65,7 @@ const productsQueryOptions = () => ({
 export const Route = createFileRoute("/dashboard/products")({
 	component: RouteComponent,
 	pendingComponent: ProductsPageSkeleton,
-	
+
 	// Loader prefetches data before component renders
 	loader: async ({ context: { queryClient } }) => {
 		// Ensure data is loaded before component renders
@@ -79,10 +76,10 @@ export const Route = createFileRoute("/dashboard/products")({
 function RouteComponent() {
 	const _router = useRouter();
 	const navigate = Route.useNavigate();
-	
+
 	// Use suspense query - data is guaranteed to be loaded by the loader
 	const { data: productsData } = useSuspenseQuery(productsQueryOptions());
-	
+
 	// Function to refetch data by navigating to the same route
 	const refetch = () => {
 		navigate({ to: "/dashboard/products", replace: true });
@@ -92,19 +89,19 @@ function RouteComponent() {
 	const editStockId = useId();
 	const editCategoryId = useId();
 	const editBrandId = useId();
-	const editImagesId = useId();
-	const editIsActiveId = useId();
-	const editIsFeaturedId = useId();
-	const addImagesId = useId();
-	const addIsActiveId = useId();
-	const addIsFeaturedId = useId();
-	const editHasVariationsId = useId();
+	const _editImagesId = useId();
+	const _editIsActiveId = useId();
+	const _editIsFeaturedId = useId();
+	const _addImagesId = useId();
+	const _addIsActiveId = useId();
+	const _addIsFeaturedId = useId();
+	const _editHasVariationsId = useId();
 	const editWeightId = useId();
 	const editShipsFromId = useId();
-	const addHasVariationsId = useId();
+	const _addHasVariationsId = useId();
 	const addShipsFromId = useId();
-	const editDiscountId = useId();
-	const addDiscountId = useId();
+	const _editDiscountId = useId();
+	const _addDiscountId = useId();
 	const addPriceId = useId();
 	const addCategoryId = useId();
 	const addBrandId = useId();
@@ -151,7 +148,7 @@ function RouteComponent() {
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [showCreateForm, setShowCreateForm] = useState(false);
 	const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
-	const [deletedImages, setDeletedImages] = useState<string[]>([]);
+	const [_deletedImages, setDeletedImages] = useState<string[]>([]);
 	const [editDeletedImages, setEditDeletedImages] = useState<string[]>([]);
 
 	// Search state
@@ -244,7 +241,10 @@ function RouteComponent() {
 		}
 	};
 
-	const handleEditImagesChange = (images: string, deletedImagesList?: string[]) => {
+	const handleEditImagesChange = (
+		images: string,
+		deletedImagesList?: string[],
+	) => {
 		setEditFormData((prev) => ({ ...prev, images }));
 		if (deletedImagesList) {
 			setEditDeletedImages(deletedImagesList);
@@ -301,6 +301,7 @@ function RouteComponent() {
 	const { groupedProducts, categories, teaCategories, brands } = productsData;
 
 	// Filter grouped products based on search
+	// Products are already sorted by availability on the server side
 	const displayGroupedProducts: ProductGroup[] = searchTerm
 		? groupedProducts
 				.map((group) => ({
@@ -503,7 +504,6 @@ function RouteComponent() {
 		try {
 			// Delete images from R2 first
 			if (editDeletedImages.length > 0) {
-				
 				const deletePromises = editDeletedImages.map((filename) =>
 					deleteProductImage({ data: { filename } }).catch((error) => {
 						console.error(`Failed to delete ${filename}:`, error);
@@ -511,7 +511,9 @@ function RouteComponent() {
 					}),
 				);
 				await Promise.all(deletePromises);
-				toast.success(`Deleted ${editDeletedImages.length} image(s) from storage`);
+				toast.success(
+					`Deleted ${editDeletedImages.length} image(s) from storage`,
+				);
 			}
 
 			const formattedVariations = editVariations.map(
@@ -707,14 +709,14 @@ function RouteComponent() {
 							<div key={group.title} className="space-y-4">
 								{/* Group Title */}
 								<div className="px-4">
-									<h2 className="text-2xl font-semibold text-foreground">
-										{group.title}
-									</h2>
-									<p className="text-sm text-muted-foreground mt-1">
+								<h2 className="text-2xl font-semibold text-foreground flex items-baseline gap-1">
+									{group.title}
+									<span className="text-sm text-muted-foreground">
 										{group.products.length}{" "}
 										{group.products.length === 1 ? "product" : "products"}
-									</p>
-								</div>
+									</span>
+								</h2>
+							</div>
 
 								{/* Products Grid */}
 								<div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 md:gap-3 px-4">
@@ -731,11 +733,7 @@ function RouteComponent() {
 									))}
 								</div>
 
-								{/* Divider between groups (except for the last one) */}
-								{displayGroupedProducts.indexOf(group) <
-									displayGroupedProducts.length - 1 && (
-									<div className="border-b border-border/40 mt-8 mx-4" />
-								)}
+							{/* No divider between groups */}
 							</div>
 						))}
 					</div>
@@ -743,58 +741,107 @@ function RouteComponent() {
 			</div>
 
 			{/* Replace Edit Modal with Drawer */}
-			<Drawer open={showEditModal} onOpenChange={setShowEditModal}>
-				<DrawerContent>
-					<DrawerHeader>
-						<DrawerTitle>Edit Product</DrawerTitle>
-					</DrawerHeader>
+			<DashboardFormDrawer
+				isOpen={showEditModal}
+				onOpenChange={setShowEditModal}
+				title="Edit Product"
+				formId={editProductFormId}
+				isSubmitting={isSubmitting}
+				submitButtonText="Update Product"
+				submittingText="Updating..."
+				onCancel={closeEditModal}
+				error={error && isEditMode ? error : undefined}
+				layout="two-column"
+			>
+				<form
+					onSubmit={handleUpdate}
+					id={editProductFormId}
+					className="contents"
+				>
+					{/* Left Column - Images, Settings, Description */}
+					<div className="space-y-4 flex flex-col">
+						{/* Product Images Block */}
+						<ProductFormSection variant="default">
+							<ImageUpload
+								currentImages={editFormData.images}
+								onImagesChange={handleEditImagesChange}
+								folder="products"
+							/>
+						</ProductFormSection>
 
-					<DrawerBody>
-						{error && isEditMode && (
-							<div className="bg-destructive/20 border border-destructive text-destructive-foreground px-4 py-3 rounded mb-4">
-								{error}
-							</div>
-						)}
+						{/* Settings Block */}
+						<ProductFormSection variant="default" title="Settings">
+							<ProductSettingsFields
+								isActive={editFormData.isActive}
+								isFeatured={editFormData.isFeatured}
+								discount={editFormData.discount}
+								hasVariations={editFormData.hasVariations}
+								onIsActiveChange={handleEditChange}
+								onIsFeaturedChange={handleEditChange}
+								onDiscountChange={handleEditChange}
+								onHasVariationsChange={handleEditChange}
+								idPrefix="edit"
+							/>
+						</ProductFormSection>
 
-						<form
-							onSubmit={handleUpdate}
-							className="space-y-6"
-							id={editProductFormId}
+						{/* Description Block - flex-1 to take remaining space */}
+						<ProductFormSection
+							variant="default"
+							className="flex-1"
+							style={{ minHeight: "7rem" }}
 						>
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-								<Input
-									label="Name"
-									type="text"
-									name="name"
-									value={editFormData.name}
-									onChange={handleEditChange}
-									required
-								/>
+							<Textarea
+								label="Description"
+								name="description"
+								value={editFormData.description}
+								onChange={handleEditChange}
+								className="resize-y h-full min-h-28"
+							/>
+						</ProductFormSection>
+					</div>
 
-								<Input
-									label="Slug"
-									type="text"
-									name="slug"
-									value={editFormData.slug}
-									onChange={handleEditChange}
-									required
-								/>
-								<div className="md:col-span-2">
-									<Textarea
-										label="Description"
-										name="description"
-										value={editFormData.description}
-										onChange={handleEditChange}
-										rows={3}
-									/>
-								</div>
+					{/* Right Column - Basic Info and Tea Categories */}
+					<ProductFormSection variant="default" title="Basic Information">
+						<div className="grid grid-cols-1 gap-4">
+							<Input
+								label="Name"
+								type="text"
+								name="name"
+								value={editFormData.name}
+								onChange={handleEditChange}
+								required
+							/>
+							<SlugField
+								slug={editFormData.slug}
+								name={editFormData.name}
+								isAutoSlug={isEditAutoSlug}
+								onSlugChange={(slug) =>
+									setEditFormData((prev) => ({ ...prev, slug }))
+								}
+								onAutoSlugChange={(isAuto) => {
+									setIsEditAutoSlug(isAuto);
+									if (isAuto && editFormData.name) {
+										const generated = editFormData.name
+											.toLowerCase()
+											.replace(/[^\w\s-]/g, "")
+											.replace(/\s+/g, "-")
+											.replace(/-+/g, "-")
+											.trim();
+										setEditFormData((prev) => ({ ...prev, slug: generated }));
+									}
+								}}
+								idPrefix="edit"
+							/>
 
+							{/* Two column layout for basic information fields */}
+							<div className="grid grid-cols-2 gap-4">
+								{/* Column 1: Price, Category, Weight */}
 								<div>
 									<label
 										htmlFor={editPriceId}
 										className="block text-sm font-medium mb-1"
 									>
-										Price
+										Price (CAD)
 									</label>
 									<Input
 										id={editPriceId}
@@ -807,6 +854,7 @@ function RouteComponent() {
 									/>
 								</div>
 
+								{/* Column 2: Stock */}
 								<div>
 									<label
 										htmlFor={editStockId}
@@ -824,6 +872,7 @@ function RouteComponent() {
 									/>
 								</div>
 
+								{/* Column 1: Category */}
 								<div>
 									<label
 										htmlFor={editCategoryId}
@@ -854,6 +903,7 @@ function RouteComponent() {
 									</Select>
 								</div>
 
+								{/* Column 2: Brand */}
 								<div>
 									<label
 										htmlFor={editBrandId}
@@ -886,116 +936,7 @@ function RouteComponent() {
 									</Select>
 								</div>
 
-								<fieldset>
-									<legend className="block text-sm font-medium mb-1">
-										Tea Categories
-									</legend>
-									<div className="space-y-2 border border-input rounded-md p-3 h-48 overflow-y-auto">
-										{teaCategories.map((category) => (
-											<label
-												key={category.slug}
-												htmlFor={`edit-tea-category-${category.slug}`}
-												className="flex items-center space-x-2"
-											>
-												<Checkbox
-													id={`edit-tea-category-${category.slug}`}
-													name={`teaCategory-${category.slug}`}
-													checked={
-														editFormData.teaCategories?.includes(
-															category.slug,
-														) || false
-													}
-													onCheckedChange={(checked) => {
-														const newCategories = checked
-															? [
-																	...(editFormData.teaCategories || []),
-																	category.slug,
-																]
-															: (editFormData.teaCategories || []).filter(
-																	(slug) => slug !== category.slug,
-																);
-														setEditFormData({
-															...editFormData,
-															teaCategories: newCategories,
-														});
-													}}
-												/>
-												<span className="text-sm">{category.name}</span>
-											</label>
-										))}
-									</div>
-								</fieldset>
-
-								<div>
-									<label className="block text-sm font-medium mb-1">
-										Product Images
-									</label>
-									<ImageUpload
-										currentImages={editFormData.images}
-										onImagesChange={handleEditImagesChange}
-										folder="products"
-										label="Upload New Image"
-									/>
-								</div>
-
-								<div className="md:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-4">
-									<div className="flex items-center">
-										<Switch
-											id={editIsActiveId}
-											name="isActive"
-											checked={editFormData.isActive}
-											onChange={handleEditChange}
-										/>
-										<label htmlFor={editIsActiveId} className="ml-2 text-sm">
-											Active
-										</label>
-									</div>
-
-									<div className="flex items-center">
-										<Switch
-											id={editIsFeaturedId}
-											name="isFeatured"
-											checked={editFormData.isFeatured}
-											onChange={handleEditChange}
-										/>
-										<label htmlFor={editIsFeaturedId} className="ml-2 text-sm">
-											Featured
-										</label>
-									</div>
-
-									<div className="flex items-center">
-										<Input
-											id={editDiscountId}
-											type="number"
-											name="discount"
-											value={editFormData.discount || ""}
-											onChange={handleEditChange}
-											placeholder="Discount %"
-											min="0"
-											max="100"
-											className="w-24"
-										/>
-										<label htmlFor={editDiscountId} className="ml-2 text-sm">
-											% Off
-										</label>
-									</div>
-
-									<div className="flex items-center">
-										<Switch
-											id={editHasVariationsId}
-											name="hasVariations"
-											checked={editFormData.hasVariations}
-											onChange={handleEditChange}
-										/>
-										<label
-											htmlFor={editHasVariationsId}
-											className="ml-2 text-sm"
-										>
-											Has Variations
-										</label>
-									</div>
-								</div>
-
+								{/* Column 1: Weight */}
 								<div>
 									<label
 										htmlFor={editWeightId}
@@ -1013,14 +954,15 @@ function RouteComponent() {
 									/>
 								</div>
 
-								<div>
+                                {/* Column 2: Ships From */}
+                                <div className="w-24">
 									<label
 										htmlFor={editShipsFromId}
 										className="block text-sm font-medium mb-1"
 									>
 										Ships From
 									</label>
-									<Select
+                                    <Select
 										name="shippingFrom"
 										value={editFormData.shippingFrom || "NONE"}
 										onValueChange={(value: string) =>
@@ -1032,137 +974,147 @@ function RouteComponent() {
 											} as React.ChangeEvent<HTMLSelectElement>)
 										}
 									>
-										<SelectTrigger id={editShipsFromId}>
-											<SelectValue placeholder="Choose shipping location" />
+                                        <SelectTrigger id={editShipsFromId} className="w-24">
+											<SelectValue placeholder="Choose shipping location">
+												{getCountryFlag(
+													editFormData.shippingFrom || undefined,
+												) || ""}
+											</SelectValue>
 										</SelectTrigger>
 										<SelectContent>
-											{COUNTRY_OPTIONS.map((country) => (
-												<SelectItem key={country.code} value={country.code}>
-													{country.name}
+											{SHIPPING_COUNTRIES.map((code) => (
+												<SelectItem key={code} value={code}>
+													{getCountryName(code)}
 												</SelectItem>
 											))}
 										</SelectContent>
 									</Select>
 								</div>
 							</div>
-
-							{/* Add the variations form when hasVariations is checked */}
-							{editFormData.hasVariations && (
-								<div className="mt-6">
-									<ProductVariationForm
-										variations={editVariations}
-										onChange={handleEditVariationsChange}
-									/>
-								</div>
-							)}
-						</form>
-					</DrawerBody>
-
-					<DrawerFooter className="border-t border-border bg-background">
-						<div className="flex justify-end space-x-2">
-							<Button
-								variant="secondaryInverted"
-								type="button"
-								onClick={closeEditModal}
-							>
-								Cancel
-							</Button>
-							<Button
-								variant="greenInverted"
-								type="submit"
-								form={editProductFormId}
-								disabled={isSubmitting}
-							>
-								{isSubmitting ? "Updating..." : "Update Product"}
-							</Button>
 						</div>
-					</DrawerFooter>
-				</DrawerContent>
-			</Drawer>
+
+						{/* Tea Categories Block */}
+						<TeaCategoriesSelector
+							teaCategories={teaCategories}
+							selectedCategories={editFormData.teaCategories || []}
+							onCategoryChange={(categorySlug, checked) => {
+								const newCategories = checked
+									? [...(editFormData.teaCategories || []), categorySlug]
+									: (editFormData.teaCategories || []).filter(
+											(slug) => slug !== categorySlug,
+										);
+								setEditFormData({
+									...editFormData,
+									teaCategories: newCategories,
+								});
+							}}
+							idPrefix="edit"
+						/>
+					</ProductFormSection>
+
+					{/* Variations Block */}
+					{editFormData.hasVariations && (
+						<ProductFormSection variant="default" className="lg:col-span-2">
+							<ProductVariationForm
+								variations={editVariations}
+								onChange={handleEditVariationsChange}
+							/>
+						</ProductFormSection>
+					)}
+				</form>
+			</DashboardFormDrawer>
 
 			{/* Create Product Drawer */}
-			<Drawer open={showCreateForm} onOpenChange={setShowCreateForm}>
-				<DrawerContent>
-					<DrawerHeader>
-						<DrawerTitle>Add New Product</DrawerTitle>
-					</DrawerHeader>
+			<DashboardFormDrawer
+				isOpen={showCreateForm}
+				onOpenChange={setShowCreateForm}
+				title="Add New Product"
+				formId={createProductFormId}
+				isSubmitting={isSubmitting}
+				submitButtonText="Create Product"
+				submittingText="Creating..."
+				onCancel={closeCreateModal}
+				error={error && !isEditMode ? error : undefined}
+				layout="two-column"
+			>
+				<form
+					onSubmit={handleSubmit}
+					id={createProductFormId}
+					className="contents"
+				>
+					{/* Left Column - Images, Settings, Description */}
+					<div className="space-y-4 flex flex-col">
+						{/* Product Images Block */}
+						<ProductFormSection variant="default">
+							<ImageUpload
+								currentImages={formData.images}
+								onImagesChange={handleImagesChange}
+								folder="products"
+							/>
+						</ProductFormSection>
 
-					<DrawerBody>
-						{error && !isEditMode && (
-							<div className="bg-destructive/20 border border-destructive text-destructive-foreground px-4 py-3 rounded mb-4">
-								{error}
-							</div>
-						)}
+						{/* Settings Block */}
+						<ProductFormSection variant="default" title="Settings">
+							<ProductSettingsFields
+								isActive={formData.isActive}
+								isFeatured={formData.isFeatured}
+								discount={formData.discount}
+								hasVariations={formData.hasVariations}
+								onIsActiveChange={handleChange}
+								onIsFeaturedChange={handleChange}
+								onDiscountChange={handleChange}
+								onHasVariationsChange={handleChange}
+								idPrefix="add"
+							/>
+						</ProductFormSection>
 
-						<form
-							onSubmit={handleSubmit}
-							className="space-y-6"
-							id={createProductFormId}
+						{/* Description Block - flex-1 to take remaining space */}
+						<ProductFormSection
+							variant="default"
+							className="flex-1"
+							style={{ minHeight: "7rem" }}
 						>
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-								<Input
-									label="Product Name"
-									type="text"
-									name="name"
-									value={formData.name}
-									onChange={handleChange}
-									required
-									className={
-										hasAttemptedSubmit && !formData.name ? "border-red-500" : ""
-									}
-								/>
+							<Textarea
+								label="Description"
+								name="description"
+								value={formData.description}
+								onChange={handleChange}
+								className="resize-y h-full min-h-28"
+							/>
+						</ProductFormSection>
+					</div>
 
-								<div className="flex items-end">
-									<Input
-										label="Slug (Auto-generated from name)"
-										type="text"
-										name="slug"
-										value={formData.slug}
-										onChange={handleChange}
-										required
-										className={cn(
-											"flex-1",
-											hasAttemptedSubmit && !formData.slug
-												? "border-red-500"
-												: "",
-										)}
-									/>
-									<Button
-										type="button"
-										size="sm"
-										variant="outline"
-										onClick={() => {
-											setIsAutoSlug(true);
-											if (formData.name) {
-												const slug = formData.name
-													.toLowerCase()
-													.replace(/[^\w\s-]/g, "")
-													.replace(/\s+/g, "-")
-													.replace(/-+/g, "-")
-													.trim();
+					{/* Right Column - Basic Info and Tea Categories */}
+					<ProductFormSection variant="default" title="Basic Information">
+						<div className="grid grid-cols-1 gap-4">
+							<Input
+								label="Product Name"
+								type="text"
+								name="name"
+								value={formData.name}
+								onChange={handleChange}
+								required
+								className={
+									hasAttemptedSubmit && !formData.name ? "border-red-500" : ""
+								}
+							/>
+							<SlugField
+								slug={formData.slug}
+								name={formData.name}
+								isAutoSlug={isAutoSlug}
+								onSlugChange={(slug) =>
+									setFormData((prev) => ({ ...prev, slug }))
+								}
+								onAutoSlugChange={setIsAutoSlug}
+								className={
+									hasAttemptedSubmit && !formData.slug ? "border-red-500" : ""
+								}
+								idPrefix="create"
+							/>
 
-												setFormData((prev) => ({
-													...prev,
-													slug,
-												}));
-											}
-										}}
-										className="ml-2"
-									>
-										Reset
-									</Button>
-								</div>
-
-								<div className="md:col-span-2">
-									<Textarea
-										label="Description"
-										name="description"
-										value={formData.description}
-										onChange={handleChange}
-										rows={3}
-									/>
-								</div>
-
+							{/* Two column layout for basic information fields */}
+							<div className="grid grid-cols-2 gap-4">
+								{/* Column 1: Price, Category, Weight */}
 								<div>
 									<label
 										htmlFor={addPriceId}
@@ -1170,29 +1122,24 @@ function RouteComponent() {
 									>
 										Price (CAD)
 									</label>
-									<div className="relative">
-										<Input
-											id={addPriceId}
-											type="number"
-											name="price"
-											value={formData.price}
-											onChange={handleChange}
-											required
-											step="0.01"
-											min="0"
-											className={cn(
-												"pl-7",
-												hasAttemptedSubmit && !formData.price
-													? "border-red-500"
-													: "",
-											)}
-										/>
-										<div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-											<span className="text-muted-foreground">$</span>
-										</div>
-									</div>
+									<Input
+										id={addPriceId}
+										type="number"
+										name="price"
+										value={formData.price}
+										onChange={handleChange}
+										required
+										step="0.01"
+										min="0"
+										className={cn(
+											hasAttemptedSubmit && !formData.price
+												? "border-red-500"
+												: "",
+										)}
+									/>
 								</div>
 
+								{/* Column 2: Stock */}
 								<Input
 									label="Stock"
 									type="number"
@@ -1202,6 +1149,7 @@ function RouteComponent() {
 									min="0"
 								/>
 
+								{/* Column 1: Category */}
 								<div>
 									<label
 										htmlFor={addCategoryId}
@@ -1239,6 +1187,7 @@ function RouteComponent() {
 									</Select>
 								</div>
 
+								{/* Column 2: Brand */}
 								<div>
 									<label
 										htmlFor={addBrandId}
@@ -1268,115 +1217,7 @@ function RouteComponent() {
 									</Select>
 								</div>
 
-								<fieldset>
-									<legend className="block text-sm font-medium mb-1">
-										Tea Categories
-									</legend>
-									<div className="space-y-2 border border-input rounded-md p-3 h-48 overflow-y-auto">
-										{teaCategories.map((category) => (
-											<label
-												key={category.slug}
-												htmlFor={`add-tea-category-${category.slug}`}
-												className="flex items-center space-x-2"
-											>
-												<Checkbox
-													id={`add-tea-category-${category.slug}`}
-													name={`teaCategory-${category.slug}`}
-													checked={
-														formData.teaCategories?.includes(category.slug) ||
-														false
-													}
-													onCheckedChange={(checked) => {
-														const newCategories = checked
-															? [
-																	...(formData.teaCategories || []),
-																	category.slug,
-																]
-															: (formData.teaCategories || []).filter(
-																	(slug) => slug !== category.slug,
-																);
-														setFormData({
-															...formData,
-															teaCategories: newCategories,
-														});
-													}}
-												/>
-												<span className="text-sm">{category.name}</span>
-											</label>
-										))}
-									</div>
-								</fieldset>
-
-								<div>
-									<label className="block text-sm font-medium mb-1">
-										Product Images
-									</label>
-									<ImageUpload
-										currentImages={formData.images}
-										onImagesChange={handleImagesChange}
-										folder="products"
-										label="Upload New Image"
-									/>
-								</div>
-
-								<div className="md:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-4">
-									<div className="flex items-center">
-										<Switch
-											id={addIsActiveId}
-											name="isActive"
-											checked={formData.isActive}
-											onChange={handleChange}
-										/>
-										<label htmlFor={addIsActiveId} className="ml-2 text-sm">
-											Active
-										</label>
-									</div>
-
-									<div className="flex items-center">
-										<Switch
-											id={addIsFeaturedId}
-											name="isFeatured"
-											checked={formData.isFeatured}
-											onChange={handleChange}
-										/>
-										<label htmlFor={addIsFeaturedId} className="ml-2 text-sm">
-											Featured
-										</label>
-									</div>
-
-									<div className="flex items-center">
-										<Input
-											id={addDiscountId}
-											type="number"
-											name="discount"
-											value={formData.discount || ""}
-											onChange={handleChange}
-											placeholder="Discount %"
-											min="0"
-											max="100"
-											className="w-24"
-										/>
-										<label htmlFor={addDiscountId} className="ml-2 text-sm">
-											% Off
-										</label>
-									</div>
-
-									<div className="flex items-center">
-										<Switch
-											id={addHasVariationsId}
-											name="hasVariations"
-											checked={formData.hasVariations}
-											onChange={handleChange}
-										/>
-										<label
-											htmlFor={addHasVariationsId}
-											className="ml-2 text-sm"
-										>
-											Has Variations
-										</label>
-									</div>
-								</div>
-
+								{/* Column 1: Weight */}
 								<Input
 									label="Weight (in grams)"
 									type="text"
@@ -1386,14 +1227,15 @@ function RouteComponent() {
 									placeholder="Enter weight in grams"
 								/>
 
-								<div>
+                                {/* Column 2: Ships From */}
+                                <div className="w-24">
 									<label
 										htmlFor={addShipsFromId}
 										className="block text-sm font-medium mb-1"
 									>
 										Ships From
 									</label>
-									<Select
+                                    <Select
 										value={formData.shippingFrom || "NONE"}
 										onValueChange={(value) => {
 											setFormData({
@@ -1402,53 +1244,54 @@ function RouteComponent() {
 											});
 										}}
 									>
-										<SelectTrigger id={addShipsFromId}>
-											<SelectValue placeholder="Shipping from..." />
+                                        <SelectTrigger id={addShipsFromId} className="w-24">
+											<SelectValue placeholder="Shipping from...">
+												{getCountryFlag(formData.shippingFrom || undefined) ||
+													""}
+											</SelectValue>
 										</SelectTrigger>
 										<SelectContent>
-											{COUNTRY_OPTIONS.map((country) => (
-												<SelectItem key={country.code} value={country.code}>
-													{country.name}
+											{SHIPPING_COUNTRIES.map((code) => (
+												<SelectItem key={code} value={code}>
+													{getCountryName(code)}
 												</SelectItem>
 											))}
 										</SelectContent>
 									</Select>
 								</div>
 							</div>
-
-							{/* Add the variations form when hasVariations is checked */}
-							{formData.hasVariations && (
-								<div className="mt-6">
-									<ProductVariationForm
-										variations={variations}
-										onChange={handleVariationsChange}
-									/>
-								</div>
-							)}
-						</form>
-					</DrawerBody>
-
-					<DrawerFooter className="border-t border-border bg-background">
-						<div className="flex justify-end space-x-2">
-							<Button
-								variant="secondaryInverted"
-								type="button"
-								onClick={closeCreateModal}
-							>
-								Cancel
-							</Button>
-							<Button
-								variant="greenInverted"
-								type="submit"
-								form={createProductFormId}
-								disabled={isSubmitting}
-							>
-								{isSubmitting ? "Creating..." : "Create Product"}
-							</Button>
 						</div>
-					</DrawerFooter>
-				</DrawerContent>
-			</Drawer>
+
+						{/* Tea Categories Block */}
+						<TeaCategoriesSelector
+							teaCategories={teaCategories}
+							selectedCategories={formData.teaCategories || []}
+							onCategoryChange={(categorySlug, checked) => {
+								const newCategories = checked
+									? [...(formData.teaCategories || []), categorySlug]
+									: (formData.teaCategories || []).filter(
+											(slug) => slug !== categorySlug,
+										);
+								setFormData({
+									...formData,
+									teaCategories: newCategories,
+								});
+							}}
+							idPrefix="add"
+						/>
+					</ProductFormSection>
+
+					{/* Variations Block */}
+					{formData.hasVariations && (
+						<ProductFormSection variant="default" className="lg:col-span-2">
+							<ProductVariationForm
+								variations={variations}
+								onChange={handleVariationsChange}
+							/>
+						</ProductFormSection>
+					)}
+				</form>
+			</DashboardFormDrawer>
 
 			{/* Delete Confirmation Dialog */}
 			{showDeleteDialog && (

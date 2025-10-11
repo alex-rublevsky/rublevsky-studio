@@ -22,11 +22,11 @@ const badgeVariants = cva(
 				greenOutline:
 					"border-green-600 bg-transparent text-green-600 hover:bg-green-600/10 active:bg-green-600/10 focus-visible:ring-green-600/20 dark:focus-visible:ring-green-600/40 dark:bg-green-600/70",
 				shuPuer:
-					"border-transparent bg-[oklch(0.454_0.0888_36)] text-primary-foreground hover:brightness-90 active:brightness-90",
+					"border-transparent hover:brightness-90 active:brightness-90",
 				rawPuer:
-					"border-transparent bg-[oklch(0.7267_0.1001_119.12)] text-foreground hover:brightness-95 active:brightness-95",
+					"border-transparent hover:brightness-95 active:brightness-95",
 				purple:
-					"border-transparent bg-[oklch(0.7267_0.1899_310.76)] text-foreground hover:brightness-95 active:brightness-95",
+					"border-transparent hover:brightness-95 active:brightness-95",
 			},
 			size: {
 				default: "px-2 py-0.5 text-xs",
@@ -50,10 +50,17 @@ function Badge({
 	VariantProps<typeof badgeVariants> & { asChild?: boolean }) {
 	const Comp = asChild ? Slot : "span";
 
+	// Add tea category specific classes
+	const teaCategoryClass = 
+		variant === "shuPuer" ? "tea-badge-shu-puer" :
+		variant === "rawPuer" ? "tea-badge-raw-puer" :
+		variant === "purple" ? "tea-badge-purple" :
+		"";
+
 	return (
 		<Comp
 			data-slot="badge"
-			className={cn(badgeVariants({ variant, size }), className)}
+			className={cn(badgeVariants({ variant, size }), teaCategoryClass, className)}
 			{...props}
 		/>
 	);

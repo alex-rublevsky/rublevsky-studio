@@ -1,34 +1,31 @@
 import {
+	closestCenter,
 	DndContext,
 	type DragEndEvent,
 	KeyboardSensor,
 	PointerSensor,
-	closestCenter,
 	useSensor,
 	useSensors,
 } from "@dnd-kit/core";
 import {
-	SortableContext,
 	arrayMove,
 	rectSortingStrategy,
+	SortableContext,
 	useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Trash2, Upload, X } from "lucide-react";
+import { GripVertical, Trash2, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { uploadProductImage } from "~/server_functions/dashboard/store/uploadProductImage";
 import { ASSETS_BASE_URL } from "~/constants/urls";
+import { uploadProductImage } from "~/server_functions/dashboard/store/uploadProductImage";
 import { Button } from "../shared/Button";
-import { Input } from "../shared/Input";
 import { Textarea } from "../shared/TextArea";
 
 interface ImageUploadProps {
 	currentImages: string; // comma-separated string from the form
 	onImagesChange: (images: string, deletedImages?: string[]) => void; // callback to update the form
 	folder?: string;
-	label?: string;
-	maxSizeMB?: number;
 }
 
 interface SortableImageItemProps {
@@ -83,7 +80,7 @@ function SortableImageItem({ image, index, onRemove }: SortableImageItemProps) {
 				<button
 					type="button"
 					onClick={() => onRemove(index)}
-					className="absolute top-1 right-1 p-1.5 bg-destructive text-destructive-foreground rounded opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/90"
+					className="absolute top-1 right-1 p-1.5 bg-destructive text-destructive-foreground rounded opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/90 cursor-pointer"
 					title="Remove image"
 				>
 					<Trash2 className="w-3 h-3" />
@@ -102,16 +99,17 @@ export function ImageUpload({
 	currentImages,
 	onImagesChange,
 	folder = "products",
-	label = "Upload Image",
-	maxSizeMB = 5,
 }: ImageUploadProps) {
 	const [isUploading, setIsUploading] = useState(false);
-	const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-	const [selectedFile, setSelectedFile] = useState<File | null>(null);
 	const [imageList, setImageList] = useState<string[]>([]);
 	const [showTextarea, setShowTextarea] = useState(false);
-	const [deletedImages, setDeletedImages] = useState<string[]>([]); // Track images to delete
+	const [deletedImages, setDeletedImages] = useState<string[]>([]);
+	const [isDragging, setIsDragging] = useState(false);
 	const fileInputRef = useRef<HTMLInputElement>(null);
+	const fileInputId =
+		typeof crypto !== "undefined" && crypto.randomUUID
+			? crypto.randomUUID()
+			: `file-input-${Date.now()}`;
 
 	// Drag and drop sensors
 	const sensors = useSensors(
@@ -132,10 +130,7 @@ export function ImageUpload({
 		setDeletedImages([]);
 	}, [currentImages]);
 
-	const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const file = event.target.files?.[0];
-		if (!file) return;
-
+	const validateAndUploadFile = async (file: File) => {
 		// Validate file type
 		const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 		if (!allowedTypes.includes(file.type)) {
@@ -144,25 +139,10 @@ export function ImageUpload({
 		}
 
 		// Validate file size
-		const maxSize = maxSizeMB * 1024 * 1024;
+		const defaultMaxSizeMB = 5;
+		const maxSize = defaultMaxSizeMB * 1024 * 1024;
 		if (file.size > maxSize) {
-			toast.error(`File size must be less than ${maxSizeMB}MB`);
-			return;
-		}
-
-		setSelectedFile(file);
-
-		// Create preview
-		const reader = new FileReader();
-		reader.onloadend = () => {
-			setPreviewUrl(reader.result as string);
-		};
-		reader.readAsDataURL(file);
-	};
-
-	const handleUpload = async () => {
-		if (!selectedFile) {
-			toast.error("Please select a file first");
+			toast.error(`File size must be less than ${defaultMaxSizeMB}MB`);
 			return;
 		}
 
@@ -178,9 +158,9 @@ export function ImageUpload({
 					const result = await uploadProductImage({
 						data: {
 							fileData: base64String,
-							fileName: selectedFile.name,
-							fileType: selectedFile.type,
-							fileSize: selectedFile.size,
+							fileName: file.name,
+							fileType: file.type,
+							fileSize: file.size,
 							folder,
 						},
 					});
@@ -191,8 +171,6 @@ export function ImageUpload({
 						const newImages = [...imageList, result.filename];
 						onImagesChange(newImages.join(", "));
 						// Reset the form
-						setSelectedFile(null);
-						setPreviewUrl(null);
 						if (fileInputRef.current) {
 							fileInputRef.current.value = "";
 						}
@@ -212,7 +190,7 @@ export function ImageUpload({
 				setIsUploading(false);
 			};
 
-			reader.readAsDataURL(selectedFile);
+			reader.readAsDataURL(file);
 		} catch (error) {
 			console.error("Upload error:", error);
 			toast.error(
@@ -222,11 +200,44 @@ export function ImageUpload({
 		}
 	};
 
-	const handleClear = () => {
-		setSelectedFile(null);
-		setPreviewUrl(null);
-		if (fileInputRef.current) {
-			fileInputRef.current.value = "";
+	const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		const file = event.target.files?.[0];
+		if (!file) return;
+		validateAndUploadFile(file);
+	};
+
+	const handleDragOver = (
+		e: React.DragEvent<
+			HTMLDivElement | HTMLLabelElement | HTMLFieldSetElement
+		>,
+	) => {
+		e.preventDefault();
+		e.stopPropagation();
+		setIsDragging(true);
+	};
+
+	const handleDragLeave = (
+		e: React.DragEvent<
+			HTMLDivElement | HTMLLabelElement | HTMLFieldSetElement
+		>,
+	) => {
+		e.preventDefault();
+		e.stopPropagation();
+		setIsDragging(false);
+	};
+
+	const handleDrop = (
+		e: React.DragEvent<
+			HTMLDivElement | HTMLLabelElement | HTMLFieldSetElement
+		>,
+	) => {
+		e.preventDefault();
+		e.stopPropagation();
+		setIsDragging(false);
+
+		const file = e.dataTransfer.files?.[0];
+		if (file) {
+			validateAndUploadFile(file);
 		}
 	};
 
@@ -261,129 +272,103 @@ export function ImageUpload({
 		}
 	};
 
+	const handleUploadClick = () => {
+		fileInputRef.current?.click();
+	};
+
 	return (
-		<div className="space-y-4">
-			{/* Current Images List */}
-			{imageList.length > 0 && (
-				<div>
-					<div className="flex items-center justify-between mb-2">
-						<label className="block text-sm font-medium">
-							Current Images ({imageList.length})
-						</label>
-						<Button
-							type="button"
-							onClick={() => setShowTextarea(!showTextarea)}
-							variant="outline"
-							size="sm"
-						>
-							{showTextarea ? "Hide" : "Edit"} Raw
-						</Button>
-					</div>
-
-					{showTextarea ? (
-						<Textarea
-							value={currentImages}
-							onChange={handleTextareaChange}
-							placeholder="image1.jpg, image2.jpg, image3.jpg"
-							className="h-32 resize-none font-mono text-xs"
-							rows={4}
-						/>
-					) : (
-						<DndContext
-							sensors={sensors}
-							collisionDetection={closestCenter}
-							onDragEnd={handleDragEnd}
-						>
-							<SortableContext items={imageList} strategy={rectSortingStrategy}>
-								<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 p-3 border border-border rounded-lg bg-muted/30">
-									{imageList.map((image, index) => (
-										<SortableImageItem
-											key={image}
-											image={image}
-											index={index}
-											onRemove={handleRemoveImage}
-										/>
-									))}
-								</div>
-							</SortableContext>
-						</DndContext>
-					)}
-				</div>
-			)}
-
-			{/* Upload New Image */}
-			<div className="border-t border-border pt-4">
-				<div className="flex flex-col gap-2">
-					<label className="block text-sm font-medium">{label}</label>
-					<Input
-						ref={fileInputRef}
-						type="file"
-						accept="image/jpeg,image/jpg,image/png,image/webp"
-						onChange={handleFileChange}
-						disabled={isUploading}
-					/>
-					<p className="text-xs text-muted-foreground">
-						Accepted formats: JPEG, PNG, WebP. Max size: {maxSizeMB}MB
-					</p>
-					{selectedFile && (
-						<p className="text-xs text-muted-foreground">
-							Will save as: <span className="font-mono">{selectedFile.name}</span>
-						</p>
-					)}
-				</div>
-
-				{previewUrl && (
-					<div className="relative inline-block mt-3">
-						<img
-							src={previewUrl}
-							alt="Preview"
-							className="max-w-xs max-h-48 rounded-lg border border-border"
-						/>
-						<button
-							type="button"
-							onClick={handleClear}
-							className="absolute top-2 right-2 p-1 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90 transition-colors"
-							disabled={isUploading}
-						>
-							<X className="w-4 h-4" />
-						</button>
-					</div>
-				)}
-
-				{selectedFile && (
-					<div className="flex gap-2 mt-3">
-						<Button
-							type="button"
-							onClick={handleUpload}
-							disabled={isUploading}
-							variant="greenInverted"
-							size="sm"
-						>
-							{isUploading ? (
-								<>
-									<span className="animate-spin mr-2">⏳</span>
-									Uploading...
-								</>
-							) : (
-								<>
-									<Upload className="w-4 h-4 mr-2" />
-									Upload Image
-								</>
-							)}
-						</Button>
-						<Button
-							type="button"
-							onClick={handleClear}
-							disabled={isUploading}
-							variant="secondaryInverted"
-							size="sm"
-						>
-							Clear
-						</Button>
-					</div>
+		<div className="space-y-2">
+			<div className="flex items-center justify-between">
+				<label htmlFor={fileInputId} className="block text-sm font-medium" id={`${fileInputId}-label`}>
+					Product Images {imageList.length > 0 && `(${imageList.length})`}
+				</label>
+				{imageList.length > 0 && (
+					<Button
+						type="button"
+						onClick={() => setShowTextarea(!showTextarea)}
+						variant="outline"
+						size="sm"
+					>
+						{showTextarea ? "Hide" : "Edit"} Raw
+					</Button>
 				)}
 			</div>
+
+			{showTextarea ? (
+				<Textarea
+					value={currentImages}
+					onChange={handleTextareaChange}
+					placeholder="image1.jpg, image2.jpg, image3.jpg"
+					className="h-32 resize-none font-mono text-xs"
+					rows={4}
+				/>
+			) : (
+				<fieldset
+					className="p-4 rounded-lg bg-muted/30 border border-border transition-colors"
+					onDragOver={handleDragOver}
+					onDragLeave={handleDragLeave}
+					onDrop={handleDrop}
+					aria-labelledby={`${fileInputId}-label`}
+					style={{
+						borderColor: isDragging ? "hsl(var(--primary))" : undefined,
+					}}
+				>
+					<DndContext
+						sensors={sensors}
+						collisionDetection={closestCenter}
+						onDragEnd={handleDragEnd}
+					>
+						<SortableContext items={imageList} strategy={rectSortingStrategy}>
+							<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+								{imageList.map((image, index) => (
+									<SortableImageItem
+										key={image}
+										image={image}
+										index={index}
+										onRemove={handleRemoveImage}
+									/>
+								))}
+
+								{/* Upload Button */}
+							<button
+									type="button"
+									onClick={handleUploadClick}
+									disabled={isUploading}
+								className="aspect-square rounded-lg border-2 border-dashed border-border/50 bg-background hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed group"
+								>
+									{isUploading ? (
+										<>
+											<span className="animate-spin text-2xl">⏳</span>
+											<span className="text-xs">Uploading...</span>
+										</>
+									) : (
+										<>
+											<Upload className="w-6 h-6 group-hover:scale-110 transition-transform" />
+											<span className="text-xs text-center px-2">
+												Drag and drop or select a file
+											</span>
+										</>
+									)}
+								</button>
+							</div>
+						</SortableContext>
+					</DndContext>
+
+					<p className="text-xs text-muted-foreground mt-3 text-center">
+						JPEG, PNG, WebP • Max 5MB
+					</p>
+				</fieldset>
+			)}
+
+			<input
+				ref={fileInputRef}
+				type="file"
+				accept="image/jpeg,image/jpg,image/png,image/webp"
+				id={fileInputId}
+				onChange={handleFileChange}
+				disabled={isUploading}
+				className="hidden"
+			/>
 		</div>
 	);
 }
-

@@ -28,10 +28,10 @@ export const photos: GalleryItem[] = [
 		storeLink: "squirrel-sticker",
 		description: `I love squirrels more than anything else in this world`,
 	},
-	{
-		id: "dinner-3-people",
-		images: ["photography/dinner-3-people.webp"],
-	},
+	// {
+	// 	id: "dinner-3-people",
+	// 	images: ["photography/dinner-3-people.webp"],
+	// },
 	{
 		id: "squirrel-photos",
 		images: [

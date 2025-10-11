@@ -177,8 +177,10 @@ const SmartBackButton = ({ label, fallbackPath }: SmartBackButtonProps) => {
 		// Try to detect if we have meaningful navigation history by checking document.referrer
 		// document.referrer is empty when opening via direct link, bookmark, or new tab
 		const hasReferrer = document.referrer && document.referrer !== "";
-		const referrerIsSameSite = hasReferrer && new URL(document.referrer).origin === window.location.origin;
-		
+		const referrerIsSameSite =
+			hasReferrer &&
+			new URL(document.referrer).origin === window.location.origin;
+
 		// If we have same-site referrer and browser history, try going back
 		if (referrerIsSameSite && window.history.length > 1) {
 			// Use router's back navigation for proper scroll restoration
@@ -202,7 +204,11 @@ const SmartBackButton = ({ label, fallbackPath }: SmartBackButtonProps) => {
 	);
 };
 
-export function NavBar({ className, userData, onActionClick }: Omit<NavBarProps, "items">) {
+export function NavBar({
+	className,
+	userData,
+	onActionClick,
+}: Omit<NavBarProps, "items">) {
 	const router = useRouter();
 	const routerState = useRouterState();
 	const pathname = router.state.location.pathname;

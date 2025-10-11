@@ -1,7 +1,6 @@
 import { Edit, Trash2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Badge } from "~/components/ui/shared/Badge";
-import { Button } from "~/components/ui/shared/Button";
 import {
 	markdownComponents,
 	rehypePlugins,
@@ -26,7 +25,6 @@ export default function DashboardBlogPostCard({
 	const {
 		id,
 		title,
-		slug,
 		body,
 		images,
 		publishedAt,
@@ -56,122 +54,135 @@ export default function DashboardBlogPostCard({
 		body && body.length > 120 ? `${body.substring(0, 120).trim()}...` : body;
 
 	return (
-		<article
-			className="w-full overflow-hidden bg-background flex flex-col h-full border border-border"
-			id={styles.blogCard}
-		>
-			{/* Image */}
+		<article className="w-full overflow-hidden bg-background flex flex-col h-full" id={styles.blogCard}>
+			{/* Image and Desktop Action Bar Area */}
 			{firstImage && (
-				<div className="w-full overflow-hidden">
+				<div className="relative aspect-square overflow-hidden group">
 					<img
 						src={`https://assets.rublevsky.studio/${firstImage}`}
 						alt={title || `Blog post ${id}`}
-						width={600}
-						height={400}
 						loading="eager"
-						className="w-full h-auto object-cover"
+						className="absolute inset-0 w-full h-full object-cover object-center"
 					/>
+
+					{/* Desktop Action Buttons */}
+					<div className="absolute bottom-0 left-0 right-0 hidden md:flex opacity-0 group-hover:opacity-100 transition-all duration-500">
+						<button
+							type="button"
+							onClick={(e) => {
+								e.stopPropagation();
+								onEdit(post);
+							}}
+							className="flex-1 flex items-center justify-center space-x-2 bg-muted/70 backdrop-blur-xs text-black hover:bg-black hover:text-white active:bg-black active:text-white transition-all duration-500 py-2 cursor-pointer outline-none border-none"
+							style={{ margin: 0, padding: "0.5rem 0" }}
+						>
+							<Edit className="w-4 h-4" />
+							<span>Edit</span>
+						</button>
+						<button
+							type="button"
+							onClick={(e) => {
+								e.stopPropagation();
+								onDelete(post);
+							}}
+							className="w-12 flex items-center justify-center bg-muted/70 backdrop-blur-xs text-black hover:bg-red-600 hover:text-white active:bg-red-600 active:text-white transition-all duration-500 cursor-pointer outline-none border-none"
+							style={{ margin: 0, padding: "0.5rem 0" }}
+						>
+							<Trash2 className="w-4 h-4" />
+						</button>
+					</div>
 				</div>
 			)}
 
 			{/* Content */}
-			<div className="p-4 flex flex-col flex-1">
-				{/* Header with title */}
-				<div className="mb-3">
-					<h3 className="text-lg font-semibold">{title || `Post ${id}`}</h3>
-				</div>
+			<div className="flex flex-col h-auto md:h-full">
+				<div className="p-4 flex flex-col h-auto md:h-full">
+					{/* Title to match product name typography */}
+					<p className="mb-3 font-medium">{title || `Post ${id}`}</p>
 
-				{/* Excerpt */}
-				{excerpt && (
-					<div className="text-muted-foreground mb-3 prose prose-sm prose-p:my-0 prose-strong:text-foreground prose-em:text-muted-foreground flex-1">
-						<ReactMarkdown
-							components={markdownComponents}
-							rehypePlugins={rehypePlugins}
-						>
-							{excerpt}
-						</ReactMarkdown>
-					</div>
-				)}
+					{/* Excerpt */}
+					{excerpt && (
+						<div className="text-muted-foreground mb-3 prose prose-sm prose-p:my-0 prose-strong:text-foreground prose-em:text-muted-foreground">
+							<ReactMarkdown components={markdownComponents} rehypePlugins={rehypePlugins}>
+								{excerpt}
+							</ReactMarkdown>
+						</div>
+					)}
 
-				{/* Footer with metadata */}
-				<div className="space-y-3 mt-auto">
-					{/* Tea Categories */}
-					{categoryNames.length > 0 && (
-						<div className="flex flex-wrap gap-1">
-							{categoryNames.slice(0, 3).map((categoryName) => (
+					{/* Metadata */}
+					<div className="space-y-3 mt-auto">
+						{/* Tea Categories */}
+						{categoryNames.length > 0 && (
+							<div className="flex flex-wrap gap-1">
+								{categoryNames.slice(0, 3).map((categoryName) => (
+									<Badge key={categoryName} variant="secondary" className="text-xs">
+										{categoryName}
+									</Badge>
+								))}
+								{categoryNames.length > 3 && (
+									<Badge variant="secondary" className="text-xs">
+										+{categoryNames.length - 3}
+									</Badge>
+								)}
+							</div>
+						)}
+
+						{/* Linked Product */}
+						{productName && productSlug && (
+							<div>
+								<span className="text-xs text-muted-foreground block mb-1">Linked product:</span>
 								<Badge
-									key={categoryName}
-									variant="secondary"
-									className="text-xs"
+									variant="outline"
+									className="text-xs cursor-pointer hover:bg-muted active:bg-muted transition-colors"
+									onClick={() => window.open(`/store/${productSlug}`, "_blank")}
 								>
-									{categoryName}
+									{productName}
 								</Badge>
-							))}
-							{categoryNames.length > 3 && (
-								<Badge variant="secondary" className="text-xs">
-									+{categoryNames.length - 3}
-								</Badge>
-							)}
-						</div>
-					)}
+							</div>
+						)}
 
-					{/* Linked Product */}
-					{productName && productSlug && (
-						<div>
-							<span className="text-xs text-muted-foreground block mb-1">
-								Linked product:
-							</span>
-						<Badge
-							variant="outline"
-							className="text-xs cursor-pointer hover:bg-muted active:bg-muted transition-colors"
-							onClick={() => window.open(`/store/${productSlug}`, "_blank")}
-						>
-							{productName}
-							</Badge>
-						</div>
-					)}
-
-					{/* Date, Visibility and Actions */}
-					<div className="flex items-center justify-between">
-						<div className="flex items-center gap-2">
-							<time className="text-sm text-muted-foreground">
-								{formatBlogDate(publishedAt)}
-							</time>
-							<span
-								className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-									isVisible
-										? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-										: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-								}`}
-							>
-								{isVisible ? "Visible" : "Hidden"}
-							</span>
-						</div>
-
-						{/* Action buttons */}
-						<div className="flex gap-2">
-							<Button
-								variant="outline"
-								size="sm"
-								onClick={() => onEdit(post)}
-								className="w-8 h-8 p-0"
-							>
-								<Edit className="w-4 h-4" />
-							</Button>
-							<Button
-								variant="destructive"
-								size="sm"
-								onClick={() => onDelete(post)}
-								className="w-8 h-8 p-0"
-							>
-								<Trash2 className="w-4 h-4" />
-							</Button>
+						{/* Date and Visibility */}
+						<div className="flex items-center justify-between">
+							<div className="flex items-center gap-2">
+								<time className="text-sm text-muted-foreground">{formatBlogDate(publishedAt)}</time>
+								<span
+									className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+										isVisible
+											? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+											: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+									}`}
+								>
+									{isVisible ? "Visible" : "Hidden"}
+								</span>
+							</div>
 						</div>
 					</div>
 
-					{/* Slug indicator */}
-					<div className="flex justify-end">
-						<span className="text-xs text-muted-foreground">Slug: {slug}</span>
+					{/* Mobile Action Buttons */}
+					<div className="md:hidden mt-auto flex">
+						<button
+							type="button"
+							onClick={(e) => {
+								e.stopPropagation();
+								onEdit(post);
+							}}
+							className="flex-1 cursor-pointer flex items-center justify-center space-x-2 bg-muted backdrop-blur-xs text-black hover:bg-black hover:text-white active:bg-black active:text-white transition-all duration-500 py-2 px-4 outline-none border-none"
+							style={{ margin: 0 }}
+						>
+							<Edit className="w-4 h-4" />
+							<span>Edit</span>
+						</button>
+						<button
+							type="button"
+							onClick={(e) => {
+								e.stopPropagation();
+								onDelete(post);
+							}}
+							className="w-12 cursor-pointer flex items-center justify-center bg-muted backdrop-blur-xs text-black hover:bg-red-600 hover:text-white active:bg-red-600 active:text-white transition-all duration-500 outline-none border-none"
+							style={{ margin: 0, padding: "0.5rem 0" }}
+						>
+							<Trash2 className="w-4 h-4" />
+						</button>
 					</div>
 				</div>
 			</div>

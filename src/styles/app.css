@@ -2,7 +2,7 @@
 
 @theme {
 	--color-background: oklch(var(--background));
-	--color-foreground: hsl(var(--foreground));
+	--color-foreground: oklch(var(--foreground));
 	--color-card: hsl(var(--card));
 	--color-card-foreground: hsl(var(--card-foreground));
 	--color-popover: hsl(var(--popover));
@@ -90,7 +90,7 @@
 }
 :root {
 	--background: 95.85% 0.0037 286.33;
-	--foreground: 0 0% 3.9%;
+	--foreground: 0.1305 0.0226 188.93;
 	--card: 0 0% 100%;
 	--card-foreground: 0 0% 3.9%;
 	--popover: 0 0% 100%;
@@ -122,6 +122,14 @@
 	--sidebar-accent-foreground: 240 5.9% 10%;
 	--sidebar-border: 220 13% 91%;
 	--sidebar-ring: 217.2 91.2% 59.8%;
+	
+	/* Tea category colors */
+	--tea-shu-puer-bg: #FFC280;
+	--tea-shu-puer-text: #473421;
+	--tea-raw-puer-bg: #DFF589;
+	--tea-raw-puer-text: #3B4220;
+	--tea-purple-bg: #E5C8FF;
+	--tea-purple-text: #392E43;
 }
 .dark {
 	--background: 0 0% 3.9%;
@@ -156,6 +164,14 @@
 	--sidebar-accent-foreground: 240 4.8% 95.9%;
 	--sidebar-border: 240 3.7% 15.9%;
 	--sidebar-ring: 217.2 91.2% 59.8%;
+	
+	/* Tea category colors - dark mode */
+	--tea-shu-puer-bg: #FFC280;
+	--tea-shu-puer-text: #473421;
+	--tea-raw-puer-bg: #DFF589;
+	--tea-raw-puer-text: #3B4220;
+	--tea-purple-bg: #E5C8FF;
+	--tea-purple-text: #392E43;
 }
 
 @layer base {
@@ -164,7 +180,7 @@
 	}
 	body {
 		background-color: oklch(var(--background));
-		color: hsl(var(--foreground));
+		color: oklch(var(--foreground));
 	}
 }
 
@@ -492,4 +508,32 @@ p {
 	.blog-gallery-mobile-at-lg .gallery-stack.flex > div:last-child {
 		order: 1;
 	}
+}
+
+/* Hide number input spinners */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+input[type="number"] {
+	-moz-appearance: textfield;
+	appearance: textfield;
+}
+
+/* Tea category badge styles */
+.tea-badge-shu-puer {
+	background-color: var(--tea-shu-puer-bg);
+	color: var(--tea-shu-puer-text);
+}
+
+.tea-badge-raw-puer {
+	background-color: var(--tea-raw-puer-bg);
+	color: var(--tea-raw-puer-text);
+}
+
+.tea-badge-purple {
+	background-color: var(--tea-purple-bg);
+	color: var(--tea-purple-text);
 }

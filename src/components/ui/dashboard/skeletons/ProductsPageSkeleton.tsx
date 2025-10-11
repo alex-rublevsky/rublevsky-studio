@@ -13,6 +13,7 @@ export function ProductsPageSkeleton() {
 					<input
 						type="text"
 						className="w-full h-10 invisible"
+						tabIndex={-1}
 						aria-hidden="true"
 					/>
 					<Skeleton className="absolute inset-0" />
@@ -25,41 +26,34 @@ export function ProductsPageSkeleton() {
 				<div className="space-y-4">
 					{/* Group Title - using real text elements for exact height */}
 					<div className="px-4">
-						<h2 className="text-2xl font-semibold text-foreground relative">
+						<h2 className="text-2xl font-semibold text-foreground flex items-baseline gap-1 relative">
 							<span className="invisible">Loading</span>
-							<Skeleton className="absolute inset-0 w-48" />
+							<Skeleton className="absolute inset-0 w-64" />
 						</h2>
-						<p className="text-sm text-muted-foreground mt-1 relative">
-							<span className="invisible">12 products</span>
-							<Skeleton className="absolute inset-0 w-24" />
-						</p>
 					</div>
 					<div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 md:gap-3 px-4">
-						{Array.from({ length: 12 }).map((_, index) => (
-							<ProductCardSkeleton key={index} />
+						{Array.from({ length: 12 }, (_, index) => (
+							<ProductCardSkeleton key={`skeleton-${Date.now()}-${index}`} />
 						))}
 					</div>
 				</div>
 
-				{/* Divider */}
-				<div className="border-b border-border/40 mt-8 mx-4" />
+				{/* No divider */}
 
 				{/* Second Group */}
 				<div className="space-y-4">
 					{/* Group Title - using real text elements for exact height */}
 					<div className="px-4">
-						<h2 className="text-2xl font-semibold text-foreground relative">
+						<h2 className="text-2xl font-semibold text-foreground flex items-baseline gap-1 relative">
 							<span className="invisible">Loading</span>
-							<Skeleton className="absolute inset-0 w-32" />
+							<Skeleton className="absolute inset-0 w-56" />
 						</h2>
-						<p className="text-sm text-muted-foreground mt-1 relative">
-							<span className="invisible">8 products</span>
-							<Skeleton className="absolute inset-0 w-20" />
-						</p>
 					</div>
 					<div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2 md:gap-3 px-4">
-						{Array.from({ length: 8 }).map((_, index) => (
-							<ProductCardSkeleton key={index} />
+						{Array.from({ length: 8 }, (_, index) => (
+							<ProductCardSkeleton
+								key={`skeleton-${Date.now()}-${index + 12}`}
+							/>
 						))}
 					</div>
 				</div>
@@ -130,7 +124,6 @@ function ProductCardSkeleton() {
 						type="button"
 						className="flex-1 flex items-center justify-center space-x-2 py-2 px-4 relative"
 						disabled
-						aria-hidden="true"
 					>
 						<span className="invisible">Edit</span>
 						<Skeleton className="absolute inset-0 rounded-none" />
@@ -139,7 +132,6 @@ function ProductCardSkeleton() {
 						type="button"
 						className="w-12 flex items-center justify-center relative"
 						disabled
-						aria-hidden="true"
 					>
 						<span className="invisible">X</span>
 						<Skeleton className="absolute inset-0 rounded-none" />

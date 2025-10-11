@@ -1,6 +1,6 @@
+import { env } from "cloudflare:workers";
 import { createServerFn } from "@tanstack/react-start";
 import { setResponseStatus } from "@tanstack/react-start/server";
-import { env } from "cloudflare:workers";
 
 interface DeleteImageInput {
 	filename: string; // Full path in R2 (e.g., "products/image.jpg")
@@ -52,4 +52,3 @@ export const deleteProductImage = createServerFn({ method: "POST" })
 			);
 		}
 	});
-

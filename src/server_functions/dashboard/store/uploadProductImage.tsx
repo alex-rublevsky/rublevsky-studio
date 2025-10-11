@@ -1,9 +1,9 @@
+import { env } from "cloudflare:workers";
 import { createServerFn } from "@tanstack/react-start";
 import { setResponseStatus } from "@tanstack/react-start/server";
-import { env } from "cloudflare:workers";
 import { ASSETS_BASE_URL } from "~/constants/urls";
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 1.5 * 1024 * 1024; // 1.5MB
 const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
 interface UploadImageInput {
@@ -18,8 +18,13 @@ export const uploadProductImage = createServerFn({ method: "POST" })
 	.inputValidator((data: UploadImageInput) => data)
 	.handler(async ({ data }) => {
 		try {
-			const { fileData, fileName, fileType, fileSize, folder = "products" } =
-				data;
+			const {
+				fileData,
+				fileName,
+				fileType,
+				fileSize,
+				folder = "products",
+			} = data;
 
 			if (!fileData) {
 				setResponseStatus(400);
@@ -37,7 +42,7 @@ export const uploadProductImage = createServerFn({ method: "POST" })
 			// Validate file size
 			if (fileSize > MAX_FILE_SIZE) {
 				setResponseStatus(400);
-				throw new Error("File size must be less than 5MB");
+				throw new Error("File size must be less than 1.5MB");
 			}
 
 			// Get R2 bucket binding
@@ -106,4 +111,3 @@ export const uploadProductImage = createServerFn({ method: "POST" })
 			);
 		}
 	});
-

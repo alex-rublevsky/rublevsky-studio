@@ -1,36 +1,29 @@
-export interface Country {
-	code: string;
-	name: string;
-}
+// Simplest possible structure: a fixed set of codes and two tiny helpers.
+export const SHIPPING_COUNTRIES = ["NONE", "CA", "RU", "CA_OR_RU"] as const;
+export type ShippingCountryCode = (typeof SHIPPING_COUNTRIES)[number];
 
-export const COUNTRIES: Record<string, Country> = {
-	CA: {
-		code: "CA",
-		name: "🇨🇦 Canada",
-	},
-	RU: {
-		code: "RU",
-		name: "🇷🇺 Russia",
-	},
-	CA_OR_RU: {
-		code: "CA_OR_RU",
-		name: "🇨🇦 Canada or 🇷🇺 Russia",
-	},
-} as const;
-
-export const COUNTRY_OPTIONS = [
-	{ code: "NONE", name: "Not specified" }, // Empty option
-	...Object.values(COUNTRIES),
-];
-
-export const getCountryByCode = (code: string): Country | undefined => {
-	if (code === "NONE" || code === "") {
-		return { code: "NONE", name: "Not specified" };
+export const getCountryName = (code: string | undefined | null): string => {
+	switch (code) {
+		case "CA":
+			return "Canada";
+		case "RU":
+			return "Russia";
+		case "CA_OR_RU":
+			return "Canada or Russia";
+		default:
+			return "Not specified";
 	}
-	return COUNTRIES[code];
 };
 
-export const getCountryDisplayName = (code: string): string => {
-	const country = getCountryByCode(code);
-	return country ? country.name : code;
+export const getCountryFlag = (code: string | undefined | null): string => {
+	switch (code) {
+		case "CA":
+			return "🇨🇦";
+		case "RU":
+			return "🇷🇺";
+		case "CA_OR_RU":
+			return "🇨🇦 🇷🇺";
+		default:
+			return "";
+	}
 };

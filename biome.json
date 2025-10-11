@@ -15,12 +15,6 @@
 	},
 	"linter": {
 		"enabled": true,
-		"ignore": [
-			"src/routeTree.gen.ts",
-			".tanstack/**",
-			"dist/**",
-			"node_modules/**"
-		],
 		"rules": {
 			"recommended": true,
 			"a11y": {

@@ -25,7 +25,11 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "~/components/ui/shared/Select";
-import { COUNTRY_OPTIONS } from "~/constants/countries";
+import {
+	getCountryFlag,
+	getCountryName,
+	SHIPPING_COUNTRIES,
+} from "~/constants/countries";
 import {
 	getAttributeDisplayName,
 	PRODUCT_ATTRIBUTES,
@@ -79,12 +83,19 @@ function SortableVariationItem({
 	) => void;
 	unusedAttributes: string[];
 }) {
-	const { attributes, listeners, setNodeRef, transform, transition } =
-		useSortable({ id: variation.id });
+	const {
+		attributes,
+		listeners,
+		setNodeRef,
+		transform,
+		transition,
+		isDragging,
+	} = useSortable({ id: variation.id });
 
 	const style = {
 		transform: CSS.Transform.toString(transform),
 		transition,
+		opacity: isDragging ? 0.5 : 1,
 	};
 
 	const [selectedAttribute, setSelectedAttribute] = useState("");
@@ -100,33 +111,16 @@ function SortableVariationItem({
 		<div
 			ref={setNodeRef}
 			style={style}
-			className="border border-border rounded-md p-3 bg-background"
+			{...attributes}
+			{...listeners}
+			className="relative border border-border rounded-md p-3 bg-background space-y-3 cursor-grab active:cursor-grabbing"
 		>
-			{/* Header with drag handle and remove button */}
-			<div className="flex justify-between items-center mb-3">
-				<div
-					{...attributes}
-					{...listeners}
-					className="cursor-move p-1 bg-muted rounded text-xs"
-				>
-					≡
-				</div>
-				<Button
-					type="button"
-					onClick={() => onRemove(variation.id)}
-					variant="invertedDestructive"
-					size="sm"
-				>
-					Remove
-				</Button>
-			</div>
-
-			{/* Main fields in a compact grid */}
-			<div className="grid grid-cols-2 lg:grid-cols-3 gap-2 mb-3">
-				<div>
+			{/* First row: SKU with Remove button */}
+			<div className="flex gap-1 items-end">
+				<div className="flex-1">
 					<label
 						htmlFor={`sku-${variation.id}`}
-						className="block text-xs font-medium text-foreground mb-1"
+						className="block text-xs text-muted-foreground mb-1"
 					>
 						SKU
 					</label>
@@ -135,13 +129,31 @@ function SortableVariationItem({
 						type="text"
 						value={variation.sku}
 						onChange={(e) => onUpdate(variation.id, "sku", e.target.value)}
+						onPointerDown={(e) => e.stopPropagation()}
 						className="text-sm"
 					/>
 				</div>
+				<Button
+					type="button"
+					onClick={(e) => {
+						e.stopPropagation();
+						onRemove(variation.id);
+					}}
+					onPointerDown={(e) => e.stopPropagation()}
+					variant="destructive"
+					size="sm"
+					className="bg-destructive/20 hover:bg-destructive/90 shrink-0"
+				>
+					Remove
+				</Button>
+			</div>
+
+			{/* Second row: Price, Discount, Stock, Country */}
+			<div className="grid grid-cols-2 md:grid-cols-4 gap-2">
 				<div>
 					<label
 						htmlFor={`price-${variation.id}`}
-						className="block text-xs font-medium text-foreground mb-1"
+						className="block text-xs text-muted-foreground mb-1"
 					>
 						Price
 					</label>
@@ -152,30 +164,15 @@ function SortableVariationItem({
 						onChange={(e) =>
 							onUpdate(variation.id, "price", parseFloat(e.target.value) || 0)
 						}
+						onPointerDown={(e) => e.stopPropagation()}
 						className="text-sm"
 					/>
 				</div>
-				<div>
-					<label
-						htmlFor={`stock-${variation.id}`}
-						className="block text-xs font-medium text-foreground mb-1"
-					>
-						Stock
-					</label>
-					<Input
-						id={`stock-${variation.id}`}
-						type="number"
-						value={variation.stock}
-						onChange={(e) =>
-							onUpdate(variation.id, "stock", parseInt(e.target.value, 10) || 0)
-						}
-						className="text-sm"
-					/>
-				</div>
+
 				<div>
 					<label
 						htmlFor={`discount-${variation.id}`}
-						className="block text-xs font-medium text-foreground mb-1"
+						className="block text-xs text-muted-foreground mb-1"
 					>
 						Discount %
 					</label>
@@ -190,16 +187,37 @@ function SortableVariationItem({
 								parseInt(e.target.value, 10) || null,
 							)
 						}
+						onPointerDown={(e) => e.stopPropagation()}
 						placeholder="0"
 						min="0"
 						max="100"
 						className="text-sm"
 					/>
 				</div>
-				<div className="col-span-2 lg:col-span-2">
+
+				<div>
+					<label
+						htmlFor={`stock-${variation.id}`}
+						className="block text-xs text-muted-foreground mb-1"
+					>
+						Stock
+					</label>
+					<Input
+						id={`stock-${variation.id}`}
+						type="number"
+						value={variation.stock}
+						onChange={(e) =>
+							onUpdate(variation.id, "stock", parseInt(e.target.value, 10) || 0)
+						}
+						onPointerDown={(e) => e.stopPropagation()}
+						className="text-sm"
+					/>
+				</div>
+
+                <div className="w-20">
 					<label
 						htmlFor={`shipping-${variation.id}`}
-						className="block text-xs font-medium text-foreground mb-1"
+						className="block text-xs text-muted-foreground mb-1"
 					>
 						Ships From
 					</label>
@@ -213,13 +231,19 @@ function SortableVariationItem({
 							)
 						}
 					>
-						<SelectTrigger id={`shipping-${variation.id}`} className="text-sm">
-							<SelectValue placeholder="Shipping from..." />
+                        <SelectTrigger
+							id={`shipping-${variation.id}`}
+                            className="text-sm w-20"
+							onPointerDown={(e) => e.stopPropagation()}
+						>
+							<SelectValue placeholder="Country">
+								{getCountryFlag(variation.shippingFrom || undefined) || ""}
+							</SelectValue>
 						</SelectTrigger>
 						<SelectContent>
-							{COUNTRY_OPTIONS.map((country) => (
-								<SelectItem key={country.code} value={country.code}>
-									{country.name}
+							{SHIPPING_COUNTRIES.map((code) => (
+								<SelectItem key={code} value={code}>
+									{getCountryName(code)}
 								</SelectItem>
 							))}
 						</SelectContent>
@@ -227,98 +251,92 @@ function SortableVariationItem({
 				</div>
 			</div>
 
-			{/* Attributes section - more compact */}
-			<div className="mb-3">
-				<h4 className="text-xs font-medium text-foreground mb-2">Attributes</h4>
-				{variation.attributes.length > 0 ? (
-					<div className="space-y-2">
-						{variation.attributes.map((attr) => (
-							<div
-								key={attr.attributeId}
-								className="flex items-center space-x-2"
-							>
-								<div className="flex-1 grid grid-cols-2 gap-2 items-center">
-									<label
-										htmlFor={`attr-${variation.id}-${attr.attributeId}`}
-										className="text-xs font-medium text-foreground truncate"
-									>
-										{getAttributeDisplayName(attr.attributeId)}:
-									</label>
-									<Input
-										id={`attr-${variation.id}-${attr.attributeId}`}
-										type="text"
-										value={attr.value}
-										onChange={(e) =>
-											onUpdateAttributeValue(
-												variation.id,
-												attr.attributeId,
-												e.target.value,
-											)
-										}
-										placeholder="Value"
-										className="text-sm"
-									/>
-								</div>
-								<Button
-									type="button"
-									onClick={() =>
-										onRemoveAttribute(variation.id, attr.attributeId)
-									}
-									variant="invertedDestructive"
-									size="icon"
-									className="h-6 w-6 text-xs"
-								>
-									×
-								</Button>
-							</div>
-						))}
-					</div>
-				) : (
-					<p className="text-xs text-muted-foreground">
-						No attributes added yet.
-					</p>
-				)}
-			</div>
-
-			{/* Add attribute section - more compact */}
-			{unusedAttributes.length > 0 && (
-				<div className="flex items-end space-x-2">
-					<div className="flex-1">
-						<label
-							htmlFor={`add-attr-${variation.id}`}
-							className="block text-xs font-medium text-foreground mb-1"
-						>
-							Add Attribute
-						</label>
-						<Select
-							value={selectedAttribute}
-							onValueChange={setSelectedAttribute}
-						>
-							<SelectTrigger
-								id={`add-attr-${variation.id}`}
-								className="text-sm"
-							>
-								<SelectValue placeholder="Select an attribute" />
-							</SelectTrigger>
-							<SelectContent>
-								{unusedAttributes.map((attr) => (
-									<SelectItem key={attr} value={attr}>
-										{getAttributeDisplayName(attr)}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-					</div>
-					<Button
-						type="button"
-						onClick={handleAddAttributeClick}
-						disabled={!selectedAttribute}
-						size="sm"
-					>
-						Add
-					</Button>
+			{/* Attributes section */}
+			<div>
+				<div className="block text-sm font-medium text-foreground mb-2">
+					Attributes
 				</div>
-			)}
+				<div className="grid grid-cols-2 gap-2">
+					{variation.attributes.map((attr) => (
+						<div key={attr.attributeId} className="flex items-center gap-1">
+							<div className="flex-1">
+								<label
+									htmlFor={`attr-${variation.id}-${attr.attributeId}`}
+									className="block text-xs text-muted-foreground mb-1"
+								>
+									{getAttributeDisplayName(attr.attributeId)}
+								</label>
+								<Input
+									id={`attr-${variation.id}-${attr.attributeId}`}
+									type="text"
+									value={attr.value}
+									onChange={(e) =>
+										onUpdateAttributeValue(
+											variation.id,
+											attr.attributeId,
+											e.target.value,
+										)
+									}
+									onPointerDown={(e) => e.stopPropagation()}
+									placeholder="Value"
+									className="text-sm"
+								/>
+							</div>
+							<Button
+								type="button"
+								onClick={(e) => {
+									e.stopPropagation();
+									onRemoveAttribute(variation.id, attr.attributeId);
+								}}
+								onPointerDown={(e) => e.stopPropagation()}
+								variant="destructive"
+								size="icon"
+								className="h-8 w-8 shrink-0 bg-destructive/20 hover:bg-destructive/90 mt-5"
+							>
+								×
+							</Button>
+						</div>
+					))}
+
+					{/* Add attribute section - takes up grid cell */}
+					{unusedAttributes.length > 0 && (
+						<div className="flex items-end gap-1">
+							<Select
+								value={selectedAttribute}
+								onValueChange={setSelectedAttribute}
+							>
+								<SelectTrigger
+									id={`add-attr-${variation.id}`}
+									className="text-sm flex-1"
+									onPointerDown={(e) => e.stopPropagation()}
+								>
+									<SelectValue placeholder="Add attribute..." />
+								</SelectTrigger>
+								<SelectContent>
+									{unusedAttributes.map((attr) => (
+										<SelectItem key={attr} value={attr}>
+											{getAttributeDisplayName(attr)}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+							<Button
+								type="button"
+								onClick={(e) => {
+									e.stopPropagation();
+									handleAddAttributeClick();
+								}}
+								onPointerDown={(e) => e.stopPropagation()}
+								disabled={!selectedAttribute}
+								size="sm"
+								className="shrink-0"
+							>
+								Add
+							</Button>
+						</div>
+					)}
+				</div>
+			</div>
 		</div>
 	);
 }
@@ -464,8 +482,8 @@ export default function ProductVariationForm({
 					items={variations.map((item) => item.id)}
 					strategy={verticalListSortingStrategy}
 				>
-					{/* Grid layout for variations */}
-					<div className="grid grid-cols-1 md:grid-cols-2  gap-3">
+					{/* Two column layout for variations on large screens */}
+					<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 						{variations.map((variation) => (
 							<SortableVariationItem
 								key={variation.id}

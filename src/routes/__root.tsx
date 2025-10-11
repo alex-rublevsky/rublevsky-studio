@@ -51,10 +51,10 @@ export const Route = createRootRoute({
 				href: "/favicon-96x96.png",
 			},
 			{
-			  rel: "icon",
-			  type: "image/png",
-			  sizes: "16x16",
-			  href: "/favicon-16x16.png",
+				rel: "icon",
+				type: "image/png",
+				sizes: "16x16",
+				href: "/favicon-16x16.png",
 			},
 			{ rel: "manifest", href: "/site.webmanifest", color: "#fffff" },
 			{ rel: "icon", href: "/favicon.ico" },
@@ -96,7 +96,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 	const pathname = router.state.location.pathname;
 
 	return (
-		<html lang="en" className={`${pathname === "/" ? "scroll-smooth" : ""} bg-background overscroll-none`}>
+		<html
+			lang="en"
+			className={`${pathname === "/" ? "scroll-smooth" : ""} bg-background overscroll-none`}
+		>
 			<head>
 				<HeadContent />
 			</head>

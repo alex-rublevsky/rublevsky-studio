@@ -52,7 +52,6 @@ function RouteComponent() {
 		  }
 		| undefined;
 
-
 	// Get the action handler from route context if it exists
 	const handleActionClick = () => {
 		// Dispatch a custom event that child routes can listen to

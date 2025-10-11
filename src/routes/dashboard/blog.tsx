@@ -1,23 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Plus } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useId, useMemo, useState } from "react";
 import { toast } from "sonner";
 import DashboardBlogPostCard from "~/components/ui/blog/DashboardBlogPostCard";
 import DeleteConfirmationDialog from "~/components/ui/dashboard/ConfirmationDialog";
+import { DashboardFormDrawer } from "~/components/ui/dashboard/DashboardFormDrawer";
+import { ProductFormSection } from "~/components/ui/dashboard/ProductFormSection";
 import ProductSelector from "~/components/ui/dashboard/ProductSelector";
-import { Button } from "~/components/ui/shared/Button";
-import { Checkbox } from "~/components/ui/shared/Checkbox";
+import { SlugField } from "~/components/ui/dashboard/SlugField";
+import { TeaCategoriesSelector } from "~/components/ui/dashboard/TeaCategoriesSelector";
 import { DatePicker } from "~/components/ui/shared/DatePicker";
-import {
-	Drawer,
-	DrawerBody,
-	DrawerContent,
-	DrawerFooter,
-	DrawerHeader,
-	DrawerTitle,
-} from "~/components/ui/shared/Drawer";
 import { FilterGroup } from "~/components/ui/shared/FilterGroup";
 import { Input } from "~/components/ui/shared/Input";
 import { Switch } from "~/components/ui/shared/Switch";
@@ -33,10 +26,10 @@ export const Route = createFileRoute("/dashboard/blog")({
 });
 
 function RouteComponent() {
-	const autoSlugId = useId();
-	const editAutoSlugId = useId();
-	const slugId = useId();
-	const editSlugId = useId();
+	const _autoSlugId = useId();
+	const _editAutoSlugId = useId();
+	const _slugId = useId();
+	const _editSlugId = useId();
 	const createBlogFormId = useId();
 	const titleId = useId();
 	const bodyId = useId();
@@ -207,12 +200,6 @@ function RouteComponent() {
 		});
 	};
 
-	const handleCategoryChange = (value: string[]) => {
-		setCreateFormData({
-			...createFormData,
-			teaCategories: value,
-		});
-	};
 
 	const handleEditChange = (
 		e: React.ChangeEvent<
@@ -432,116 +419,27 @@ function RouteComponent() {
 			</div>
 
 			{/* Blog Posts List */}
-			<Drawer open={showCreateDrawer} onOpenChange={setShowCreateDrawer}>
-				<DrawerContent>
-					<DrawerHeader>
-						<DrawerTitle>Create New Blog Post</DrawerTitle>
-					</DrawerHeader>
-
-					<DrawerBody>
-						{error && (
-							<div className="bg-destructive/20 border border-destructive text-destructive-foreground px-4 py-3 rounded mb-4">
-								{error}
-							</div>
-						)}
-
-						<form
-							onSubmit={handleSubmit}
-							className="space-y-4"
-							id={createBlogFormId}
-						>
-							<Input
-								label="Title"
-								id={titleId}
-								name="title"
-								value={createFormData.title}
-								onChange={handleCreateChange}
-								required
-							/>
-
-							<div>
-								<div className="flex items-center justify-between mb-1">
-									<label htmlFor={slugId} className="block text-sm font-medium">
-										Slug
-									</label>
-									<div className="flex items-center space-x-2">
-										<Switch
-											id={autoSlugId}
-											checked={isCreateAutoSlug}
-											onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-												setIsCreateAutoSlug(e.target.checked);
-											}}
-										/>
-										<label
-											htmlFor={autoSlugId}
-											className="text-xs text-muted-foreground"
-										>
-											Auto-generate
-										</label>
-									</div>
-								</div>
-								<Input
-									id={slugId}
-									name="slug"
-									value={createFormData.slug}
-									onChange={handleCreateChange}
-									required
-									disabled={isCreateAutoSlug}
-									className={
-										isCreateAutoSlug ? "opacity-60 cursor-not-allowed" : ""
-									}
-								/>
-							</div>
-
-							<div>
-								<div className="block text-sm font-medium mb-2">
-									Tea Categories
-								</div>
-								<div className="space-y-2 border border-input rounded-md p-3 max-h-40 overflow-y-auto">
-									{teaCategories.map((category) => (
-										<label
-											key={category.slug}
-											htmlFor={`create-tea-category-${category.slug}`}
-											className="flex items-center space-x-2"
-										>
-											<Checkbox
-												id={`create-tea-category-${category.slug}`}
-												checked={
-													createFormData.teaCategories?.includes(
-														category.slug,
-													) ?? false
-												}
-												onCheckedChange={(checked) => {
-													const newCategories = checked
-														? [
-																...(createFormData.teaCategories || []),
-																category.slug,
-															]
-														: (createFormData.teaCategories || []).filter(
-																(slug) => slug !== category.slug,
-															);
-													handleCategoryChange(newCategories);
-												}}
-											/>
-											<span>{category.name}</span>
-										</label>
-									))}
-								</div>
-							</div>
-
-							<div>
-								<label
-									htmlFor="product"
-									className="block text-sm font-medium mb-1"
-								>
-									Related Product
-								</label>
-								<ProductSelector
-									selectedProductSlug={createFormData.productSlug || ""}
-									onProductSelect={handleProductSelect}
-								/>
-							</div>
-
+			<DashboardFormDrawer
+				isOpen={showCreateDrawer}
+				onOpenChange={setShowCreateDrawer}
+				title="Create New Blog Post"
+				formId={createBlogFormId}
+				isSubmitting={isSubmitting}
+				submitButtonText="Create Post"
+				submittingText="Creating..."
+				onCancel={closeCreateDrawer}
+				error={error}
+				layout="two-column"
+				fullWidth={true}
+			>
+				<form
+					onSubmit={handleSubmit}
+					id={createBlogFormId}
+					className="contents"
+				>
+					{/* Left Column - Content */}
+					<div className="space-y-4">
+						<ProductFormSection variant="default" title="Content">
 							<Textarea
 								label="Content"
 								id={bodyId}
@@ -549,76 +447,115 @@ function RouteComponent() {
 								value={createFormData.body}
 								onChange={handleCreateChange}
 								required
-								rows={10}
+								rows={15}
+								className="resize-y"
 							/>
+						</ProductFormSection>
+					</div>
 
-							<Input
-								label="Images (comma-separated URLs)"
-								id={imagesId}
-								name="images"
-								value={createFormData.images}
-								onChange={handleCreateChange}
-							/>
+					{/* Right Column - Metadata */}
+					<div className="space-y-4">
+						<ProductFormSection variant="default" title="Post Details">
+							<div className="space-y-4">
+								<Input
+									label="Title"
+									id={titleId}
+									name="title"
+									value={createFormData.title}
+									onChange={handleCreateChange}
+									required
+								/>
 
-							<DatePicker
-								label="Published At"
-								date={(() => {
-									const timestamp = createFormData.publishedAt;
-									if (Number.isNaN(timestamp)) {
-										return new Date();
+								<SlugField
+									slug={createFormData.slug || ""}
+									name={createFormData.title || ""}
+									isAutoSlug={isCreateAutoSlug}
+									onSlugChange={(slug) =>
+										setCreateFormData((prev) => ({ ...prev, slug }))
 									}
-									// Create date from timestamp and ensure it shows the correct date
-									const date = new Date(timestamp);
-									return date;
-								})()}
-								onDateChange={(date) => {
-									setCreateFormData((prev) => ({
-										...prev,
-										publishedAt: date ? date.getTime() : Date.now(),
-									}));
-								}}
-								placeholder="Select publication date"
-							/>
+									onAutoSlugChange={setIsCreateAutoSlug}
+									idPrefix="create"
+								/>
 
-							<div className="flex items-center space-x-2">
-								<Switch
-									id={isVisibleId}
-									checked={createFormData.isVisible ?? true}
-									onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+
+								<div>
+									<label
+										htmlFor="product"
+										className="block text-sm font-medium mb-1"
+									>
+										Related Product
+									</label>
+									<ProductSelector
+										selectedProductSlug={createFormData.productSlug || ""}
+										onProductSelect={handleProductSelect}
+									/>
+								</div>
+
+								<Input
+									label="Images (comma-separated URLs)"
+									id={imagesId}
+									name="images"
+									value={createFormData.images}
+									onChange={handleCreateChange}
+								/>
+
+								<DatePicker
+									label="Published At"
+									date={(() => {
+										const timestamp = createFormData.publishedAt;
+										if (Number.isNaN(timestamp)) {
+											return new Date();
+										}
+										const date = new Date(timestamp);
+										return date;
+									})()}
+									onDateChange={(date) => {
 										setCreateFormData((prev) => ({
 											...prev,
-											isVisible: e.target.checked,
+											publishedAt: date ? date.getTime() : Date.now(),
 										}));
 									}}
+									placeholder="Select publication date"
 								/>
-								<label htmlFor="isVisible" className="text-sm font-medium">
-									Visible on blog
-								</label>
-							</div>
-						</form>
-					</DrawerBody>
 
-					<DrawerFooter className="border-t border-border bg-background">
-						<div className="flex justify-end space-x-2">
-							<Button
-								variant="secondaryInverted"
-								type="button"
-								onClick={closeCreateDrawer}
-							>
-								Cancel
-							</Button>
-							<Button
-								variant="greenInverted"
-								type="submit"
-								form="createBlogForm"
-								disabled={isSubmitting}
-							>
-								{isSubmitting ? "Creating..." : "Create Post"}
-							</Button>
-						</div>
-					</DrawerFooter>
-				</DrawerContent>
-			</Drawer>
+								<div className="flex items-center space-x-2">
+									<Switch
+										id={isVisibleId}
+										checked={createFormData.isVisible ?? true}
+										onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+											setCreateFormData((prev) => ({
+												...prev,
+												isVisible: e.target.checked,
+											}));
+										}}
+									/>
+									<label htmlFor="isVisible" className="text-sm font-medium">
+										Visible on blog
+									</label>
+								</div>
+							</div>
+						</ProductFormSection>
+
+						{/* Tea Categories Block */}
+						<TeaCategoriesSelector
+							teaCategories={teaCategories}
+							selectedCategories={createFormData.teaCategories || []}
+							onCategoryChange={(categorySlug, checked) => {
+								const newCategories = checked
+									? [...(createFormData.teaCategories || []), categorySlug]
+									: (createFormData.teaCategories || []).filter(
+											(slug) => slug !== categorySlug,
+										);
+								setCreateFormData((prev) => ({
+									...prev,
+									teaCategories: newCategories,
+								}));
+							}}
+							idPrefix="create"
+						/>
+					</div>
+				</form>
+			</DashboardFormDrawer>
 
 			{/* Blog Posts Grid */}
 			<div className="px-0">
@@ -656,127 +593,23 @@ function RouteComponent() {
 			</div>
 
 			{/* Edit Drawer */}
-			<Drawer open={showEditDrawer} onOpenChange={setShowEditDrawer}>
-				<DrawerContent>
-					<DrawerHeader>
-						<DrawerTitle>Edit Blog Post</DrawerTitle>
-					</DrawerHeader>
-
-					<DrawerBody>
-						{error && (
-							<div className="bg-destructive/20 border border-destructive text-destructive-foreground px-4 py-3 rounded mb-4">
-								{error}
-							</div>
-						)}
-
-						<form
-							onSubmit={handleUpdate}
-							className="space-y-4"
-							id={editBlogFormId}
-						>
-							<div>
-								<label
-									htmlFor={editTitleId}
-									className="block text-sm font-medium mb-1"
-								>
-									Title
-								</label>
-								<Input
-									id={editTitleId}
-									name="title"
-									value={editFormData.title}
-									onChange={handleEditChange}
-								/>
-							</div>
-
-							<div>
-								<div className="flex items-center justify-between mb-1">
-									<label
-										htmlFor={editSlugId}
-										className="block text-sm font-medium"
-									>
-										Slug
-									</label>
-									<div className="flex items-center space-x-2">
-										<Switch
-											id={editAutoSlugId}
-											checked={isEditAutoSlug}
-											onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-												setIsEditAutoSlug(e.target.checked);
-											}}
-										/>
-										<label
-											htmlFor={editAutoSlugId}
-											className="text-xs text-muted-foreground"
-										>
-											Auto-generate
-										</label>
-									</div>
-								</div>
-								<Input
-									id={editSlugId}
-									name="slug"
-									value={editFormData.slug}
-									onChange={handleEditChange}
-									required
-									disabled={isEditAutoSlug}
-									className={
-										isEditAutoSlug ? "opacity-60 cursor-not-allowed" : ""
-									}
-								/>
-							</div>
-
-							<div>
-								<div className="block text-sm font-medium mb-2">
-									Tea Categories
-								</div>
-								<div className="space-y-2 border border-input rounded-md p-3 max-h-40 overflow-y-auto">
-									{teaCategories.map((category) => (
-										<label
-											key={category.slug}
-											htmlFor={`edit-tea-category-${category.slug}`}
-											className="flex items-center space-x-2"
-										>
-											<Checkbox
-												id={`edit-tea-category-${category.slug}`}
-												checked={
-													editFormData.teaCategories?.includes(category.slug) ??
-													false
-												}
-												onCheckedChange={(checked) => {
-													const newCategories = checked
-														? [
-																...(editFormData.teaCategories || []),
-																category.slug,
-															]
-														: (editFormData.teaCategories || []).filter(
-																(slug) => slug !== category.slug,
-															);
-													setEditFormData((prev) => ({
-														...prev,
-														teaCategories: newCategories,
-													}));
-												}}
-											/>
-											<span>{category.name}</span>
-										</label>
-									))}
-								</div>
-							</div>
-
-							<div>
-								<label
-									htmlFor="editProduct"
-									className="block text-sm font-medium mb-1"
-								>
-									Related Product
-								</label>
-								<ProductSelector
-									selectedProductSlug={editFormData.productSlug || ""}
-									onProductSelect={handleEditProductSelect}
-								/>
-							</div>
-
+			<DashboardFormDrawer
+				isOpen={showEditDrawer}
+				onOpenChange={setShowEditDrawer}
+				title="Edit Blog Post"
+				formId={editBlogFormId}
+				isSubmitting={isSubmitting}
+				submitButtonText="Update Post"
+				submittingText="Updating..."
+				onCancel={closeEditDrawer}
+				error={error}
+				layout="two-column"
+				fullWidth={true}
+			>
+				<form onSubmit={handleUpdate} id={editBlogFormId} className="contents">
+					{/* Left Column - Content */}
+					<div className="space-y-4">
+						<ProductFormSection variant="default" title="Content">
 							<Textarea
 								label="Content"
 								id={editBodyId}
@@ -784,75 +617,124 @@ function RouteComponent() {
 								value={editFormData.body}
 								onChange={handleEditChange}
 								required
-								rows={10}
+								rows={15}
+								className="resize-y"
 							/>
+						</ProductFormSection>
+					</div>
 
-							<Input
-								label="Images (comma-separated URLs)"
-								id={editImagesId}
-								name="images"
-								value={editFormData.images}
-								onChange={handleEditChange}
-							/>
-							<DatePicker
-								label="Published At"
-								date={(() => {
-									const timestamp = editFormData.publishedAt;
-									if (Number.isNaN(timestamp)) {
-										return new Date();
+					{/* Right Column - Metadata */}
+					<div className="space-y-4">
+						<ProductFormSection variant="default" title="Post Details">
+							<div className="space-y-4">
+								<div>
+									<label
+										htmlFor={editTitleId}
+										className="block text-sm font-medium mb-1"
+									>
+										Title
+									</label>
+									<Input
+										id={editTitleId}
+										name="title"
+										value={editFormData.title}
+										onChange={handleEditChange}
+									/>
+								</div>
+
+								<SlugField
+									slug={editFormData.slug || ""}
+									name={editFormData.title || ""}
+									isAutoSlug={isEditAutoSlug}
+									onSlugChange={(slug) =>
+										setEditFormData((prev) => ({ ...prev, slug }))
 									}
-									// Create date from timestamp and ensure it shows the correct date
-									const date = new Date(timestamp);
-									return date;
-								})()}
-								onDateChange={(date) => {
-									setEditFormData((prev) => ({
-										...prev,
-										publishedAt: date ? date.getTime() : Date.now(),
-									}));
-								}}
-								placeholder="Select publication date"
-							/>
+									onAutoSlugChange={setIsEditAutoSlug}
+									idPrefix="edit"
+								/>
 
-							<div className="flex items-center space-x-2">
-								<Switch
-									id={editIsVisibleId}
-									checked={editFormData.isVisible ?? true}
-									onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+
+								<div>
+									<label
+										htmlFor="editProduct"
+										className="block text-sm font-medium mb-1"
+									>
+										Related Product
+									</label>
+									<ProductSelector
+										selectedProductSlug={editFormData.productSlug || ""}
+										onProductSelect={handleEditProductSelect}
+									/>
+								</div>
+
+								<Input
+									label="Images (comma-separated URLs)"
+									id={editImagesId}
+									name="images"
+									value={editFormData.images}
+									onChange={handleEditChange}
+								/>
+
+								<DatePicker
+									label="Published At"
+									date={(() => {
+										const timestamp = editFormData.publishedAt;
+										if (Number.isNaN(timestamp)) {
+											return new Date();
+										}
+										const date = new Date(timestamp);
+										return date;
+									})()}
+									onDateChange={(date) => {
 										setEditFormData((prev) => ({
 											...prev,
-											isVisible: e.target.checked,
+											publishedAt: date ? date.getTime() : Date.now(),
 										}));
 									}}
+									placeholder="Select publication date"
 								/>
-								<label htmlFor="editIsVisible" className="text-sm font-medium">
-									Visible on blog
-								</label>
-							</div>
-						</form>
-					</DrawerBody>
 
-					<DrawerFooter className="border-t border-border bg-background">
-						<div className="flex justify-end space-x-2">
-							<Button
-								variant="secondaryInverted"
-								type="button"
-								onClick={closeEditDrawer}
-							>
-								Cancel
-							</Button>
-							<Button
-								variant="greenInverted"
-								type="submit"
-								form="editBlogForm"
-								disabled={isSubmitting}
-							>
-								{isSubmitting ? "Updating..." : "Update Post"}
-							</Button>
-						</div>
-					</DrawerFooter>
-				</DrawerContent>
-			</Drawer>
+								<div className="flex items-center space-x-2">
+									<Switch
+										id={editIsVisibleId}
+										checked={editFormData.isVisible ?? true}
+										onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+											setEditFormData((prev) => ({
+												...prev,
+												isVisible: e.target.checked,
+											}));
+										}}
+									/>
+									<label
+										htmlFor="editIsVisible"
+										className="text-sm font-medium"
+									>
+										Visible on blog
+									</label>
+								</div>
+							</div>
+						</ProductFormSection>
+
+						{/* Tea Categories Block */}
+						<TeaCategoriesSelector
+							teaCategories={teaCategories}
+							selectedCategories={editFormData.teaCategories || []}
+							onCategoryChange={(categorySlug, checked) => {
+								const newCategories = checked
+									? [...(editFormData.teaCategories || []), categorySlug]
+									: (editFormData.teaCategories || []).filter(
+											(slug) => slug !== categorySlug,
+										);
+								setEditFormData((prev) => ({
+									...prev,
+									teaCategories: newCategories,
+								}));
+							}}
+							idPrefix="edit"
+						/>
+					</div>
+				</form>
+			</DashboardFormDrawer>
 
 			{/* Delete Confirmation Dialog */}
 			{showDeleteDialog && (

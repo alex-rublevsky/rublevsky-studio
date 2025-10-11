@@ -198,20 +198,75 @@ export const getAllProducts = createServerFn({ method: "GET" })
 				return a.localeCompare(b);
 			});
 
+			// Helper function to check if product is available (server-side, no cart context)
+			const isProductAvailableServerSide = (
+				product: ProductWithVariations,
+			): boolean => {
+				// Sticker category products are always available
+				if (product.categorySlug === "stickers") {
+					return true;
+				}
+
+				// Unlimited stock products are always available
+				if (product.unlimitedStock) {
+					return true;
+				}
+
+				// Check if product has variations
+				if (
+					product.hasVariations &&
+					product.variations &&
+					product.variations.length > 0
+				) {
+					// For weight-based products, check if there's total weight available
+					if (product.weight) {
+						const totalWeight = parseInt(product.weight || "0", 10);
+						return totalWeight > 0;
+					}
+
+					// For regular variation products, check if ANY variation has stock > 0
+					return product.variations.some((variation) => variation.stock > 0);
+				}
+
+				// For regular products without variations, check base stock
+				return product.stock > 0;
+			};
+
+			// Sort products within each category: available first, then alphabetically
+			const sortProductsByAvailability = (
+				products: ProductWithVariations[],
+			): ProductWithVariations[] => {
+				return [...products].sort((a, b) => {
+					const aAvailable = isProductAvailableServerSide(a);
+					const bAvailable = isProductAvailableServerSide(b);
+
+					// Available products first, unavailable last
+					if (aAvailable !== bAvailable) {
+						return aAvailable ? -1 : 1;
+					}
+
+					// Within same availability group, sort alphabetically
+					return a.name.localeCompare(b.name);
+				});
+			};
+
 			for (const slug of sortedCategorySlugs) {
 				const products = productsByCategory.get(slug);
 				if (!products) continue; // Skip if products not found
 				const category = categoriesBySlug.get(slug);
 				groupedProducts.push({
 					title: category?.name || slug,
-					products,
+					products: sortProductsByAvailability(products),
 					categorySlug: slug,
 				});
 			}
 
-			// Add inactive group
+			// Add inactive group (also sorted)
 			if (inactive.length > 0) {
-				groupedProducts.push({ title: "Inactive", products: inactive });
+				groupedProducts.push({
+					title: "Inactive",
+					products: sortProductsByAvailability(inactive),
+				});
 			}
 
 			return {
