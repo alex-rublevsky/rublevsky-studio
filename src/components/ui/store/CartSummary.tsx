@@ -2,6 +2,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "~/components/ui/shared/Button";
 import { useCart } from "~/lib/cartContext";
+import { Badge } from "../shared/Badge";
 
 export function CartSummary() {
 	const { cart } = useCart();
@@ -29,9 +30,9 @@ export function CartSummary() {
 			</div>
 
 			{discountTotal > 0 && (
-				<div className="flex justify-between text-sm text-green-600">
+				<div className="flex justify-between text-sm text-foreground">
 					<p>Discount</p>
-					<p>-${discountTotal.toFixed(2)}</p>
+					<Badge variant="green" className="text-sm translate-x-2">-${discountTotal.toFixed(2)}</Badge>
 				</div>
 			)}
 

@@ -85,7 +85,7 @@ function OrderPage() {
 		isPending,
 		data: order,
 		isError,
-	} = useQuery<Order>({
+	} = useQuery({
 		queryKey: ["order", orderId],
 		queryFn: async () => {
 			try {
@@ -155,7 +155,7 @@ function OrderPage() {
 					<div className="flex justify-center gap-8">
 						<p className="text-muted-foreground mb-2">Order #{order.id}</p>
 						<p className="text-muted-foreground">
-							Placed on {new Date(order.createdAt * 1000).toLocaleDateString()}
+							Placed on {new Date(Number(order.createdAt) * 1000).toLocaleDateString()}
 						</p>
 					</div>
 
@@ -216,9 +216,9 @@ function OrderPage() {
 									<h6 className="font-medium break-words">
 										{item.product?.name || "Product"}
 									</h6>
-									{item.variation && (
+									{item.productVariationId && (
 										<p className="text-sm text-muted-foreground">
-											SKU: {item.variation.sku}
+											Variation ID: {item.productVariationId}
 										</p>
 									)}
 									<div className="grid grid-cols-[1fr_auto] gap-4">
@@ -235,7 +235,7 @@ function OrderPage() {
 																	key={key}
 																	className="text-sm text-muted-foreground"
 																>
-																	{getAttributeDisplayName(key)}: {value}
+																	{getAttributeDisplayName(key)}: {String(value)}
 																</span>
 															),
 														)}
@@ -245,7 +245,7 @@ function OrderPage() {
 										<div className="text-right self-end">
 											{item.discountPercentage ? (
 												<>
-													<Badge variant="greenOutline" className="mb-1 -mr-1">
+													<Badge variant="green" className="mb-1 -mr-1">
 														-{item.discountPercentage}%
 													</Badge>
 													<p className="line-through text-muted-foreground">

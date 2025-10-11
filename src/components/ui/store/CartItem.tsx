@@ -130,7 +130,7 @@ export function CartItem({ item }: CartItemProps) {
 			<div className="flex flex-col items-end">
 				{item.discount ? (
 					<div className="flex flex-col items-end">
-						<Badge variant="greenOutline" className="-mr-1">
+						<Badge variant="greenOutline" className="translate-x-2">
 							{item.discount}% OFF
 						</Badge>
 						<span className="line-through text-sm text-muted-foreground">

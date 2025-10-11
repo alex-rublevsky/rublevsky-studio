@@ -20,7 +20,7 @@ const badgeVariants = cva(
 				green:
 					"bg-discount-badge text-discount-badge-foreground font-medium hover:bg-discount-badge/90 active:bg-discount-badge/90 focus-visible:ring-discount-badge/20 dark:focus-visible:ring-discount-badge/40 dark:bg-discount-badge/70",
 				greenOutline:
-					"border-discount-badge bg-transparent text-discount-badge hover:bg-discount-badge/10 active:bg-discount-badge/10 focus-visible:ring-discount-badge/20 dark:focus-visible:ring-discount-badge/40 dark:bg-discount-badge/70",
+				"!bg-transparent border-discount-badge text-discount-badge-foreground font-medium hover:!bg-discount-badge hover:text-discount-badge-foreground active:!bg-discount-badge active:text-discount-badge-foreground hover:brightness-100 active:brightness-100 focus-visible:ring-discount-badge/20 dark:focus-visible:ring-discount-badge/40 dark:bg-discount-badge/70 border-solid",
 				shuPuer: "hover:brightness-90 active:brightness-90 tea-badge-shu-puer",
 				rawPuer: "tea-badge-raw-puer",
 				purple: "tea-badge-purple",
