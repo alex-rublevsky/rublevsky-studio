@@ -118,15 +118,10 @@ function SortableVariationItem({
 			{/* First row: SKU with Remove button */}
 			<div className="flex gap-1 items-end">
 				<div className="flex-1">
-					<label
-						htmlFor={`sku-${variation.id}`}
-						className="block text-xs text-muted-foreground mb-1"
-					>
-						SKU
-					</label>
 					<Input
 						id={`sku-${variation.id}`}
 						type="text"
+						label="SKU"
 						value={variation.sku}
 						onChange={(e) => onUpdate(variation.id, "sku", e.target.value)}
 						onPointerDown={(e) => e.stopPropagation()}
@@ -151,42 +146,33 @@ function SortableVariationItem({
 			{/* Second row: Price, Discount, Stock, Country */}
 			<div className="grid grid-cols-2 md:grid-cols-4 gap-2">
 				<div>
-					<label
-						htmlFor={`price-${variation.id}`}
-						className="block text-xs text-muted-foreground mb-1"
-					>
-						Price
-					</label>
 					<Input
 						id={`price-${variation.id}`}
 						type="number"
-						value={variation.price}
-						onChange={(e) =>
-							onUpdate(variation.id, "price", parseFloat(e.target.value) || 0)
-						}
+						label="Price"
+						value={variation.price === 0 ? "" : variation.price}
+						onChange={(e) => {
+							const value = e.target.value;
+							const numericValue = value === "" ? 0 : parseFloat(value) || 0;
+							onUpdate(variation.id, "price", numericValue);
+						}}
 						onPointerDown={(e) => e.stopPropagation()}
 						className="text-sm"
+						placeholder="0"
 					/>
 				</div>
 
 				<div>
-					<label
-						htmlFor={`discount-${variation.id}`}
-						className="block text-xs text-muted-foreground mb-1"
-					>
-						Discount %
-					</label>
 					<Input
 						id={`discount-${variation.id}`}
 						type="number"
+						label="Discount %"
 						value={variation.discount || ""}
-						onChange={(e) =>
-							onUpdate(
-								variation.id,
-								"discount",
-								parseInt(e.target.value, 10) || null,
-							)
-						}
+						onChange={(e) => {
+							const value = e.target.value;
+							const numericValue = value === "" ? null : parseInt(value, 10) || null;
+							onUpdate(variation.id, "discount", numericValue);
+						}}
 						onPointerDown={(e) => e.stopPropagation()}
 						placeholder="0"
 						min="0"
@@ -196,21 +182,19 @@ function SortableVariationItem({
 				</div>
 
 				<div>
-					<label
-						htmlFor={`stock-${variation.id}`}
-						className="block text-xs text-muted-foreground mb-1"
-					>
-						Stock
-					</label>
 					<Input
 						id={`stock-${variation.id}`}
 						type="number"
-						value={variation.stock}
-						onChange={(e) =>
-							onUpdate(variation.id, "stock", parseInt(e.target.value, 10) || 0)
-						}
+						label="Stock"
+						value={variation.stock === 0 ? "" : variation.stock}
+						onChange={(e) => {
+							const value = e.target.value;
+							const numericValue = value === "" ? 0 : parseInt(value, 10) || 0;
+							onUpdate(variation.id, "stock", numericValue);
+						}}
 						onPointerDown={(e) => e.stopPropagation()}
 						className="text-sm"
+						placeholder="0"
 					/>
 				</div>
 
@@ -260,15 +244,10 @@ function SortableVariationItem({
 					{variation.attributes.map((attr) => (
 						<div key={attr.attributeId} className="flex items-center gap-1">
 							<div className="flex-1">
-								<label
-									htmlFor={`attr-${variation.id}-${attr.attributeId}`}
-									className="block text-xs text-muted-foreground mb-1"
-								>
-									{getAttributeDisplayName(attr.attributeId)}
-								</label>
 								<Input
 									id={`attr-${variation.id}-${attr.attributeId}`}
 									type="text"
+									label={getAttributeDisplayName(attr.attributeId)}
 									value={attr.value}
 									onChange={(e) =>
 										onUpdateAttributeValue(

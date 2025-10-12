@@ -396,14 +396,14 @@ function ProductCard({
 									{/* Tea Category Badges - Desktop/Tablet */}
 									<TeaCategoryBadges 
 										teaCategories={product.teaCategories} 
-										className="hidden md:flex flex-wrap gap-1 items-center justify-end flex-1 min-w-0"
+										className="hidden md:flex flex-wrap items-center justify-end flex-1 min-w-0"
 									/>
 								</div>
 								{/* Tea Category Badges - Mobile */}
 								<div className="md:hidden mt-2">
 									<TeaCategoryBadges 
 										teaCategories={product.teaCategories} 
-										className="flex flex-wrap gap-2"
+										className="flex flex-wrap"
 									/>
 								</div>
 

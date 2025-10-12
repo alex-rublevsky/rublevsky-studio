@@ -217,33 +217,21 @@ export default function ImageGallery({
 
 			{/* Main image container */}
 			<div className="flex items-center justify-center lg:items-start lg:justify-start order-1 grow relative">
-				{/* ALWAYS VISIBLE: First image with view transition name - this is the key element for view transitions */}
+				{/* Desktop: Single image display */}
 				<img
-					src={`https://assets.rublevsky.studio/${images[0]}`}
+					src={`https://assets.rublevsky.studio/${images[currentImageIndex]}`}
 					alt={alt}
 					width={3000}
 					height={3000}
 					loading="eager"
-					className={`${mainImageVariants({ size })} ${currentImageIndex === 0 ? "block" : "hidden lg:hidden"}`}
+					className={`${mainImageVariants({ size })} hidden lg:block`}
 					style={{ viewTransitionName: transitionName }}
 				/>
 
-				{/* Desktop: Show selected image if not first image */}
-				{currentImageIndex !== 0 && (
-					<img
-						src={`https://assets.rublevsky.studio/${images[currentImageIndex]}`}
-						alt={alt}
-						width={3000}
-						height={3000}
-						loading="eager"
-						className={`${mainImageVariants({ size })} hidden lg:block`}
-					/>
-				)}
-
-				{/* Mobile: Scrollable gallery (only for navigation, not view transitions) */}
+				{/* Mobile: Scrollable gallery */}
 				<div
 					ref={mainImageContainerRef}
-					className="lg:hidden relative w-full h-[60vh] overflow-x-auto overflow-y-hidden scroll-smooth snap-x snap-mandatory"
+					className="lg:hidden relative w-full aspect-square overflow-x-auto overflow-y-hidden scroll-smooth snap-x snap-mandatory"
 				>
 					<div className="flex h-full">
 						{images.map((image, index) => (

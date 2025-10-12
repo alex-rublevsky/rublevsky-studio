@@ -43,7 +43,7 @@ export function TeaCategoryBadges({ teaCategories = [], className }: TeaCategory
 	if (!validCategories.length) return null;
 
 	return (
-		<div className={`flex flex-wrap ${className || ""}`}>
+		<div className={`flex flex-wrap gap-1 ${className || ""}`}>
 			{validCategories.map((category) => {
 				const variant = teaCategoryVariantMap[category];
 				const name = teaCategoryNames[category];

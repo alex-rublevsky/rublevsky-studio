@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useId, useMemo, useState } from "react";
@@ -27,10 +27,8 @@ export const Route = createFileRoute("/dashboard/blog")({
 });
 
 function RouteComponent() {
-	const _autoSlugId = useId();
-	const _editAutoSlugId = useId();
-	const _slugId = useId();
-	const _editSlugId = useId();
+	const queryClient = useQueryClient();
+
 	const createBlogFormId = useId();
 	const titleId = useId();
 	const bodyId = useId();
@@ -47,7 +45,6 @@ function RouteComponent() {
 		isPending: isLoading,
 		isError,
 		data,
-		refetch: refetchBlog,
 	} = useQuery<{
 		posts: BlogPost[];
 		teaCategories: TeaCategory[];
@@ -226,7 +223,9 @@ function RouteComponent() {
 			toast.success("Blog post added successfully!");
 
 			closeCreateDrawer();
-			refetchBlog();
+			queryClient.invalidateQueries({
+				queryKey: ["dashboard-blog"],
+			});
 		} catch (err) {
 			const errorMessage =
 				err instanceof Error ? err.message : "An error occurred";
@@ -288,7 +287,9 @@ function RouteComponent() {
 
 			toast.success("Blog post updated successfully!");
 			closeEditDrawer();
-			refetchBlog();
+			queryClient.invalidateQueries({
+				queryKey: ["dashboard-blog"],
+			});
 		} catch (err) {
 			const errorMessage =
 				err instanceof Error ? err.message : "An error occurred";
@@ -316,7 +317,9 @@ function RouteComponent() {
 			toast.success("Blog post deleted successfully!");
 			setShowDeleteDialog(false);
 			setDeletingPostId(null);
-			refetchBlog();
+			queryClient.invalidateQueries({
+				queryKey: ["dashboard-blog"],
+			});
 		} catch (err) {
 			const errorMessage =
 				err instanceof Error ? err.message : "An error occurred";

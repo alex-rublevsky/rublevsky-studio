@@ -1,5 +1,5 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { useCallback, useEffect, useId, useState } from "react";
 import { toast } from "sonner";
@@ -75,34 +75,28 @@ export const Route = createFileRoute("/dashboard/products")({
 });
 
 function RouteComponent() {
-	const _router = useRouter();
-	const navigate = Route.useNavigate();
+	
+	const queryClient = useQueryClient();
 
 	// Use suspense query - data is guaranteed to be loaded by the loader
 	const { data: productsData } = useSuspenseQuery(productsQueryOptions());
 
-	// Function to refetch data by navigating to the same route
+	// Function to refetch data using query invalidation
 	const refetch = () => {
-		navigate({ to: "/dashboard/products", replace: true });
+		queryClient.invalidateQueries({
+			queryKey: ["dashboard-products"],
+		});
 	};
 
 	// Generate unique IDs for form elements
 	const editStockId = useId();
 	const editCategoryId = useId();
 	const editBrandId = useId();
-	const _editImagesId = useId();
-	const _editIsActiveId = useId();
-	const _editIsFeaturedId = useId();
-	const _addImagesId = useId();
-	const _addIsActiveId = useId();
-	const _addIsFeaturedId = useId();
-	const _editHasVariationsId = useId();
+
 	const editWeightId = useId();
 	const editShipsFromId = useId();
-	const _addHasVariationsId = useId();
 	const addShipsFromId = useId();
-	const _editDiscountId = useId();
-	const _addDiscountId = useId();
+
 	const addPriceId = useId();
 	const addCategoryId = useId();
 	const addBrandId = useId();
@@ -114,7 +108,7 @@ function RouteComponent() {
 		name: "",
 		slug: "",
 		description: "",
-		price: "",
+		price: "0",
 		categorySlug: "",
 		brandSlug: "",
 		teaCategories: [],
@@ -325,7 +319,7 @@ function RouteComponent() {
 		const { name, value, type } = e.target;
 		const checked = (e.target as HTMLInputElement).checked;
 
-		let updatedFormData = { ...formData };
+		let updatedFormData: ProductFormData = { ...formData };
 
 		// Handle slug auto-generation
 		if (name === "slug") {
@@ -347,10 +341,18 @@ function RouteComponent() {
 			};
 		} else {
 			// Handle regular form fields
-			updatedFormData = {
-				...updatedFormData,
-				[name]: type === "checkbox" ? checked : value,
-			};
+			if (name === "discount") {
+				// Handle discount field specifically - allow empty string to be converted to null
+				updatedFormData = {
+					...updatedFormData,
+					discount: value === "" ? null : parseInt(value, 10) || null,
+				};
+			} else {
+				updatedFormData = {
+					...updatedFormData,
+					[name]: type === "checkbox" ? checked : value,
+				};
+			}
 		}
 
 		// Handle variations creation
@@ -378,7 +380,7 @@ function RouteComponent() {
 		const { name, value, type } = e.target;
 		const checked = (e.target as HTMLInputElement).checked;
 
-		let updatedFormData = { ...editFormData };
+		let updatedFormData: ProductFormData = { ...editFormData };
 
 		// Handle slug auto-generation
 		if (name === "slug") {
@@ -400,10 +402,18 @@ function RouteComponent() {
 			};
 		} else {
 			// Handle regular form fields
-			updatedFormData = {
-				...updatedFormData,
-				[name]: type === "checkbox" ? checked : value,
-			};
+			if (name === "discount") {
+				// Handle discount field specifically - allow empty string to be converted to null
+				updatedFormData = {
+					...updatedFormData,
+					discount: value === "" ? null : parseInt(value, 10) || null,
+				};
+			} else {
+				updatedFormData = {
+					...updatedFormData,
+					[name]: type === "checkbox" ? checked : value,
+				};
+			}
 		}
 
 		// Handle variations creation
@@ -831,16 +841,11 @@ function RouteComponent() {
 							<div className="grid grid-cols-2 gap-4">
 								{/* Column 1: Price, Category, Weight */}
 								<div>
-									<label
-										htmlFor={editPriceId}
-										className="block text-sm font-medium mb-1"
-									>
-										Price (CAD)
-									</label>
 									<Input
 										id={editPriceId}
 										type="number"
 										name="price"
+										label="Price (CAD)"
 										value={editFormData.price}
 										onChange={handleEditChange}
 										step="0.01"
@@ -850,16 +855,11 @@ function RouteComponent() {
 
 								{/* Column 2: Stock */}
 								<div>
-									<label
-										htmlFor={editStockId}
-										className="block text-sm font-medium mb-1"
-									>
-										Stock
-									</label>
 									<Input
 										id={editStockId}
 										type="number"
 										name="stock"
+										label="Stock"
 										value={editFormData.stock}
 										onChange={handleEditChange}
 										required
@@ -932,16 +932,11 @@ function RouteComponent() {
 
 								{/* Column 1: Weight */}
 								<div>
-									<label
-										htmlFor={editWeightId}
-										className="block text-sm font-medium mb-1"
-									>
-										Weight (in grams)
-									</label>
 									<Input
 										id={editWeightId}
 										type="text"
 										name="weight"
+										label="Weight (in grams)"
 										value={editFormData.weight}
 										onChange={handleEditChange}
 										placeholder="Enter weight in grams"
@@ -1112,16 +1107,11 @@ function RouteComponent() {
 							<div className="grid grid-cols-2 gap-4">
 								{/* Column 1: Price, Category, Weight */}
 								<div>
-									<label
-										htmlFor={addPriceId}
-										className="block text-sm font-medium mb-1"
-									>
-										Price (CAD)
-									</label>
 									<Input
 										id={addPriceId}
 										type="number"
 										name="price"
+										label="Price (CAD)"
 										value={formData.price}
 										onChange={handleChange}
 										required

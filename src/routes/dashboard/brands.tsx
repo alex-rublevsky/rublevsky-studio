@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { useId, useState } from "react";
@@ -11,12 +11,27 @@ import { Button } from "~/components/ui/shared/Button";
 import { Image } from "~/components/ui/shared/Image";
 import { Input } from "~/components/ui/shared/Input";
 import { Switch } from "~/components/ui/shared/Switch";
+import { BrandsPageSkeleton } from "~/components/ui/dashboard/skeletons/BrandsPageSkeleton";
 import { useDashboardForm } from "~/hooks/useDashboardForm";
 import { getAllBrands } from "~/server_functions/dashboard/getAllBrands";
 import type { Brand, BrandFormData } from "~/types";
 
+// Query options factory for reuse
+const brandsQueryOptions = () => ({
+	queryKey: ["dashboard-brands"],
+	queryFn: () => getAllBrands(),
+	staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+});
+
 export const Route = createFileRoute("/dashboard/brands")({
 	component: RouteComponent,
+	pendingComponent: BrandsPageSkeleton,
+
+	// Loader prefetches data before component renders
+	loader: async ({ context: { queryClient } }) => {
+		// Ensure data is loaded before component renders
+		await queryClient.ensureQueryData(brandsQueryOptions());
+	},
 });
 
 function RouteComponent() {
@@ -24,18 +39,16 @@ function RouteComponent() {
 	const createFormId = useId();
 	const editFormId = useId();
 	const editNameId = useId();
-	const _editSlugId = useId();
+
 	const editLogoId = useId();
 	const editIsActiveId = useId();
 	const createNameId = useId();
-	const _createSlugId = useId();
+
 	const createLogoId = useId();
 	const createIsActiveId = useId();
 
-	const { isPending, data } = useQuery<Brand[]>({
-		queryKey: ["dashboard-brands"],
-		queryFn: () => getAllBrands(),
-	});
+	// Use suspense query - data is guaranteed to be loaded by the loader
+	const { data } = useSuspenseQuery(brandsQueryOptions());
 
 	// All-in-one dashboard form management hook
 	const { crud, createForm, editForm } = useDashboardForm<BrandFormData>(
@@ -165,9 +178,7 @@ function RouteComponent() {
 	return (
 		<div className="space-y-8">
 			<div>
-				{isPending ? (
-					<div className="text-center py-4">Loading brands...</div>
-				) : data === null ? (
+				{!data || data.length === 0 ? (
 					<div className="text-center py-4 text-muted-foreground">
 						No brands found
 					</div>

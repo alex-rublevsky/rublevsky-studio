@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { useCallback, useId, useState } from "react";
@@ -11,6 +11,7 @@ import { Badge } from "~/components/ui/shared/Badge";
 import { Button } from "~/components/ui/shared/Button";
 import { Input } from "~/components/ui/shared/Input";
 import { Switch } from "~/components/ui/shared/Switch";
+import { CategoriesPageSkeleton } from "~/components/ui/dashboard/skeletons/CategoriesPageSkeleton";
 import { useDashboardForm } from "~/hooks/useDashboardForm";
 import { generateSlug, useSlugGeneration } from "~/hooks/useSlugGeneration";
 import { createProductCategory } from "~/server_functions/dashboard/categories/createProductCategory";
@@ -28,8 +29,31 @@ import type {
 	TeaCategoryFormData,
 } from "~/types";
 
+// Query options factories for reuse
+const productCategoriesQueryOptions = () => ({
+	queryKey: ["dashboard-categories"],
+	queryFn: () => getAllProductCategories(),
+	staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+});
+
+const teaCategoriesQueryOptions = () => ({
+	queryKey: ["dashboard-tea-categories"],
+	queryFn: () => getAllTeaCategories(),
+	staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+});
+
 export const Route = createFileRoute("/dashboard/categories")({
 	component: RouteComponent,
+	pendingComponent: CategoriesPageSkeleton,
+
+	// Loader prefetches data before component renders
+	loader: async ({ context: { queryClient } }) => {
+		// Ensure data is loaded before component renders
+		await Promise.all([
+			queryClient.ensureQueryData(productCategoriesQueryOptions()),
+			queryClient.ensureQueryData(teaCategoriesQueryOptions()),
+		]);
+	},
 });
 
 function RouteComponent() {
@@ -37,21 +61,9 @@ function RouteComponent() {
 	const createFormId = useId();
 	const editFormId = useId();
 
-	// Fetch product categories
-	const { isPending: categoriesPending, data: categoriesData } = useQuery<
-		Category[]
-	>({
-		queryKey: ["dashboard-categories"],
-		queryFn: () => getAllProductCategories(),
-	});
-
-	// Fetch tea categories
-	const { isPending: teaCategoriesPending, data: teaCategoriesData } = useQuery<
-		TeaCategory[]
-	>({
-		queryKey: ["dashboard-tea-categories"],
-		queryFn: () => getAllTeaCategories(),
-	});
+	// Use suspense queries - data is guaranteed to be loaded by the loader
+	const { data: categoriesData } = useSuspenseQuery(productCategoriesQueryOptions());
+	const { data: teaCategoriesData } = useSuspenseQuery(teaCategoriesQueryOptions());
 
 	// Category type state (to distinguish between product category and tea category operations)
 	const [categoryType, setCategoryType] = useState<"product" | "tea">(
@@ -348,11 +360,7 @@ function RouteComponent() {
 					</div>
 
 					<div>
-						{categoriesPending ? (
-							<div className="text-center py-8">
-								Loading product categories...
-							</div>
-						) : !categoriesData || categoriesData.length === 0 ? (
+						{!categoriesData || categoriesData.length === 0 ? (
 							<div className="text-center py-8 text-muted-foreground">
 								No product categories found
 							</div>
@@ -425,9 +433,7 @@ function RouteComponent() {
 					</div>
 
 					<div>
-						{teaCategoriesPending ? (
-							<div className="text-center py-8">Loading tea categories...</div>
-						) : !teaCategoriesData || teaCategoriesData.length === 0 ? (
+						{!teaCategoriesData || teaCategoriesData.length === 0 ? (
 							<div className="text-center py-8 text-muted-foreground">
 								No tea categories found
 							</div>
