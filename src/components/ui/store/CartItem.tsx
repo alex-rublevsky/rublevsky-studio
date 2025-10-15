@@ -132,7 +132,7 @@ export function CartItem({ item, enrichedItems }: CartItemProps) {
 
 			{/* Product info */}
 			<div className="grow">
-				<Link href={`/product/${item.productSlug}`} className="hover:underline">
+				<Link href={`/store/${item.productSlug}`} className="hover:underline">
 					{item.productName}
 				</Link>
 
