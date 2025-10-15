@@ -14,6 +14,7 @@
 // import SmoothScroll from "~/components/SmoothScroll";
 import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "~/components/ui/shared/Button";
+import { usePrefetch } from "~/hooks/usePrefetch";
 import "../styles/app.css";
 import { seo } from "~/utils/seo";
 
@@ -30,6 +31,8 @@ export const Route = createFileRoute("/")({
 });
 
 function App() {
+	const { prefetchBlog, prefetchStore } = usePrefetch();
+
 	return (
 		<div className="min-h-screen flex flex-col">
 			<main className="flex-1 flex items-center justify-center px-4 py-8">
@@ -63,6 +66,7 @@ function App() {
 								variant="secondary"
 								className="w-full max-w-lg"
 								description="I study, drink, compare and analyse traditional chinese tea, as well as conduct tea ceremonies"
+								onMouseEnter={prefetchBlog}
 							>
 								Tea Blog
 							</Button>
@@ -72,6 +76,7 @@ function App() {
 								variant="secondary"
 								className="w-full max-w-lg"
 								description="I sell tea, handmade clothing prints, posters and stickers"
+								onMouseEnter={prefetchStore}
 							>
 								Store
 							</Button>

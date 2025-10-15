@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import { cn } from "~/lib/utils";
 
-interface FormSectionProps {
+interface DrawerSectionProps {
 	title?: string;
 	variant?: "default" | "muted";
 	children: ReactNode;
@@ -10,14 +10,14 @@ interface FormSectionProps {
 	maxWidth?: boolean; // Add max-width for single-column layouts
 }
 
-export function FormSection({
+export function DrawerSection({
 	title,
 	variant = "default",
 	children,
 	className,
 	style,
 	maxWidth = false,
-}: FormSectionProps) {
+}: DrawerSectionProps) {
 	return (
 		<div
 			className={cn(
@@ -33,6 +33,3 @@ export function FormSection({
 		</div>
 	);
 }
-
-// Keep the old name for backward compatibility
-export const ProductFormSection = FormSection;

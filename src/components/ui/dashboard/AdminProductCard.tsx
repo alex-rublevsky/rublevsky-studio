@@ -1,6 +1,5 @@
 import { Edit, Trash2 } from "lucide-react";
 import { Badge } from "~/components/ui/shared/Badge";
-import { TeaCategoryBadges } from "~/components/ui/shared/TeaCategoryBadges";
 import { getCountryFlag } from "~/constants/countries";
 import { cn } from "~/lib/utils";
 import type { ProductWithVariations } from "~/types";
@@ -12,7 +11,6 @@ interface AdminProductCardProps {
 	onEdit: (product: ProductWithVariations) => void;
 	onDelete: (product: ProductWithVariations) => void;
 	formatPrice: (price: number) => string;
-	getCategoryName: (slug: string | null) => string | null;
 	getTeaCategoryNames: (slugs: string[] | undefined) => string;
 }
 
@@ -21,7 +19,6 @@ export function AdminProductCard({
 	onEdit,
 	onDelete,
 	formatPrice: _formatPrice,
-	getCategoryName,
 }: AdminProductCardProps) {
 	const imageArray = product.images?.split(",").map((img) => img.trim()) ?? [];
 	const primaryImage = imageArray[0];
@@ -181,17 +178,17 @@ export function AdminProductCard({
 										)}
 									</div>
 									{/* Tea Category Badges - Desktop/Tablet */}
-									<TeaCategoryBadges 
-										teaCategories={product.teaCategories} 
-										className="hidden md:flex flex-col gap-1 items-end justify-center"
-									/>
+									<div className="hidden md:flex flex-col gap-1 items-end justify-center">
+										{product.teaCategories?.map((category) => (
+											<Badge key={category.slug} teaCategory={category} />
+										))}
+									</div>
 								</div>
 								{/* Tea Category Badges - Mobile */}
-								<div className="md:hidden mt-2">
-									<TeaCategoryBadges 
-										teaCategories={product.teaCategories} 
-										className="flex flex-wrap gap-2"
-									/>
+								<div className="md:hidden mt-2 flex flex-wrap gap-2">
+									{product.teaCategories?.map((category) => (
+										<Badge key={category.slug} teaCategory={category} />
+									))}
 								</div>
 							</div>
 
@@ -200,14 +197,6 @@ export function AdminProductCard({
 
 							{/* Metadata */}
 							<div className="space-y-1 text-sm">
-								{/* Category */}
-								<div>
-									<span className="text-muted-foreground">
-										{getCategoryName(product.categorySlug) || "N/A"}
-									</span>
-								</div>
-
-
 								{/* Stock */}
 								<div>
 									<span
@@ -244,15 +233,6 @@ export function AdminProductCard({
 												)
 												.join(" ")}
 										</span>
-									</div>
-								)}
-
-								{/* Variations indicator */}
-								{product.hasVariations && (
-									<div className="pt-1">
-										<Badge variant="outline" className="text-xs">
-											Has Variations
-										</Badge>
 									</div>
 								)}
 							</div>

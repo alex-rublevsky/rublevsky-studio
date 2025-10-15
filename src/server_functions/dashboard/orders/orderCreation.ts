@@ -14,6 +14,7 @@ interface CartItem {
 	productSlug: string;
 	variationId?: number;
 	quantity: number;
+	addedAt: number; // From minimal CartItem
 	price: number;
 	maxStock: number;
 	unlimitedStock: boolean;

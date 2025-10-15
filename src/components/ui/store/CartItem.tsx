@@ -1,18 +1,23 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { useMemo } from "react";
 import { Badge } from "~/components/ui/shared/Badge";
 import { Image } from "~/components/ui/shared/Image";
 import { Link } from "~/components/ui/shared/Link";
 import { QuantitySelector } from "~/components/ui/shared/QuantitySelector";
-import { type CartItem as CartItemType, useCart } from "~/lib/cartContext";
+import type { EnrichedCartItem } from "~/hooks/useEnrichedCart";
+import { useCart } from "~/lib/cartContext";
 import { getAttributeDisplayName } from "~/lib/productAttributes";
+import { storeDataQueryOptions } from "~/lib/queryOptions";
 
 interface CartItemProps {
-	item: CartItemType;
+	item: EnrichedCartItem;
+	enrichedItems: EnrichedCartItem[];
 }
 
-export function CartItem({ item }: CartItemProps) {
+export function CartItem({ item, enrichedItems }: CartItemProps) {
 	const { updateQuantity, removeFromCart, cart } = useCart();
+	const queryClient = useQueryClient();
 
 	// Calculate effective max quantity for weight-based products
 	const effectiveMaxQuantity = useMemo(() => {
@@ -36,7 +41,13 @@ export function CartItem({ item }: CartItemProps) {
 							!(cartItem.variationId === item.variationId),
 					)
 					.reduce((total, cartItem) => {
-						const cartItemWeight = cartItem.attributes?.WEIGHT_G;
+						// Get enriched cart item to access attributes
+						const enrichedCartItem = enrichedItems.find(
+							(enriched) =>
+								enriched.productId === cartItem.productId &&
+								enriched.variationId === cartItem.variationId,
+						);
+						const cartItemWeight = enrichedCartItem?.attributes?.WEIGHT_G;
 						if (cartItemWeight) {
 							return total + parseInt(cartItemWeight, 10) * cartItem.quantity;
 						}
@@ -53,20 +64,40 @@ export function CartItem({ item }: CartItemProps) {
 
 		// For regular products, use the maxStock from the item
 		return item.maxStock;
-	}, [item, cart.items]);
+	}, [item, cart.items, enrichedItems]);
 
 	const handleIncrement = () => {
 		if (
 			item.unlimitedStock ||
 			(effectiveMaxQuantity && item.quantity < effectiveMaxQuantity)
 		) {
-			updateQuantity(item.productId, item.quantity + 1, item.variationId);
+			// Get products from cache for validation
+			const storeData = queryClient.getQueryData(
+				storeDataQueryOptions().queryKey,
+			);
+			const products = storeData?.products || [];
+			updateQuantity(
+				item.productId,
+				item.quantity + 1,
+				item.variationId,
+				products,
+			);
 		}
 	};
 
 	const handleDecrement = () => {
 		if (item.quantity > 1) {
-			updateQuantity(item.productId, item.quantity - 1, item.variationId);
+			// Get products from cache for validation
+			const storeData = queryClient.getQueryData(
+				storeDataQueryOptions().queryKey,
+			);
+			const products = storeData?.products || [];
+			updateQuantity(
+				item.productId,
+				item.quantity - 1,
+				item.variationId,
+				products,
+			);
 		}
 	};
 

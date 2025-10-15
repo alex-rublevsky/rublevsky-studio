@@ -132,6 +132,10 @@ export const addresses = sqliteTable("addresses", {
 export const teaCategories = sqliteTable("tea_categories", {
 	slug: text("slug").primaryKey(),
 	name: text("name").notNull(),
+	description: text("description"),
+	blogSlug: text("blog_slug").references(() => blogPosts.slug, {
+		onDelete: "set null",
+	}),
 	isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
 });
 

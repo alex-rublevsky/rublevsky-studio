@@ -51,6 +51,8 @@ export const updateTeaCategoryBySlug = createServerFn({ method: "POST" })
 				.set({
 					name: teaCategoryData.name,
 					slug: teaCategoryData.slug,
+					description: teaCategoryData.description || null,
+					blogSlug: teaCategoryData.blogSlug || null,
 					isActive: teaCategoryData.isActive ?? true,
 				})
 				.where(eq(teaCategories.slug, slug))

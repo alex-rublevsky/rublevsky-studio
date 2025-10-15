@@ -87,8 +87,8 @@ export const webProjects: Project[] = [
 				icon: "logos/figma-text.svg",
 			},
 			{
-				name: "Webflow",
-				icon: "logos/webflow-text.svg",
+				name: "WordPress",
+				icon: "logos/wordpress.svg",
 			},
 		],
 		websiteUrl: "https://bfloor.ru/",

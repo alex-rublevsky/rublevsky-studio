@@ -1,7 +1,9 @@
 /// <reference types="vite/client" />
 
+import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 //import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { persistQueryClient } from "@tanstack/react-query-persist-client";
 import {
 	createRootRoute,
 	HeadContent,
@@ -20,7 +22,30 @@ import { useIsMobile } from "~/hooks/use-mobile";
 import { seo } from "~/utils/seo";
 import appCss from "../styles/app.css?url";
 
-const queryClient = new QueryClient();
+// Create QueryClient with optimized defaults
+const queryClient = new QueryClient({
+	defaultOptions: {
+		queries: {
+			gcTime: 1000 * 60 * 60 * 24 * 7, // 7 days - keep data in cache
+			staleTime: 1000 * 60 * 60 * 24, // 24 hours - consider data fresh
+		},
+	},
+});
+
+// Configure persistence - only runs on client side
+if (typeof window !== "undefined") {
+	const persister = createSyncStoragePersister({
+		storage: window.localStorage,
+		key: "RUBLEVSKY_QUERY_CACHE",
+	});
+
+	persistQueryClient({
+		queryClient,
+		persister,
+		maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days - persist for a week
+		buster: "v7",
+	});
+}
 
 export const Route = createRootRoute({
 	head: () => ({

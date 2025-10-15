@@ -1,19 +1,21 @@
-import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { useCallback, useId, useState } from "react";
 import { toast } from "sonner";
 import DeleteConfirmationDialog from "~/components/ui/dashboard/ConfirmationDialog";
 import { DashboardFormDrawer } from "~/components/ui/dashboard/DashboardFormDrawer";
-import { FormSection } from "~/components/ui/dashboard/ProductFormSection";
+import { DescriptionField } from "~/components/ui/dashboard/DescriptionField";
+import { DrawerSection } from "~/components/ui/dashboard/DrawerSection";
 import { SlugField } from "~/components/ui/dashboard/SlugField";
+import { CategoriesPageSkeleton } from "~/components/ui/dashboard/skeletons/CategoriesPageSkeleton";
 import { Badge } from "~/components/ui/shared/Badge";
 import { Button } from "~/components/ui/shared/Button";
 import { Input } from "~/components/ui/shared/Input";
 import { Switch } from "~/components/ui/shared/Switch";
-import { CategoriesPageSkeleton } from "~/components/ui/dashboard/skeletons/CategoriesPageSkeleton";
 import { useDashboardForm } from "~/hooks/useDashboardForm";
 import { generateSlug, useSlugGeneration } from "~/hooks/useSlugGeneration";
+import { storeDataQueryOptions } from "~/lib/queryOptions";
 import { createProductCategory } from "~/server_functions/dashboard/categories/createProductCategory";
 import { deleteProductCategory } from "~/server_functions/dashboard/categories/deleteProductCategory";
 import { getAllProductCategories } from "~/server_functions/dashboard/categories/getAllProductCategories";
@@ -62,8 +64,12 @@ function RouteComponent() {
 	const editFormId = useId();
 
 	// Use suspense queries - data is guaranteed to be loaded by the loader
-	const { data: categoriesData } = useSuspenseQuery(productCategoriesQueryOptions());
-	const { data: teaCategoriesData } = useSuspenseQuery(teaCategoriesQueryOptions());
+	const { data: categoriesData } = useSuspenseQuery(
+		productCategoriesQueryOptions(),
+	);
+	const { data: teaCategoriesData } = useSuspenseQuery(
+		teaCategoriesQueryOptions(),
+	);
 
 	// Category type state (to distinguish between product category and tea category operations)
 	const [categoryType, setCategoryType] = useState<"product" | "tea">(
@@ -84,6 +90,8 @@ function RouteComponent() {
 	const teaCategoryForm = useDashboardForm<TeaCategoryFormData>({
 		name: "",
 		slug: "",
+		description: "",
+		blogSlug: "",
 		isActive: true,
 	});
 
@@ -115,7 +123,11 @@ function RouteComponent() {
 				teaCategoryForm.createForm.updateField("slug", slug);
 			}
 		},
-		[categoryType, productCategoryForm.createForm.updateField, teaCategoryForm.createForm.updateField]
+		[
+			categoryType,
+			productCategoryForm.createForm.updateField,
+			teaCategoryForm.createForm.updateField,
+		],
 	);
 
 	const handleEditSlugChange = useCallback(
@@ -126,12 +138,24 @@ function RouteComponent() {
 				teaCategoryForm.editForm.updateField("slug", slug);
 			}
 		},
-		[categoryType, productCategoryForm.editForm.updateField, teaCategoryForm.editForm.updateField]
+		[
+			categoryType,
+			productCategoryForm.editForm.updateField,
+			teaCategoryForm.editForm.updateField,
+		],
 	);
 
 	// Auto-slug generation hooks
-	useSlugGeneration(activeForm.createForm.formData.name, isCreateAutoSlug, handleCreateSlugChange);
-	useSlugGeneration(activeForm.editForm.formData.name, isEditAutoSlug, handleEditSlugChange);
+	useSlugGeneration(
+		activeForm.createForm.formData.name,
+		isCreateAutoSlug,
+		handleCreateSlugChange,
+	);
+	useSlugGeneration(
+		activeForm.editForm.formData.name,
+		isEditAutoSlug,
+		handleEditSlugChange,
+	);
 
 	// Submit handler for creating categories
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -160,6 +184,13 @@ function RouteComponent() {
 						? ["dashboard-categories"]
 						: ["dashboard-tea-categories"],
 			});
+
+			// For tea categories, also remove store data cache completely - forces fresh fetch on all clients
+			if (categoryType === "tea") {
+				queryClient.removeQueries({
+					queryKey: storeDataQueryOptions().queryKey,
+				});
+			}
 
 			closeCreateDrawer();
 		} catch (err) {
@@ -209,6 +240,8 @@ function RouteComponent() {
 		teaCategoryForm.editForm.setFormData({
 			name: teaCategory.name,
 			slug: teaCategory.slug,
+			description: teaCategory.description || "",
+			blogSlug: teaCategory.blogSlug || "",
 			isActive: teaCategory.isActive,
 		});
 		setIsEditAutoSlug(!isCustomSlug);
@@ -251,6 +284,13 @@ function RouteComponent() {
 						? ["dashboard-categories"]
 						: ["dashboard-tea-categories"],
 			});
+
+			// For tea categories, also remove store data cache completely - forces fresh fetch on all clients
+			if (categoryType === "tea") {
+				queryClient.removeQueries({
+					queryKey: storeDataQueryOptions().queryKey,
+				});
+			}
 
 			closeEditModal();
 		} catch (err) {
@@ -313,6 +353,13 @@ function RouteComponent() {
 						? ["dashboard-categories"]
 						: ["dashboard-tea-categories"],
 			});
+
+			// For tea categories, also remove store data cache completely - forces fresh fetch on all clients
+			if (categoryType === "tea") {
+				queryClient.removeQueries({
+					queryKey: storeDataQueryOptions().queryKey,
+				});
+			}
 
 			activeForm.crud.closeDeleteDialog();
 			setDeletingCategoryId(null);
@@ -510,7 +557,7 @@ function RouteComponent() {
 				layout="single-column"
 			>
 				<form onSubmit={handleSubmit} id={createFormId} className="contents">
-					<FormSection
+					<DrawerSection
 						maxWidth
 						title={`${categoryType === "product" ? "Category" : "Tea Category"} Details`}
 					>
@@ -540,6 +587,27 @@ function RouteComponent() {
 								idPrefix="create"
 							/>
 
+							{categoryType === "tea" && (
+								<DescriptionField
+									label="Description"
+									name="description"
+									value={(activeForm.createForm.formData as TeaCategoryFormData).description || ""}
+									onChange={activeForm.createForm.handleChange}
+									placeholder="Enter a description for this tea category..."
+								/>
+							)}
+
+							{categoryType === "tea" && (
+								<Input
+									label="Blog Slug"
+									type="text"
+									name="blogSlug"
+									value={(activeForm.createForm.formData as TeaCategoryFormData).blogSlug || ""}
+									onChange={activeForm.createForm.handleChange}
+									placeholder="e.g., shu-puer-the-foundation-trilogy-part-iii"
+								/>
+							)}
+
 							{categoryType === "product" && (
 								<Input
 									label="Image URL"
@@ -563,7 +631,7 @@ function RouteComponent() {
 								<span className="text-sm">Active</span>
 							</div>
 						</div>
-					</FormSection>
+					</DrawerSection>
 				</form>
 			</DashboardFormDrawer>
 
@@ -585,7 +653,7 @@ function RouteComponent() {
 				layout="single-column"
 			>
 				<form onSubmit={handleUpdate} id={editFormId} className="contents">
-					<FormSection
+					<DrawerSection
 						maxWidth
 						title={`${categoryType === "product" ? "Category" : "Tea Category"} Details`}
 					>
@@ -615,6 +683,27 @@ function RouteComponent() {
 								idPrefix="edit"
 							/>
 
+							{categoryType === "tea" && (
+								<DescriptionField
+									label="Description"
+									name="description"
+									value={(activeForm.editForm.formData as TeaCategoryFormData).description || ""}
+									onChange={activeForm.editForm.handleChange}
+									placeholder="Enter a description for this tea category..."
+								/>
+							)}
+
+							{categoryType === "tea" && (
+								<Input
+									label="Blog Slug"
+									type="text"
+									name="blogSlug"
+									value={(activeForm.editForm.formData as TeaCategoryFormData).blogSlug || ""}
+									onChange={activeForm.editForm.handleChange}
+									placeholder="e.g., shu-puer-the-foundation-trilogy-part-iii"
+								/>
+							)}
+
 							{categoryType === "product" && (
 								<Input
 									label="Image URL"
@@ -638,7 +727,7 @@ function RouteComponent() {
 								<span className="text-sm">Active</span>
 							</div>
 						</div>
-					</FormSection>
+					</DrawerSection>
 				</form>
 			</DashboardFormDrawer>
 

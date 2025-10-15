@@ -1,13 +1,11 @@
 import {
 	AlertDialog,
-	AlertDialogAction,
-	AlertDialogCancel,
 	AlertDialogContent,
 	AlertDialogDescription,
 	AlertDialogFooter,
 	AlertDialogHeader,
-	AlertDialogTitle,
 } from "~/components/ui/dashboard/AlertDialog";
+import { Button } from "~/components/ui/shared/Button";
 
 interface DeleteConfirmationDialogProps {
 	isOpen: boolean;
@@ -30,21 +28,20 @@ export default function DeleteConfirmationDialog({
 		<AlertDialog open={isOpen} onOpenChange={onClose}>
 			<AlertDialogContent>
 				<AlertDialogHeader>
-					<AlertDialogTitle>{title}</AlertDialogTitle>
+					<h5 className="text-lg font-semibold">{title}</h5>
 					<AlertDialogDescription>{description}</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
-					<AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-					<AlertDialogAction
-						onClick={(e) => {
-							e.preventDefault();
-							onConfirm();
-						}}
+					<Button variant="outline" onClick={onClose} disabled={isDeleting}>
+						Cancel
+					</Button>
+					<Button
+						variant="destructive"
+						onClick={onConfirm}
 						disabled={isDeleting}
-						className="bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive/90"
 					>
 						{isDeleting ? "Deleting..." : "Delete"}
-					</AlertDialogAction>
+					</Button>
 				</AlertDialogFooter>
 			</AlertDialogContent>
 		</AlertDialog>

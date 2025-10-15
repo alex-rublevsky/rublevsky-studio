@@ -1,6 +1,7 @@
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import StoreFeed from "~/components/ui/store/StoreFeed";
-import { useCart } from "~/lib/cartContext";
+import { storeDataQueryOptions } from "~/lib/queryOptions";
 import { seo } from "~/utils/seo";
 
 export const Route = createFileRoute("/store/")({
@@ -17,15 +18,15 @@ export const Route = createFileRoute("/store/")({
 });
 
 function StorePage() {
-	// Get store data from cart context (which is now available since we're inside CartProvider)
-	const { products, categories, teaCategories } = useCart();
+	// Get store data directly from TanStack Query (with persist plugin)
+	const { data: storeData } = useSuspenseQuery(storeDataQueryOptions());
 
 	return (
 		<main>
 			<StoreFeed
-				products={products}
-				categories={categories}
-				teaCategories={teaCategories}
+				products={storeData.products}
+				categories={storeData.categories}
+				teaCategories={storeData.teaCategories}
 			/>
 		</main>
 	);

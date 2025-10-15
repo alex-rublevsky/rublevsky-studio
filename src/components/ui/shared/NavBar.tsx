@@ -22,6 +22,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "~/components/ui/DropdownMenu";
+import { usePrefetch } from "~/hooks/usePrefetch";
 import { signOut } from "~/utils/auth-client";
 import { cn } from "~/utils/utils";
 
@@ -93,7 +94,7 @@ const DropdownNavMenu = ({
 			>
 				{showUserInfo && (
 					<>
-						<div className="flex items-center gap-2 px-3 py-2 border-b border-gray-200">
+						<div className="flex items-center gap-2 px-3 py-2 border-b border-border">
 							<Avatar className="h-8 w-8 rounded-lg">
 								<AvatarImage src={userAvatar} alt={userName || userID} />
 								<AvatarFallback className="rounded-lg">
@@ -131,7 +132,7 @@ const DropdownNavMenu = ({
 									navigate({ to: "/" });
 								}
 							}}
-							className="flex items-center gap-2 py-2 px-3 text-sm hover:bg-priimary hover:text-primary-foreground active:bg-primary active:text-primary-foreground transition-colors duration-200 border-b border-gray-200"
+							className="flex items-center gap-2 py-2 px-3 text-sm hover:bg-primary hover:text-primary-foreground active:bg-primary active:text-primary-foreground transition-colors duration-200 border-b border-border"
 						>
 							<LogOutIcon className="h-4 w-4" />
 							Log out
@@ -152,7 +153,7 @@ const DropdownNavMenu = ({
 						) : (
 							<Link
 								to={item.url}
-								className="relative flex w-full cursor-default select-none items-center py-2 px-3 text-sm outline-none focus:bg-primary focus:text-primary-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-primary hover:text-primary-foreground text-primary-foreground active:bg-primary active:text-primary-foreground transition-colors duration-200"
+								className="relative flex w-full cursor-default select-none items-center py-2 px-3 text-sm outline-none focus:bg-primary focus:text-primary-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-primary hover:text-primary-foreground active:bg-primary active:text-primary-foreground transition-colors duration-200"
 							>
 								{item.name}
 							</Link>
@@ -212,6 +213,8 @@ export function NavBar({
 	const router = useRouter();
 	const routerState = useRouterState();
 	const pathname = router.state.location.pathname;
+	const { prefetchBlog, prefetchStore, prefetchDashboardOrders } =
+		usePrefetch();
 
 	// Keep NavBar silent in production; no-op logs
 
@@ -297,6 +300,12 @@ export function NavBar({
 							<Link
 								key={item.url}
 								to={item.url}
+								onMouseEnter={() => {
+									// Prefetch orders data on hover
+									if (item.url === "/dashboard/orders") {
+										prefetchDashboardOrders();
+									}
+								}}
 								className={cn(
 									"relative z-10 block cursor-pointer px-3 xl:px-4 py-1.5 text-xs text-primary-foreground mix-blend-difference xl:py-2 xl:text-sm rounded-full transition-colors",
 									pathname === item.url &&
@@ -341,9 +350,14 @@ export function NavBar({
 				<>
 					{/* Show SmartBackButton for blog pages - Desktop layout */}
 					{showBlogBackButton && (
-						<div className="hidden md:flex items-center gap-3 pointer-events-auto z-50">
+						<button
+							type="button"
+							className="hidden md:flex items-center gap-3 pointer-events-auto z-50 bg-transparent border-0 p-0"
+							onMouseEnter={prefetchBlog}
+							onClick={() => {}}
+						>
 							<SmartBackButton label="Back to blog" fallbackPath="/blog" />
-						</div>
+						</button>
 					)}
 
 					{/* Show SmartBackButton for blog pages - Mobile layout */}
@@ -355,9 +369,14 @@ export function NavBar({
 
 					{/* Show SmartBackButton for product pages - Desktop layout */}
 					{showStoreBackButton && (
-						<div className="hidden md:flex items-center gap-3 pointer-events-auto z-50">
+						<button
+							type="button"
+							className="hidden md:flex items-center gap-3 pointer-events-auto z-50 bg-transparent border-0 p-0"
+							onMouseEnter={prefetchStore}
+							onClick={() => {}}
+						>
 							<SmartBackButton label="Back to store" fallbackPath="/store" />
-						</div>
+						</button>
 					)}
 
 					{/* Show SmartBackButton for product pages - Mobile layout */}

@@ -92,9 +92,15 @@ export const getAllProducts = createServerFn({ method: "GET" })
 				// Add tea category if exists and not already added
 				if (
 					teaCategory &&
-					!currentProduct.teaCategories?.includes(teaCategory.slug)
+					!currentProduct.teaCategories?.some(tc => tc.slug === teaCategory.slug)
 				) {
-					currentProduct.teaCategories?.push(teaCategory.slug);
+					currentProduct.teaCategories?.push({
+						slug: teaCategory.slug,
+						name: teaCategory.name,
+						description: teaCategory.description,
+						blogSlug: teaCategory.blogSlug,
+						isActive: teaCategory.isActive,
+					});
 				}
 
 				// Process variations if product has them

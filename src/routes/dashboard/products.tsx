@@ -1,4 +1,4 @@
-import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { useCallback, useEffect, useId, useState } from "react";
@@ -6,14 +6,17 @@ import { toast } from "sonner";
 import { AdminProductCard } from "~/components/ui/dashboard/AdminProductCard";
 import DeleteConfirmationDialog from "~/components/ui/dashboard/ConfirmationDialog";
 import { DashboardFormDrawer } from "~/components/ui/dashboard/DashboardFormDrawer";
+import { DescriptionField } from "~/components/ui/dashboard/DescriptionField";
 import { ImageUpload } from "~/components/ui/dashboard/ImageUpload";
-import { ProductFormSection } from "~/components/ui/dashboard/ProductFormSection";
+import { DrawerSection } from "~/components/ui/dashboard/ProductFormSection";
 import { ProductSettingsFields } from "~/components/ui/dashboard/ProductSettingsFields";
 import ProductVariationForm from "~/components/ui/dashboard/ProductVariationForm";
 import { SlugField } from "~/components/ui/dashboard/SlugField";
 import { ProductsPageSkeleton } from "~/components/ui/dashboard/skeletons/ProductsPageSkeleton";
 import { TeaCategoriesSelector } from "~/components/ui/dashboard/TeaCategoriesSelector";
+import { ProductStatsCompact } from "~/components/ui/shared/productNumberAndWeightDisplay";
 import { Input } from "~/components/ui/shared/Input";
+import { SearchInput } from "~/components/ui/shared/SearchInput";
 import {
 	Select,
 	SelectContent,
@@ -21,13 +24,13 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "~/components/ui/shared/Select";
-import { Textarea } from "~/components/ui/shared/TextArea";
 import {
 	getCountryFlag,
 	getCountryName,
 	SHIPPING_COUNTRIES,
 } from "~/constants/countries";
 import { generateSlug, useSlugGeneration } from "~/hooks/useSlugGeneration";
+import { storeDataQueryOptions } from "~/lib/queryOptions";
 import { cn } from "~/lib/utils";
 import { createProduct } from "~/server_functions/dashboard/store/createProduct";
 import { deleteProduct } from "~/server_functions/dashboard/store/deleteProduct";
@@ -75,7 +78,6 @@ export const Route = createFileRoute("/dashboard/products")({
 });
 
 function RouteComponent() {
-	
 	const queryClient = useQueryClient();
 
 	// Use suspense query - data is guaranteed to be loaded by the loader
@@ -83,9 +85,44 @@ function RouteComponent() {
 
 	// Function to refetch data using query invalidation
 	const refetch = () => {
+		// Invalidate dashboard products cache
 		queryClient.invalidateQueries({
 			queryKey: ["dashboard-products"],
 		});
+
+		// Remove store data cache completely - forces fresh fetch on all clients
+		queryClient.removeQueries({
+			queryKey: storeDataQueryOptions().queryKey,
+		});
+	};
+
+	// Function to invalidate specific product cache (for updates)
+	const invalidateProductCache = (
+		_productId: number,
+		oldSlug?: string,
+		newSlug?: string,
+	) => {
+		// Remove store data cache completely - forces fresh fetch on all clients
+		queryClient.removeQueries({
+			queryKey: storeDataQueryOptions().queryKey,
+		});
+
+		// If slug changed, remove both old and new product pages
+		if (oldSlug && newSlug && oldSlug !== newSlug) {
+			queryClient.removeQueries({
+				queryKey: ["product", oldSlug],
+			});
+			queryClient.removeQueries({
+				queryKey: ["product", newSlug],
+			});
+		} else if (newSlug) {
+			// If only new slug available, remove that product page
+			queryClient.removeQueries({
+				queryKey: ["product", newSlug],
+			});
+		}
+		// If no slug info, don't remove individual product pages
+		// (they'll get fresh data from storeData when accessed)
 	};
 
 	// Generate unique IDs for form elements
@@ -133,6 +170,7 @@ function RouteComponent() {
 	const [isEditAutoSlug, setIsEditAutoSlug] = useState(false);
 	const [isEditMode, setIsEditMode] = useState(false);
 	const [editingProductId, setEditingProductId] = useState<number | null>(null);
+	const [originalProductSlug, setOriginalProductSlug] = useState<string>("");
 	const [showEditModal, setShowEditModal] = useState(false);
 	const [variations, setVariations] = useState<Variation[]>([]);
 	const [editVariations, setEditVariations] = useState<Variation[]>([]);
@@ -152,12 +190,12 @@ function RouteComponent() {
 	// Stable callbacks for slug generation
 	const handleCreateSlugChange = useCallback(
 		(slug: string) => setFormData((prev) => ({ ...prev, slug })),
-		[]
+		[],
 	);
 
 	const handleEditSlugChange = useCallback(
 		(slug: string) => setEditFormData((prev) => ({ ...prev, slug })),
-		[]
+		[],
 	);
 
 	// Auto-slug generation hooks
@@ -249,6 +287,7 @@ function RouteComponent() {
 	const closeEditModal = () => {
 		setShowEditModal(false);
 		setEditingProductId(null);
+		setOriginalProductSlug(""); // Reset original slug
 		setEditFormData(defaultFormData);
 		setEditVariations([]);
 		setEditDeletedImages([]);
@@ -263,12 +302,6 @@ function RouteComponent() {
 			style: "currency",
 			currency: "CAD",
 		}).format(numericPrice);
-	};
-
-	const getCategoryName = (slug: string | null): string | null => {
-		if (!slug || !productsData) return null;
-		const category = productsData.categories.find((cat) => cat.slug === slug);
-		return category?.name || null;
 	};
 
 	const getTeaCategoryNames = (slugs: string[] | undefined): string => {
@@ -300,16 +333,6 @@ function RouteComponent() {
 				}))
 				.filter((group) => group.products.length > 0)
 		: groupedProducts;
-
-	// Calculate total products count
-	const totalProducts = groupedProducts.reduce(
-		(sum, group) => sum + group.products.length,
-		0,
-	);
-	const displayedProducts = displayGroupedProducts.reduce(
-		(sum, group) => sum + group.products.length,
-		0,
-	);
 
 	const handleChange = (
 		e: React.ChangeEvent<
@@ -548,8 +571,15 @@ function RouteComponent() {
 			// Reset form state
 			closeEditModal();
 
-			// Refresh data
+			// Refresh dashboard data
 			refetch();
+
+			// Invalidate specific product cache
+			invalidateProductCache(
+				editingProductId,
+				originalProductSlug,
+				editFormData.slug,
+			);
 		} catch (err) {
 			const errorMessage =
 				err instanceof Error ? err.message : "An error occurred";
@@ -595,6 +625,7 @@ function RouteComponent() {
 
 	const handleEdit = async (product: ProductWithVariations) => {
 		setEditingProductId(product.id);
+		setOriginalProductSlug(product.slug); // Store original slug
 		setShowEditModal(true);
 		setIsEditMode(true);
 
@@ -677,21 +708,20 @@ function RouteComponent() {
 		<div>
 			{/* Products List */}
 			<div className="space-y-6">
-				{/* Products Header with Search */}
-				<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4">
-					<p className="text-muted-foreground">
-						{searchTerm
-							? `${displayedProducts} of ${totalProducts} products`
-							: `${totalProducts} products`}
-					</p>
+				{/* Products Header with Search and Total Weight */}
+				<div className="space-y-4 px-4">
+					{/* Top row: Product stats and search */}
+					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+						<ProductStatsCompact />
 
-					{/* Search */}
-					<Input
-						placeholder="Search products..."
-						value={searchTerm}
-						onChange={(e) => setSearchTerm(e.target.value)}
-						className="w-full sm:w-64"
-					/>
+						{/* Search */}
+						<SearchInput
+							placeholder="Search products..."
+							value={searchTerm}
+							onChange={setSearchTerm}
+							className="w-full sm:w-64"
+						/>
+					</div>
 				</div>
 
 				{displayGroupedProducts.length === 0 ? (
@@ -734,7 +764,6 @@ function RouteComponent() {
 											onEdit={handleEdit}
 											onDelete={handleDeleteClick}
 											formatPrice={formatPrice}
-											getCategoryName={getCategoryName}
 											getTeaCategoryNames={getTeaCategoryNames}
 										/>
 									))}
@@ -768,17 +797,17 @@ function RouteComponent() {
 					{/* Left Column - Images, Settings, Description */}
 					<div className="space-y-4 flex flex-col">
 						{/* Product Images Block */}
-						<ProductFormSection variant="default">
+						<DrawerSection variant="default">
 							<ImageUpload
 								currentImages={editFormData.images}
 								onImagesChange={handleEditImagesChange}
 								folder="products"
 								slug={editFormData.slug}
 							/>
-						</ProductFormSection>
+						</DrawerSection>
 
 						{/* Settings Block */}
-						<ProductFormSection variant="default" title="Settings">
+						<DrawerSection variant="default" title="Settings">
 							<ProductSettingsFields
 								isActive={editFormData.isActive}
 								isFeatured={editFormData.isFeatured}
@@ -790,26 +819,25 @@ function RouteComponent() {
 								onHasVariationsChange={handleEditChange}
 								idPrefix="edit"
 							/>
-						</ProductFormSection>
+						</DrawerSection>
 
 						{/* Description Block - flex-1 to take remaining space */}
-						<ProductFormSection
+						<DrawerSection
 							variant="default"
 							className="flex-1"
 							style={{ minHeight: "7rem" }}
 						>
-							<Textarea
-								label="Description"
+							<DescriptionField
 								name="description"
 								value={editFormData.description}
 								onChange={handleEditChange}
-								className="resize-y h-full min-h-28"
+								className="h-full"
 							/>
-						</ProductFormSection>
+						</DrawerSection>
 					</div>
 
 					{/* Right Column - Basic Info and Tea Categories */}
-					<ProductFormSection variant="default" title="Basic Information">
+					<DrawerSection variant="default" title="Basic Information">
 						<div className="grid grid-cols-1 gap-4">
 							<Input
 								label="Name"
@@ -999,16 +1027,16 @@ function RouteComponent() {
 							}}
 							idPrefix="edit"
 						/>
-					</ProductFormSection>
+					</DrawerSection>
 
 					{/* Variations Block */}
 					{editFormData.hasVariations && (
-						<ProductFormSection variant="default" className="lg:col-span-2">
+						<DrawerSection variant="default" className="lg:col-span-2">
 							<ProductVariationForm
 								variations={editVariations}
 								onChange={handleEditVariationsChange}
 							/>
-						</ProductFormSection>
+						</DrawerSection>
 					)}
 				</form>
 			</DashboardFormDrawer>
@@ -1034,17 +1062,17 @@ function RouteComponent() {
 					{/* Left Column - Images, Settings, Description */}
 					<div className="space-y-4 flex flex-col">
 						{/* Product Images Block */}
-						<ProductFormSection variant="default">
+						<DrawerSection variant="default">
 							<ImageUpload
 								currentImages={formData.images}
 								onImagesChange={handleImagesChange}
 								folder="products"
 								slug={formData.slug}
 							/>
-						</ProductFormSection>
+						</DrawerSection>
 
 						{/* Settings Block */}
-						<ProductFormSection variant="default" title="Settings">
+						<DrawerSection variant="default" title="Settings">
 							<ProductSettingsFields
 								isActive={formData.isActive}
 								isFeatured={formData.isFeatured}
@@ -1056,26 +1084,25 @@ function RouteComponent() {
 								onHasVariationsChange={handleChange}
 								idPrefix="add"
 							/>
-						</ProductFormSection>
+						</DrawerSection>
 
 						{/* Description Block - flex-1 to take remaining space */}
-						<ProductFormSection
+						<DrawerSection
 							variant="default"
 							className="flex-1"
 							style={{ minHeight: "7rem" }}
 						>
-							<Textarea
-								label="Description"
+							<DescriptionField
 								name="description"
 								value={formData.description}
 								onChange={handleChange}
-								className="resize-y h-full min-h-28"
+								className="h-full"
 							/>
-						</ProductFormSection>
+						</DrawerSection>
 					</div>
 
 					{/* Right Column - Basic Info and Tea Categories */}
-					<ProductFormSection variant="default" title="Basic Information">
+					<DrawerSection variant="default" title="Basic Information">
 						<div className="grid grid-cols-1 gap-4">
 							<Input
 								label="Product Name"
@@ -1265,16 +1292,16 @@ function RouteComponent() {
 							}}
 							idPrefix="add"
 						/>
-					</ProductFormSection>
+					</DrawerSection>
 
 					{/* Variations Block */}
 					{formData.hasVariations && (
-						<ProductFormSection variant="default" className="lg:col-span-2">
+						<DrawerSection variant="default" className="lg:col-span-2">
 							<ProductVariationForm
 								variations={variations}
 								onChange={handleVariationsChange}
 							/>
-						</ProductFormSection>
+						</DrawerSection>
 					)}
 				</form>
 			</DashboardFormDrawer>

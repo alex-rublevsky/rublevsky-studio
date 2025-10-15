@@ -1,34 +1,33 @@
-//TODO: rename this to store context, since it now includes all store data, even categories and tea categories
+/**
+ * Cart Context
+ *
+ * Manages shopping cart state and operations.
+ * Products data is now managed by TanStack Query with persist plugin.
+ *
+ * This context only handles:
+ * - Cart items (stored in cookies)
+ * - Cart operations (add, remove, update, clear)
+ * - Cart UI state (open/closed)
+ */
 
 import type React from "react";
 import { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { getCookie, setCookie } from "~/lib/cookies";
-import type {
-	Category,
-	Product,
-	ProductVariation,
-	ProductWithVariations,
-	TeaCategory,
-} from "~/types";
+import type { Product, ProductVariation, ProductWithVariations } from "~/types";
 import { validateStock } from "~/utils/validateStock";
 
 // Types
+/**
+ * Minimal CartItem - only IDs and quantity
+ * All other data (price, image, stock, etc.) is looked up from TanStack Query cache
+ * This eliminates data duplication and ensures we always show current data
+ */
 export interface CartItem {
 	productId: number;
-	productName: string;
-	productSlug: string;
 	variationId?: number;
-	price: number;
 	quantity: number;
-	image?: string;
-	attributes?: Record<string, string>; // e.g. {SIZE_CM: "6x6", COLOR: "Red"}
-	maxStock: number; // to validate against stock limits
-	unlimitedStock: boolean;
-	discount?: number | null; // Percentage discount (e.g., 20 for 20% off)
-	weightInfo?: {
-		totalWeight: number;
-	};
+	addedAt: number; // Timestamp for sorting/debugging
 }
 
 export interface Cart {
@@ -39,10 +38,6 @@ export interface Cart {
 interface CartContextType {
 	cart: Cart;
 	cartOpen: boolean;
-	products: ProductWithVariations[]; // Make products directly accessible
-	categories: Category[];
-	teaCategories: TeaCategory[];
-	isLoading: boolean;
 	setCartOpen: (open: boolean) => void;
 	addToCart: (item: CartItem) => void;
 	addProductToCart: (
@@ -50,12 +45,14 @@ interface CartContextType {
 		quantity: number,
 		selectedVariation?: ProductVariation | null,
 		selectedAttributes?: Record<string, string>,
+		products?: ProductWithVariations[], // Pass products for validation
 	) => Promise<boolean>;
 	removeFromCart: (productId: number, variationId?: number) => void;
 	updateQuantity: (
 		productId: number,
 		quantity: number,
 		variationId?: number,
+		products?: ProductWithVariations[], // Pass products for validation
 	) => void;
 	clearCart: () => void;
 	itemCount: number;
@@ -63,32 +60,18 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-// Cookie and localStorage constants
+// Cookie constant
 const CART_COOKIE_NAME = "rublevsky-cart";
-const PRODUCTS_STORAGE_KEY = "rublevsky-products";
-const PRODUCTS_TIMESTAMP_KEY = "rublevsky-products-timestamp";
-const PRODUCTS_CACHE_DURATION = 1000 * 60 * 5; // 5 minutes
 
 interface CartProviderProps {
 	children: React.ReactNode;
-	initialProducts?: ProductWithVariations[];
-	initialCategories?: Category[];
-	initialTeaCategories?: TeaCategory[];
-	isLoading?: boolean;
 }
 
-export function CartProvider({
-	children,
-	initialProducts,
-	initialCategories = [],
-	initialTeaCategories = [],
-	isLoading = false,
-}: CartProviderProps) {
+export function CartProvider({ children }: CartProviderProps) {
 	const [cart, setCart] = useState<Cart>({
 		items: [],
 		lastUpdated: Date.now(),
 	});
-	const [products, setProducts] = useState<ProductWithVariations[]>([]);
 	const [cartOpen, setCartOpen] = useState(false);
 	const [initialized, setInitialized] = useState(false);
 
@@ -120,39 +103,6 @@ export function CartProvider({
 		return () => window.removeEventListener("cart-cleared", handleCartCleared);
 	}, []);
 
-	// Load or update products in localStorage
-	useEffect(() => {
-		if (typeof window === "undefined") return;
-
-		if (initialProducts?.length) {
-			// If we have initial products, update localStorage
-			localStorage.setItem(
-				PRODUCTS_STORAGE_KEY,
-				JSON.stringify(initialProducts),
-			);
-			localStorage.setItem(PRODUCTS_TIMESTAMP_KEY, Date.now().toString());
-			setProducts(initialProducts);
-		} else {
-			// Try to load from localStorage if no initial products
-			const timestamp = parseInt(
-				localStorage.getItem(PRODUCTS_TIMESTAMP_KEY) || "0",
-				10,
-			);
-			const isStale = Date.now() - timestamp > PRODUCTS_CACHE_DURATION;
-
-			if (!isStale) {
-				try {
-					const savedProducts = localStorage.getItem(PRODUCTS_STORAGE_KEY);
-					if (savedProducts) {
-						setProducts(JSON.parse(savedProducts));
-					}
-				} catch (error) {
-					console.error("Failed to parse products from localStorage:", error);
-				}
-			}
-		}
-	}, [initialProducts]);
-
 	// Save cart to cookie whenever it changes
 	useEffect(() => {
 		if (initialized) {
@@ -168,47 +118,28 @@ export function CartProvider({
 		0,
 	);
 
-	// Add item to cart
+	// Add item to cart (or update quantity if exists)
+	// Validation happens BEFORE calling this function
 	const addToCart = (item: CartItem) => {
 		setCart((prevCart) => {
-			// Check if the item is already in the cart
-			const existingItemIndex = prevCart.items.findIndex(
+			const existingIndex = prevCart.items.findIndex(
 				(cartItem) =>
 					cartItem.productId === item.productId &&
 					cartItem.variationId === item.variationId,
 			);
 
-			const newItems = [...prevCart.items];
+			let newItems: CartItem[];
 
-			if (existingItemIndex >= 0) {
-				// Item exists, update quantity
-				const existingItem = newItems[existingItemIndex];
-				const newQuantity = existingItem.quantity + item.quantity;
-
-				// Don't apply stock limits for unlimited stock items
-				if (existingItem.unlimitedStock) {
-					newItems[existingItemIndex] = {
-						...existingItem,
-						quantity: newQuantity,
-					};
-				} else {
-					// Apply stock limits for limited stock items
-					newItems[existingItemIndex] = {
-						...existingItem,
-						quantity: Math.min(newQuantity, item.maxStock),
-					};
-				}
+			if (existingIndex >= 0) {
+				// Update existing item quantity
+				newItems = [...prevCart.items];
+				newItems[existingIndex] = {
+					...newItems[existingIndex],
+					quantity: newItems[existingIndex].quantity + item.quantity,
+				};
 			} else {
-				// Item doesn't exist, add it
-				if (item.unlimitedStock) {
-					newItems.push(item);
-				} else {
-					// Apply stock limits for limited stock items
-					newItems.push({
-						...item,
-						quantity: Math.min(item.quantity, item.maxStock),
-					});
-				}
+				// Add new item
+				newItems = [...prevCart.items, item];
 			}
 
 			return {
@@ -226,7 +157,8 @@ export function CartProvider({
 		product: Product,
 		quantity: number,
 		selectedVariation?: ProductVariation | null,
-		selectedAttributes?: Record<string, string>,
+		_selectedAttributes?: Record<string, string>, // Not used anymore (enriched from cache)
+		products?: ProductWithVariations[], // Products passed from component
 	): Promise<boolean> => {
 		try {
 			// Basic validation
@@ -251,8 +183,8 @@ export function CartProvider({
 				return false;
 			}
 
-			// Find the product in products state to get the latest data
-			const currentProduct = products.find((p) => p.id === product.id);
+			// Find the product in products array to get the latest data
+			const currentProduct = products?.find((p) => p.id === product.id);
 			if (!currentProduct) {
 				toast.error("Product not found");
 				return false;
@@ -294,7 +226,7 @@ export function CartProvider({
 
 			// Validate stock using client-side validation
 			const result = validateStock(
-				products,
+				products || [],
 				cart.items,
 				product.id,
 				totalQuantityAfterAdd,
@@ -307,41 +239,13 @@ export function CartProvider({
 				return false;
 			}
 
-			// Create cart item
+			// Create minimal cart item - just IDs and quantity
+			// All other data will be looked up from TanStack Query cache when needed
 			const cartItem: CartItem = {
 				productId: product.id,
-				productName: product.name,
-				productSlug: product.slug,
 				variationId: selectedVariation?.id,
-				price: (() => {
-					// If product has variations, always use variation price
-					if (product.hasVariations && selectedVariation) {
-						return selectedVariation.price;
-					}
-					// If product price is zero, use variation price (if available)
-					if (product.price === 0 && selectedVariation) {
-						return selectedVariation.price;
-					}
-					return selectedVariation ? selectedVariation.price : product.price;
-				})(),
 				quantity: quantity,
-				maxStock: result.unlimitedStock
-					? Number.MAX_SAFE_INTEGER
-					: result.availableStock,
-				unlimitedStock: result.unlimitedStock,
-				discount: selectedVariation?.discount || product.discount,
-				image:
-					product.images && typeof product.images === "string"
-						? product.images.split(",")[0]?.trim() || undefined
-						: undefined,
-				attributes: selectedAttributes,
-				...(product.weight
-					? {
-							weightInfo: {
-								totalWeight: parseInt(product.weight, 10),
-							},
-						}
-					: {}),
+				addedAt: Date.now(),
 			};
 
 			addToCart(cartItem);
@@ -369,11 +273,19 @@ export function CartProvider({
 	};
 
 	// Update item quantity
+	// Validation happens BEFORE calling this function
 	const updateQuantity = async (
 		productId: number,
 		quantity: number,
 		variationId?: number,
+		products: ProductWithVariations[] = [], // Products passed for validation
 	) => {
+		// If quantity is 0 or less, remove the item
+		if (quantity <= 0) {
+			removeFromCart(productId, variationId);
+			return;
+		}
+
 		// Validate stock using client-side validation
 		const result = validateStock(
 			products,
@@ -381,7 +293,7 @@ export function CartProvider({
 			productId,
 			quantity,
 			variationId,
-			true, // Add isExistingCartItem flag as true
+			true, // Existing cart item
 		);
 
 		if (!result.isAvailable && !result.unlimitedStock) {
@@ -389,31 +301,15 @@ export function CartProvider({
 			return;
 		}
 
-		setCart((prevCart) => {
-			const newItems = prevCart.items.map((item) => {
-				if (item.productId === productId && item.variationId === variationId) {
-					// Don't apply stock limits for unlimited stock items
-					if (item.unlimitedStock) {
-						return {
-							...item,
-							quantity: Math.max(1, quantity), // Only enforce minimum of 1
-						};
-					}
-					// Apply stock limits for limited stock items
-					return {
-						...item,
-						quantity: Math.min(Math.max(1, quantity), result.availableStock),
-						maxStock: result.availableStock, // Update maxStock with latest value
-					};
-				}
-				return item;
-			});
-
-			return {
-				items: newItems,
-				lastUpdated: Date.now(),
-			};
-		});
+		// Update quantity (enforce minimum of 1)
+		setCart((prevCart) => ({
+			items: prevCart.items.map((item) =>
+				item.productId === productId && item.variationId === variationId
+					? { ...item, quantity: Math.max(1, quantity) }
+					: item,
+			),
+			lastUpdated: Date.now(),
+		}));
 	};
 
 	// Clear the cart
@@ -429,10 +325,6 @@ export function CartProvider({
 			value={{
 				cart,
 				cartOpen,
-				products, // Use products from state
-				categories: initialCategories,
-				teaCategories: initialTeaCategories,
-				isLoading,
 				setCartOpen,
 				addToCart,
 				addProductToCart,

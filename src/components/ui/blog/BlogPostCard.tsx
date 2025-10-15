@@ -5,19 +5,21 @@ import {
 	markdownComponents,
 	rehypePlugins,
 } from "~/components/ui/shared/MarkdownComponents";
+import { usePrefetch } from "~/hooks/usePrefetch";
 import { formatBlogDate } from "~/lib/utils";
 import type { BlogPostPreview } from "~/types/index";
 import styles from "./blogCard.module.css";
 
 interface BlogPostCardProps {
 	post: BlogPostPreview;
-	teaCategories: { slug: string; name: string }[];
+	teaCategories?: Array<{ slug: string; name: string }>;
 }
 
 export default function BlogPostCard({
 	post,
-	teaCategories,
+	teaCategories = [],
 }: BlogPostCardProps) {
+	const { prefetchBlogPost } = usePrefetch();
 	const {
 		id,
 		title,
@@ -28,6 +30,11 @@ export default function BlogPostCard({
 		teaCategories: postTeaCategories,
 	} = post;
 
+	// Create a map for quick lookup of tea category names
+	const teaCategoryMap = new Map(
+		teaCategories.map((cat) => [cat.slug, cat.name])
+	);
+
 	// Extract first image from images string
 	const firstImage = images
 		? images
@@ -36,19 +43,13 @@ export default function BlogPostCard({
 				.filter((img) => img !== "")[0] || null
 		: null;
 
-	// Get tea category names from slugs
-	const categoryNames =
-		postTeaCategories?.map((catSlug) => {
-			const category = teaCategories.find((cat) => cat.slug === catSlug);
-			return category?.name || catSlug;
-		}) || [];
-
 	return (
 		<Link
 			to="/blog/$slug"
 			params={{ slug }}
 			className="block h-full relative"
 			viewTransition={true}
+			onMouseEnter={() => prefetchBlogPost(slug)}
 		>
 			<article
 				className="w-full overflow-hidden group bg-background flex flex-col h-full"
@@ -99,20 +100,23 @@ export default function BlogPostCard({
 						</time>
 
 						{/* Tags */}
-						{categoryNames.length > 0 && (
+						{postTeaCategories && postTeaCategories.length > 0 && (
 							<div className="flex flex-wrap gap-1">
-								{categoryNames.slice(0, 2).map((categoryName) => (
-									<Badge
-										key={categoryName}
-										variant="secondary"
-										className="text-xs"
-									>
-										{categoryName}
-									</Badge>
-								))}
-								{categoryNames.length > 2 && (
+								{postTeaCategories.slice(0, 2).map((categorySlug) => {
+									const name = teaCategoryMap.get(categorySlug) || categorySlug;
+									return (
+										<Badge
+											key={categorySlug}
+											variant={categorySlug as any}
+											className="text-xs"
+										>
+											{name}
+										</Badge>
+									);
+								})}
+								{postTeaCategories.length > 2 && (
 									<Badge variant="secondary" className="text-xs">
-										+{categoryNames.length - 2}
+										+{postTeaCategories.length - 2}
 									</Badge>
 								)}
 							</div>

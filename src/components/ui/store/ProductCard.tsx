@@ -1,9 +1,13 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useCallback, useMemo, useState } from "react";
+import { usePrefetch } from "~/hooks/usePrefetch";
 import { useVariationSelection } from "~/hooks/useVariationSelection";
-import { type CartItem, useCart } from "~/lib/cartContext";
+import { useCart } from "~/lib/cartContext";
 import { getAttributeDisplayName } from "~/lib/productAttributes";
+import { storeDataQueryOptions } from "~/lib/queryOptions";
 import type {
+	CartItem,
 	Product,
 	ProductVariation,
 	TeaCategory,
@@ -14,14 +18,20 @@ import {
 	isProductAvailable,
 } from "~/utils/validateStock";
 import { Badge } from "../shared/Badge";
-import { TeaCategoryBadges } from "../shared/TeaCategoryBadges";
 import { useCursorHover } from "../shared/custom_cursor/CustomCursorContext";
 import { FilterGroup } from "../shared/FilterGroup";
 import styles from "./productCard.module.css";
 
 // Extended product interface with variations
-interface ProductWithVariations extends Product {
+interface ProductWithVariations extends Omit<Product, 'teaCategories'> {
 	variations?: ProductVariationWithAttributes[];
+	teaCategories?: Array<{
+		slug: string;
+		name: string;
+		description?: string | null;
+		blogSlug?: string | null;
+		isActive: boolean;
+	}>;
 }
 
 interface ProductVariationWithAttributes extends ProductVariation {
@@ -111,16 +121,16 @@ const getVariationSearchParams = (
 	return params;
 };
 
-
 function ProductCard({
 	product,
-	teaCategories = [],
 }: {
 	product: ProductWithVariations;
 	teaCategories?: TeaCategory[];
 }) {
 	const [isAddingToCart, setIsAddingToCart] = useState(false);
 	const { addProductToCart, cart } = useCart();
+	const { prefetchProduct } = usePrefetch();
+	const queryClient = useQueryClient();
 
 	// Use the variation selection hook
 	const {
@@ -209,7 +219,6 @@ function ProductCard({
 		[product.variations],
 	);
 
-
 	const handleAddToCart = useCallback(
 		async (e: React.MouseEvent) => {
 			e.preventDefault();
@@ -218,12 +227,19 @@ function ProductCard({
 			setIsAddingToCart(true);
 
 			try {
+				// Get products from TanStack Query cache for validation
+				const storeData = queryClient.getQueryData(
+					storeDataQueryOptions().queryKey,
+				);
+				const products = storeData?.products || [];
+
 				// Use the context function directly
 				await addProductToCart(
-					product,
+					product as Product,
 					1, // Default quantity of 1 when adding from product card
 					selectedVariation,
 					selectedAttributes,
+					products as unknown as ProductWithVariations[],
 				);
 			} catch (error) {
 				console.error("Error adding to cart:", error);
@@ -237,6 +253,7 @@ function ProductCard({
 			product,
 			selectedVariation,
 			selectedAttributes,
+			queryClient,
 		],
 	);
 
@@ -253,6 +270,7 @@ function ProductCard({
 			className="block h-full relative"
 			preload="intent"
 			viewTransition={true}
+			onMouseEnter={() => prefetchProduct(product.slug)}
 		>
 			<div
 				className="w-full product-card overflow-hidden  group"
@@ -394,17 +412,17 @@ function ProductCard({
 										)}
 									</div>
 									{/* Tea Category Badges - Desktop/Tablet */}
-									<TeaCategoryBadges 
-										teaCategories={product.teaCategories} 
-										className="hidden md:flex flex-wrap items-center justify-end flex-1 min-w-0"
-									/>
+									<div className="hidden md:flex flex-wrap items-center justify-end flex-1 min-w-0 gap-1">
+										{product.teaCategories?.map((category) => (
+											<Badge key={category.slug} teaCategory={category} />
+										))}
+									</div>
 								</div>
 								{/* Tea Category Badges - Mobile */}
-								<div className="md:hidden mt-2">
-									<TeaCategoryBadges 
-										teaCategories={product.teaCategories} 
-										className="flex flex-wrap"
-									/>
+								<div className="md:hidden mt-2 flex flex-wrap gap-1">
+									{product.teaCategories?.map((category) => (
+										<Badge key={category.slug} teaCategory={category} />
+									))}
 								</div>
 
 								{isComingSoon && (

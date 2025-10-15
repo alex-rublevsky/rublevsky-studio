@@ -23,11 +23,7 @@ export function CategoriesPageSkeleton() {
 							<Skeleton className="absolute inset-0 w-40" />
 						</h3>
 						<div className="relative">
-							<button
-								type="button"
-								className="h-8 px-3 invisible"
-								disabled
-							>
+							<button type="button" className="h-8 px-3 invisible" disabled>
 								<span>Add Category</span>
 							</button>
 							<Skeleton className="absolute inset-0 rounded" />
@@ -39,7 +35,10 @@ export function CategoriesPageSkeleton() {
 							<table className="min-w-full">
 								<tbody className="divide-y divide-border">
 									{Array.from({ length: 5 }, (_, index) => (
-										<tr key={`product-category-skeleton-${Date.now()}-${index}`} className="hover:bg-muted/30">
+										<tr
+											key={`product-category-skeleton-${Date.now()}-${index}`}
+											className="hover:bg-muted/30"
+										>
 											<td className="px-1 py-4">
 												<div>
 													<div className="font-medium relative">
@@ -98,11 +97,7 @@ export function CategoriesPageSkeleton() {
 							<Skeleton className="absolute inset-0 w-32" />
 						</h3>
 						<div className="relative">
-							<button
-								type="button"
-								className="h-8 px-3 invisible"
-								disabled
-							>
+							<button type="button" className="h-8 px-3 invisible" disabled>
 								<span>Add Tea Category</span>
 							</button>
 							<Skeleton className="absolute inset-0 rounded" />
@@ -114,7 +109,10 @@ export function CategoriesPageSkeleton() {
 							<table className="min-w-full">
 								<tbody className="divide-y divide-border">
 									{Array.from({ length: 4 }, (_, index) => (
-										<tr key={`tea-category-skeleton-${Date.now()}-${index}`} className="hover:bg-muted/30">
+										<tr
+											key={`tea-category-skeleton-${Date.now()}-${index}`}
+											className="hover:bg-muted/30"
+										>
 											<td className="px-1 py-4">
 												<div>
 													<div className="font-medium relative">

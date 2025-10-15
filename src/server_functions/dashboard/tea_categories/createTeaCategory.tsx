@@ -35,6 +35,8 @@ export const createTeaCategory = createServerFn({ method: "POST" })
 				.values({
 					name: teaCategoryData.name,
 					slug: teaCategoryData.slug,
+					description: teaCategoryData.description || null,
+					blogSlug: teaCategoryData.blogSlug || null,
 					isActive: teaCategoryData.isActive ?? true,
 				})
 				.returning();

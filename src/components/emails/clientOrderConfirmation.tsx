@@ -165,12 +165,13 @@ export const ClientOrderConfirmation = ({
 						<Hr className="border border-solid border-[#eaeaea] my-[26px] mx-0 w-full" />
 						<Text className="text-[#666666] text-[12px] leading-[22px]">
 							This order confirmation was intended for{" "}
-							<span className="text-foreground">{Name}</span>. This email was sent
-							from <span className="text-foreground">Rublevsky Studio</span> located
-							in <span className="text-foreground">Ontario, Canada</span>. If you
-							were not expecting this order confirmation, you can ignore this
-							email. If you are concerned about your account's safety, please
-							reply to this email to get in touch with us.
+							<span className="text-foreground">{Name}</span>. This email was
+							sent from{" "}
+							<span className="text-foreground">Rublevsky Studio</span> located
+							in <span className="text-foreground">Ontario, Canada</span>. If
+							you were not expecting this order confirmation, you can ignore
+							this email. If you are concerned about your account's safety,
+							please reply to this email to get in touch with us.
 						</Text>
 					</Container>
 				</Body>

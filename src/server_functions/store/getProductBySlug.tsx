@@ -56,9 +56,12 @@ export const getProductBySlug = createServerFn({ method: "GET" })
 					.select({
 						slug: teaCategories.slug,
 						name: teaCategories.name,
+						description: teaCategories.description,
+						blogSlug: teaCategories.blogSlug,
+						isActive: teaCategories.isActive,
 					})
 					.from(productTeaCategories)
-					.leftJoin(
+					.innerJoin(
 						teaCategories,
 						eq(productTeaCategories.teaCategorySlug, teaCategories.slug),
 					)
@@ -123,9 +126,16 @@ export const getProductBySlug = createServerFn({ method: "GET" })
 				: null,
 			description: firstRow.blog_posts?.body || baseProduct.description,
 			variations: Array.from(variationsMap.values()),
-			teaCategories: teaCategoriesResult
-				.map((tc) => tc.slug)
-				.filter((slug): slug is string => Boolean(slug)),
+			teaCategories: teaCategoriesResult.map((tc) => {
+				const mapped = {
+					slug: tc.slug,
+					name: tc.name,
+					description: tc.description,
+					blogSlug: tc.blogSlug,
+					isActive: tc.isActive ?? true,
+				};
+				return mapped;
+			}),
 		};
 
 		return productWithDetails;

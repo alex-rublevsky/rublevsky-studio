@@ -108,7 +108,10 @@ export const getStoreData = createServerFn({ method: "GET" }).handler(
 
 			const productsArray = productsResult.map((product: Product) => {
 				const variations = variationsByProduct.get(product.id) || [];
-				const teaCategories = teaCategoryMap.get(product.id) || [];
+				const teaCategorySlugs = teaCategoryMap.get(product.id) || [];
+				const teaCategories = teaCategorySlugs.map(slug => 
+					teaCategoriesResult.find(tc => tc.slug === slug)
+				);
 
 				const variationsWithAttributes = variations
 					.map((variation) => ({

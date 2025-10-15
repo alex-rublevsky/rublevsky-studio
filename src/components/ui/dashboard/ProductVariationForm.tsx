@@ -170,7 +170,8 @@ function SortableVariationItem({
 						value={variation.discount || ""}
 						onChange={(e) => {
 							const value = e.target.value;
-							const numericValue = value === "" ? null : parseInt(value, 10) || null;
+							const numericValue =
+								value === "" ? null : parseInt(value, 10) || null;
 							onUpdate(variation.id, "discount", numericValue);
 						}}
 						onPointerDown={(e) => e.stopPropagation()}
@@ -451,7 +452,7 @@ export default function ProductVariationForm({
 	};
 
 	return (
-		<div className="space-y-4 pb-4">
+		<div className="space-y-4">
 			<DndContext
 				sensors={sensors}
 				collisionDetection={closestCenter}

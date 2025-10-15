@@ -6,7 +6,8 @@ import { toast } from "sonner";
 import DashboardBlogPostCard from "~/components/ui/blog/DashboardBlogPostCard";
 import DeleteConfirmationDialog from "~/components/ui/dashboard/ConfirmationDialog";
 import { DashboardFormDrawer } from "~/components/ui/dashboard/DashboardFormDrawer";
-import { ProductFormSection } from "~/components/ui/dashboard/ProductFormSection";
+import { DescriptionField } from "~/components/ui/dashboard/DescriptionField";
+import { DrawerSection } from "~/components/ui/dashboard/ProductFormSection";
 import ProductSelector from "~/components/ui/dashboard/ProductSelector";
 import { SlugField } from "~/components/ui/dashboard/SlugField";
 import { TeaCategoriesSelector } from "~/components/ui/dashboard/TeaCategoriesSelector";
@@ -14,7 +15,6 @@ import { DatePicker } from "~/components/ui/shared/DatePicker";
 import { FilterGroup } from "~/components/ui/shared/FilterGroup";
 import { Input } from "~/components/ui/shared/Input";
 import { Switch } from "~/components/ui/shared/Switch";
-import { Textarea } from "~/components/ui/shared/TextArea";
 import { generateSlug, useSlugGeneration } from "~/hooks/useSlugGeneration";
 import { createBlogPost } from "~/server_functions/dashboard/blog/createBlogPost";
 import { deleteBlogPost } from "~/server_functions/dashboard/blog/deleteBlogPost";
@@ -139,17 +139,25 @@ function RouteComponent() {
 	// Stable callbacks for slug generation
 	const handleCreateSlugChange = useCallback(
 		(slug: string) => setCreateFormData((prev) => ({ ...prev, slug })),
-		[]
+		[],
 	);
 
 	const handleEditSlugChange = useCallback(
 		(slug: string) => setEditFormData((prev) => ({ ...prev, slug })),
-		[]
+		[],
 	);
 
 	// Auto-generate slugs
-	useSlugGeneration(createFormData.title || "", isCreateAutoSlug, handleCreateSlugChange);
-	useSlugGeneration(editFormData.title || "", isEditAutoSlug, handleEditSlugChange);
+	useSlugGeneration(
+		createFormData.title || "",
+		isCreateAutoSlug,
+		handleCreateSlugChange,
+	);
+	useSlugGeneration(
+		editFormData.title || "",
+		isEditAutoSlug,
+		handleEditSlugChange,
+	);
 
 	// Listen for action button clicks from navbar
 	useEffect(() => {
@@ -429,23 +437,21 @@ function RouteComponent() {
 				>
 					{/* Left Column - Content */}
 					<div className="space-y-4">
-						<ProductFormSection variant="default" title="Content">
-							<Textarea
-								label="Content"
+						<DrawerSection variant="default" title="Content">
+							<DescriptionField
 								id={bodyId}
 								name="body"
 								value={createFormData.body}
 								onChange={handleCreateChange}
 								required
-								rows={15}
-								className="resize-y"
+								variant="large"
 							/>
-						</ProductFormSection>
+						</DrawerSection>
 					</div>
 
 					{/* Right Column - Metadata */}
 					<div className="space-y-4">
-						<ProductFormSection variant="default" title="Post Details">
+						<DrawerSection variant="default" title="Post Details">
 							<div className="space-y-4">
 								<Input
 									label="Title"
@@ -523,7 +529,7 @@ function RouteComponent() {
 									</label>
 								</div>
 							</div>
-						</ProductFormSection>
+						</DrawerSection>
 
 						{/* Tea Categories Block */}
 						<TeaCategoriesSelector
@@ -558,7 +564,7 @@ function RouteComponent() {
 					</div>
 				) : (
 					<AnimatePresence mode="popLayout">
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-6 gap-x-3 sm:gap-4 items-start">
+						<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-y-6 gap-x-3 sm:gap-4 items-start">
 							{filteredBlogPosts.map((post) => (
 								<motion.div
 									key={post.id}
@@ -598,23 +604,21 @@ function RouteComponent() {
 				<form onSubmit={handleUpdate} id={editBlogFormId} className="contents">
 					{/* Left Column - Content */}
 					<div className="space-y-4">
-						<ProductFormSection variant="default" title="Content">
-							<Textarea
-								label="Content"
+						<DrawerSection variant="default" title="Content">
+							<DescriptionField
 								id={editBodyId}
 								name="body"
 								value={editFormData.body}
 								onChange={handleEditChange}
 								required
-								rows={15}
-								className="resize-y"
+								variant="large"
 							/>
-						</ProductFormSection>
+						</DrawerSection>
 					</div>
 
 					{/* Right Column - Metadata */}
 					<div className="space-y-4">
-						<ProductFormSection variant="default" title="Post Details">
+						<DrawerSection variant="default" title="Post Details">
 							<div className="space-y-4">
 								<div>
 									<label
@@ -701,7 +705,7 @@ function RouteComponent() {
 									</label>
 								</div>
 							</div>
-						</ProductFormSection>
+						</DrawerSection>
 
 						{/* Tea Categories Block */}
 						<TeaCategoriesSelector

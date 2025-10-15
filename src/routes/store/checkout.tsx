@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import React, { useCallback, useEffect, useId, useState } from "react";
 import { toast } from "sonner";
@@ -9,11 +9,14 @@ import { Image } from "~/components/ui/shared/Image";
 import { Link } from "~/components/ui/shared/Link";
 import NeumorphismCard from "~/components/ui/shared/NeumorphismCard";
 import { Textarea } from "~/components/ui/shared/TextArea";
+import type { EnrichedCartItem } from "~/hooks/useEnrichedCart";
+import { useEnrichedCart } from "~/hooks/useEnrichedCart";
 import { useCart } from "~/lib/cartContext";
 import { getAttributeDisplayName } from "~/lib/productAttributes";
+import { storeDataQueryOptions } from "~/lib/queryOptions";
 import { createOrder } from "~/server_functions/dashboard/orders/orderCreation";
 import { sendOrderEmails } from "~/server_functions/sendOrderEmails";
-import type { CartItem, ProductWithVariations } from "~/types";
+import type { ProductWithVariations } from "~/types";
 
 interface Address {
 	firstName: string;
@@ -43,7 +46,9 @@ function CheckoutPage() {
 }
 
 function CheckoutScreen() {
-	const { cart, clearCart, products } = useCart();
+	const { cart, clearCart } = useCart();
+	const enrichedItems = useEnrichedCart(cart.items);
+	const queryClient = useQueryClient();
 	const formRef = React.useRef<HTMLFormElement>(null);
 	const notesId = useId();
 	const billingId = useId();
@@ -69,7 +74,7 @@ function CheckoutScreen() {
 	const orderMutation = useMutation({
 		mutationFn: async (orderData: {
 			customerInfo: CustomerInfo;
-			cartItems: CartItem[];
+			cartItems: EnrichedCartItem[];
 			products: ProductWithVariations[];
 		}) => {
 			// Step 1: Create order
@@ -111,9 +116,6 @@ function CheckoutScreen() {
 			}
 		},
 		onSuccess: ({ orderId, emailWarnings }) => {
-			// Clear the cart after successful order
-			clearCart();
-
 			// Show appropriate success message
 			if (emailWarnings && emailWarnings.length > 0) {
 				toast.warning(
@@ -131,7 +133,7 @@ function CheckoutScreen() {
 				orderId,
 				customerInfo,
 				// Transform cart items to match order page display structure
-				items: cart.items.map((item, index) => ({
+				items: enrichedItems.map((item, index) => ({
 					id: index,
 					productName: item.productName,
 					quantity: item.quantity,
@@ -157,6 +159,8 @@ function CheckoutScreen() {
 			// Small delay to ensure success message is seen, then redirect
 			setTimeout(() => {
 				console.log("🚀 Redirecting to order page:", orderId);
+				// Clear the cart AFTER redirect to avoid showing "cart is empty"
+				clearCart();
 				window.location.href = `/order/${orderId}?new=true`;
 			}, 1000);
 		},
@@ -169,31 +173,7 @@ function CheckoutScreen() {
 
 	const isLoading = orderMutation.isPending;
 
-	// Wait for cart and products to be loaded
-	useEffect(() => {
-		if (cart.items.length > 0 && products.length > 0) {
-			// Check for any variation ID mismatches and log them
-			cart.items.forEach((item) => {
-				if (item.variationId) {
-					const product = products.find((p) => p.id === item.productId);
-					if (product?.variations) {
-						const variation = product.variations.find(
-							(v) => v.id === item.variationId,
-						);
-						if (!variation) {
-							console.warn(
-								`Variation ${item.variationId} not found for product ${item.productName} (ID: ${item.productId})`,
-							);
-							console.log(
-								"Available variations:",
-								product.variations.map((v) => ({ id: v.id, sku: v.sku })),
-							);
-						}
-					}
-				}
-			});
-		}
-	}, [cart.items, products]);
+	// Note: Removed product validation as it's handled by the enriched cart
 
 	// Check if required fields are filled
 	const isFormValid = useCallback(() => {
@@ -360,22 +340,28 @@ function CheckoutScreen() {
 			return;
 		}
 
+		// Get products from TanStack Query cache for server validation
+		const storeData = queryClient.getQueryData(
+			storeDataQueryOptions().queryKey,
+		);
+		const products = storeData?.products || [];
+
 		// Use the mutation instead of manual fetch
 		orderMutation.mutate({
 			customerInfo,
-			cartItems: cart.items,
-			products,
+			cartItems: enrichedItems,
+			products: products as unknown as ProductWithVariations[], // Type assertion to resolve type mismatch
 		});
 	};
 
 	// Calculate cart totals
-	const subtotal = cart.items.reduce(
+	const subtotal = enrichedItems.reduce(
 		(total, item) => total + item.price * item.quantity,
 		0,
 	);
 
 	// Calculate total discounts
-	const totalDiscount = cart.items.reduce((total, item) => {
+	const totalDiscount = enrichedItems.reduce((total, item) => {
 		if (item.discount) {
 			const itemDiscount = item.price * item.quantity * (item.discount / 100);
 			return total + itemDiscount;
@@ -539,7 +525,7 @@ function CheckoutScreen() {
 							</Button>
 							<div className="mt-6 pt-4 border-t">
 								<h6>Order Items</h6>
-								{cart.items.map((item) => (
+								{enrichedItems.map((item) => (
 									<div
 										key={`${item.productId}-${item.variationId || "default"}`}
 										className="flex items-start gap-3 py-2"

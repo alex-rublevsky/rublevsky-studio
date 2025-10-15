@@ -1,5 +1,6 @@
 import "./blogPost.css";
 
+import { Link } from "@tanstack/react-router";
 import ReactMarkdown from "react-markdown";
 import ImageGallery from "~/components/ui/shared/ImageGallery";
 import { formatBlogDate } from "~/lib/utils";
@@ -16,6 +17,7 @@ interface BlogPostProps {
 	slug: string;
 	publishedAt: number;
 	id?: number; // Add id for fallback title consistency
+	productSlug?: string | null; // Add productSlug for product links
 	onlyImages?: boolean; // Render only the image gallery
 	onlyContent?: boolean; // Render only the content (no images)
 }
@@ -27,6 +29,7 @@ function BlogPost({
 	slug,
 	publishedAt,
 	id,
+	productSlug,
 	onlyImages = false,
 	onlyContent = false,
 }: BlogPostProps) {
@@ -75,20 +78,17 @@ function BlogPost({
 
 						<div className="my-2 flex gap-4 items-center">
 							<div className="flex gap-4">
-								{/* TODO: fix the link
-                
-                {productSlug && (
-              
-                  <Link
-                    to="/store/$itemId"
-                    params={{
-                      itemId: productSlug,
-                    }}
-                    className="blurLink"
-                  >
-                    <h6 className="whitespace-nowrap">Purchase →</h6>
-                  </Link>
-                )} */}
+								{productSlug && (
+									<Link
+										to="/store/$productId"
+										params={{
+											productId: productSlug,
+										}}
+										className="blurLink"
+									>
+										<h6 className="whitespace-nowrap">Purchase →</h6>
+									</Link>
+								)}
 								<time className="whitespace-nowrap">
 									{new Date(publishedAt).toLocaleDateString("en-US", {
 										year: "numeric",
@@ -145,20 +145,17 @@ function BlogPost({
 
 					<div className="my-2 flex gap-4 items-center">
 						<div className="flex gap-4">
-							{/* TODO: fix the link
-              
-              {productSlug && (
-            
-                <Link
-                  to="/store/$itemId"
-                  params={{
-                    itemId: productSlug,
-                  }}
-                  className="blurLink"
-                >
-                  <h6 className="whitespace-nowrap">Purchase →</h6>
-                </Link>
-              )} */}
+							{productSlug && (
+								<Link
+									to="/store/$productId"
+									params={{
+										productId: productSlug,
+									}}
+									className="blurLink"
+								>
+									<h6 className="whitespace-nowrap">Purchase →</h6>
+								</Link>
+							)}
 							<time className="whitespace-nowrap">
 								{formatBlogDate(publishedAt)}
 							</time>

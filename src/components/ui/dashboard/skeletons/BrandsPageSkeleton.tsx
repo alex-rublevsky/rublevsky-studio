@@ -84,11 +84,7 @@ export function BrandsPageSkeleton() {
 
 			{/* Floating Action Button */}
 			<div className="fixed bottom-3 right-3 z-50">
-				<button
-					type="button"
-					className="h-12 px-6 invisible relative"
-					disabled
-				>
+				<button type="button" className="h-12 px-6 invisible relative" disabled>
 					<span>Add New Brand</span>
 				</button>
 				<Skeleton className="absolute inset-0 rounded" />

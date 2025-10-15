@@ -3,7 +3,6 @@ import type { ErrorComponentProps } from "@tanstack/react-router";
 import {
 	createFileRoute,
 	Link,
-	notFound,
 	stripSearchParams,
 } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -26,7 +25,7 @@ import {
 	getAttributeDisplayName,
 	PRODUCT_ATTRIBUTES,
 } from "~/lib/productAttributes";
-import { getProductBySlug } from "~/server_functions/store/getProductBySlug";
+import { productQueryOptions, storeDataQueryOptions } from "~/lib/queryOptions";
 import type {
 	ProductWithDetails,
 	ProductWithVariations,
@@ -120,23 +119,6 @@ function ProductNotFoundComponent() {
 	);
 }
 
-// Product query options factory for reuse
-const productQueryOptions = (productId: string) => ({
-	queryKey: ["product", productId],
-	queryFn: async () => {
-		try {
-			return await getProductBySlug({ data: productId });
-		} catch (error) {
-			if (error instanceof Error && error.message === "Product not found") {
-				throw notFound();
-			}
-			throw error;
-		}
-	},
-	retry: false, // Don't retry on error - fail fast for 404s
-	staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-});
-
 export const Route = createFileRoute("/store/$productId")({
 	component: ProductPage,
 	errorComponent: ProductErrorComponent,
@@ -145,8 +127,11 @@ export const Route = createFileRoute("/store/$productId")({
 
 	// Loader prefetches data before component renders
 	loader: async ({ context: { queryClient }, params: { productId } }) => {
-		// Ensure data is loaded before component renders
-		await queryClient.ensureQueryData(productQueryOptions(productId));
+		// Ensure both product and store data are loaded before component renders
+		await Promise.all([
+			queryClient.ensureQueryData(productQueryOptions(productId)),
+			queryClient.ensureQueryData(storeDataQueryOptions()),
+		]);
 	},
 
 	head: ({ loaderData }) => {
@@ -186,10 +171,14 @@ function ProductPage() {
 	const navigate = Route.useNavigate();
 	const [quantity, setQuantity] = useState(1);
 
-	const { addProductToCart, cart, products } = useCart();
+	const { addProductToCart, cart } = useCart();
 
 	// Use suspense query - data is guaranteed to be loaded by the loader
 	const { data: product } = useSuspenseQuery(productQueryOptions(productId));
+
+	// Get store data for products array (needed for cart operations)
+	const { data: storeData } = useSuspenseQuery(storeDataQueryOptions());
+	const products = storeData.products;
 
 	// Auto-select first variation if no search params and product has variations
 	// This runs once when product loads and no search params exist
@@ -290,8 +279,7 @@ function ProductPage() {
 			syncedProduct.variations.find((variation) => {
 				return Object.entries(selectedAttributes).every(([attrId, value]) =>
 					variation.attributes.some(
-						(attr: VariationAttribute) =>
-							attr.attributeId === attrId && attr.value === value,
+						(attr) => attr.attributeId === attrId && attr.value === value,
 					),
 				);
 			}) || null
@@ -398,7 +386,7 @@ function ProductPage() {
 			const values = new Set<string>();
 			sortedVariations.forEach((variation) => {
 				const attribute = variation.attributes.find(
-					(attr: VariationAttribute) => attr.attributeId === attributeId,
+					(attr) => attr.attributeId === attributeId,
 				);
 				if (attribute) {
 					values.add(attribute.value);
@@ -439,7 +427,7 @@ function ProductPage() {
 
 		const attributeNames = new Set<string>();
 		syncedProduct.variations.forEach((variation) => {
-			variation.attributes.forEach((attr: VariationAttribute) => {
+			variation.attributes.forEach((attr) => {
 				attributeNames.add(attr.attributeId);
 			});
 		});
@@ -586,7 +574,11 @@ function ProductPage() {
 									</div>
 								)}
 								{/* Tea category learn more links */}
-								<TeaCategoryLearnMore teaCategories={(syncedProduct as ProductWithDetails).teaCategories} />
+								<TeaCategoryLearnMore
+									teaCategories={
+										(syncedProduct as ProductWithDetails).teaCategories
+									}
+								/>
 							</div>
 
 							{/* Blog post link */}

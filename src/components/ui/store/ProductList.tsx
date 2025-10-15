@@ -2,12 +2,12 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 import { AnimatedGroup } from "~/components/motion_primitives/AnimatedGroup";
 import { useDeviceType } from "~/hooks/use-mobile";
-import type { Product, TeaCategory } from "~/types";
+import type { ProductWithVariations, TeaCategory } from "~/types";
 import ProductCard from "./ProductCard";
 import { ProductCardSkeleton } from "./skeletons/ProductCardSkeleton";
 
 interface ProductListProps {
-	data: Product[];
+	data: ProductWithVariations[];
 	isLoading?: boolean;
 	teaCategories?: TeaCategory[];
 }

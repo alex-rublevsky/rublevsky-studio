@@ -23,9 +23,15 @@ export interface ProductVariationWithAttributes extends ProductVariation {
 }
 
 // Extended product type with variations
-export interface ProductWithVariations extends Product {
+export interface ProductWithVariations extends Omit<Product, 'teaCategories'> {
 	variations?: ProductVariationWithAttributes[];
-	teaCategories?: string[];
+	teaCategories?: Array<{
+		slug: string;
+		name: string;
+		description?: string | null;
+		blogSlug?: string | null;
+		isActive: boolean;
+	}>;
 }
 
 // Product group for dashboard
@@ -96,6 +102,7 @@ export type BlogPost = Omit<
 	teaCategories?: string[];
 	publishedAt: number;
 	productName?: string | null;
+	productSlug?: string | null;
 };
 
 // Blog Post Preview (for index page)
@@ -164,6 +171,8 @@ export interface BrandFormData {
 export interface TeaCategoryFormData {
 	name: string;
 	slug: string;
+	description: string;
+	blogSlug: string;
 	isActive: boolean;
 }
 
@@ -210,24 +219,19 @@ export interface BrandResponse extends ApiResponse<Brand> {
 	brand?: Brand;
 }
 
+/**
+ * Minimal CartItem - only IDs and quantity
+ * All other data (price, image, stock, etc.) is looked up from TanStack Query cache
+ * This eliminates data duplication and ensures we always show current data
+ */
 export interface CartItem {
 	productId: number;
-	productName: string;
-	productSlug: string;
 	variationId?: number;
 	quantity: number;
-	price: number;
-	maxStock: number;
-	unlimitedStock: boolean;
-	discount?: number | null;
-	image?: string;
-	attributes?: Record<string, string>;
-	weightInfo?: {
-		totalWeight: number;
-	};
+	addedAt: number; // Timestamp for sorting/debugging
 }
 
-export interface ProductWithDetails extends Product {
+export interface ProductWithDetails extends Omit<Product, 'teaCategories'> {
 	category?: {
 		name: string;
 		slug: string;
@@ -244,5 +248,11 @@ export interface ProductWithDetails extends Product {
 		body: string;
 		blogUrl: string;
 	} | null;
-	teaCategories?: string[];
+	teaCategories?: Array<{
+		slug: string;
+		name: string;
+		description?: string | null;
+		blogSlug?: string | null;
+		isActive: boolean;
+	}>;
 }

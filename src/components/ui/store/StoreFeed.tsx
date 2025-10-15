@@ -4,7 +4,6 @@ import type { Category, ProductWithVariations, TeaCategory } from "~/types";
 import { isProductAvailable } from "~/utils/validateStock";
 import ProductFilters from "./ProductFilters";
 import ProductList from "./ProductList";
-import { ProductFiltersSkeleton } from "./skeletons/ProductFiltersSkeleton";
 
 interface StoreFeedProps {
 	products: ProductWithVariations[];
@@ -45,7 +44,7 @@ export default function StoreFeed({
 	);
 	const [sortBy, setSortBy] = useState<string>("relevant");
 
-	const { cart, isLoading } = useCart();
+	const { cart } = useCart();
 
 	// Pre-calculate price ranges for all products (eliminates redundant calculations)
 	const productsWithPriceRanges = useMemo(() => {
@@ -113,8 +112,8 @@ export default function StoreFeed({
 		// Count tea categories and track which ones are used
 		productsWithPriceRanges.forEach((product) => {
 			product.teaCategories?.forEach((cat) => {
-				usedCategories.add(cat);
-				counts.set(cat, (counts.get(cat) || 0) + 1);
+				usedCategories.add(cat.slug);
+				counts.set(cat.slug, (counts.get(cat.slug) || 0) + 1);
 			});
 		});
 
@@ -141,7 +140,7 @@ export default function StoreFeed({
 		// Apply tea category filter
 		if (selectedCategory === "tea" && selectedTeaCategory) {
 			filtered = filtered.filter((product) =>
-				product.teaCategories?.includes(selectedTeaCategory),
+				product.teaCategories?.some(tc => tc.slug === selectedTeaCategory),
 			);
 		}
 
@@ -218,10 +217,7 @@ export default function StoreFeed({
 
 	return (
 		<section className="no-padding space-y-8">
-			{isLoading ? (
-				<ProductFiltersSkeleton />
-			) : (
-				<ProductFilters
+			<ProductFilters
 					categories={categoriesWithCounts}
 					teaCategories={filteredTeaCategoriesWithCounts}
 					selectedCategory={selectedCategory}
@@ -234,11 +230,9 @@ export default function StoreFeed({
 					sortBy={sortBy}
 					onSortChange={setSortBy}
 				/>
-			)}
 			<div className="px-0">
 				<ProductList
 					data={filteredAndSortedProducts}
-					isLoading={isLoading}
 					teaCategories={teaCategories}
 				/>
 			</div>

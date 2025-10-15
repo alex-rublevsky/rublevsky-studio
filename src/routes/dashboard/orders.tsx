@@ -1,12 +1,22 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { CheckSquare, Square, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
-import { Badge } from "~/components/ui/shared/Badge";
-import { Image } from "~/components/ui/shared/Image";
-import { Switch } from "~/components/ui/shared/Switch";
-import { getAllOrders } from "~/server_functions/dashboard/orders/getAllOrders";
+import DeleteConfirmationDialog from "~/components/ui/dashboard/ConfirmationDialog";
+import { OrderCard } from "~/components/ui/dashboard/OrderCard";
+import { OrderDrawer } from "~/components/ui/dashboard/OrderDrawer";
+import { OrdersPageSkeleton } from "~/components/ui/dashboard/skeletons/OrdersPageSkeleton";
+import { Button } from "~/components/ui/shared/Button";
+import { SearchInput } from "~/components/ui/shared/SearchInput";
+import { dashboardOrdersQueryOptions } from "~/lib/queryOptions";
+import {
+	deleteOrder,
+	deleteOrders,
+} from "~/server_functions/dashboard/orders/deleteOrder";
+import { updateOrderStatus } from "~/server_functions/dashboard/orders/updateOrderStatus";
 
-interface OrderAddress {
+export interface OrderAddress {
 	id: number;
 	orderId: number;
 	firstName: string;
@@ -15,20 +25,21 @@ interface OrderAddress {
 	phone: string;
 	streetAddress: string;
 	city: string;
-	state: string;
+	state: string | null;
 	country: string;
 	zipCode: string;
-	addressType: "shipping" | "billing" | "both";
+	addressType: string;
+	createdAt: Date;
 }
 
-interface OrderItem {
+export interface OrderItem {
 	id: number;
 	orderId: number;
 	productId: number;
 	quantity: number;
 	unitAmount: number;
 	finalAmount: number;
-	discountPercentage?: number;
+	discountPercentage: number | null;
 	product: {
 		name: string;
 		images: string | null;
@@ -40,7 +51,7 @@ interface OrderItem {
 	attributes?: Record<string, string>;
 }
 
-interface Order {
+export interface Order {
 	id: number;
 	status: string;
 	subtotalAmount: number;
@@ -52,303 +63,393 @@ interface Order {
 	paymentStatus: string;
 	shippingMethod: string | null;
 	notes: string | null;
-	createdAt: number;
-	completedAt: number | null;
+	createdAt: Date;
+	completedAt: Date | null;
 	addresses: OrderAddress[];
 	items: OrderItem[];
 }
 
 export const Route = createFileRoute("/dashboard/orders")({
 	component: OrderList,
+	pendingComponent: OrdersPageSkeleton,
+	// Prefetch orders data before component renders
+	loader: async ({ context: { queryClient } }) => {
+		await queryClient.ensureQueryData(dashboardOrdersQueryOptions());
+	},
+	errorComponent: ({ error }) => {
+		return (
+			<div className="h-full w-full flex flex-col justify-center items-center gap-4 p-8">
+				<h2 className="text-2xl font-semibold">Failed to load orders</h2>
+				<p className="text-muted-foreground text-center max-w-md">
+					{error instanceof Error
+						? error.message
+						: "An unexpected error occurred"}
+				</p>
+				<button
+					type="button"
+					onClick={() => window.location.reload()}
+					className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+				>
+					Retry
+				</button>
+			</div>
+		);
+	},
 });
 
 function OrderList() {
-	const { isPending, data, refetch } = useQuery<Order[]>({
-		queryKey: ["dashboard-orders"],
-		queryFn: () => getAllOrders(),
-	});
+	const queryClient = useQueryClient();
+	const [searchTerm, setSearchTerm] = useState("");
+	const [isSelectionMode, setIsSelectionMode] = useState(false);
+	const [selectedOrders, setSelectedOrders] = useState<Set<number>>(new Set());
+	const [isDeleting, setIsDeleting] = useState(false);
 
-	const handleToggleStatus = async (
-		_orderId: number,
-		_currentStatus: string,
-	) => {
+	// Single order deletion state
+	const [showSingleDeleteDialog, setShowSingleDeleteDialog] = useState(false);
+	const [deletingOrderId, setDeletingOrderId] = useState<number | null>(null);
+
+	// Bulk deletion state
+	const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
+
+	// Order drawer state
+	const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+	const [showOrderDrawer, setShowOrderDrawer] = useState(false);
+
+	// Fetch orders (already grouped and sorted by server)
+	// Data is guaranteed to be loaded by the loader
+	const { data } = useSuspenseQuery(dashboardOrdersQueryOptions());
+
+	const refetch = () => {
+		queryClient.invalidateQueries({
+			queryKey: ["dashboard-orders"],
+		});
+	};
+
+	const handleToggleStatus = async (orderId: number, currentStatus: string) => {
 		try {
-			// TODO: Implement actual status toggle API call
-			toast.success("Order status updated");
-			refetch(); // Refresh the orders list
+			// Determine new status
+			const newStatus = currentStatus === "processed" ? "pending" : "processed";
+
+			// Call server function to update status
+			await updateOrderStatus({
+				data: { id: orderId, status: newStatus },
+			});
+
+			toast.success(`Order #${orderId} marked as ${newStatus}`);
+
+			// Refresh the orders list
+			refetch();
 		} catch (error) {
 			console.error("Failed to update order status:", error);
 			toast.error("Failed to update order status");
 		}
 	};
-	//   try {
-	//     const result = await toggleOrderStatus(orderId);
-	//     if (result.success) {
-	//       setOrders(
-	//         orders.map((order) =>
-	//           order.id === orderId
-	//             ? {
-	//                 ...order,
-	//                 status: currentStatus === "pending" ? "processed" : "pending",
-	//               }
-	//             : order
-	//         )
-	//       );
-	//       toast.success(result.message);
-	//     } else {
-	//       toast.error(result.message);
-	//     }
-	//   } catch (error) {
-	//     console.error("Failed to update order status:", error);
-	//     toast.error("Failed to update order status");
-	//   }
-	// };
 
-	if (isPending) {
-		return <div className="text-center py-4">Loading orders...</div>;
-	}
+	const handleDeleteOrder = async (orderId: number) => {
+		setDeletingOrderId(orderId);
+		setShowSingleDeleteDialog(true);
+	};
 
-	if (!data || data.length === 0) {
+	const handleSingleDeleteConfirm = async () => {
+		if (!deletingOrderId) return;
+
+		setIsDeleting(true);
+		try {
+			await deleteOrder({ data: { id: deletingOrderId } });
+			toast.success(`Order #${deletingOrderId} deleted successfully`);
+			refetch();
+		} catch (error) {
+			console.error("Failed to delete order:", error);
+			toast.error("Failed to delete order");
+		} finally {
+			setIsDeleting(false);
+			setShowSingleDeleteDialog(false);
+			setDeletingOrderId(null);
+		}
+	};
+
+	const handleSingleDeleteCancel = () => {
+		setShowSingleDeleteDialog(false);
+		setDeletingOrderId(null);
+	};
+
+	const handleBulkDelete = async () => {
+		if (selectedOrders.size === 0) return;
+		setShowBulkDeleteDialog(true);
+	};
+
+	const handleBulkDeleteConfirm = async () => {
+		if (selectedOrders.size === 0) return;
+
+		setIsDeleting(true);
+		try {
+			const orderIds = Array.from(selectedOrders);
+			await deleteOrders({ data: { ids: orderIds } });
+			toast.success(`${orderIds.length} order(s) deleted successfully`);
+
+			// Clear selection and exit selection mode
+			setSelectedOrders(new Set());
+			setIsSelectionMode(false);
+			refetch();
+		} catch (error) {
+			console.error("Failed to delete orders:", error);
+			toast.error("Failed to delete orders");
+		} finally {
+			setIsDeleting(false);
+			setShowBulkDeleteDialog(false);
+		}
+	};
+
+	const handleBulkDeleteCancel = () => {
+		setShowBulkDeleteDialog(false);
+	};
+
+	const handleSelectionChange = (orderId: number, selected: boolean) => {
+		setSelectedOrders((prev) => {
+			const newSet = new Set(prev);
+			if (selected) {
+				newSet.add(orderId);
+			} else {
+				newSet.delete(orderId);
+			}
+			return newSet;
+		});
+	};
+
+	const toggleSelectionMode = () => {
+		setIsSelectionMode(!isSelectionMode);
+		if (isSelectionMode) {
+			setSelectedOrders(new Set());
+		}
+	};
+
+	const handleSelectAll = () => {
+		if (selectedOrders.size === allOrders.length) {
+			// All selected, so deselect all
+			setSelectedOrders(new Set());
+		} else {
+			// Not all selected, so select all
+			setSelectedOrders(new Set(allOrders.map((order) => order.id)));
+		}
+	};
+
+	const handleOrderClick = (order: Order) => {
+		if (isSelectionMode) {
+			// In selection mode, toggle selection instead of opening drawer
+			handleSelectionChange(order.id, !selectedOrders.has(order.id));
+		} else {
+			// Normal mode, open drawer
+			setSelectedOrder(order);
+			setShowOrderDrawer(true);
+		}
+	};
+
+	const handleCloseOrderDrawer = () => {
+		setShowOrderDrawer(false);
+		setSelectedOrder(null);
+	};
+
+	const groupedOrders = data.groupedOrders || [];
+
+	// Flatten all orders for total count
+	const allOrders = groupedOrders.flatMap(
+		(group: { title: string; orders: Order[] }) => group.orders,
+	);
+
+	if (allOrders.length === 0) {
 		return (
 			<div className="h-full w-full flex justify-center items-center">
-				<p className="text-gray-500">No orders found</p>
+				<p className="text-muted-foreground">No orders found</p>
 			</div>
 		);
 	}
 
-	return (
-		<div className="space-y-6">
-			{data.map((order) => {
+	// Filter orders within each group based on search
+	const filteredGroupedOrders = groupedOrders
+		.map((group: { title: string; orders: Order[] }) => ({
+			...group,
+			orders: group.orders.filter((order: Order) => {
+				if (!searchTerm) return true;
+
+				const searchLower = searchTerm.toLowerCase();
 				const shippingAddress = order.addresses?.find(
-					(addr) =>
+					(addr: OrderAddress) =>
 						addr.addressType === "shipping" || addr.addressType === "both",
 				);
-				const billingAddress =
-					order.addresses?.find((addr) => addr.addressType === "billing") ||
-					shippingAddress;
 
 				return (
-					<div key={order.id} className="border rounded-lg p-6 space-y-6">
-						{/* Order Header */}
-						<div className="flex justify-between items-start">
-							<div>
-								<h3 className="text-lg font-semibold">Order #{order.id}</h3>
-								<p className="text-sm text-gray-500">
-									{new Date(order.createdAt * 1000).toLocaleString()}
-								</p>
-							</div>
-							<div className="flex items-center gap-4">
-								<Badge
-									variant={
-										order.status === "processed"
-											? "default"
-											: order.status === "pending"
-												? "secondary"
-												: "outline"
-									}
-								>
-									{order.status}
-								</Badge>
-								<div className="flex items-center gap-2">
-									<span className="text-sm text-gray-500">
-										Mark as processed
-									</span>
-									<Switch
-										checked={order.status === "processed"}
-										onChange={() => handleToggleStatus(order.id, order.status)}
-									/>
-								</div>
-							</div>
-						</div>
-
-						{/* Customer Info */}
-						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-							{/* Order Details */}
-							<div className="space-y-4">
-								<div>
-									<h4 className="font-medium mb-2">Order Details</h4>
-									<div className="text-sm space-y-1">
-										<p>
-											<span className="text-gray-500">Payment Status:</span>{" "}
-											<span className="capitalize">{order.paymentStatus}</span>
-										</p>
-										<p>
-											<span className="text-gray-500">Payment Method:</span>{" "}
-											<span className="capitalize">
-												{order.paymentMethod || "Not specified"}
-											</span>
-										</p>
-										<p>
-											<span className="text-gray-500">Shipping Method:</span>{" "}
-											<span className="capitalize">
-												{order.shippingMethod || "Not specified"}
-											</span>
-										</p>
-										{order.completedAt && (
-											<p>
-												<span className="text-gray-500">Completed:</span>{" "}
-												{new Date(order.completedAt * 1000).toLocaleString()}
-											</p>
-										)}
-										{order.notes && (
-											<p>
-												<span className="text-gray-500">Notes:</span>{" "}
-												{order.notes}
-											</p>
-										)}
-									</div>
-								</div>
-							</div>
-
-							{/* Price Details */}
-							<div className="space-y-4">
-								<div>
-									<h4 className="font-medium mb-2">Price Details</h4>
-									<div className="text-sm space-y-1">
-										<p>
-											<span className="text-gray-500">Subtotal:</span> $
-											{(order.subtotalAmount || 0).toFixed(2)}
-										</p>
-										{(order.discountAmount || 0) > 0 && (
-											<p>
-												<span className="text-gray-500">Discount:</span>{" "}
-												<span className="text-red-500">
-													-${(order.discountAmount || 0).toFixed(2)}
-												</span>
-											</p>
-										)}
-										<p>
-											<span className="text-gray-500">Shipping:</span> $
-											{(order.shippingAmount || 0).toFixed(2)}
-										</p>
-										<p className="font-medium">
-											<span className="text-gray-500">Total:</span>{" "}
-											{order.currency || "CAD"} $
-											{(order.totalAmount || 0).toFixed(2)}
-										</p>
-									</div>
-								</div>
-							</div>
-
-							{/* Shipping Address */}
-							{shippingAddress && (
-								<div className="space-y-4">
-									<div>
-										<h4 className="font-medium mb-2">Shipping Address</h4>
-										<div className="text-sm space-y-1">
-											<p className="font-medium">
-												{shippingAddress.firstName} {shippingAddress.lastName}
-											</p>
-											<p>{shippingAddress.email}</p>
-											<p>{shippingAddress.phone}</p>
-											<p>{shippingAddress.streetAddress}</p>
-											<p>
-												{shippingAddress.city}
-												{shippingAddress.state && `, ${shippingAddress.state}`}
-											</p>
-											<p>{shippingAddress.zipCode}</p>
-											<p>{shippingAddress.country}</p>
-										</div>
-									</div>
-								</div>
-							)}
-
-							{/* Billing Address - Only show if different from shipping */}
-							{order.addresses?.length > 1 && billingAddress && (
-								<div className="space-y-4">
-									<div>
-										<h4 className="font-medium mb-2">Billing Address</h4>
-										<div className="text-sm space-y-1">
-											<p className="font-medium">
-												{billingAddress.firstName} {billingAddress.lastName}
-											</p>
-											<p>{billingAddress.email}</p>
-											<p>{billingAddress.phone}</p>
-											<p>{billingAddress.streetAddress}</p>
-											<p>
-												{billingAddress.city}
-												{billingAddress.state && `, ${billingAddress.state}`}
-											</p>
-											<p>{billingAddress.zipCode}</p>
-											<p>{billingAddress.country}</p>
-										</div>
-									</div>
-								</div>
-							)}
-						</div>
-
-						{/* Order Items */}
-						<div>
-							<h4 className="font-medium mb-3">
-								Items ({order.items?.length || 0})
-							</h4>
-							<div className="space-y-3">
-								{(order.items || []).map((item) => (
-									<div
-										key={item.id}
-										className="flex items-start gap-4 p-4 bg-background border rounded-lg hover:border-primary/50 transition-colors"
-									>
-										<div className="relative w-20 h-20 shrink-0 bg-gray-100 rounded-md overflow-hidden">
-											{item.product.images ? (
-												<Image
-													src={`/${item.product.images.split(",").map((img) => img.trim())[0]}`}
-													alt={item.product.name}
-													className="object-cover"
-													sizes="5rem"
-												/>
-											) : (
-												<div className="w-full h-full flex items-center justify-center text-gray-400">
-													No image
-												</div>
-											)}
-										</div>
-										<div className="grow min-w-0">
-											<div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
-												<div>
-													<div className="font-medium truncate">
-														{item.product.name}
-													</div>
-													{item.variation && (
-														<div className="text-sm text-gray-500">
-															SKU: {item.variation.sku}
-														</div>
-													)}
-													{item.attributes &&
-														Object.keys(item.attributes).length > 0 && (
-															<div className="text-sm text-gray-500">
-																{Object.entries(item.attributes)
-																	.map(([key, value]) => `${key}: ${value}`)
-																	.join(", ")}
-															</div>
-														)}
-													<div className="text-sm text-gray-500 mt-1">
-														Quantity: {item.quantity}
-													</div>
-												</div>
-												<div className="flex flex-col items-end gap-1">
-													<div className="font-medium">
-														${(item.finalAmount || 0).toFixed(2)}
-													</div>
-													{item.discountPercentage && (
-														<div className="flex items-center gap-2">
-															<span className="text-sm line-through text-gray-500">
-																${(item.unitAmount * item.quantity).toFixed(2)}
-															</span>
-															<span className="text-xs px-2 py-0.5 bg-red-100 text-red-700 rounded-full">
-																{item.discountPercentage}% OFF
-															</span>
-														</div>
-													)}
-												</div>
-											</div>
-										</div>
-									</div>
-								))}
-							</div>
-						</div>
-					</div>
+					order.id.toString().includes(searchLower) ||
+					order.status.toLowerCase().includes(searchLower) ||
+					shippingAddress?.firstName.toLowerCase().includes(searchLower) ||
+					shippingAddress?.lastName.toLowerCase().includes(searchLower) ||
+					shippingAddress?.email.toLowerCase().includes(searchLower) ||
+					order.items?.some((item: OrderItem) =>
+						item.product.name.toLowerCase().includes(searchLower),
+					)
 				);
-			})}
+			}),
+		}))
+		.filter(
+			(group: { title: string; orders: Order[] }) => group.orders.length > 0,
+		); // Only show groups with orders
+
+	const totalOrders = allOrders.length;
+	const displayedOrders = filteredGroupedOrders.reduce(
+		(sum: number, group: { title: string; orders: Order[] }) =>
+			sum + group.orders.length,
+		0,
+	);
+
+	return (
+		<div className="space-y-6">
+			{/* Header with count, search, and selection controls */}
+			<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4">
+				<div className="flex items-center gap-4">
+					<p className="text-muted-foreground">
+						{searchTerm
+							? `${displayedOrders} of ${totalOrders} orders`
+							: `${totalOrders} orders`}
+					</p>
+					{isSelectionMode && selectedOrders.size > 0 && (
+						<p className="text-sm text-primary">
+							{selectedOrders.size} selected
+						</p>
+					)}
+				</div>
+
+				<div className="flex items-center gap-2">
+					{/* Search */}
+					<SearchInput
+						placeholder="Search orders..."
+						value={searchTerm}
+						onChange={setSearchTerm}
+						className="w-full sm:w-64"
+					/>
+
+					{/* Selection Controls */}
+					<div className="flex items-center gap-2">
+						{isSelectionMode && selectedOrders.size > 0 && (
+							<Button
+								variant="destructive"
+								size="sm"
+								onClick={handleBulkDelete}
+								disabled={isDeleting}
+								className="flex items-center gap-1"
+							>
+								<Trash2 className="h-4 w-4" />
+								Delete ({selectedOrders.size})
+							</Button>
+						)}
+						<Button
+							variant={isSelectionMode ? "default" : "outline"}
+							size="sm"
+							onClick={toggleSelectionMode}
+							className="flex items-center gap-1"
+						>
+							{isSelectionMode ? (
+								<CheckSquare className="h-4 w-4" />
+							) : (
+								<Square className="h-4 w-4" />
+							)}
+							Select
+						</Button>
+						{isSelectionMode && (
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={handleSelectAll}
+								className="flex items-center gap-1"
+							>
+								{selectedOrders.size === allOrders.length
+									? "Select None"
+									: "Select All"}
+							</Button>
+						)}
+					</div>
+				</div>
+			</div>
+
+			{/* Orders Groups */}
+			{filteredGroupedOrders.length === 0 ? (
+				<div className="text-center py-8 text-muted-foreground px-4">
+					<h3 className="text-lg font-medium mb-2">
+						{searchTerm ? "No orders found" : "No orders yet"}
+					</h3>
+					<p className="text-sm text-muted-foreground">
+						{searchTerm
+							? "Try adjusting your search"
+							: "Orders will appear here once customers place them"}
+					</p>
+				</div>
+			) : (
+				<div className="space-y-8">
+					{/* Render each group from server */}
+					{filteredGroupedOrders.map(
+						(group: { title: string; orders: Order[] }) => (
+							<div key={group.title} className="space-y-4">
+								{/* Group Title */}
+								<div className="px-4">
+									<h2 className="text-2xl font-semibold text-foreground flex items-baseline gap-1">
+										{group.title}
+										<span className="text-sm text-muted-foreground">
+											{group.orders.length}{" "}
+											{group.orders.length === 1 ? "order" : "orders"}
+										</span>
+									</h2>
+								</div>
+
+								{/* Orders Grid */}
+								<div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-2 md:gap-3 px-4">
+									{group.orders.map((order: Order) => (
+										<OrderCard
+											key={order.id}
+											// biome-ignore lint/suspicious/noExplicitAny: OrderCard expects a different Order type
+											order={order as any}
+											onStatusToggle={handleToggleStatus}
+											onDelete={handleDeleteOrder}
+											onClick={handleOrderClick}
+											isSelectionMode={isSelectionMode}
+											isSelected={selectedOrders.has(order.id)}
+											onSelectionChange={handleSelectionChange}
+										/>
+									))}
+								</div>
+							</div>
+						),
+					)}
+				</div>
+			)}
+
+			{/* Single Order Delete Confirmation Dialog */}
+			{showSingleDeleteDialog && (
+				<DeleteConfirmationDialog
+					isOpen={showSingleDeleteDialog}
+					onClose={handleSingleDeleteCancel}
+					onConfirm={handleSingleDeleteConfirm}
+					title="Delete Order"
+					description={`Are you sure you want to delete order #${deletingOrderId}? This action cannot be undone.`}
+					isDeleting={isDeleting}
+				/>
+			)}
+
+			{/* Bulk Delete Confirmation Dialog */}
+			{showBulkDeleteDialog && (
+				<DeleteConfirmationDialog
+					isOpen={showBulkDeleteDialog}
+					onClose={handleBulkDeleteCancel}
+					onConfirm={handleBulkDeleteConfirm}
+					title="Delete Orders"
+					description={`Are you sure you want to delete ${selectedOrders.size} selected order(s)? This action cannot be undone.`}
+					isDeleting={isDeleting}
+				/>
+			)}
+
+			{/* Order Drawer */}
+			<OrderDrawer
+				order={selectedOrder}
+				isOpen={showOrderDrawer}
+				onClose={handleCloseOrderDrawer}
+			/>
 		</div>
 	);
 }

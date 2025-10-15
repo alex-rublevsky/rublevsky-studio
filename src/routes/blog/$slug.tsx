@@ -1,9 +1,11 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, notFound } from "@tanstack/react-router";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
 import BlogPost from "~/components/ui/blog/BlogPost";
+import { BlogPostSkeleton } from "~/components/ui/blog/BlogPostSkeleton";
+import { BlogPostErrorComponent } from "~/components/ui/blog/BlogPostError";
 import ImageGallery from "~/components/ui/shared/ImageGallery";
-import { getBlogPostBySlug } from "~/server_functions/blog/getBlogPostBySlug";
+import { blogPostQueryOptions } from "~/lib/queryOptions";
 import type {
 	BlogPostPreview,
 	BlogPost as BlogPostType,
@@ -12,33 +14,20 @@ import type {
 
 export const Route = createFileRoute("/blog/$slug")({
 	component: BlogPostComponent,
+	pendingComponent: BlogPostSkeleton,
+	errorComponent: BlogPostErrorComponent,
+	// Prefetch blog post before component renders
+	loader: async ({ context: { queryClient }, params: { slug } }) => {
+		await queryClient.ensureQueryData(blogPostQueryOptions(slug));
+	},
 });
 
 function BlogPostComponent() {
-	const params = Route.useParams();
-	const slug = params.slug;
+	const { slug } = Route.useParams();
 	const queryClient = useQueryClient();
 
-	const {
-		isPending: isLoading,
-		error: hasError,
-		data: post,
-	} = useQuery({
-		queryKey: ["blog-post", slug],
-		queryFn: async (): Promise<BlogPostType> => {
-			console.log(`Fetching blog post with slug: ${slug}`);
-			try {
-				const data = await getBlogPostBySlug({ data: slug });
-				console.log("Fetched blog post:", data);
-				return data as BlogPostType;
-			} catch (error) {
-				if (error instanceof Error && error.message === "Blog post not found") {
-					throw notFound();
-				}
-				throw new Error("Failed to fetch blog post");
-			}
-		},
-	});
+	// Use suspense query - data is guaranteed to be loaded by the loader
+	const { data: post } = useSuspenseQuery(blogPostQueryOptions(slug));
 
 	// Get cached blog preview data to use as fallback during loading
 	const cachedBlogData = queryClient.getQueryData<{
@@ -80,29 +69,6 @@ function BlogPostComponent() {
 	const imageArray = hasImages
 		? displayPost.images?.split(",").map((img: string) => img.trim()) || []
 		: [];
-
-	// Only show loading if we don't have any data (neither full post nor fallback)
-	if (isLoading && !displayPost) {
-		return (
-			<section className="pt-24 sm:pt-32 div min-h-screen">
-				<div className="text-center">Loading blog post...</div>
-			</section>
-		);
-	}
-
-	if (hasError) {
-		return (
-			<section className="pt-24 sm:pt-32 div min-h-screen">
-				<div className="text-center text-red-500">
-					Error loading blog post. Please try again later.
-				</div>
-			</section>
-		);
-	}
-
-	if (!displayPost) {
-		throw notFound();
-	}
 
 	// Conditional layout based on image presence
 	if (!hasImages) {

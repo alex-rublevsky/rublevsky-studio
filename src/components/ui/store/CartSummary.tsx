@@ -1,19 +1,21 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "~/components/ui/shared/Button";
+import { useEnrichedCart } from "~/hooks/useEnrichedCart";
 import { useCart } from "~/lib/cartContext";
 import { Badge } from "../shared/Badge";
 
 export function CartSummary() {
 	const { cart } = useCart();
+	const enrichedItems = useEnrichedCart(cart.items);
 
 	// Calculate cart totals with discounts
-	const subtotal = cart.items.reduce(
+	const subtotal = enrichedItems.reduce(
 		(total, item) => total + item.price * item.quantity,
 		0,
 	);
 
-	const discountTotal = cart.items.reduce((total, item) => {
+	const discountTotal = enrichedItems.reduce((total, item) => {
 		if (item.discount) {
 			return total + (item.price * item.quantity * item.discount) / 100;
 		}
@@ -32,7 +34,9 @@ export function CartSummary() {
 			{discountTotal > 0 && (
 				<div className="flex justify-between text-sm text-foreground">
 					<p>Discount</p>
-					<Badge variant="green" className="text-sm translate-x-2">-${discountTotal.toFixed(2)}</Badge>
+					<Badge variant="green" className="text-sm translate-x-2">
+						-${discountTotal.toFixed(2)}
+					</Badge>
 				</div>
 			)}
 
@@ -50,16 +54,17 @@ export function CartSummary() {
 
 export function CartCheckoutButton() {
 	const { cart, setCartOpen } = useCart();
+	const enrichedItems = useEnrichedCart(cart.items);
 	const [isLoading, setIsLoading] = useState(false);
 	const navigate = useNavigate();
 
 	// Calculate total with discounts
-	const subtotal = cart.items.reduce(
+	const subtotal = enrichedItems.reduce(
 		(total, item) => total + item.price * item.quantity,
 		0,
 	);
 
-	const discountTotal = cart.items.reduce((total, item) => {
+	const discountTotal = enrichedItems.reduce((total, item) => {
 		if (item.discount) {
 			return total + (item.price * item.quantity * item.discount) / 100;
 		}

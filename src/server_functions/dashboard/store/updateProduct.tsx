@@ -53,8 +53,8 @@ export const updateProduct = createServerFn({ method: "POST" })
 			}
 
 			// Process images
-			const imageString =
-				productData.images?.trim() || existingProduct[0].images || "";
+			// Use the provided images string directly, even if empty (to allow removing all images)
+			const imageString = productData.images?.trim() ?? "";
 
 			// Check if slug is changing and update blog post references
 			const oldSlug = existingProduct[0].slug;

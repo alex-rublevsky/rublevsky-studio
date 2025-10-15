@@ -4,31 +4,17 @@ import {
 	DrawerFooter,
 	DrawerHeader,
 } from "~/components/ui/shared/Drawer";
+import { useEnrichedCart } from "~/hooks/useEnrichedCart";
 import { useCart } from "~/lib/cartContext";
 import { CartItem } from "./CartItem";
 import { CartCheckoutButton, CartSummary } from "./CartSummary";
 
 export function CartDrawerContent() {
-	const cartContext = useCart();
+	const { cart } = useCart();
 
-	// If we're not within a CartProvider, show empty cart
-	if (!cartContext) {
-		return (
-			<>
-				<DrawerHeader>
-					<h5>Shopping Cart</h5>
-				</DrawerHeader>
-				<DrawerBody>
-					<div className="flex flex-col items-center justify-center h-full">
-						<ShoppingBag size={48} className="text-muted mb-4" />
-						<p className="text-muted-foreground">Your cart is empty</p>
-					</div>
-				</DrawerBody>
-			</>
-		);
-	}
-
-	const { cart } = cartContext;
+	// Enrich cart items with product data from TanStack Query cache
+	// This must be called unconditionally (hooks rule)
+	const enrichedItems = useEnrichedCart(cart.items);
 
 	return (
 		<>
@@ -37,7 +23,7 @@ export function CartDrawerContent() {
 			</DrawerHeader>
 
 			<DrawerBody>
-				{cart.items.length === 0 ? (
+				{enrichedItems.length === 0 ? (
 					<div className="flex flex-col items-center justify-center h-full">
 						<ShoppingBag size={48} className="text-muted mb-4" />
 						<p className="text-muted-foreground">Your cart is empty</p>
@@ -45,10 +31,11 @@ export function CartDrawerContent() {
 				) : (
 					<div className="space-y-6">
 						<div className="space-y-4">
-							{cart.items.map((item) => (
+							{enrichedItems.map((item) => (
 								<CartItem
 									key={`${item.productId}-${item.variationId || "default"}`}
 									item={item}
+									enrichedItems={enrichedItems}
 								/>
 							))}
 						</div>
@@ -57,7 +44,7 @@ export function CartDrawerContent() {
 				)}
 			</DrawerBody>
 
-			{cart.items.length > 0 && (
+			{enrichedItems.length > 0 && (
 				<DrawerFooter>
 					<CartCheckoutButton />
 				</DrawerFooter>

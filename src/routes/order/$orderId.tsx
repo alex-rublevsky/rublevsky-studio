@@ -25,58 +25,6 @@ export const Route = createFileRoute("/order/$orderId")({
 	}),
 });
 
-interface OrderAddress {
-	id: number;
-	orderId: number;
-	firstName: string;
-	lastName: string;
-	email: string;
-	phone: string;
-	streetAddress: string;
-	city: string;
-	state: string;
-	country: string;
-	zipCode: string;
-	addressType: "shipping" | "billing" | "both";
-}
-
-interface OrderItem {
-	id: number;
-	orderId: number;
-	productId: number;
-	quantity: number;
-	unitAmount: number;
-	finalAmount: number;
-	discountPercentage?: number;
-	product: {
-		name: string;
-		images: string | null;
-	};
-	variation?: {
-		id: number;
-		sku: string;
-	};
-	attributes?: Record<string, string>;
-}
-
-interface Order {
-	id: number;
-	status: string;
-	subtotalAmount: number;
-	discountAmount: number;
-	shippingAmount: number;
-	totalAmount: number;
-	currency: string;
-	paymentMethod: string | null;
-	paymentStatus: string;
-	shippingMethod: string | null;
-	notes: string | null;
-	createdAt: number;
-	completedAt: number | null;
-	addresses: OrderAddress[];
-	items: OrderItem[];
-}
-
 function OrderPage() {
 	const { orderId } = Route.useParams();
 	const search = Route.useSearch();
@@ -155,7 +103,8 @@ function OrderPage() {
 					<div className="flex justify-center gap-8">
 						<p className="text-muted-foreground mb-2">Order #{order.id}</p>
 						<p className="text-muted-foreground">
-							Placed on {new Date(Number(order.createdAt) * 1000).toLocaleDateString()}
+							Placed on{" "}
+							{new Date(Number(order.createdAt) * 1000).toLocaleDateString()}
 						</p>
 					</div>
 
@@ -235,7 +184,8 @@ function OrderPage() {
 																	key={key}
 																	className="text-sm text-muted-foreground"
 																>
-																	{getAttributeDisplayName(key)}: {String(value)}
+																	{getAttributeDisplayName(key)}:{" "}
+																	{String(value)}
 																</span>
 															),
 														)}
