@@ -23,7 +23,7 @@ import { FilterGroup } from "../shared/FilterGroup";
 import styles from "./productCard.module.css";
 
 // Extended product interface with variations
-interface ProductWithVariations extends Omit<Product, 'teaCategories'> {
+interface ProductWithVariations extends Omit<Product, "teaCategories"> {
 	variations?: ProductVariationWithAttributes[];
 	teaCategories?: Array<{
 		slug: string;
@@ -317,6 +317,13 @@ function ProductCard({
 								)}
 							</div>
 						</div>
+
+						{/* Recommended Badge */}
+						{product.isFeatured && (
+							<div className="absolute top-2 right-2">
+								<Badge variant="default">Recommended</Badge>
+							</div>
+						)}
 
 						{/* Desktop Add to Cart button */}
 						<button

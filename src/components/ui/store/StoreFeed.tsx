@@ -140,7 +140,7 @@ export default function StoreFeed({
 		// Apply tea category filter
 		if (selectedCategory === "tea" && selectedTeaCategory) {
 			filtered = filtered.filter((product) =>
-				product.teaCategories?.some(tc => tc.slug === selectedTeaCategory),
+				product.teaCategories?.some((tc) => tc.slug === selectedTeaCategory),
 			);
 		}
 
@@ -218,18 +218,18 @@ export default function StoreFeed({
 	return (
 		<section className="no-padding space-y-8">
 			<ProductFilters
-					categories={categoriesWithCounts}
-					teaCategories={filteredTeaCategoriesWithCounts}
-					selectedCategory={selectedCategory}
-					selectedTeaCategory={selectedTeaCategory}
-					onCategoryChange={setSelectedCategory}
-					onTeaCategoryChange={setSelectedTeaCategory}
-					priceRange={effectivePriceRange}
-					currentPriceRange={localPriceRange}
-					onPriceRangeChange={setLocalPriceRange}
-					sortBy={sortBy}
-					onSortChange={setSortBy}
-				/>
+				categories={categoriesWithCounts}
+				teaCategories={filteredTeaCategoriesWithCounts}
+				selectedCategory={selectedCategory}
+				selectedTeaCategory={selectedTeaCategory}
+				onCategoryChange={setSelectedCategory}
+				onTeaCategoryChange={setSelectedTeaCategory}
+				priceRange={effectivePriceRange}
+				currentPriceRange={localPriceRange}
+				onPriceRangeChange={setLocalPriceRange}
+				sortBy={sortBy}
+				onSortChange={setSortBy}
+			/>
 			<div className="px-0">
 				<ProductList
 					data={filteredAndSortedProducts}

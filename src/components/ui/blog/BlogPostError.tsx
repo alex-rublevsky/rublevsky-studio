@@ -1,6 +1,6 @@
 import type { ErrorComponentProps } from "@tanstack/react-router";
-import { AlertTriangle, RefreshCw, Home, ArrowLeft } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { AlertTriangle, ArrowLeft, Home, RefreshCw } from "lucide-react";
 import { Button } from "~/components/ui/shared/Button";
 
 /**
@@ -28,7 +28,8 @@ export function BlogPostErrorComponent({ error }: ErrorComponentProps) {
 									Oops! Something went wrong
 								</h1>
 								<p className="text-muted-foreground text-lg">
-									We couldn't load this blog post. This might be due to a network issue or the post might not exist.
+									We couldn't load this blog post. This might be due to a
+									network issue or the post might not exist.
 								</p>
 							</div>
 
@@ -53,16 +54,16 @@ export function BlogPostErrorComponent({ error }: ErrorComponentProps) {
 									<RefreshCw className="h-4 w-4" />
 									Try Again
 								</Button>
-								
+
 								<Button variant="outline" asChild>
 									<Link to="/blog" className="flex items-center gap-2">
 										<Home className="h-4 w-4" />
 										All Posts
 									</Link>
 								</Button>
-								
-								<Button 
-									variant="ghost" 
+
+								<Button
+									variant="ghost"
 									onClick={() => window.history.back()}
 									className="flex items-center gap-2"
 								>
@@ -74,7 +75,8 @@ export function BlogPostErrorComponent({ error }: ErrorComponentProps) {
 							{/* Help text */}
 							<div className="text-sm text-muted-foreground pt-4 border-t">
 								<p>
-									If this problem persists, please check your internet connection or try again later.
+									If this problem persists, please check your internet
+									connection or try again later.
 								</p>
 							</div>
 						</div>

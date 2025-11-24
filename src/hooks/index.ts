@@ -6,6 +6,6 @@ export { useDashboardAction } from "./useDashboardAction";
 export { useDashboardCRUD } from "./useDashboardCRUD";
 export { useDashboardForm } from "./useDashboardForm";
 export { useFormHandlers } from "./useFormHandlers";
-export { createFormSubmitHandler, useSubmitHandler } from "./useSubmitHandler";
 export { useProductStats } from "./useSelectProductInfo";
+export { createFormSubmitHandler, useSubmitHandler } from "./useSubmitHandler";
 export { useVariationSelection } from "./useVariationSelection";

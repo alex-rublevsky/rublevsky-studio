@@ -9,8 +9,8 @@ export const Route = createFileRoute("/design/")({
 function RouteComponent() {
 	return (
 		<main>
-			<BrandingSection />
 			<GallerySection type="posters" />
+			<BrandingSection />
 		</main>
 	);
 }

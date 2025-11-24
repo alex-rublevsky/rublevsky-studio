@@ -36,7 +36,7 @@ export default function DashboardBlogPostCard({
 
 	// Create a map for quick lookup of tea category names
 	const teaCategoryMap = new Map(
-		teaCategories.map((cat) => [cat.slug, cat.name])
+		teaCategories.map((cat) => [cat.slug, cat.name]),
 	);
 
 	// Extract first image from images string
@@ -152,7 +152,7 @@ export default function DashboardBlogPostCard({
 									return (
 										<Badge
 											key={categorySlug}
-											variant={categorySlug as any}
+											variant={categorySlug}
 											className="text-xs"
 										>
 											{name}

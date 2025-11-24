@@ -11,7 +11,7 @@ export const Route = createFileRoute("/web/")({
 			...seo({
 				title: "Web Development - Rublevsky Studio",
 				description:
-					"Website design and development projects",
+					"Design and development of websites and web applications — from blogs to ecommerce solutions",
 			}),
 		],
 	}),

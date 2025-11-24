@@ -1,0 +1,242 @@
+.gallery {
+	position: fixed;
+	inset: 0;
+	background-color: oklch(var(--primary) / 0.9);
+	z-index: 9999;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	backdrop-filter: blur(0);
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.3s ease-out;
+}
+
+.gallery[data-open="true"] {
+	opacity: 1;
+	pointer-events: all;
+}
+
+.closeButton {
+	position: absolute;
+	right: 1rem;
+	top: 1rem;
+	color: var(--color-primary-foreground);
+	background: transparent;
+	border: none;
+	cursor: pointer;
+	padding: 0.5rem;
+	z-index: 10000;
+	transition: opacity 0.3s ease-out;
+}
+
+.closeButton:hover {
+	opacity: 0.7;
+}
+
+.container {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+}
+
+.mainArea {
+	position: relative;
+	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 0;
+	overflow: visible;
+	padding-top: 1rem;
+}
+
+/* Embla carousel styles */
+.emblaViewport {
+	overflow: hidden;
+	width: 100%;
+	height: 100%;
+}
+
+.emblaContainer {
+	display: flex;
+	height: 100%;
+	touch-action: pan-x pan-y pinch-zoom;
+	margin-left: 0;
+}
+
+.emblaSlide {
+	flex: 0 0 100%;
+	min-width: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+}
+
+.image {
+	max-width: 100%;
+	max-height: 100%;
+	width: auto;
+	height: auto;
+	object-fit: contain;
+	backface-visibility: hidden;
+	transform: translateZ(0);
+	user-select: none;
+}
+
+.navButton {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	background-color: oklch(var(--background) / 0.2);
+	border: none;
+	border-radius: 9999px;
+	width: 4.5rem;
+	height: 4.5rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--color-background);
+	cursor: pointer;
+	transition:
+		opacity 0.3s ease-out,
+		background-color 0.3s ease-out,
+		visibility 0.3s ease-out;
+	opacity: 0.7;
+}
+
+.navButtonPrev {
+	left: 1rem;
+}
+
+.navButtonNext {
+	right: 1rem;
+}
+
+.navButton[data-hidden="true"] {
+	opacity: 0;
+	visibility: hidden;
+	pointer-events: none;
+}
+
+.navButton:hover {
+	opacity: 1;
+	background-color: oklch(var(--background) / 0.3);
+}
+
+/* Info overlay styles */
+.infoOverlay {
+	position: absolute;
+	bottom: 0.75rem;
+	left: 0.75rem;
+	max-width: 45ch;
+	z-index: 10001;
+	pointer-events: none;
+	overflow: visible;
+}
+
+.infoContent {
+	background-color: oklch(var(--background) / 0.95);
+	border-radius: var(--radius);
+	padding: 1rem;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.infoDescription {
+	margin: 0;
+	font-size: 0.875rem;
+	line-height: 1.5;
+	color: var(--color-foreground);
+	flex: 1;
+}
+
+.infoLogo {
+	height: 1.75rem;
+	width: auto;
+	object-fit: contain;
+	flex-shrink: 0;
+}
+
+.infoLogoRounded {
+	border-radius: 0.25rem;
+}
+
+/* Thumbnail carousel styles - following Embla official pattern */
+.thumbnails {
+	--thumbs-slide-spacing: 0.5rem;
+	--thumbs-slide-height: 6rem;
+	padding-top: 1rem;
+	padding-bottom: 1rem;
+	height: var(--thumbs-slide-height);
+}
+
+.thumbnailsViewport {
+	overflow: hidden;
+	width: 100%;
+	height: 100%;
+}
+
+.thumbnailsContainer {
+	display: flex;
+	flex-direction: row;
+	margin-left: calc(var(--thumbs-slide-spacing) * -1);
+	height: 100%;
+}
+
+.thumbnailsContainerCentered {
+	justify-content: center;
+	margin-left: 0;
+	padding-left: var(--thumbs-slide-spacing);
+}
+
+.thumbnailSlide {
+	flex: 0 0 auto;
+	min-width: 0;
+	padding-left: var(--thumbs-slide-spacing);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.thumbnail {
+	-webkit-tap-highlight-color: var(--color-foreground) / 0.5;
+	-webkit-appearance: none;
+	appearance: none;
+	background-color: transparent;
+	touch-action: manipulation;
+	display: inline-flex;
+	text-decoration: none;
+	cursor: pointer;
+	border: 2px solid transparent;
+	padding: 0;
+	margin: 0;
+	border-radius: 0.25rem;
+	overflow: hidden;
+	width: auto;
+	height: 100%;
+	transition:
+		border-color 0.3s ease-out,
+		opacity 0.3s ease-out;
+	opacity: 0.6;
+}
+
+.thumbnail:hover {
+	opacity: 0.8;
+}
+
+.thumbnailSlideSelected .thumbnail {
+	border-color: var(--color-background);
+	opacity: 1;
+}
+
+.thumbnailImage {
+	height: 100%;
+	width: auto;
+	object-fit: cover;
+	display: block;
+}

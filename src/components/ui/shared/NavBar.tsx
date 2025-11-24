@@ -1,7 +1,6 @@
 import {
 	IconArticle,
 	IconBadgeTm,
-	IconBox,
 	IconCategory,
 	IconChartBar,
 	IconDashboard,
@@ -46,8 +45,7 @@ interface NavBarProps {
 
 // Dashboard navigation items
 const dashboardNavItems: NavItem[] = [
-	{ name: "Dashboard", url: "/dashboard", icon: IconDashboard },
-	{ name: "Products", url: "/dashboard/products", icon: IconBox },
+	{ name: "Dashboard", url: "/dashboard/", icon: IconDashboard },
 	{ name: "Blog", url: "/dashboard/blog", icon: IconArticle },
 	{ name: "Categories", url: "/dashboard/categories", icon: IconCategory },
 	{ name: "Brands", url: "/dashboard/brands", icon: IconBadgeTm },
@@ -238,7 +236,7 @@ export function NavBar({
 
 	// Configure action button based on current route
 	const getActionButton = () => {
-		if (pathname === "/dashboard/products") {
+		if (pathname === "/dashboard/" || pathname === "/dashboard") {
 			return {
 				label: "Add Product",
 				onClick: onActionClick,

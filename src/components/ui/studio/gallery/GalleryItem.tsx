@@ -1,8 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
+import { useState } from "react";
 import { Button } from "~/components/ui/shared/Button";
 import { useCursorHover } from "~/components/ui/shared/custom_cursor/CustomCursorContext";
 import { Image } from "~/components/ui/shared/Image";
+import { BlurHashPlaceholder } from "./BlurHashPlaceholder";
 import type {
 	GalleryItem as GalleryItemType,
 	GalleryType,
@@ -13,7 +15,7 @@ import type {
 type GalleryItemProps = {
 	item: GalleryItemType;
 	index: number;
-	onOpenGallery: (index: number) => void;
+	onOpenGallery: (index: number, itemId: string) => void;
 	galleryType: GalleryType;
 };
 
@@ -24,13 +26,25 @@ export default function GalleryItemComponent({
 	galleryType: _galleryType,
 }: GalleryItemProps) {
 	const { handleMouseEnter, handleMouseLeave } = useCursorHover("enlarge");
+	const [imageLoaded, setImageLoaded] = useState(false);
+
+	// Calculate aspect ratio from ratio string if provided
+	const aspectRatioStyle = item.ratio
+		? (() => {
+				const [w, h] = item.ratio!.split("/").map(Number);
+				if (w && h) {
+					return { aspectRatio: `${w} / ${h}` };
+				}
+				return {};
+			})()
+		: {};
 
 	return (
 		<motion.div
 			//shadow-[0_5px_6px_rgb(0,0,0,0.08)]
 			id={item.id}
-			className="relative group transform-gpu rounded-lg overflow-hidden cursor-pointer md:cursor-none mb-3"
-			onClick={() => onOpenGallery(index)}
+			className="relative group transform-gpu rounded-lg overflow-hidden cursor-pointer md:cursor-none mb-3 break-inside-avoid"
+			onClick={() => onOpenGallery(index, item.id)}
 			onMouseEnter={handleMouseEnter()}
 			onMouseLeave={handleMouseLeave()}
 			whileHover={{
@@ -42,15 +56,32 @@ export default function GalleryItemComponent({
 			}}
 		>
 			{/* TODO: does this solve the problem on ios which needed custom css in branding-photography module? */}
-			<div>
+			<div className="relative" style={aspectRatioStyle}>
+				{/* BlurHash placeholder - shown while image loads */}
+				{item.hash && item.hash.trim() !== "" && !imageLoaded && (
+					<div className="absolute inset-0 w-full h-full">
+						<BlurHashPlaceholder
+							hash={item.hash}
+							width={800}
+							ratio={item.ratio}
+							className="w-full h-full object-cover"
+						/>
+					</div>
+				)}
 				<Image
 					id={`${item.id}-main-image`}
 					src={`/${item.images[0]}`}
 					alt={`Photo ${index + 1}`}
 					width={800}
 					height={600}
-					className="w-full h-auto transition-all duration-300 ease-in-out"
+					className={`w-full ${item.ratio ? "h-full object-cover" : "h-auto"} transition-all duration-300 ease-in-out ${
+						imageLoaded || !item.hash || item.hash.trim() === "" ? "opacity-100" : "opacity-0"
+					}`}
 					loading="eager"
+					style={{
+						viewTransitionName: `gallery-image-${item.id}`,
+					}}
+					onLoad={() => setImageLoaded(true)}
 					//priority={true}
 				/>
 				{item.images.length > 1 && (
@@ -100,7 +131,9 @@ export default function GalleryItemComponent({
 									alt={`Photo ${index + 1} logo`}
 									width={64}
 									height={64}
-									className="h-7 flex-shrink-0 box-shadow-none"
+									className={`h-7 flex-shrink-0 box-shadow-none ${
+										item.roundedLogo ? "rounded-xs" : ""
+									}`}
 									loading="lazy"
 								/>
 							)}

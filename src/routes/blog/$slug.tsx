@@ -2,8 +2,8 @@ import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
 import BlogPost from "~/components/ui/blog/BlogPost";
-import { BlogPostSkeleton } from "~/components/ui/blog/BlogPostSkeleton";
 import { BlogPostErrorComponent } from "~/components/ui/blog/BlogPostError";
+import { BlogPostSkeleton } from "~/components/ui/blog/BlogPostSkeleton";
 import ImageGallery from "~/components/ui/shared/ImageGallery";
 import { blogPostQueryOptions } from "~/lib/queryOptions";
 import type {

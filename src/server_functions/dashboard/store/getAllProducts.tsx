@@ -92,7 +92,9 @@ export const getAllProducts = createServerFn({ method: "GET" })
 				// Add tea category if exists and not already added
 				if (
 					teaCategory &&
-					!currentProduct.teaCategories?.some(tc => tc.slug === teaCategory.slug)
+					!currentProduct.teaCategories?.some(
+						(tc) => tc.slug === teaCategory.slug,
+					)
 				) {
 					currentProduct.teaCategories?.push({
 						slug: teaCategory.slug,

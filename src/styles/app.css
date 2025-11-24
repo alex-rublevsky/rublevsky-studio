@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "tailwindcss-motion";
 
 /* Variable Font Declaration */
 @font-face {
@@ -42,7 +43,7 @@ body {
 	--radius-lg: var(--radius);
 	--radius-md: calc(var(--radius) - 2px);
 	--radius-sm: calc(var(--radius) - 4px);
-
+	--radius-xs: calc(var(--radius) - 8px);
 	--font-family-sans: "Overused Grotesk", ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -221,6 +222,8 @@ body {
 		z-index: 1;
 		padding-right: 1rem;
 		position: relative;
+		overflow-x: hidden;
+		overflow-y: visible;
 	}
 
 	section.no-padding {
@@ -241,6 +244,85 @@ body {
 	}
 
 	/* GENERAL */
+	/* Custom Scrollbar Styling - Cross-platform support */
+	/* STANDALONE VERSION - Replace colors with your own values */
+
+	/* Firefox */
+	html,
+	body {
+		scrollbar-width: thin;
+		/* Replace with your color - format: <thumb-color> <track-color> */
+		scrollbar-color: oklch(var(--primary)) transparent; /* Example: brown thumb, transparent track */
+	}
+
+	/* WebKit browsers (Chrome, Edge, Safari, iOS Safari) */
+	html::-webkit-scrollbar,
+	body::-webkit-scrollbar {
+		width: 12px;
+		height: 12px;
+	}
+
+	html::-webkit-scrollbar-track,
+	body::-webkit-scrollbar-track {
+		background: transparent; /* This creates the overlay effect */
+	}
+
+	html::-webkit-scrollbar-thumb,
+	body::-webkit-scrollbar-thumb {
+		/* Replace with your color */
+		background-color: oklch(var(--primary)); /* Example color */
+		border-radius: 10px;
+		/* The border + background-clip creates the overlay gap */
+		border: 2px solid transparent;
+		background-clip: padding-box;
+		cursor: grab;
+	}
+
+	html::-webkit-scrollbar-thumb:hover,
+	body::-webkit-scrollbar-thumb:hover {
+		/* Replace with a slightly lighter version of your color */
+		background-color: oklch(var(--primary)); /* Example: lighter brown */
+		cursor: grab;
+	}
+
+	html::-webkit-scrollbar-thumb:active,
+	body::-webkit-scrollbar-thumb:active {
+		cursor: grabbing;
+	}
+
+	/* iOS Safari specific - ensure scrollbars are styled when visible */
+	@supports (-webkit-touch-callout: none) {
+		html,
+		body {
+			-webkit-overflow-scrolling: touch;
+		}
+
+		html::-webkit-scrollbar,
+		body::-webkit-scrollbar {
+			-webkit-appearance: none;
+			width: 12px;
+			height: 12px;
+		}
+
+		html::-webkit-scrollbar-thumb,
+		body::-webkit-scrollbar-thumb {
+			background-color: oklch(var(--primary)); /* Same as above */
+			border-radius: 10px;
+			cursor: grab;
+		}
+
+		html::-webkit-scrollbar-thumb:active,
+		body::-webkit-scrollbar-thumb:active {
+			cursor: grabbing;
+		}
+	}
+
+	::view-transition-old(root),
+	::view-transition-new(root) {
+		animation-duration: 0.3s;
+		animation-timing-function: ease-in-out;
+	}
+
 	.logo-hover {
 		width: auto;
 
@@ -521,15 +603,6 @@ p {
 	}
 }
 
-/* View transition for elements that actually transition */
-::view-transition-old(root) {
-	animation: none;
-}
-
-::view-transition-new(root) {
-	animation: none;
-}
-
 /* Custom breakpoint for blog gallery - keep mobile layout until 1450px */
 @media (min-width: 1024px) and (max-width: 1449px) {
 	.blog-gallery-mobile-at-lg .gallery-stack.flex {
@@ -699,4 +772,28 @@ input[type="number"] {
 .green:hover {
 	background-color: #8ef936;
 	color: #20390c;
+}
+
+/* BlurHash placeholder animations */
+@keyframes hideAfterDelay {
+	0%,
+	99.99% {
+		display: block;
+	}
+
+	100% {
+		display: none;
+	}
+}
+
+/* Pulse animation for loading image */
+@keyframes pulse {
+	0%,
+	100% {
+		opacity: 1;
+	}
+
+	50% {
+		opacity: 0.75;
+	}
 }

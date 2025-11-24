@@ -8,8 +8,7 @@ export const Route = createFileRoute("/photos/")({
 		meta: [
 			...seo({
 				title: "Photography - Rublevsky Studio",
-				description:
-					"Some portraits and animal pics",
+				description: "Some portraits and animal pics",
 			}),
 		],
 	}),

@@ -9,6 +9,7 @@ import {
 	variationAttributes,
 } from "~/schema";
 import type { ProductFormData } from "~/types";
+import { moveStagingImages } from "./moveStagingImages";
 
 export const createProduct = createServerFn({ method: "POST" })
 	.inputValidator((data: ProductFormData) => data)
@@ -36,8 +37,42 @@ export const createProduct = createServerFn({ method: "POST" })
 				throw new Error("A product with this slug already exists");
 			}
 
-			// Process images
-			const imageString = productData.images?.trim() || "";
+			// Process images - move staging images to final location before saving
+			let imageString = productData.images?.trim() || "";
+
+			// Parse image paths and move staging images to final location
+			if (imageString) {
+				const imagePaths = imageString
+					.split(",")
+					.map((img) => img.trim())
+					.filter(Boolean);
+
+				// Check if any images are in staging
+				const hasStagingImages = imagePaths.some((path) =>
+					path.startsWith("staging/"),
+				);
+
+				if (hasStagingImages) {
+					// Move staging images to final location
+					const moveResult = await moveStagingImages({
+						data: {
+							imagePaths,
+							finalFolder: "products",
+							categorySlug: productData.categorySlug,
+							productName: productData.name,
+							slug: productData.slug,
+						},
+					});
+
+					if (moveResult?.pathMap) {
+						// Update image string with final paths
+						const updatedPaths = imagePaths.map(
+							(path) => moveResult.pathMap?.[path] || path,
+						);
+						imageString = updatedPaths.join(", ");
+					}
+				}
+			}
 
 			// Insert main product
 			const insertedProducts = await db

@@ -591,7 +591,10 @@ function RouteComponent() {
 								<DescriptionField
 									label="Description"
 									name="description"
-									value={(activeForm.createForm.formData as TeaCategoryFormData).description || ""}
+									value={
+										(activeForm.createForm.formData as TeaCategoryFormData)
+											.description || ""
+									}
 									onChange={activeForm.createForm.handleChange}
 									placeholder="Enter a description for this tea category..."
 								/>
@@ -602,7 +605,10 @@ function RouteComponent() {
 									label="Blog Slug"
 									type="text"
 									name="blogSlug"
-									value={(activeForm.createForm.formData as TeaCategoryFormData).blogSlug || ""}
+									value={
+										(activeForm.createForm.formData as TeaCategoryFormData)
+											.blogSlug || ""
+									}
 									onChange={activeForm.createForm.handleChange}
 									placeholder="e.g., shu-puer-the-foundation-trilogy-part-iii"
 								/>
@@ -687,7 +693,10 @@ function RouteComponent() {
 								<DescriptionField
 									label="Description"
 									name="description"
-									value={(activeForm.editForm.formData as TeaCategoryFormData).description || ""}
+									value={
+										(activeForm.editForm.formData as TeaCategoryFormData)
+											.description || ""
+									}
 									onChange={activeForm.editForm.handleChange}
 									placeholder="Enter a description for this tea category..."
 								/>
@@ -698,7 +707,10 @@ function RouteComponent() {
 									label="Blog Slug"
 									type="text"
 									name="blogSlug"
-									value={(activeForm.editForm.formData as TeaCategoryFormData).blogSlug || ""}
+									value={
+										(activeForm.editForm.formData as TeaCategoryFormData)
+											.blogSlug || ""
+									}
 									onChange={activeForm.editForm.handleChange}
 									placeholder="e.g., shu-puer-the-foundation-trilogy-part-iii"
 								/>

@@ -51,7 +51,7 @@ export function ProductSettingsFields({
 					onChange={onIsFeaturedChange}
 				/>
 				<label htmlFor={isFeaturedId} className="ml-2 text-sm">
-					Featured
+					Recommended
 				</label>
 			</div>
 

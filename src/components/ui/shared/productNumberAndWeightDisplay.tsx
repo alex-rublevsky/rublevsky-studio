@@ -10,9 +10,7 @@ interface ProductStatsDisplayProps {
  * Component that displays total products count and tea weight
  * Uses TanStack Query's select option for efficient calculation
  */
-export function ProductStatsDisplay({
-	className,
-}: ProductStatsDisplayProps) {
+export function ProductStatsDisplay({ className }: ProductStatsDisplayProps) {
 	const { totalProducts, totalTeaWeight } = useProductStats();
 
 	const formatWeight = (weight: number) => {

@@ -27,8 +27,10 @@ export function TeaCategoryLearnMore({
 	if (!activeCategories.length) return null;
 
 	// Separate categories with blog slugs from those without
-	const categoriesWithBlogs = activeCategories.filter(cat => cat.blogSlug);
-	const categoriesWithoutBlogs = activeCategories.filter(cat => !cat.blogSlug);
+	const categoriesWithBlogs = activeCategories.filter((cat) => cat.blogSlug);
+	const categoriesWithoutBlogs = activeCategories.filter(
+		(cat) => !cat.blogSlug,
+	);
 
 	return (
 		<div className={`flex flex-wrap gap-6 text-sm ${className || ""}`}>

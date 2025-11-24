@@ -23,7 +23,7 @@ export interface ProductVariationWithAttributes extends ProductVariation {
 }
 
 // Extended product type with variations
-export interface ProductWithVariations extends Omit<Product, 'teaCategories'> {
+export interface ProductWithVariations extends Omit<Product, "teaCategories"> {
 	variations?: ProductVariationWithAttributes[];
 	teaCategories?: Array<{
 		slug: string;
@@ -231,7 +231,7 @@ export interface CartItem {
 	addedAt: number; // Timestamp for sorting/debugging
 }
 
-export interface ProductWithDetails extends Omit<Product, 'teaCategories'> {
+export interface ProductWithDetails extends Omit<Product, "teaCategories"> {
 	category?: {
 		name: string;
 		slug: string;

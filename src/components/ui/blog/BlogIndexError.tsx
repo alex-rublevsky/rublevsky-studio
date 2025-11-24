@@ -1,6 +1,6 @@
 import type { ErrorComponentProps } from "@tanstack/react-router";
-import { AlertTriangle, RefreshCw, Home } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { AlertTriangle, Home, RefreshCw } from "lucide-react";
 import { Button } from "~/components/ui/shared/Button";
 
 /**
@@ -18,15 +18,16 @@ export function BlogIndexErrorComponent({ error }: ErrorComponentProps) {
 						<div className="flex justify-center">
 							<AlertTriangle className="h-16 w-16 text-destructive/60" />
 						</div>
-						
+
 						{/* Error title */}
 						<h1 className="text-4xl font-bold text-destructive">
 							Oops! Something went wrong
 						</h1>
-						
+
 						{/* Error message */}
 						<p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-							We couldn't load the blog posts. This might be due to a network issue or a server problem.
+							We couldn't load the blog posts. This might be due to a network
+							issue or a server problem.
 						</p>
 					</div>
 				</div>
@@ -60,7 +61,7 @@ export function BlogIndexErrorComponent({ error }: ErrorComponentProps) {
 								<RefreshCw className="h-4 w-4" />
 								Try Again
 							</Button>
-							
+
 							<Button variant="outline" asChild size="lg">
 								<Link to="/" className="flex items-center gap-2">
 									<Home className="h-4 w-4" />
@@ -72,7 +73,8 @@ export function BlogIndexErrorComponent({ error }: ErrorComponentProps) {
 						{/* Help text */}
 						<div className="text-center text-sm text-muted-foreground pt-6 border-t">
 							<p>
-								If this problem persists, please check your internet connection or try again later.
+								If this problem persists, please check your internet connection
+								or try again later.
 							</p>
 						</div>
 					</div>

@@ -29,7 +29,7 @@ const BrandingProjectCard = ({
 					ease: "easeInOut",
 				},
 			}}
-			className="w-full mb-2 group grid grid-cols-1 grid-rows-1"
+			className="w-full mb-2 group grid grid-cols-1 grid-rows-1 break-inside-avoid"
 			id={`${project.id}`}
 			onMouseEnter={handleMouseEnter}
 			onMouseLeave={handleMouseLeave}
@@ -102,7 +102,7 @@ export default function BrandingList({
 	setSelected: (project: BrandingProject) => void;
 }) {
 	return (
-		<div className="columns-2 md:columns-3 2xl:columns-4 gap-3">
+		<div className="columns-2 md:columns-3 2xl:columns-4 gap-3 break-inside-avoid overflow-visible">
 			{brandingProjects.map((project) => (
 				<BrandingProjectCard
 					key={project.id}

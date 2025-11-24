@@ -111,10 +111,10 @@ export function AdminProductCard({
 							</div>
 						</div>
 
-						{/* Featured Badge */}
+						{/* Recommended Badge */}
 						{product.isFeatured && (
 							<div className="absolute top-2 right-2">
-								<Badge variant="default">Featured</Badge>
+								<Badge variant="default">Recommended</Badge>
 							</div>
 						)}
 

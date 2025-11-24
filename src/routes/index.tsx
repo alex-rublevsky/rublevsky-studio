@@ -14,9 +14,10 @@
 // import SmoothScroll from "~/components/SmoothScroll";
 import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "~/components/ui/shared/Button";
+import { Link } from "~/components/ui/shared/Link";
 import { usePrefetch } from "~/hooks/usePrefetch";
-import "../styles/app.css";
 import { seo } from "~/utils/seo";
+import "../styles/app.css";
 
 export const Route = createFileRoute("/")({
 	component: App,
@@ -38,9 +39,12 @@ function App() {
 			<main className="flex-1 flex items-center justify-center px-4 py-8">
 				<div className="w-full max-w-md space-y-6 text-center">
 					<section className="!p-0 !static">
-						<h1 className="text-2xl!">
-							Hi, I'm Alex. I do things. Mostly code, design and tea reviews.
-						</h1>
+						<h1 className="text-2xl!">Greetings, I'm Alex.</h1>
+						<p>
+							Currently working at{" "}
+							<Link href="https://urbancustomz.com/">Urban Customz</Link> as a
+							graphic designer.
+						</p>
 						<nav aria-label="Main navigation" className="space-y-3 mt-6">
 							<Button
 								to="/web"
