@@ -1,6 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useCallback, useMemo, useState } from "react";
+import { ASSETS_BASE_URL } from "~/constants/urls";
 import { usePrefetch } from "~/hooks/usePrefetch";
 import { useVariationSelection } from "~/hooks/useVariationSelection";
 import { useCart } from "~/lib/cartContext";
@@ -285,7 +286,7 @@ function ProductCard({
 									<div className="relative w-full h-full">
 										{/* Primary Image */}
 										<img
-											src={`https://assets.rublevsky.studio/${imageArray[0]}`}
+											src={`${ASSETS_BASE_URL}/${imageArray[0]}`}
 											alt={product.name}
 											loading="eager"
 											className="absolute inset-0 w-full h-full object-cover object-center"
@@ -300,7 +301,7 @@ function ProductCard({
 										{/* Secondary Image (if exists) - Only on desktop devices with hover capability */}
 										{imageArray.length > 1 && (
 											<img
-												src={`https://assets.rublevsky.studio/${imageArray[1]}`}
+												src={`${ASSETS_BASE_URL}/${imageArray[1]}`}
 												alt={product.name}
 												loading="eager"
 												className="absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-500 ease-in-out opacity-0 group-hover:opacity-100 hidden md:block"

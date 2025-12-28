@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { useCursorContext } from "~/components/ui/shared/custom_cursor/CustomCursorContext";
 import { Image } from "~/components/ui/shared/Image";
+import { ASSETS_BASE_URL } from "~/constants/urls";
 import { brandingProjects } from "~/data/brandingData";
 import type { BrandingProject } from "./brandingTypes";
 
@@ -39,7 +40,7 @@ const BrandingProjectCard = ({
 					whileTap={{ scale: 0.95 }}
 					layoutId={`card-${project.id}`}
 					id={`image-${project.id}`}
-					src={`https://assets.rublevsky.studio/${project.images?.[0] || "placeholder.jpg"}`}
+					src={`${ASSETS_BASE_URL}/${project.images?.[0] || "placeholder.jpg"}`}
 					alt={project.name}
 					width={800}
 					height={600}

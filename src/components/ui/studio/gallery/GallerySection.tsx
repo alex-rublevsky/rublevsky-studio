@@ -45,12 +45,30 @@ export default function GallerySection({ type }: GallerySectionProps) {
 				className={"text-center work_page_section_title_holder"}
 				data-heading-reveal
 			>
-				{type === "posters"
-					? "Graphic Design"
-					: type.charAt(0).toUpperCase() + type.slice(1)}
+				{type === "posters" ? (
+					<span
+						style={{
+							viewTransitionName: "page-title-graphic-design",
+							display: "inline-block",
+						}}
+					>
+						Graphic Design
+					</span>
+				) : type === "photos" ? (
+					<span
+						style={{
+							viewTransitionName: "page-title-photography",
+							display: "inline-block",
+						}}
+					>
+						Photography
+					</span>
+				) : (
+					type.charAt(0).toUpperCase() + type.slice(1)
+				)}
 			</h1>
 
-			<div className="columns-2 md:columns-3 2xl:columns-4 gap-3 break-inside-avoid overflow-visible">
+			<div className="columns-2 md:columns-3 2xl:columns-4 gap-3 break-inside-avoid overflow-visible motion-translate-y-in-20 motion-blur-in-md motion-opacity-in-0 motion-delay-[100ms]">
 				{galleryData.map((item, index) => (
 					<GalleryItemComponent
 						key={item.id}

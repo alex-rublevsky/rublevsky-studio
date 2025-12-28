@@ -248,6 +248,31 @@ function Cursor() {
 					<p>Visit the website</p>
 				</motion.div>
 			</motion.div>
+
+			{/* Visit playlist cursor - separate from blend mode context */}
+			<motion.div
+				className="fixed pointer-events-none w-7 h-7 flex items-center justify-center"
+				style={{
+					left: mousePosition.x,
+					top: mousePosition.y,
+					zIndex: 10000000,
+				}}
+				initial={{ opacity: 0 }}
+				animate={{ opacity: 1 }}
+				transition={{ duration: 0.1 }}
+			>
+				<motion.div
+					className="absolute flex items-center justify-center bg-primary text-primary-foreground rounded-3xl text-sm font-medium whitespace-nowrap px-7 py-4"
+					initial={{ scale: 0, opacity: 0 }}
+					animate={{
+						scale: (variant === "visitPlaylist" ? 1 : 0) * pressScale,
+						opacity: variant === "visitPlaylist" ? 1 : 0,
+					}}
+					transition={isPressed ? pressAnimationConfig : animationConfig}
+				>
+					<p>Check out the playlist</p>
+				</motion.div>
+			</motion.div>
 		</>
 	);
 }

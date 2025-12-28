@@ -1,7 +1,7 @@
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import type * as React from "react";
-
+import { BASE_URL } from "~/constants/urls";
 import { cn } from "~/utils/utils";
 import {
 	Tooltip,
@@ -95,7 +95,7 @@ function Badge({
 	if (isTeaCategory && teaCategory) {
 		// Case 1: Has blog slug - render as clickable link (with optional tooltip if description exists)
 		if (effectiveBlogSlug) {
-			const blogUrl = `https://rublevsky.studio/blog/${effectiveBlogSlug}`;
+			const blogUrl = `${BASE_URL}/blog/${effectiveBlogSlug}`;
 
 			// If both blogSlug and description exist, wrap with tooltip
 			if (effectiveDescription) {

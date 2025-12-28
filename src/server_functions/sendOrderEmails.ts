@@ -1,6 +1,7 @@
-import { env } from "cloudflare:workers";
 import { createServerFn } from "@tanstack/react-start";
+import { env } from "cloudflare:workers";
 import { Resend } from "resend";
+import { ASSETS_BASE_URL, BASE_URL, EMAIL_DOMAIN } from "~/constants/urls";
 import { resolveSecret } from "~/utils/cloudflare-env";
 
 interface CartItem {
@@ -116,7 +117,7 @@ function generateClientEmailHtml(data: {
           
           <!-- Logo -->
           <div style="text-align: center; margin: 32px 0;">
-            <img src="https://assets.rublevsky.studio/logos/rublevsky-studio.svg" width="40" height="37" alt="Rublevsky Studio" />
+            <img src="${ASSETS_BASE_URL}/logos/rublevsky-studio.svg" width="40" height="37" alt="Rublevsky Studio" />
           </div>
           
           <!-- Heading -->
@@ -147,7 +148,7 @@ function generateClientEmailHtml(data: {
             
             <!-- View Order Button -->
             <div style="text-align: center;">
-              <a href="https://www.rublevsky.studio/order/${data.orderId}" 
+              <a href="https://www.rublevsky.com/order/${data.orderId}" 
                  style="display: inline-block; width: 100%; max-width: 200px; background-color: #000; color: #fff; text-decoration: none; padding: 12px; border-radius: 8px; font-weight: 500; text-align: center;">
                 View Order
               </a>
@@ -157,8 +158,8 @@ function generateClientEmailHtml(data: {
           <!-- Footer -->
           <p style="color: #9ca3af; font-size: 14px; line-height: 1.6; margin: 24px 0 0 0;">
             or copy and paste this URL into your browser: 
-            <a href="https://www.rublevsky.studio/order/${data.orderId}" style="color: #60a5fa; text-decoration: none;">
-              https://www.rublevsky.studio/order/${data.orderId}
+            <a href="https://www.rublevsky.com/order/${data.orderId}" style="color: #60a5fa; text-decoration: none;">
+              https://www.rublevsky.com/order/${data.orderId}
             </a>
           </p>
           
@@ -247,7 +248,7 @@ function generateAdminEmailHtml(data: {
           
           <!-- Logo -->
           <div style="text-align: center; margin: 32px 0;">
-            <img src="https://assets.rublevsky.studio/logos/rublevsky-studio.svg" width="40" height="37" alt="Rublevsky Studio" />
+            <img src="${ASSETS_BASE_URL}/logos/rublevsky-studio.svg" width="40" height="37" alt="Rublevsky Studio" />
           </div>
           
           <!-- Heading -->
@@ -315,7 +316,7 @@ function generateAdminEmailHtml(data: {
             
             <!-- View Order Button -->
             <div style="text-align: center;">
-              <a href="https://www.rublevsky.studio/admin/orders/${data.orderId}" 
+              <a href="${BASE_URL}/admin/orders/${data.orderId}" 
                  style="display: inline-block; width: 100%; max-width: 200px; background-color: #000; color: #fff; text-decoration: none; padding: 12px; border-radius: 8px; font-weight: 500; text-align: center;">
                 View Order Details
               </a>
@@ -325,8 +326,8 @@ function generateAdminEmailHtml(data: {
           <!-- Footer -->
           <p style="color: #9ca3af; font-size: 14px; line-height: 1.6; margin: 24px 0 0 0;">
             or copy and paste this URL into your browser: 
-            <a href="https://www.rublevsky.studio/admin/orders/${data.orderId}" style="color: #60a5fa; text-decoration: none;">
-              https://www.rublevsky.studio/admin/orders/${data.orderId}
+            <a href="${BASE_URL}/admin/orders/${data.orderId}" style="color: #60a5fa; text-decoration: none;">
+              ${BASE_URL}/admin/orders/${data.orderId}
             </a>
           </p>
           
@@ -404,7 +405,7 @@ export const sendOrderEmails = createServerFn({ method: "POST" })
 					discount: item.discount ?? undefined,
 					image:
 						item.image && typeof item.image === "string"
-							? `https://assets.rublevsky.studio/${item.image}`
+							? `${ASSETS_BASE_URL}/${item.image}`
 							: undefined,
 				})),
 			};
@@ -412,7 +413,7 @@ export const sendOrderEmails = createServerFn({ method: "POST" })
 			// Generate and send client confirmation email
 			const clientEmailHtml = generateClientEmailHtml(emailTemplateData);
 			const clientEmailResponse = await resend.emails.send({
-				from: "store@rublevsky.studio",
+				from: `store@${EMAIL_DOMAIN}`,
 				to: data.customerInfo.shippingAddress.email,
 				subject: `Order Confirmation #${data.orderId} - Rublevsky Studio`,
 				html: clientEmailHtml,
@@ -421,8 +422,8 @@ export const sendOrderEmails = createServerFn({ method: "POST" })
 			// Generate and send admin notification email
 			const adminEmailHtml = generateAdminEmailHtml(emailTemplateData);
 			const adminEmailResponse = await resend.emails.send({
-				from: "store@rublevsky.studio",
-				to: "alexander@rublevsky.studio",
+				from: `store@${EMAIL_DOMAIN}`,
+				to: `alex@${EMAIL_DOMAIN}`,
 				subject: `New Order #${data.orderId} Received - Rublevsky Studio`,
 				html: adminEmailHtml,
 			});

@@ -42,6 +42,19 @@ export const posters: GalleryItem[] = [
 		ratio: "1875/2500",
 	},
 	{
+		id: "maleficent",
+		images: [
+			"posters/maleficent.webp",
+			"posters/maleficent-preview.webp",
+			"posters/maleficent_disassembled.webp",
+		],
+		description: "Maleficent poster",
+		logo: "logos/urban-customz.webp",
+		roundedLogo: true,
+		hash: "",
+		ratio: "",
+	},
+	{
 		id: "arsenal-poster",
 		images: [
 			"posters/arsenal.webp",

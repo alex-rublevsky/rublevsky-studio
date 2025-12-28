@@ -64,6 +64,15 @@ function PostsIndexComponent() {
 				<div className="">
 					{/* Header */}
 					<div className="text-center mb-12 px-4">
+						<h5
+							className="opacity-60 mb-6"
+							style={{
+								viewTransitionName: "page-title-tea-blog",
+								display: "inline-block",
+							}}
+						>
+							Tea Blog
+						</h5>
 						<h1 className="mb-8">What&apos;s in the gaiwan?</h1>
 						<div className="flex justify-center items-center gap-8 mb-8">
 							<h5 className="text-secondary-foreground">{totalCount} posts</h5>

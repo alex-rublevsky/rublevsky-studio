@@ -5,6 +5,7 @@ import {
 	markdownComponents,
 	rehypePlugins,
 } from "~/components/ui/shared/MarkdownComponents";
+import { ASSETS_BASE_URL } from "~/constants/urls";
 import { usePrefetch } from "~/hooks/usePrefetch";
 import { formatBlogDate } from "~/lib/utils";
 import type { BlogPostPreview } from "~/types/index";
@@ -59,7 +60,7 @@ export default function BlogPostCard({
 				{firstImage && (
 					<div className="w-full overflow-hidden">
 						<img
-							src={`https://assets.rublevsky.studio/${firstImage}`}
+							src={`${ASSETS_BASE_URL}/${firstImage}`}
 							alt={title || `Blog post ${id}`}
 							width={600}
 							height={400}

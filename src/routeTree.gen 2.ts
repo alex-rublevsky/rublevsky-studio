@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RedirectRouteImport } from './routes/redirect'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as AboutRouteImport } from './routes/about'
 import { Route as StoreRouteRouteImport } from './routes/store/route'
 import { Route as ProductRouteRouteImport } from './routes/product/route'
 import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
@@ -43,11 +42,6 @@ const RedirectRoute = RedirectRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StoreRouteRoute = StoreRouteRouteImport.update({
@@ -166,7 +160,6 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/product': typeof ProductRouteRoute
   '/store': typeof StoreRouteRouteWithChildren
-  '/about': typeof AboutRoute
   '/login': typeof LoginRoute
   '/redirect': typeof RedirectRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -191,7 +184,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/product': typeof ProductRouteRoute
-  '/about': typeof AboutRoute
   '/login': typeof LoginRoute
   '/redirect': typeof RedirectRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -219,7 +211,6 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/product': typeof ProductRouteRoute
   '/store': typeof StoreRouteRouteWithChildren
-  '/about': typeof AboutRoute
   '/login': typeof LoginRoute
   '/redirect': typeof RedirectRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -248,7 +239,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/product'
     | '/store'
-    | '/about'
     | '/login'
     | '/redirect'
     | '/blog/$slug'
@@ -273,7 +263,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/product'
-    | '/about'
     | '/login'
     | '/redirect'
     | '/blog/$slug'
@@ -300,7 +289,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/product'
     | '/store'
-    | '/about'
     | '/login'
     | '/redirect'
     | '/blog/$slug'
@@ -328,7 +316,6 @@ export interface RootRouteChildren {
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
   ProductRouteRoute: typeof ProductRouteRoute
   StoreRouteRoute: typeof StoreRouteRouteWithChildren
-  AboutRoute: typeof AboutRoute
   LoginRoute: typeof LoginRoute
   RedirectRoute: typeof RedirectRoute
   BlogSlugRoute: typeof BlogSlugRoute
@@ -354,13 +341,6 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/store': {
@@ -567,7 +547,6 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
   ProductRouteRoute: ProductRouteRoute,
   StoreRouteRoute: StoreRouteRouteWithChildren,
-  AboutRoute: AboutRoute,
   LoginRoute: LoginRoute,
   RedirectRoute: RedirectRoute,
   BlogSlugRoute: BlogSlugRoute,

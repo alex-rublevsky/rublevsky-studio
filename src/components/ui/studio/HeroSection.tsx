@@ -7,6 +7,7 @@ import { Button } from "~/components/ui/shared/Button";
 import { Image } from "~/components/ui/shared/Image";
 import { Link } from "~/components/ui/shared/Link";
 import NeumorphismCard from "~/components/ui/shared/NeumorphismCard";
+import { EMAIL_DOMAIN } from "~/constants/urls";
 import { useIsMobile } from "~/hooks/use-mobile";
 
 function HeroSection() {
@@ -169,9 +170,7 @@ function HeroSection() {
 								<div>
 									<div className="flex gap-6">
 										<h5>
-											<Link href="mailto:alexander@rublevsky.studio">
-												Email
-											</Link>
+											<Link href={`mailto:alex@${EMAIL_DOMAIN}`}>Email</Link>
 										</h5>
 										<h5>
 											<Link href="https://t.me/alexrublevsky" target="_blank">

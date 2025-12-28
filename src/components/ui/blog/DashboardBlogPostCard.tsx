@@ -5,6 +5,7 @@ import {
 	markdownComponents,
 	rehypePlugins,
 } from "~/components/ui/shared/MarkdownComponents";
+import { ASSETS_BASE_URL } from "~/constants/urls";
 import { formatBlogDate } from "~/lib/utils";
 import type { BlogPost } from "~/types/index";
 import styles from "./blogCard.module.css";
@@ -60,7 +61,7 @@ export default function DashboardBlogPostCard({
 			{firstImage && (
 				<div className="relative aspect-square overflow-hidden group">
 					<img
-						src={`https://assets.rublevsky.studio/${firstImage}`}
+						src={`${ASSETS_BASE_URL}/${firstImage}`}
 						alt={title || `Blog post ${id}`}
 						loading="eager"
 						className="absolute inset-0 w-full h-full object-cover object-center"

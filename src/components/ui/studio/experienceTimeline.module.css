@@ -3,7 +3,7 @@
 	padding-bottom: 0;
 	background-color: oklch(var(--background));
 	position: relative;
-	z-index: -3;
+	z-index: 0;
 	margin: 0 auto;
 	width: 100%;
 }

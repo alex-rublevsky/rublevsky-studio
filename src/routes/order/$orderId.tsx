@@ -5,6 +5,7 @@ import { Badge } from "~/components/ui/shared/Badge";
 import { Button } from "~/components/ui/shared/Button";
 import { Image } from "~/components/ui/shared/Image";
 import NeumorphismCard from "~/components/ui/shared/NeumorphismCard";
+import { ASSETS_BASE_URL, EMAIL_DOMAIN } from "~/constants/urls";
 import { getAttributeDisplayName } from "~/lib/productAttributes";
 import { getOrderBySlug } from "~/server_functions/dashboard/orders/getOrderBySlug";
 
@@ -153,7 +154,7 @@ function OrderPage() {
 								{item.product?.images && (
 									<div className="w-20 flex-shrink-0">
 										<Image
-											src={`https://assets.rublevsky.studio/${getFirstImage(item.product.images)}`}
+											src={`${ASSETS_BASE_URL}/${getFirstImage(item.product.images)}`}
 											alt={item.product.name}
 											width={80}
 											height={80}
@@ -289,7 +290,7 @@ function OrderPage() {
 					</Button>
 					{!isNewOrder && (
 						<Button asChild variant="outline">
-							<a href="mailto:support@rublevsky.studio">Contact Support</a>
+							<a href={`mailto:store@${EMAIL_DOMAIN}`}>Contact Support</a>
 						</Button>
 					)}
 				</div>

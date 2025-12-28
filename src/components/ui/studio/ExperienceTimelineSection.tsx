@@ -11,6 +11,7 @@ interface TimelineItem {
 	description: string;
 	additionalImage?: string;
 	wideLogo?: boolean;
+	roundedLogo?: boolean;
 }
 
 const timelineItems: TimelineItem[] = [
@@ -60,6 +61,15 @@ const timelineItems: TimelineItem[] = [
 		additionalImage: "/screen-printing-me.jpg",
 		wideLogo: true,
 	},
+	{
+		date: "10/25 — Present",
+		logo: "/logos/urban-customz.webp",
+		title: "Urban Customz",
+		description:
+			"Working as a graphic designer & print specialist. I design custom graphics and print them on hoodies, shirts, and other clothing using heat transfer paper and sublimation transfer paper. I also design and produce prints for posters and canvases.",
+		wideLogo: false,
+		roundedLogo: true,
+	},
 ];
 
 const TimelineItem = ({ item }: { item: TimelineItem }) => {
@@ -107,7 +117,7 @@ const TimelineItem = ({ item }: { item: TimelineItem }) => {
 							item.wideLogo
 								? "h-auto w-auto max-h-[4.5rem]"
 								: "h-[5rem] md:h-[7rem]"
-						}`}
+						} ${item.roundedLogo ? "rounded-lg" : ""}`}
 					/>
 					<h5 className="font-semibold">{item.title}</h5>
 					<p>{item.description}</p>

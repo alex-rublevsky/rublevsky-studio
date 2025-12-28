@@ -15,6 +15,7 @@ import {
 	Tailwind,
 	Text,
 } from "@react-email/components";
+import { ASSETS_BASE_URL, BASE_URL } from "~/constants/urls";
 
 interface AdminOrderConfirmationProps {
 	userImage?: string;
@@ -86,9 +87,7 @@ export const AdminOrderConfirmation = ({
 					<Container className="border border-solid border-[#eaeaea] rounded my-[40px] mx-auto p-[10px] max-w-[465px]">
 						<Section className="mt-[32px]">
 							<Img
-								src={
-									"https://assets.rublevsky.studio/logos/rublevsky-studio.svg"
-								}
+								src={`${ASSETS_BASE_URL}/logos/rublevsky-studio.svg`}
 								width="40"
 								height="37"
 								alt="Rublevsky Studio"
@@ -232,7 +231,7 @@ export const AdminOrderConfirmation = ({
 								<Column align="center">
 									<Button
 										className="box-border w-full rounded-[8px] bg-primary px-[12px] py-[12px] text-center font-normal text-primary-foreground"
-										href={`https://www.rublevsky.studio/admin/orders/${orderId}`}
+										href={`${BASE_URL}/admin/orders/${orderId}`}
 									>
 										View Order Details
 									</Button>
@@ -243,10 +242,10 @@ export const AdminOrderConfirmation = ({
 						<Text className="text-gray-400 text-[14px] leading-[24px]">
 							or copy and paste this URL into your browser:{" "}
 							<Link
-								href={`https://www.rublevsky.studio/admin/orders/${orderId}`}
+								href={`${BASE_URL}/admin/orders/${orderId}`}
 								className="text-blue-400 no-underline"
 							>
-								{`https://www.rublevsky.studio/admin/orders/${orderId}`}
+								{`${BASE_URL}/admin/orders/${orderId}`}
 							</Link>
 						</Text>
 						<Hr className="border border-solid border-[#eaeaea] my-[26px] mx-0 w-full" />
@@ -290,7 +289,7 @@ AdminOrderConfirmation.PreviewProps = {
 			name: "Red Graffiti Print",
 			quantity: 1,
 			price: "120.00",
-			image: "https://assets.rublevsky.studio/red-graffiti-1.webp",
+			image: `${ASSETS_BASE_URL}/red-graffiti-1.webp`,
 		},
 		{
 			name: "Blue Abstract Print",
@@ -298,7 +297,7 @@ AdminOrderConfirmation.PreviewProps = {
 			price: "63.75",
 			originalPrice: "75.00",
 			discount: 15,
-			image: "https://assets.rublevsky.studio/yin-yang-shirt-7.webp",
+			image: `${ASSETS_BASE_URL}/yin-yang-shirt-7.webp`,
 		},
 	],
 } as AdminOrderConfirmationProps;

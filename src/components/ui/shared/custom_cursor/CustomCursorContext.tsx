@@ -15,6 +15,7 @@ type CursorVariant =
 	| "add"
 	| "block"
 	| "visitWebsite"
+	| "visitPlaylist"
 	| "shrink"
 	| "hidden";
 

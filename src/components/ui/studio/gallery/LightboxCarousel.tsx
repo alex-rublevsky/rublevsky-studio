@@ -10,6 +10,7 @@ import {
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Image } from "~/components/ui/shared/Image";
+import { ASSETS_BASE_URL } from "~/constants/urls";
 import { cn } from "~/utils/utils";
 
 type CarouselProps = {
@@ -90,7 +91,7 @@ export default function Carousel({
 							{images.map((image, i) => (
 								<motion.img
 									key={image}
-									src={`https://assets.rublevsky.studio/${image}`}
+									src={`${ASSETS_BASE_URL}/${image}`}
 									animate={{ opacity: i === index ? 1 : 0.4 }}
 									className="w-full h-full flex-shrink-0 object-contain px-8"
 									alt=""
@@ -196,7 +197,7 @@ function Thumbnails({
 					>
 						<Image
 							alt=""
-							src={`https://assets.rublevsky.studio/${image}`}
+							src={`${ASSETS_BASE_URL}/${image}`}
 							className={cn(
 								"h-full object-cover",
 								i === index ? "w-auto" : "w-full",

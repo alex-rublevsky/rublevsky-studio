@@ -12,8 +12,9 @@ import {
 	useRouter,
 	useRouterState,
 } from "@tanstack/react-router";
-import { ArrowLeftFromLine, LogOutIcon, Plus } from "lucide-react";
+import { ArrowLeftFromLine, LogOutIcon, Plus, X } from "lucide-react";
 import type React from "react";
+import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import {
 	DropdownMenu,
@@ -21,6 +22,9 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "~/components/ui/DropdownMenu";
+import { Button } from "~/components/ui/shared/Button";
+import { InstagramIcon, TelegramIcon } from "~/components/ui/shared/Icons";
+import { INSTAGRAM_URL, TELEGRAM_CHANNEL_URL } from "~/constants/urls";
 import { usePrefetch } from "~/hooks/usePrefetch";
 import { signOut } from "~/utils/auth-client";
 import { cn } from "~/utils/utils";
@@ -166,27 +170,38 @@ const DropdownNavMenu = ({
 interface SmartBackButtonProps {
 	label: string;
 	fallbackPath: string;
+	isCloseMode?: boolean;
+	onClose?: () => void;
 }
 
-const SmartBackButton = ({ label, fallbackPath }: SmartBackButtonProps) => {
+const SmartBackButton = ({
+	label,
+	fallbackPath,
+	isCloseMode = false,
+	onClose,
+}: SmartBackButtonProps) => {
 	const navigate = useNavigate();
 	const router = useRouter();
 
-	const handleBack = () => {
-		// Try to detect if we have meaningful navigation history by checking document.referrer
-		// document.referrer is empty when opening via direct link, bookmark, or new tab
-		const hasReferrer = document.referrer && document.referrer !== "";
-		const referrerIsSameSite =
-			hasReferrer &&
-			new URL(document.referrer).origin === window.location.origin;
-
-		// If we have same-site referrer and browser history, try going back
-		if (referrerIsSameSite && window.history.length > 1) {
-			// Use router's back navigation for proper scroll restoration
-			router.history.back();
+	const handleClick = () => {
+		if (isCloseMode && onClose) {
+			onClose();
 		} else {
-			// No referrer or external referrer - navigate directly to fallback
-			navigate({ to: fallbackPath });
+			// Try to detect if we have meaningful navigation history by checking document.referrer
+			// document.referrer is empty when opening via direct link, bookmark, or new tab
+			const hasReferrer = document.referrer && document.referrer !== "";
+			const referrerIsSameSite =
+				hasReferrer &&
+				new URL(document.referrer).origin === window.location.origin;
+
+			// If we have same-site referrer and browser history, try going back
+			if (referrerIsSameSite && window.history.length > 1) {
+				// Use router's back navigation for proper scroll restoration
+				router.history.back();
+			} else {
+				// No referrer or external referrer - navigate directly to fallback
+				navigate({ to: fallbackPath });
+			}
 		}
 	};
 
@@ -194,10 +209,17 @@ const SmartBackButton = ({ label, fallbackPath }: SmartBackButtonProps) => {
 		<div className="relative flex w-fit rounded-full border border-black bg-background hover:bg-primary hover:text-primary-foreground active:bg-primary active:text-primary-foreground transition-all duration-300 p-[0.3rem]">
 			<button
 				type="button"
-				onClick={handleBack}
-				className="relative z-10 block cursor-pointer px-3 py-1.5 text-xs text-primary-foreground mix-blend-difference md:px-4 md:py-2 md:text-sm"
+				onClick={handleClick}
+				className="relative z-10 flex items-center gap-2 cursor-pointer px-3 py-1.5 text-xs text-primary-foreground mix-blend-difference md:px-4 md:py-2 md:text-sm"
 			>
-				← {label}
+				{isCloseMode ? (
+					<>
+						<X className="h-4 w-4" />
+						{label}
+					</>
+				) : (
+					<>← {label}</>
+				)}
 			</button>
 		</div>
 	);
@@ -214,6 +236,29 @@ export function NavBar({
 	const { prefetchBlog, prefetchStore, prefetchDashboardOrders } =
 		usePrefetch();
 
+	// Check if branding modal is open
+	const [isBrandingModalOpen, setIsBrandingModalOpen] = useState(false);
+
+	useEffect(() => {
+		const checkModalState = () => {
+			setIsBrandingModalOpen(
+				document.body.getAttribute("data-branding-modal-open") === "true",
+			);
+		};
+
+		// Check initial state
+		checkModalState();
+
+		// Watch for changes using MutationObserver
+		const observer = new MutationObserver(checkModalState);
+		observer.observe(document.body, {
+			attributes: true,
+			attributeFilter: ["data-branding-modal-open"],
+		});
+
+		return () => observer.disconnect();
+	}, []);
+
 	// Keep NavBar silent in production; no-op logs
 
 	const showBlogBackButton =
@@ -229,7 +274,13 @@ export function NavBar({
 		pathname === "/photos" ||
 		pathname === "/design" ||
 		pathname === "/store" ||
-		pathname === "/blog";
+		pathname === "/blog" ||
+		pathname === "/about";
+
+	// Handle closing branding modal from NavBar
+	const handleCloseBrandingModal = () => {
+		window.dispatchEvent(new CustomEvent("close-branding-modal"));
+	};
 
 	const isDashboard = routerState.location.pathname.startsWith("/dashboard");
 	const showOther = !isDashboard;
@@ -258,9 +309,12 @@ export function NavBar({
 		return (
 			<nav
 				className={cn(
-					"fixed bottom-0 left-0 right-0 z-[40] mb-3 px-3 pointer-events-none",
+					"fixed bottom-0 left-0 right-0 z-[9999] mb-3 px-3 pointer-events-none",
 					className,
 				)}
+				style={{
+					viewTransitionName: "navbar", // Isolate navbar from page transitions
+				}}
 			>
 				{/* Mobile: Stack menu and action button */}
 				<div className="xl:hidden flex justify-between items-center gap-2 pointer-events-auto">
@@ -340,61 +394,110 @@ export function NavBar({
 	return (
 		<nav
 			className={cn(
-				"fixed bottom-0 left-0 right-0 z-[40] mb-3 flex justify-start items-center px-3 pointer-events-none",
+				"fixed bottom-0 left-0 right-0 z-[9999] mb-3 flex justify-between items-center px-3 pointer-events-none",
 				className,
 			)}
+			style={{
+				viewTransitionName: "navbar", // Isolate navbar from page transitions
+			}}
 		>
 			{showOther ? (
 				<>
-					{/* Show SmartBackButton for blog pages - Desktop layout */}
-					{showBlogBackButton && (
-						<button
-							type="button"
-							className="hidden md:flex items-center gap-3 pointer-events-auto z-50 bg-transparent border-0 p-0"
-							onMouseEnter={prefetchBlog}
-							onClick={() => {}}
-						>
-							<SmartBackButton label="Back to blog" fallbackPath="/blog" />
-						</button>
-					)}
+					<div className="flex items-center gap-3">
+						{/* Show SmartBackButton for blog pages - Desktop layout */}
+						{showBlogBackButton && (
+							<button
+								type="button"
+								className="hidden md:flex items-center gap-3 pointer-events-auto z-50 bg-transparent border-0 p-0 motion-translate-y-in-20 motion-blur-in-md motion-opacity-in-0 motion-delay-[100ms]"
+								onMouseEnter={prefetchBlog}
+								onClick={() => {}}
+							>
+								<SmartBackButton label="Back to blog" fallbackPath="/blog" />
+							</button>
+						)}
 
-					{/* Show SmartBackButton for blog pages - Mobile layout */}
-					{showBlogBackButton && (
-						<div className="md:hidden flex items-center gap-3 pointer-events-auto z-50">
-							<SmartBackButton label="Back to blog" fallbackPath="/blog" />
-						</div>
-					)}
+						{/* Show SmartBackButton for blog pages - Mobile layout */}
+						{showBlogBackButton && (
+							<div className="md:hidden flex items-center gap-3 pointer-events-auto z-50 motion-translate-y-in-20 motion-blur-in-md motion-opacity-in-0 motion-delay-[100ms]">
+								<SmartBackButton label="Back to blog" fallbackPath="/blog" />
+							</div>
+						)}
 
-					{/* Show SmartBackButton for product pages - Desktop layout */}
-					{showStoreBackButton && (
-						<button
-							type="button"
-							className="hidden md:flex items-center gap-3 pointer-events-auto z-50 bg-transparent border-0 p-0"
-							onMouseEnter={prefetchStore}
-							onClick={() => {}}
-						>
-							<SmartBackButton label="Back to store" fallbackPath="/store" />
-						</button>
-					)}
+						{/* Show SmartBackButton for product pages - Desktop layout */}
+						{showStoreBackButton && (
+							<button
+								type="button"
+								className="hidden md:flex items-center gap-3 pointer-events-auto z-50 bg-transparent border-0 p-0 motion-translate-y-in-20 motion-blur-in-md motion-opacity-in-0 motion-delay-[100ms]"
+								onMouseEnter={prefetchStore}
+								onClick={() => {}}
+							>
+								<SmartBackButton label="Back to store" fallbackPath="/store" />
+							</button>
+						)}
 
-					{/* Show SmartBackButton for product pages - Mobile layout */}
-					{showStoreBackButton && (
-						<div className="md:hidden flex items-center gap-3 pointer-events-auto z-50">
-							<SmartBackButton label="Back to store" fallbackPath="/store" />
-						</div>
-					)}
+						{/* Show SmartBackButton for product pages - Mobile layout */}
+						{showStoreBackButton && (
+							<div className="md:hidden flex items-center gap-3 pointer-events-auto z-50 motion-translate-y-in-20 motion-blur-in-md motion-opacity-in-0 motion-delay-[100ms]">
+								<SmartBackButton label="Back to store" fallbackPath="/store" />
+							</div>
+						)}
 
-					{/* Show SmartBackButton for index pages - Desktop layout */}
-					{showHomeBackButton && (
-						<div className="hidden md:flex items-center gap-3 pointer-events-auto z-50">
-							<SmartBackButton label="Home" fallbackPath="/" />
-						</div>
-					)}
+						{/* Show SmartBackButton for index pages - Desktop layout */}
+						{showHomeBackButton && (
+							<div className="hidden md:flex items-center gap-3 pointer-events-auto z-50 motion-translate-y-in-20 motion-blur-in-md motion-opacity-in-0 motion-delay-[100ms]">
+								<SmartBackButton
+									label={isBrandingModalOpen ? "Close project" : "Home"}
+									fallbackPath="/"
+									isCloseMode={isBrandingModalOpen}
+									onClose={handleCloseBrandingModal}
+								/>
+							</div>
+						)}
 
-					{/* Show SmartBackButton for index pages - Mobile layout */}
-					{showHomeBackButton && (
-						<div className="md:hidden flex items-center gap-3 pointer-events-auto z-50">
-							<SmartBackButton label="Home" fallbackPath="/" />
+						{/* Show SmartBackButton for index pages - Mobile layout */}
+						{showHomeBackButton && (
+							<div className="md:hidden flex items-center gap-3 pointer-events-auto z-50 motion-translate-y-in-20 motion-blur-in-md motion-opacity-in-0 motion-delay-[100ms]">
+								<SmartBackButton
+									label={isBrandingModalOpen ? "Close project" : "Home"}
+									fallbackPath="/"
+									isCloseMode={isBrandingModalOpen}
+									onClose={handleCloseBrandingModal}
+								/>
+							</div>
+						)}
+					</div>
+
+					{/* Social buttons - show on design page */}
+					{pathname === "/design" && (
+						<div className="flex flex-row gap-2 pointer-events-auto z-50">
+							{/* Telegram button */}
+							<div className="motion-translate-y-in-20 motion-blur-in-md motion-opacity-in-0 motion-delay-[150ms]">
+								<Button
+									href={TELEGRAM_CHANNEL_URL}
+									target="_blank"
+									rel="noopener noreferrer"
+									aria-label="Visit Telegram"
+									variant="outline"
+									className="relative flex items-center justify-center w-[2.6rem] h-[2.6rem] md:w-[3.2rem] md:h-[3.2rem] rounded-full border border-black bg-background text-foreground hover:bg-primary hover:text-primary-foreground active:bg-primary active:text-primary-foreground transition-all duration-500 p-0 [&_svg]:!w-[1.325rem] [&_svg]:!h-[1.325rem] md:[&_svg]:!w-[1.6rem] md:[&_svg]:!h-[1.6rem]"
+									cursorType="link"
+								>
+									<TelegramIcon className="w-[1.125rem] h-[1.125rem] md:w-[1.375rem] md:h-[1.375rem]" />
+								</Button>
+							</div>
+							{/* Instagram button */}
+							<div className="motion-translate-y-in-20 motion-blur-in-md motion-opacity-in-0 motion-delay-[200ms]">
+								<Button
+									href={INSTAGRAM_URL}
+									target="_blank"
+									rel="noopener noreferrer"
+									aria-label="Visit Instagram"
+									variant="outline"
+									className="relative flex items-center justify-center w-[2.6rem] h-[2.6rem] md:w-[3.2rem] md:h-[3.2rem] rounded-full border border-black bg-background text-foreground hover:bg-primary hover:text-primary-foreground active:bg-primary active:text-primary-foreground transition-all duration-500 p-0 [&_svg]:!w-[1.325rem] [&_svg]:!h-[1.325rem] md:[&_svg]:!w-[1.6rem] md:[&_svg]:!h-[1.6rem]"
+									cursorType="link"
+								>
+									<InstagramIcon className="w-[1.125rem] h-[1.125rem] md:w-[1.375rem] md:h-[1.375rem]" />
+								</Button>
+							</div>
 						</div>
 					)}
 				</>

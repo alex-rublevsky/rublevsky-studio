@@ -15,9 +15,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "~/components/ui/shared/Button";
 import { Link } from "~/components/ui/shared/Link";
+import {
+	ASSETS_BASE_URL,
+	EMAIL_DOMAIN,
+	TELEGRAM_CHANNEL_URL,
+} from "~/constants/urls";
 import { usePrefetch } from "~/hooks/usePrefetch";
 import { seo } from "~/utils/seo";
-import "../styles/app.css";
 
 export const Route = createFileRoute("/")({
 	component: App,
@@ -43,7 +47,8 @@ function App() {
 						<p>
 							Currently working at{" "}
 							<Link href="https://urbancustomz.com/">Urban Customz</Link> as a
-							graphic designer.
+							graphic designer & print specialist.{" "}
+							<Link href="/about">Read about me</Link>.
 						</p>
 						<nav aria-label="Main navigation" className="space-y-3 mt-6">
 							<Button
@@ -53,7 +58,14 @@ function App() {
 								className="w-full max-w-lg"
 								description="I design and code web experiences — from blogs to ecommerce solutions"
 							>
-								Websites
+								<span
+									style={{
+										viewTransitionName: "page-title-websites",
+										display: "inline-block",
+									}}
+								>
+									Websites
+								</span>
 							</Button>
 							<Button
 								to="/design"
@@ -62,7 +74,14 @@ function App() {
 								className="w-full max-w-lg"
 								description="Includes branding, packaging, posters, photomanipulations,"
 							>
-								Graphic Design
+								<span
+									style={{
+										viewTransitionName: "page-title-graphic-design",
+										display: "inline-block",
+									}}
+								>
+									Graphic Design
+								</span>
 							</Button>
 							<Button
 								to="/blog"
@@ -72,7 +91,14 @@ function App() {
 								description="I study, drink, compare and analyse traditional chinese tea, as well as conduct tea ceremonies"
 								onMouseEnter={prefetchBlog}
 							>
-								Tea Blog
+								<span
+									style={{
+										viewTransitionName: "page-title-tea-blog",
+										display: "inline-block",
+									}}
+								>
+									Tea Blog
+								</span>
 							</Button>
 							<Button
 								to="/store"
@@ -82,7 +108,7 @@ function App() {
 								description="I sell tea, handmade clothing prints, posters and stickers"
 								onMouseEnter={prefetchStore}
 							>
-								Store
+								Tea Store
 							</Button>
 							<Button
 								to="/photos"
@@ -91,7 +117,14 @@ function App() {
 								className="w-full max-w-lg"
 								description="Some portraits and animal pics "
 							>
-								Photography
+								<span
+									style={{
+										viewTransitionName: "page-title-photography",
+										display: "inline-block",
+									}}
+								>
+									Photography
+								</span>
 							</Button>
 						</nav>
 					</section>
@@ -102,20 +135,20 @@ function App() {
 				<p className="text-center">Let's level up your business together!</p>
 				<div className="flex flex-wrap gap-2 justify-center pb-4 pt-2 border-t border-gray-200/20">
 					<Button
-						href="https://assets.rublevsky.studio/PDF/Resume%20Alexander%20Rublevsky.pdf"
+						href={`${ASSETS_BASE_URL}/PDF/Resume%20Alexander%20Rublevsky.pdf`}
 						target="_blank"
 						variant="secondary"
 					>
 						Resume
 					</Button>
 					<Button
-						href="https://t.me/alexrublevsky"
+						href={TELEGRAM_CHANNEL_URL}
 						target="_blank"
 						variant="secondary"
 					>
 						Telegram
 					</Button>
-					<Button href="mailto:alexander@rublevsky.studio" variant="secondary">
+					<Button href={`mailto:alex@${EMAIL_DOMAIN}`} variant="secondary">
 						Email
 					</Button>
 				</div>

@@ -10,6 +10,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { Image } from "~/components/ui/shared/Image";
+import { ASSETS_BASE_URL } from "~/constants/urls";
 import styles from "./FullScreenGallery.module.css";
 import type { GalleryItem } from "./galleryTypes";
 
@@ -151,7 +152,7 @@ export default function FullScreenGallery({
 							{images.map((image, i) => (
 								<div key={image} className={styles.emblaSlide}>
 									<img
-										src={`https://assets.rublevsky.studio/${image}`}
+										src={`${ASSETS_BASE_URL}/${image}`}
 										alt={`Gallery item ${i + 1}`}
 										className={styles.image}
 									/>
@@ -225,7 +226,7 @@ export default function FullScreenGallery({
 										aria-label={`Go to item ${i + 1}`}
 									>
 										<img
-											src={`https://assets.rublevsky.studio/${image}`}
+											src={`${ASSETS_BASE_URL}/${image}`}
 											alt=""
 											className={styles.thumbnailImage}
 										/>

@@ -1,6 +1,7 @@
 import { Edit, Trash2 } from "lucide-react";
 import { Badge } from "~/components/ui/shared/Badge";
 import { getCountryFlag } from "~/constants/countries";
+import { ASSETS_BASE_URL } from "~/constants/urls";
 import { cn } from "~/lib/utils";
 import type { ProductWithVariations } from "~/types";
 import { getStockDisplayText, isProductAvailable } from "~/utils/validateStock";
@@ -81,7 +82,7 @@ export function AdminProductCard({
 									<div className="relative w-full h-full">
 										{/* Primary Image */}
 										<img
-											src={`https://assets.rublevsky.studio/${primaryImage}`}
+											src={`${ASSETS_BASE_URL}/${primaryImage}`}
 											alt={product.name}
 											loading="eager"
 											className="absolute inset-0 w-full h-full object-cover object-center"
@@ -93,7 +94,7 @@ export function AdminProductCard({
 										{/* Secondary Image (if exists) - Only on desktop devices with hover capability */}
 										{imageArray.length > 1 && (
 											<img
-												src={`https://assets.rublevsky.studio/${imageArray[1]}`}
+												src={`${ASSETS_BASE_URL}/${imageArray[1]}`}
 												alt={product.name}
 												loading="eager"
 												className="absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-500 ease-in-out opacity-0 group-hover:opacity-100 hidden md:block"

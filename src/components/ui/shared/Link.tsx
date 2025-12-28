@@ -11,6 +11,7 @@ export interface LinkProps
 		| "enlarge"
 		| "link"
 		| "visitWebsite"
+		| "visitPlaylist"
 		| "disabled";
 	disableCursor?: boolean;
 	blurOnHover?: boolean;
@@ -46,6 +47,9 @@ const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(
 						break;
 					case "visitWebsite":
 						setVariant("visitWebsite");
+						break;
+					case "visitPlaylist":
+						setVariant("visitPlaylist");
 						break;
 					case "default":
 						setVariant("default");

@@ -1,6 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Image } from "~/components/ui/shared/Image";
+import { ASSETS_BASE_URL } from "~/constants/urls";
 
 const mainImageVariants = cva(
 	"max-w-full w-full lg:w-auto object-contain rounded-none lg:rounded-lg relative z-2",
@@ -156,7 +157,7 @@ export default function ImageGallery({
 				{/* Main image container - same structure as multi-image gallery */}
 				<div className="flex items-center justify-center lg:items-start lg:justify-start order-1 grow relative">
 					<img
-						src={`https://assets.rublevsky.studio/${images[0]}`}
+						src={`${ASSETS_BASE_URL}/${images[0]}`}
 						alt={alt}
 						width={3000}
 						height={3000}
@@ -219,7 +220,7 @@ export default function ImageGallery({
 			<div className="flex items-center justify-center lg:items-start lg:justify-start order-1 grow relative">
 				{/* Desktop: Single image display */}
 				<img
-					src={`https://assets.rublevsky.studio/${images[currentImageIndex]}`}
+					src={`${ASSETS_BASE_URL}/${images[currentImageIndex]}`}
 					alt={alt}
 					width={3000}
 					height={3000}

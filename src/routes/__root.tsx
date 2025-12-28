@@ -63,7 +63,8 @@ export const Route = createRootRoute({
 			}),
 		],
 		links: [
-			{ rel: "stylesheet", href: appCss },
+			// Load CSS as blocking stylesheet to prevent FOUC
+			{ rel: "stylesheet", href: appCss, media: "all" },
 			{
 				rel: "preload",
 				href: "/fonts/OverusedGrotesk-VF.woff2",
@@ -130,7 +131,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 	return (
 		<html
 			lang="en"
-			className={`${pathname === "/" ? "scroll-smooth" : ""} bg-background overscroll-none`}
+			className={`${pathname === "/" ? "scroll-smooth" : ""} bg-background`}
 		>
 			<head>
 				<HeadContent />

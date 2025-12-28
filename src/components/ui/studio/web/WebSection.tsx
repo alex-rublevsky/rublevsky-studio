@@ -14,7 +14,14 @@ export default function WebProjectsSection() {
 					className="text-center work_page_section_title_holder"
 					data-heading-reveal
 				>
-					Web
+					<span
+						style={{
+							viewTransitionName: "page-title-websites",
+							display: "inline-block",
+						}}
+					>
+						Websites
+					</span>
 				</h1>
 
 				{webProjects.map((project) => (
