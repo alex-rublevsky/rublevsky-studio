@@ -2,7 +2,6 @@ import { motion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
 import { TextEffect } from "~/components/motion_primitives/AnimatedText";
 import { Image } from "~/components/ui/shared/Image";
-import styles from "./experienceTimeline.module.css";
 
 interface TimelineItem {
 	date: string;
@@ -87,27 +86,24 @@ const TimelineItem = ({ item }: { item: TimelineItem }) => {
 	);
 
 	return (
-		<div ref={itemRef} className={styles.experienceTimelineItem}>
-			<motion.div className={styles.experienceTimelineLeft} style={{ opacity }}>
-				<div className={styles.experienceTimelineDateWrapper}>
-					<h4 className={styles.experienceTimelineDateText}>{item.date}</h4>
+		<div ref={itemRef} className="experienceTimelineItem">
+			<motion.div className="experienceTimelineLeft" style={{ opacity }}>
+				<div className="experienceTimelineDateWrapper">
+					<h4 className="experienceTimelineDateText">{item.date}</h4>
 				</div>
 			</motion.div>
-			<div className={styles.experienceTimelineCenter}>
-				<div className={styles.experienceTimelineCircleWrapper}>
+			<div className="experienceTimelineCenter">
+				<div className="experienceTimelineCircleWrapper">
 					<motion.div
-						className={styles.experienceTimelineCircle}
+						className="experienceTimelineCircle"
 						style={{
 							backgroundColor,
 						}}
 					></motion.div>
 				</div>
 			</div>
-			<motion.div
-				className={styles.experienceTimelineRight}
-				style={{ opacity }}
-			>
-				<div className={styles.experienceTimelineContent}>
+			<motion.div className="experienceTimelineRight" style={{ opacity }}>
+				<div className="experienceTimelineContent">
 					<Image
 						src={item.logo}
 						alt={`${item.title} Logo`}
@@ -150,16 +146,16 @@ export default function ExperienceTimeline() {
 				<TextEffect as="h2">Experience</TextEffect>
 			</section>
 
-			<section className={`no-padding ${styles.experienceTimelineSection}`}>
-				<div className={styles.experienceTimelineComponent}>
-					<div className={styles.experienceTimelineOverlayTop}></div>
-					<div className={styles.experienceTimelineOverlayBottom}></div>
+			<section className="no-padding experienceTimelineSection">
+				<div className="experienceTimelineComponent">
+					<div className="experienceTimelineOverlayTop"></div>
+					<div className="experienceTimelineOverlayBottom"></div>
 					<motion.div
-						className={styles.experienceTimelineProgress}
+						className="experienceTimelineProgress"
 						style={{ opacity: progressOpacity }}
 					></motion.div>
 					<motion.div
-						className={styles.experienceTimelineProgressBar}
+						className="experienceTimelineProgressBar"
 						style={{ opacity: progressOpacity }}
 					></motion.div>
 

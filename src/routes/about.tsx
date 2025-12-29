@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "~/components/ui/shared/Link";
 import ExperienceTimelineSection from "~/components/ui/studio/ExperienceTimelineSection";
+import experienceTimelineCss from "~/components/ui/studio/experienceTimeline.css?url";
 import { ASSETS_BASE_URL } from "~/constants/urls";
 import { seo } from "~/utils/seo";
 
@@ -13,6 +14,10 @@ export const Route = createFileRoute("/about")({
 				description:
 					"Learn about Alex Rublevsky - Graphic designer and web developer from Russia, by way of New Zealand, now working in Canada",
 			}),
+		],
+		links: [
+			// Load CSS as blocking stylesheet to prevent FOUC
+			{ rel: "stylesheet", href: experienceTimelineCss, media: "all" },
 		],
 	}),
 });
@@ -37,6 +42,19 @@ function AboutPage() {
 				<p className="text-muted-foreground mb-6">
 					I don't really make music, but rather create DJ mixes.
 				</p>
+
+				<div className="mb-8">
+					<iframe
+						width="100%"
+						height="300"
+						scrolling="no"
+						frameBorder="no"
+						allow="autoplay"
+						src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/soundcloud%253Atracks%253A2219710013&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true"
+						className="rounded-lg"
+						title="SoundCloud track preview - ephemeral ether"
+					/>
+				</div>
 
 				<div>
 					<h3 className="text-xl font-semibold mb-4">Playlists</h3>
