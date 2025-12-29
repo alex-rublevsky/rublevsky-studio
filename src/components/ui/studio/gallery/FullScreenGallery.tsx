@@ -134,11 +134,14 @@ export default function FullScreenGallery({
 		};
 	}, [isOpen, onClose, emblaMainApi]);
 
-	// Don't render anything if not open - prevents flash during page load
-	if (!isOpen) return null;
-
 	return createPortal(
-		<div className={styles.gallery} data-open={isOpen && isPositioned}>
+		<div
+			className={styles.gallery}
+			data-open={isOpen}
+			style={{
+				visibility: isOpen ? "visible" : "hidden",
+			}}
+		>
 			<button
 				type="button"
 				onClick={onClose}

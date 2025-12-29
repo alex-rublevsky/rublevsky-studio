@@ -9,12 +9,14 @@
 	backdrop-filter: blur(0);
 	opacity: 0;
 	pointer-events: none;
-	transition: opacity 0.3s ease-out;
+	transition: opacity 0.4s ease-in-out, visibility 0.4s;
+	visibility: hidden;
 }
 
 .gallery[data-open="true"] {
 	opacity: 1;
 	pointer-events: all;
+	visibility: visible;
 }
 
 .closeButton {

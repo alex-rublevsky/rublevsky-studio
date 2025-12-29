@@ -17,6 +17,30 @@ body {
 	letter-spacing: 3%; /* Slightly increased character spacing */
 }
 
+/* Gallery item fade-in animation - optimized for performance */
+@keyframes galleryItemFadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.gallery-item-animate {
+	opacity: 0; /* Start hidden */
+	animation: galleryItemFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+	/* Use will-change sparingly for better performance */
+	will-change: opacity, transform;
+}
+
+/* Remove will-change after animation completes to free up resources */
+.gallery-item-animate.animation-complete {
+	will-change: auto;
+}
+
 @theme {
 	--color-background: oklch(var(--background));
 	--color-foreground: oklch(var(--foreground));

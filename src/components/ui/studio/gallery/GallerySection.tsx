@@ -68,7 +68,7 @@ export default function GallerySection({ type }: GallerySectionProps) {
 				)}
 			</h1>
 
-			<div className="columns-2 md:columns-3 2xl:columns-4 gap-3 break-inside-avoid overflow-visible motion-translate-y-in-20 motion-blur-in-md motion-opacity-in-0 motion-delay-[100ms]">
+			<div className="columns-2 md:columns-3 2xl:columns-4 gap-3 break-inside-avoid overflow-visible">
 				{galleryData.map((item, index) => (
 					<GalleryItemComponent
 						key={item.id}

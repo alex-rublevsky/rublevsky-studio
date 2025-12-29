@@ -135,6 +135,23 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 		>
 			<head>
 				<HeadContent />
+				{/* Critical CSS to prevent FOUC - inlined for immediate application */}
+				<style
+					// biome-ignore lint/security/noDangerouslySetInnerHtml: Critical CSS must be inlined
+					dangerouslySetInnerHTML={{
+						__html: `
+						
+							body {
+								background-color: oklch(var(--background));
+								font-family: "Overused Grotesk", ui-sans-serif, system-ui, sans-serif;
+							}
+						
+							html {
+								font-display: swap;
+							}
+						`,
+					}}
+				/>
 			</head>
 			<body className="">
 				<NavBar />

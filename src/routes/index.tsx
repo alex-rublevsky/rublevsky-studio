@@ -62,22 +62,6 @@ function App() {
 						</p>
 						<nav aria-label="Main navigation" className="space-y-3 mt-6">
 							<Button
-								to="/web"
-								centered
-								variant="secondary"
-								className="w-full max-w-lg"
-								description="I design and code web experiences — from blogs to ecommerce solutions"
-							>
-								<span
-									style={{
-										viewTransitionName: "page-title-websites",
-										display: "inline-block",
-									}}
-								>
-									Websites
-								</span>
-							</Button>
-							<Button
 								to="/design"
 								centered
 								variant="secondary"
@@ -91,6 +75,22 @@ function App() {
 									}}
 								>
 									Graphic Design
+								</span>
+							</Button>
+							<Button
+								to="/web"
+								centered
+								variant="secondary"
+								className="w-full max-w-lg"
+								description="I design and code web experiences — from blogs to ecommerce solutions"
+							>
+								<span
+									style={{
+										viewTransitionName: "page-title-websites",
+										display: "inline-block",
+									}}
+								>
+									Websites
 								</span>
 							</Button>
 							<Button
