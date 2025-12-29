@@ -317,10 +317,25 @@ body {
 		}
 	}
 
+	/* Default smooth crossfade for all page transitions */
 	::view-transition-old(root),
 	::view-transition-new(root) {
-		animation-duration: 0.3s;
-		animation-timing-function: ease-in-out;
+		animation-duration: 0.4s;
+	}
+
+	/* Keep navbar static during transitions */
+	::view-transition-group(navbar) {
+		z-index: 9999;
+		animation: none;
+	}
+
+	/* Smooth morphing for matching page titles */
+	::view-transition-group(page-title-websites),
+	::view-transition-group(page-title-graphic-design),
+	::view-transition-group(page-title-photography),
+	::view-transition-group(page-title-tea-blog),
+	::view-transition-group(page-title-about) {
+		animation-duration: 0.4s;
 	}
 
 	.logo-hover {

@@ -26,7 +26,16 @@ function AboutPage() {
 	return (
 		<main>
 			<section className="mx-auto px-4 py-8">
-				<h1 className="text-3xl font-bold mb-6">About Me</h1>
+				<h1 className="text-3xl font-bold mb-6">
+					<span
+						style={{
+							viewTransitionName: "page-title-about",
+							display: "inline-block",
+						}}
+					>
+						About Me
+					</span>
+				</h1>
 				<div className="space-y-4 text-lg">
 					<p>
 						I come from Russia 🇷🇺, by way of New Zealand 🇳🇿, to Canada 🇨🇦 where

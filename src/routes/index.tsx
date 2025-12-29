@@ -48,7 +48,17 @@ function App() {
 							Currently working at{" "}
 							<Link href="https://urbancustomz.com/">Urban Customz</Link> as a
 							graphic designer & print specialist.{" "}
-							<Link href="/about">Read about me</Link>.
+							<Link href="/about">
+								<span
+									style={{
+										viewTransitionName: "page-title-about",
+										display: "inline",
+									}}
+								>
+									Read about me
+								</span>
+							</Link>
+							.
 						</p>
 						<nav aria-label="Main navigation" className="space-y-3 mt-6">
 							<Button
